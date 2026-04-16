@@ -1,51 +1,23 @@
 import { useNavigate } from 'react-router-dom'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 
+const MASCOT_SRC = '/404-mascot.png'
+
 /** 끝까지 민트·화이트 톤으로 이어지도록 100% 구간 유지 (하단 흰 띠 방지) */
 const PAGE_BG = {
   background: 'linear-gradient(180deg, #E0F7FA 0%, #E8FDF9 35%, #F0FDFA 70%, #F7FEF9 100%)',
 }
 
-function OffRouteIllustration({ className = '' }) {
+function NotFoundMascotImage({ className = '' }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 160"
-      className={className}
-      fill="none"
-      aria-hidden
-    >
-      <ellipse cx="100" cy="140" rx="78" ry="12" fill="#CFFAFE" opacity="0.9" />
-      <path
-        d="M38 108c18-42 52-68 96-68 18 0 34 4 48 12"
-        stroke="#5EEAD4"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeDasharray="8 10"
-      />
-      <path
-        d="M152 52l12 8-8 4-4 12-8-8 8-16z"
-        fill="#14B8A6"
-        opacity="0.85"
-      />
-      <path
-        d="M48 44 L160 100"
-        stroke="#F59E0B"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeDasharray="6 8"
-      />
-      <circle cx="48" cy="44" r="10" fill="#06B6D4" opacity="0.9" />
-      <circle cx="160" cy="100" r="10" fill="#FBBF24" opacity="0.95" />
-      <path
-        d="M92 28h26l6 16-19 10-13-26z"
-        fill="#0D9488"
-      />
-      <path
-        d="M98 36l8 4-3 6-8-3 3-7z"
-        fill="#CCFBF1"
-      />
-    </svg>
+    <img
+      src={MASCOT_SRC}
+      alt=""
+      role="presentation"
+      className={`object-contain object-center ${className}`}
+      loading="eager"
+      decoding="async"
+    />
   )
 }
 
@@ -61,8 +33,8 @@ function NotFoundPage() {
         <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">
           Page not found
         </span>
-        <div className="mb-5 flex h-[7.5rem] w-full max-w-[220px] items-center justify-center rounded-3xl bg-white/90 shadow-lg shadow-cyan-900/5 ring-1 ring-cyan-100">
-          <OffRouteIllustration className="h-28 w-36 text-cyan-500" />
+        <div className="mb-5 flex w-full max-w-[240px] items-center justify-center">
+          <NotFoundMascotImage className="max-h-[200px] w-full object-contain" />
         </div>
         <h1 className="mb-2 text-center text-2xl font-extrabold leading-snug text-gray-900">
           길을 잃으셨나요?
@@ -84,10 +56,8 @@ function NotFoundPage() {
 
       {/* 웹 (md 이상) — 좌 일러스트 / 우 카피 */}
       <div className="mx-auto hidden min-h-0 w-full max-w-5xl flex-1 flex-col justify-center gap-10 px-8 py-12 md:flex md:flex-row md:items-center md:gap-14 md:py-16 lg:px-10">
-        <div className="flex flex-1 justify-center md:justify-end">
-          <div className="flex h-64 w-full max-w-md items-center justify-center rounded-[2rem] bg-white/95 p-8 shadow-xl shadow-cyan-900/[0.06] ring-1 ring-cyan-100/80 lg:h-72">
-            <OffRouteIllustration className="h-44 w-full max-w-sm lg:h-52" />
-          </div>
+        <div className="flex flex-1 items-center justify-center md:justify-end">
+          <NotFoundMascotImage className="w-full max-w-md max-h-72 object-contain lg:max-h-80" />
         </div>
         <div className="flex max-w-lg flex-1 flex-col justify-center text-left">
           <span className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-600">

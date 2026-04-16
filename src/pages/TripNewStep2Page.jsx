@@ -31,12 +31,12 @@ function TripNewStep2Page() {
 
   const pageBgStyle = {
     background: `
-      radial-gradient(ellipse 110% 75% at 50% -8%, rgba(6, 182, 212, 0.42), transparent 58%),
-      radial-gradient(ellipse 85% 60% at 100% 15%, rgba(139, 92, 246, 0.12), transparent 50%),
-      radial-gradient(ellipse 80% 55% at 100% 92%, rgba(45, 212, 191, 0.38), transparent 55%),
-      radial-gradient(ellipse 70% 50% at 0% 45%, rgba(167, 243, 208, 0.35), transparent 52%),
-      radial-gradient(ellipse 95% 65% at 50% 105%, rgba(6, 182, 212, 0.12), transparent 55%),
-      linear-gradient(152deg, #7dd3fc 0%, #a5f3fc 22%, #ccfbf1 48%, #a7f3d0 72%, #d1fae5 100%)
+      radial-gradient(ellipse 110% 75% at 50% -8%, rgba(165, 243, 252, 0.35), transparent 58%),
+      radial-gradient(ellipse 85% 60% at 100% 12%, rgba(204, 251, 241, 0.45), transparent 52%),
+      radial-gradient(ellipse 80% 55% at 100% 92%, rgba(167, 243, 208, 0.22), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 0% 45%, rgba(236, 253, 245, 0.9), transparent 52%),
+      radial-gradient(ellipse 95% 65% at 50% 105%, rgba(207, 250, 254, 0.35), transparent 55%),
+      linear-gradient(152deg, #f0fdfa 0%, #ecfeff 18%, #f0fdfa 42%, #eefcf6 68%, #f7fef9 100%)
     `,
   }
 

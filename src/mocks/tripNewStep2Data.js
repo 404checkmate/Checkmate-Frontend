@@ -41,9 +41,9 @@ export const OPTION_CARDS = [
     id: 'booked',
     icon: 'airplane',
     titleDesktop: '네, 예매했어요',
-    titleMobile: '네, 입력할게요',
+    titleMobile: '네, 예매했어요',
     descDesktop:
-      '다음 단계에서 출국·귀국 일정과 편명을 입력하면, 목적지와 여행 기간에 맞는 준비 항목·체크리스트와 이후 일정·동네 안내로 이어집니다.',
+      '다음 화면에서 항공 일정과 편명을 입력하고, 맞춤 여행 준비를 시작해 보세요.',
     descMobile:
       '다음 화면에서 항공 일정과 편명을 입력하고, 맞춤 여행 준비를 시작해 보세요.',
     variant: 'primary',
@@ -51,10 +51,10 @@ export const OPTION_CARDS = [
   {
     id: 'notBooked',
     icon: 'calendarX',
-    titleDesktop: '아니오, 아직입니다',
-    titleMobile: '아니요, 아직입니다',
+    titleDesktop: '아직 안 했어요',
+    titleMobile: '아직 안 했어요',
     descDesktop:
-      '괜찮아요. 예매를 마치신 뒤 같은 흐름에서 항공 일정과 편명만 넣어 주시면, 그때부터 맞춤 준비 목록과 체크리스트로 이어갈 수 있어요.',
+      '예매 전이어도 다음으로 넘어가 둘러볼 수 있어요. 항공 정보는 예매 후 입력하시면 됩니다.',
     descMobile:
       '예매 전이어도 다음으로 넘어가 둘러볼 수 있어요. 항공 정보는 예매 후 입력하시면 됩니다.',
     variant: 'secondary',

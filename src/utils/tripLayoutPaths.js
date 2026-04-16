@@ -11,7 +11,7 @@ export function normalizePathname(pathname) {
  */
 export function shouldHideGlobalHeaderOnMobile(pathname) {
   const p = normalizePathname(pathname)
-  if (p === '/' || p === '/login' || p === '/404') return true
+  if (p === '/' || p === '/login' || p === '/404' || p === '/mypage') return true
   if (/^\/trips\/new\/step[2-5]$/.test(p)) return true
   if (/^\/trips\/[^/]+\/search$/.test(p)) return true
   if (/^\/trips\/[^/]+\/checklist$/.test(p)) return true

@@ -13,6 +13,7 @@ import TripGuideArchivePage from '@/pages/TripGuideArchivePage'
 import TripGuideArchiveDetailPage from '@/pages/TripGuideArchiveDetailPage'
 import TripChecklistPage from '@/pages/TripChecklistPage'
 import NotFoundPage from '@/pages/NotFoundPage'
+import MyPage from '@/pages/MyPage'
 import ErrorPage from '@/pages/ErrorPage'
 
 /**
@@ -45,6 +46,7 @@ const AppRoutes = () => {
       children: [
         { path: '/',                    element: <HomePage /> },
         { path: '/login',               element: <LoginPage /> },
+        { path: '/mypage',              element: <MyPage /> },
         { path: '/trips/new',           element: <Navigate to="/trips/new/step2" replace /> },
         { path: '/trips/new/step2',     element: <TripNewStep2Page /> },
         { path: '/trips/new/step3',     element: <TripNewStep3Page /> },

@@ -46,9 +46,9 @@ function Header() {
 
           <button
             type="button"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/mypage')}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
-            aria-label="사용자 메뉴"
+            aria-label="마이페이지"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
