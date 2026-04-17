@@ -54,6 +54,23 @@ export function getGuideArchiveEntry(tripId, entryId) {
   return loadGuideArchive(tripId).find((e) => String(e.id) === String(entryId)) ?? null
 }
 
+/**
+ * 기존 엔트리에 필드 병합 (체크리스트 저장 시 진행률 스냅샷 등)
+ * @param {string|number} tripId
+ * @param {string|number} entryId
+ * @param {Record<string, unknown>} partial
+ */
+export function patchGuideArchiveEntry(tripId, entryId, partial) {
+  if (tripId == null || entryId == null) return null
+  const list = loadGuideArchive(tripId)
+  const idx = list.findIndex((e) => String(e.id) === String(entryId))
+  if (idx < 0) return null
+  const next = [...list]
+  next[idx] = { ...next[idx], ...partial }
+  saveGuideArchiveList(tripId, next)
+  return next[idx]
+}
+
 /** 해당 여행의 가이드 보관함 목록을 모두 삭제합니다. */
 export function clearGuideArchive(tripId) {
   if (tripId == null) return

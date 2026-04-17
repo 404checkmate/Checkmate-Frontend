@@ -33,7 +33,7 @@ function monthGrid(year, monthIndex) {
 }
 
 /**
- * 모바일 목적지 페이지용 — 스크롤 가능한 다월 달력, 기간(시작·종료) 선택
+ * 목적지 페이지(/trips/new/destination) — 스크롤 가능한 다월 달력, 기간(시작·종료) 선택 (모바일·데스크톱 공용)
  */
 export default function DestinationMobileRangeCalendar({
   startDate,

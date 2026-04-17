@@ -1,18 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { loadSavedItems, setSavedItemChecked } from '@/utils/savedTripItems'
+import { patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
 import {
   loadEntryChecklistChecks,
   seedEntryChecksFromSavedIfEmpty,
   setEntryChecklistItemChecked,
 } from '@/utils/guideArchiveEntryChecklistStorage'
-import { loadSavedItems, setSavedItemChecked } from '@/utils/savedTripItems'
 
 /**
  * 가이드 보관함 상세 — 이 여행 스냅샷에 담긴 필수품을 하나씩 체크하며 준비합니다.
  * 체크 상태는 entry 단위로 저장되어, 같은 trip에 다른 여행지 목록이 있어도 섞이지 않습니다.
  */
 export default function GuideArchiveChecklistView({ tripId, entry }) {
+  const navigate = useNavigate()
+  const toastTimerRef = useRef(null)
+  const [showSaveToast, setShowSaveToast] = useState(false)
   const items = entry.items ?? []
   const [checks, setChecks] = useState(() => loadEntryChecklistChecks(tripId, entry.id))
 
@@ -46,28 +50,92 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
     [checks, tripId, entry.id],
   )
 
+  const handleSave = useCallback(() => {
+    patchGuideArchiveEntry(tripId, entry.id, {
+      checklistProgressPercent: progress,
+      checklistSavedAt: new Date().toISOString(),
+    })
+    window.dispatchEvent(
+      new CustomEvent('guide-archive-checklist-saved', {
+        detail: { tripId: String(tripId), entryId: String(entry.id), progress },
+      }),
+    )
+    setShowSaveToast(true)
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = window.setTimeout(() => setShowSaveToast(false), 2800)
+  }, [tripId, entry.id, progress])
+
+  const handleBack = useCallback(() => {
+    navigate(-1)
+  }, [navigate])
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+    }
+  }, [])
+
   const title = buildGuideArchiveListTitle(entry)
   const dateLine = buildGuideArchiveDateLine(entry)
 
+  const bottomBar = (
+    <div
+      className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-4 py-3 md:bottom-0 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
+    >
+      <div className="mx-auto flex max-w-3xl gap-3">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="min-w-0 flex-1 basis-0 rounded-xl border border-white/90 bg-white px-4 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50"
+        >
+          뒤로가기
+        </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          className="min-w-0 flex-1 basis-0 rounded-xl bg-teal-700 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-teal-800"
+        >
+          저장
+        </button>
+      </div>
+    </div>
+  )
+
+  const toast = showSaveToast ? (
+    <div
+      className="fixed left-1/2 top-[max(1rem,env(safe-area-inset-top))] z-[70] -translate-x-1/2 rounded-full bg-slate-900/92 px-5 py-2.5 text-sm font-semibold text-white shadow-lg"
+      role="status"
+      aria-live="polite"
+    >
+      저장되었습니다
+    </div>
+  ) : null
+
   if (total === 0) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-10 text-center">
-        <p className="text-lg font-bold text-slate-900">담긴 준비물이 없습니다</p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          맞춤 여행 준비 탐색에서 필요한 항목을 저장하면 여기에서 하나씩 체크할 수 있어요.
-        </p>
-        <Link
-          to={`/trips/${tripId}/search`}
-          className="mt-6 inline-flex rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-teal-800"
-        >
-          준비물 검색하러 가기
-        </Link>
-      </div>
+      <>
+        {toast}
+        <div className="mx-auto max-w-2xl px-4 pb-36 pt-10 text-center md:pb-28">
+          <p className="text-lg font-bold text-slate-900">담긴 준비물이 없습니다</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            맞춤 여행 준비 탐색에서 필요한 항목을 저장하면 여기에서 하나씩 체크할 수 있어요.
+          </p>
+          <Link
+            to={`/trips/${tripId}/search`}
+            className="mt-6 inline-flex rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-teal-800"
+          >
+            준비물 검색하러 가기
+          </Link>
+        </div>
+        {bottomBar}
+      </>
     )
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-24 pt-4 md:pb-12 md:pt-6">
+    <>
+      {toast}
+      <div className="mx-auto max-w-3xl px-4 pb-36 pt-4 md:pb-28 md:pt-6">
       <header className="mb-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-800/90">체크리스트 상세</p>
         <h1 className="mt-2 text-xl font-extrabold leading-snug text-slate-900 md:text-2xl">{title}</h1>
@@ -167,6 +235,8 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
           </section>
         ))}
       </div>
-    </div>
+      </div>
+      {bottomBar}
+    </>
   )
 }

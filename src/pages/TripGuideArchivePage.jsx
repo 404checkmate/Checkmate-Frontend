@@ -92,11 +92,19 @@ function TripGuideArchiveInner({ tripId }) {
   const [filterTab, setFilterTab] = useState('all')
   const [deleteMode, setDeleteMode] = useState(false)
   const [selectedEntryIds, setSelectedEntryIds] = useState([])
+  /** 상세에서 저장 시 진행률 재계산(체크 상태는 entry 스토리지에 있음) */
+  const [checklistRevision, setChecklistRevision] = useState(0)
 
   const refreshFromStorage = useCallback(() => {
     setEntries(loadGuideArchive(tripId))
     setSavedItems(loadSavedItems(tripId))
   }, [tripId])
+
+  useEffect(() => {
+    const onSaved = () => setChecklistRevision((n) => n + 1)
+    window.addEventListener('guide-archive-checklist-saved', onSaved)
+    return () => window.removeEventListener('guide-archive-checklist-saved', onSaved)
+  }, [])
 
   useEffect(() => {
     ensureDefaultGuideArchiveSample(tripId)
@@ -127,7 +135,7 @@ function TripGuideArchiveInner({ tripId }) {
       const progress = computeProgressPercent(entry, savedItems, tripId)
       return { entry, progress, statusLabel: getProgressStatusLabel(progress) }
     })
-  }, [entries, savedItems, tripId])
+  }, [entries, savedItems, tripId, checklistRevision])
 
   const filtered = useMemo(() => {
     if (filterTab === 'all') return entriesWithMeta

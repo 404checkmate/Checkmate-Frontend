@@ -70,9 +70,7 @@ function DestinationDateForm({
   startDate,
   endDate,
   today,
-  endMinDate,
-  onStartChange,
-  onEndChange,
+  onRangeChange,
 }) {
   const hasQuery = countryQuery.trim().length > 0
   const panelOpen = showDropdown && hasQuery
@@ -180,16 +178,21 @@ function DestinationDateForm({
         }`}
         aria-disabled={!selectedCountry}
       >
-        <div className="mb-4 flex items-center gap-2">
-          <div
-            className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm ${
-              selectedCountry ? 'bg-white/90 text-sky-600' : 'bg-gray-100 text-gray-400'
-            }`}
-          >
-            <SvgIcon name="calendar" className="h-5 w-5" />
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm ${
+                selectedCountry ? 'bg-white/90 text-sky-600' : 'bg-gray-100 text-gray-400'
+              }`}
+            >
+              <SvgIcon name="calendar" className="h-5 w-5" />
+            </div>
+            <span className={`text-base font-bold ${selectedCountry ? 'text-gray-900' : 'text-gray-500'}`}>
+              언제 떠나시나요?
+            </span>
           </div>
-          <span className={`text-base font-bold ${selectedCountry ? 'text-gray-900' : 'text-gray-500'}`}>
-            언제 떠나시나요?
+          <span className="shrink-0 text-sm font-semibold tabular-nums text-gray-500">
+            {(startDate ? parseInt(startDate.slice(0, 4), 10) : new Date().getFullYear())}년
           </span>
         </div>
         {!selectedCountry && (
@@ -197,31 +200,15 @@ function DestinationDateForm({
             위에서 <strong className="text-sky-700">여행 국가</strong>를 먼저 선택하면 일정을 입력할 수 있어요.
           </p>
         )}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <p className="mb-1.5 text-xs font-semibold text-gray-500">출발일</p>
-            <div className="relative">
-              <input
-                type="date"
-                value={startDate}
-                min={today}
-                disabled={!selectedCountry}
-                onChange={(e) => onStartChange(e.target.value)}
-                className="w-full rounded-xl border border-sky-100/80 bg-sky-100/50 px-3 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-              />
-            </div>
-          </div>
-          <div>
-            <p className="mb-1.5 text-xs font-semibold text-gray-500">귀국일</p>
-            <input
-              type="date"
-              value={endDate}
-              min={endMinDate}
-              disabled={!selectedCountry}
-              onChange={(e) => onEndChange(e.target.value)}
-              className="w-full rounded-xl border border-sky-100/80 bg-sky-100/50 py-3 px-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-            />
-          </div>
+        <div className="rounded-xl border border-sky-100/80 bg-white/70 p-3 shadow-inner">
+          <DestinationMobileRangeCalendar
+            startDate={startDate}
+            endDate={endDate}
+            todayYmd={today}
+            minDateYmd={today}
+            disabled={!selectedCountry}
+            onChangeRange={onRangeChange}
+          />
         </div>
       </div>
     </div>
@@ -334,26 +321,6 @@ export default function TripNewDestinationPage() {
     setCountryQuery('')
   }
 
-  const endMinDate = useMemo(() => {
-    if (!startDate) return today
-    return startDate >= today ? startDate : today
-  }, [startDate, today])
-
-  const handleStartChange = (value) => {
-    let next = value
-    if (next && next < today) next = today
-    setStartDate(next)
-    if (endDate && next && endDate < next) {
-      setEndDate('')
-    }
-  }
-
-  const handleEndChange = (value) => {
-    let next = value
-    if (next && next < endMinDate) next = endMinDate
-    setEndDate(next)
-  }
-
   const handleMobileRangeChange = ({ start, end }) => {
     setStartDate(start)
     setEndDate(end)
@@ -406,9 +373,7 @@ export default function TripNewDestinationPage() {
     startDate,
     endDate,
     today,
-    endMinDate,
-    onStartChange: handleStartChange,
-    onEndChange: handleEndChange,
+    onRangeChange: handleMobileRangeChange,
   }
 
   return (

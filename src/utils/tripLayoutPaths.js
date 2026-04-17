@@ -17,6 +17,8 @@ export function normalizePathname(pathname) {
 export function shouldPadMainForMobileBottomNav(pathname) {
   const p = normalizePathname(pathname)
   if (p === '/trips/new' || p.startsWith('/trips/new/')) return false
+  /** 가이드 상세: 하단 고정 버튼·그라데이션만 쓰고, main pb-16 이 흰 띠로 보이는 것 방지 */
+  if (/^\/trips\/[^/]+\/guide-archive\/[^/]+$/.test(p)) return false
   return true
 }
 
