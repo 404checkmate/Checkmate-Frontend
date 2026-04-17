@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { IMAGES } from '@/images/constants'
 import { FEATURE_CARDS, FOOTER_SECTIONS, FOOTER_BOTTOM_LINKS } from '@/mocks/homeData'
-import AiPlannerFab from '@/components/common/AiPlannerFab'
 import BrandLogo from '@/components/common/BrandLogo'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 
@@ -447,9 +446,6 @@ function HomePage() {
           </p>
         </div>
       </footer>
-
-      {/* AI 플래너 FAB (화면 고정) */}
-      <AiPlannerFab />
     </div>
   )
 }

@@ -1,47 +1,89 @@
 /**
  * TripLoadingPage 목데이터
  *
- * 로딩 화면에서 사용되는 단계 메시지, 팁, 배경 효과, 아이콘 등
- * 모든 정적 데이터를 중앙 관리합니다.
+ * 로딩 화면 문구는 페이지 진입 시 한 번만 골라 고정됩니다(진행률·시간과 무관).
  */
 
 /* ─────────────────────────────────────────────
-   분석 단계 메시지 (진행률 구간별)
+   로딩 화면 변형 (방문 1회당 1개만 랜덤 선택)
 ───────────────────────────────────────────── */
-export const STAGES = [
+export const LOADING_VARIANTS = [
   {
-    label: '분석 단계',
-    barLabel: 'DATA ANALYZING',
-    descDesktop: 'Architect is analyzing the weather and environment of your destination...',
-    descMobile: '여행지의 실시간 날씨 정보를 분석하여 최적의 준비물 리스트를 생성하고 있습니다.',
-    highlight: '실시간 날씨 정보',
-    range: [0, 40],
+    headlineDesktop: '캐리어 챙기기 전, 이미 기분은 여행 모드!',
+    headlineMobile: '여행 모드 ON! 체크리스트 만드는 중',
+    subDesktop: 'Your trip, your checklist — almost ready ✈️',
+    highlight: '날씨·일정·스타일',
+    subMobileSuffix: '을 반영해\n딱 맞는 준비 리스트를 짜고 있어요.',
+    cardLabel: '맞춤 체크리스트 조립 중',
+    barLabel: 'PACK YOUR VIBE',
+    descDesktop:
+      'CHECKMATE가 여행지와 일정에 맞춰 필수품부터 꿀팁까지 한 번에 모아두고 있어요. 곧 가방에 넣을 리스트가 쫙!',
+    descMobile:
+      '목적지와 일정을 바탕으로 필수 준비물과 꿀팁을 한곳에 모으는 중이에요. 잠시만요!',
   },
   {
-    label: '큐레이션 단계',
-    barLabel: 'CURATING CHECKLIST',
-    descDesktop: 'Building your personalized checklist based on destination data...',
-    descMobile: '여행지 환경 데이터를 기반으로 맞춤형 준비물 리스트를 큐레이션하고 있습니다.',
-    highlight: '맞춤형 준비물 리스트',
-    range: [40, 75],
+    headlineDesktop: '설렘은 100%, 빠진 건 이제 체크리스트뿐!',
+    headlineMobile: '설렘 풀충전! 준비 리스트 완성 중',
+    subDesktop: 'Curating your smart travel prep list 🧳',
+    highlight: '여행 취향',
+    subMobileSuffix: '을 담아\n놓치기 싫은 준비만 골라 담아요.',
+    cardLabel: '스마트 준비 큐레이션',
+    barLabel: 'CHECK & GO',
+    descDesktop:
+      '짐은 가볍게, 준비는 꽉 차게! 여행 스타일에 맞는 아이템만 골라 CHECKMATE가 정리해 드릴게요.',
+    descMobile:
+      '가볍게 짐 싸고, 빠짐없이 챙기기! 취향에 맞는 준비만 골라 정리하고 있어요.',
   },
   {
-    label: '최적화 단계',
-    barLabel: 'OPTIMISING ROUTINE',
-    descDesktop: 'Finalizing and optimizing your personalized travel routine...',
-    descMobile: '당신만을 위한 여행 준비 루틴을 최종 구성하고 있습니다.',
-    highlight: '여행 준비 루틴',
-    range: [75, 100],
+    headlineDesktop: '티켓은 준비됐고, 이제 체크만 하면 돼요',
+    headlineMobile: '티켓 OK! 체크리스트 채우는 중',
+    subDesktop: 'Turning your plans into a ready-to-go list 🎫',
+    highlight: '일정과 동선',
+    subMobileSuffix: '를 읽고\n현지에서 통하는 준비를 추천해요.',
+    cardLabel: '플랜 → 준비 리스트 변환',
+    barLabel: 'TRIP READY MODE',
+    descDesktop:
+      '예약·일정 정보를 바탕으로 현지에서 진짜 쓸 준비만 쏙 담았어요. 여행 첫날부터 탄탄하게!',
+    descMobile:
+      '일정과 동선을 보고 현지에서 바로 쓸 준비만 추천 중이에요. 곧 완성!',
+  },
+  {
+    headlineDesktop: '공항 가기 전, CHECKMATE가 먼저 출발!',
+    headlineMobile: '출발 전 체크! 리스트 완성 중',
+    subDesktop: 'Building your checklist before you board 🌏',
+    highlight: '목적지 정보',
+    subMobileSuffix: '를 바탕으로\n놓치기 쉬운 준비까지 챙겨요.',
+    cardLabel: '목적지 맞춤 프렙',
+    barLabel: 'READY TO FLY',
+    descDesktop:
+      '비자·날씨·현지 팁까지 한눈에! 여행지에 맞춰 빠지기 쉬운 준비를 미리 짚어 드릴게요.',
+    descMobile:
+      '목적지에 맞춰 비자·날씨·꿀팁까지 한 번에 정리 중이에요.',
+  },
+  {
+    headlineDesktop: '완벽한 여행은 완벽한 준비에서 시작돼요',
+    headlineMobile: '완벽한 준비, 재밌게 완성 중!',
+    subDesktop: 'Fun prep today, smooth trip tomorrow 💫',
+    highlight: '당신만의 여행',
+    subMobileSuffix: '에 맞춰\n체크리스트를 재미있게 채워 넣고 있어요.',
+    cardLabel: '맞춤 프렙 파티 타임',
+    barLabel: 'LET\'S CHECK IT',
+    descDesktop:
+      '무료한 준비는 싫죠? 여행 전 설렘 그대로, 필요한 것만 쏙 담은 리스트를 만들고 있어요.',
+    descMobile:
+      '필요한 것만 쏙! 재미있게 채우는 맞춤 체크리스트, 거의 다 됐어요.',
   },
 ]
 
 /* ─────────────────────────────────────────────
-   순환 팁 메시지
+   TIP (방문 1회당 1개만 랜덤 선택, 순환 없음)
 ───────────────────────────────────────────── */
 export const TIPS = [
-  '완벽한 준비는 최고의 여행을 만듭니다.',
-  '여행 3일 전에 필수 서류를 꼭 확인하세요.',
-  '현지 앱을 미리 설치해두면 훨씬 편리합니다.',
+  'TIP: 짐은 가볍게, 준비는 든든하게 — CHECKMATE가 대신 기억해 드릴게요!',
+  'TIP: 현지 날씨 한번 보면 짐 리스트가 반은 정해져요 ☀️',
+  'TIP: 여권·e티켓 스크린샷은 오프라인으로도 저장해 두면 안심!',
+  'TIP: 어댑터·보조배터리는 공항 가기 전날 챙기면 스트레스 제로!',
+  'TIP: 체크리스트 완료하면 마음만 여행지에 두고 출발하세요 ✈️',
 ]
 
 /* ─────────────────────────────────────────────

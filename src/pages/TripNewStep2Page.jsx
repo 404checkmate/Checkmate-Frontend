@@ -6,7 +6,6 @@ import {
   AI_TIP,
 } from '@/mocks/tripNewStep2Data'
 import StepHeader from '@/components/common/StepHeader'
-import AiPlannerFab from '@/components/common/AiPlannerFab'
 import AiConciergeTip from '@/components/common/AiConciergeTip'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 
@@ -160,9 +159,6 @@ function TripNewStep2Page() {
           </div>
         </div>
       </div>
-
-      {/* AI 플래너 FAB (화면 고정) */}
-      <AiPlannerFab />
     </div>
   )
 }

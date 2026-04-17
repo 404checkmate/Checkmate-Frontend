@@ -10,7 +10,6 @@ import {
   EDITORIAL_PICK,
 } from '@/mocks/tripNewStep5Data'
 import StepHeader from '@/components/common/StepHeader'
-import AiPlannerFab from '@/components/common/AiPlannerFab'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
@@ -74,11 +73,11 @@ export default function TripNewStep5Page() {
     ].join(' ')
   }
 
-  /** 여행 스타일 카드 — 모바일·데스크톱 동일 톤·크기 (먹방 등 특별 그리드/다크 배경 없음) */
+  /** 여행 스타일 카드 — 섹션 안에서 셀을 넓게 채우도록 높이·패딩 확대 */
   const styleCardClass = (id) => {
     const on = styleIds.includes(id)
     const base = [
-      'rounded-2xl border-2 p-3 flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-200 min-h-[76px]',
+      'w-full h-full min-h-[92px] rounded-2xl border-2 p-3.5 sm:p-4 md:p-5 flex flex-col items-center justify-center gap-2 text-center transition-all duration-200 md:min-h-0',
     ]
     if (on) {
       base.push('border-amber-400 bg-amber-200/95 shadow-md ring-1 ring-amber-300/70 text-gray-900')
@@ -110,7 +109,7 @@ export default function TripNewStep5Page() {
           {/* 좌측 패널 */}
           <div className="w-[480px] flex-shrink-0 flex flex-col gap-6">
             <SectionLabel num={1} label="동행인 선택" />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 auto-rows-fr">
               {COMPANIONS.map((c) => (
                 <button
                   key={c.id}
@@ -149,11 +148,11 @@ export default function TripNewStep5Page() {
           </div>
 
           {/* 우측 패널 */}
-          <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
+          <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm min-h-0">
             <SectionLabel num={2} label="여행 스타일" />
             <p className="text-sm text-gray-500 mb-5">원하는 만큼 골라 주세요. (복수 선택)</p>
 
-            <div className="grid grid-cols-3 gap-3 flex-1 content-start">
+            <div className="grid w-full flex-1 grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
               {TRAVEL_STYLES.map((s) => (
                 <button
                   key={s.id}
@@ -161,10 +160,10 @@ export default function TripNewStep5Page() {
                   onClick={() => toggleStyle(s.id)}
                   className={styleCardClass(s.id)}
                 >
-                  <span className="text-2xl leading-none" aria-hidden>
+                  <span className="text-3xl leading-none md:text-4xl" aria-hidden>
                     {s.emoji}
                   </span>
-                  <span className="text-xs font-bold leading-tight">{s.label}</span>
+                  <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
                 </button>
               ))}
             </div>
@@ -225,7 +224,7 @@ export default function TripNewStep5Page() {
           </div>
 
           <SectionLabel num={2} label="여행 스타일" />
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-3 min-h-[420px] auto-rows-fr">
             {TRAVEL_STYLES.map((s) => (
               <button
                 key={s.id}
@@ -233,10 +232,10 @@ export default function TripNewStep5Page() {
                 onClick={() => toggleStyle(s.id)}
                 className={styleCardClass(s.id)}
               >
-                <span className="text-2xl leading-none" aria-hidden>
+                <span className="text-3xl leading-none" aria-hidden>
                   {s.emoji}
                 </span>
-                <span className="text-xs font-bold leading-tight">{s.label}</span>
+                <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
               </button>
             ))}
           </div>
@@ -257,8 +256,6 @@ export default function TripNewStep5Page() {
           </button>
         </div>
       </div>
-
-      <AiPlannerFab mobileBottomClassName="bottom-[10.25rem]" />
     </div>
   )
 }

@@ -21,7 +21,6 @@ import StepHeader from '@/components/common/StepHeader'
  * `isVietnamArrival(arrival)`이 true일 때만 베트남 동네 피커·일정 블록이 보이고,
  * 그렇지 않아도 항공 카드 아래 추가 지역 입력창은 동일하게 표시됩니다.
  */
-import AiPlannerFab from '@/components/common/AiPlannerFab'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 import AiConciergeTip, { AiConciergeTipHeading, AiConciergeTipIcon } from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
@@ -742,8 +741,9 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
       return vnSchedulesComplete
     }
     if (tripDatesLoading || tripDatesError || !tripWindow) return false
-    return true
-  }, [isVn, tripDatesLoading, tripDatesError, tripWindow, vnSchedulesComplete])
+    /** 「선택된 도시」에 최소 1곳 이상(확인으로 추가된 항목) */
+    return nonVnPlaces.length >= 1
+  }, [isVn, tripDatesLoading, tripDatesError, tripWindow, vnSchedulesComplete, nonVnPlaces.length])
 
   const heroSrc = useMemo(() => {
     if (isVn && selectedIds.length) return heroImageForSelection(selectedIds)
@@ -1022,8 +1022,6 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
           </button>
         </div>
       </div>
-
-      <AiPlannerFab mobileBottomClassName="bottom-[10.25rem]" />
     </div>
   )
 }

@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
 import {
-  STAGES, TIPS, LOADING_ICON_PATHS,
-  BLUR_ORBS, BRAND_DOTS,
+  LOADING_VARIANTS,
+  TIPS,
+  LOADING_ICON_PATHS,
+  BLUR_ORBS,
+  BRAND_DOTS,
 } from '@/mocks/loadingData'
 
 /* ─────────────────────────────────────────────
@@ -26,9 +29,15 @@ function TripLoadingPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [progress, setProgress] = useState(0)
-  const [tipIndex, setTipIndex] = useState(0)
 
-  const currentStage = STAGES.find((s) => progress >= s.range[0] && progress < s.range[1]) ?? STAGES[2]
+  /** 이 페이지 방문당 1회만 고정 (진행률과 무관하게 문구 변경 없음) */
+  const variantIndex = useMemo(
+    () => Math.floor(Math.random() * LOADING_VARIANTS.length),
+    []
+  )
+  const tipIndex = useMemo(() => Math.floor(Math.random() * TIPS.length), [])
+
+  const v = LOADING_VARIANTS[variantIndex]
 
   /* 진행률 자동 증가: ~5초 완료 */
   useEffect(() => {
@@ -53,12 +62,6 @@ function TripLoadingPage() {
       return () => clearTimeout(t)
     }
   }, [progress, id, navigate])
-
-  /* 팁 순환 */
-  useEffect(() => {
-    const t = setInterval(() => setTipIndex((i) => (i + 1) % TIPS.length), 3000)
-    return () => clearInterval(t)
-  }, [])
 
   const pct = Math.round(progress)
 
@@ -98,50 +101,37 @@ function TripLoadingPage() {
       ══════════════════════════════════ */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-lg px-6 text-center">
 
-        {/* 앱 아이콘 */}
+        {/* 마스코트 (public/loading-mascot.png) — 배경 박스 없이 이미지만 */}
         <div className="mb-6 md:mb-8">
-          {/* 데스크탑: 흰 카드 + 시안 원 */}
-          <div className="hidden md:flex w-24 h-24 bg-white rounded-3xl shadow-lg border border-cyan-100 items-center justify-center">
-            <div className="w-14 h-14 bg-cyan-400 rounded-full flex items-center justify-center shadow-sm">
-              <SvgIcon name="diamond" className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          {/* 모바일: 흰 카드 + 시안 스퀘어 배경 + 스파클 */}
-          <div className="md:hidden w-20 h-20 bg-white rounded-3xl shadow-lg border border-cyan-100 flex items-center justify-center">
-            <div className="w-12 h-12 bg-cyan-400 rounded-2xl flex items-center justify-center shadow-sm">
-              <SvgIcon name="sparkles" className="w-10 h-10 text-white" />
-            </div>
-          </div>
+          <img
+            src="/loading-mascot.png"
+            alt=""
+            className="mx-auto h-20 w-auto max-w-[5.5rem] object-contain object-center md:h-24 md:max-w-[6.5rem]"
+            draggable={false}
+          />
         </div>
 
-        {/* 제목 */}
+        {/* 제목 — variant 고정 */}
         <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">
-          <span className="hidden md:inline">준비 루틴을 디자인하는 중입니다</span>
-          <span className="md:hidden">맞춤형 체크리스트 구성 중</span>
+          <span className="hidden md:inline">{v.headlineDesktop}</span>
+          <span className="md:hidden">{v.headlineMobile}</span>
         </h1>
         <p className="text-sm md:text-base text-cyan-500 font-medium mb-6 md:mb-8">
-          <span className="hidden md:inline">Creating your custom checklist</span>
-          <span className="md:hidden">
-            여행지의{' '}
-            <strong className="text-cyan-600">{currentStage.highlight}</strong>
-            를 분석하여<br />최적의 준비물 리스트를 생성하고 있습니다.
+          <span className="hidden md:inline">{v.subDesktop}</span>
+          <span className="md:hidden whitespace-pre-line">
+            여행지의 <strong className="text-cyan-600">{v.highlight}</strong>
+            {v.subMobileSuffix}
           </span>
         </p>
 
         {/* 분석 카드 */}
         <div className="w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-md px-5 py-5 mb-6 md:mb-8 text-left">
-          <div className="flex items-start gap-3 mb-4">
-            {/* 아이콘 */}
-            <div className="w-9 h-9 bg-cyan-400 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-              <SvgIcon name="trendUp" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-gray-800 mb-0.5">{currentStage.label}</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                <span className="hidden md:inline">{currentStage.descDesktop}</span>
-                <span className="md:hidden">{currentStage.descMobile}</span>
-              </p>
-            </div>
+          <div className="mb-4">
+            <p className="text-sm font-bold text-gray-800 mb-0.5">{v.cardLabel}</p>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              <span className="hidden md:inline">{v.descDesktop}</span>
+              <span className="md:hidden">{v.descMobile}</span>
+            </p>
           </div>
 
           {/* 진행률 바 */}
@@ -158,7 +148,7 @@ function TripLoadingPage() {
           {/* 레이블 + % */}
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-              {currentStage.barLabel}
+              {v.barLabel}
             </span>
             <span className="text-sm font-extrabold text-cyan-500">{pct}%</span>
           </div>
@@ -168,7 +158,7 @@ function TripLoadingPage() {
         {/* 데스크탑: 황색 pill */}
         <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm">
           <span className="text-amber-700">✦</span>
-          TIP: {TIPS[tipIndex]}
+          {TIPS[tipIndex]}
         </div>
 
         {/* 모바일: Editor's Tip 카드 */}
@@ -180,9 +170,7 @@ function TripLoadingPage() {
             <p className="text-[10px] font-bold tracking-widest text-amber-500 uppercase mb-1">
               Editor&apos;s Tip
             </p>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              {TIPS[tipIndex]}
-            </p>
+            <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
           </div>
         </div>
 

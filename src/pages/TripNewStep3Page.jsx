@@ -11,7 +11,6 @@ import {
 } from '@/mocks/tripNewStep3Data'
 import { fetchFlightInfo } from '@/mocks/flightMockData'
 import StepHeader from '@/components/common/StepHeader'
-import AiPlannerFab from '@/components/common/AiPlannerFab'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 import AiConciergeTip, { AiConciergeTipHeading, AiConciergeTipIcon } from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
@@ -467,8 +466,6 @@ function TripNewStep3Page() {
           </button>
         </div>
       </div>
-
-      <AiPlannerFab mobileBottomClassName="bottom-[10.25rem]" />
     </div>
   )
 }

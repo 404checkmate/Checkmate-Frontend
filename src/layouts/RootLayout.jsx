@@ -1,6 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import Header from '@/components/common/Header'
+import AiPlannerFab from '@/components/common/AiPlannerFab'
 import { shouldHideGlobalHeaderOnMobile } from '@/utils/tripLayoutPaths'
+
+/** 홈·준비 항목 탐색(/trips/:id/search)에서만 메이퀸 FAB 표시. /trips/new/*(destination 포함)에서는 비표시 */
+function shouldShowAiPlannerFab(pathname) {
+  if (pathname === '/') return true
+  return /^\/trips\/[^/]+\/search$/.test(pathname)
+}
 
 const BOTTOM_NAV_ITEMS = [
   {
@@ -47,7 +54,10 @@ const BOTTOM_NAV_ITEMS = [
 
 function RootLayout() {
   const location = useLocation()
-  const hideHeaderOnMobile = shouldHideGlobalHeaderOnMobile(location.pathname)
+  const { pathname } = location
+  const hideHeaderOnMobile = shouldHideGlobalHeaderOnMobile(pathname)
+  const showAiPlannerFab = shouldShowAiPlannerFab(pathname)
+  const searchFabMobileBottom = /^\/trips\/[^/]+\/search$/.test(pathname)
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -79,6 +89,12 @@ function RootLayout() {
           )
         })}
       </nav>
+
+      {showAiPlannerFab ? (
+        <AiPlannerFab
+          {...(searchFabMobileBottom ? { mobileBottomClassName: 'bottom-[10.25rem]' } : {})}
+        />
+      ) : null}
     </div>
   )
 }

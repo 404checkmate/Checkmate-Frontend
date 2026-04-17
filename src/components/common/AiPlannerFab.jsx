@@ -24,9 +24,10 @@ export default function AiPlannerFab({
         fixed z-50 right-4 ${mobileBottom}
         md:bottom-8 md:right-8
         flex items-center justify-center
-        h-14 w-14 shrink-0 rounded-full border border-amber-200/90
-        bg-white/95 shadow-xl backdrop-blur-sm
+        h-14 w-14 shrink-0 rounded-full border border-orange-200/80
+        bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100/90 shadow-xl
         transition-all duration-200 hover:scale-105 hover:shadow-2xl
+        hover:from-orange-100/95 hover:via-amber-100/80 hover:to-orange-100
         md:h-auto md:w-auto md:rounded-full md:border-0 md:px-5 md:py-3 md:shadow-xl
         ${className}
       `

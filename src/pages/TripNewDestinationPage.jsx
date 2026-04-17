@@ -13,7 +13,6 @@ import {
   MOBILE_TIP,
 } from '@/mocks/tripNewDestinationData'
 import StepHeader from '@/components/common/StepHeader'
-import AiPlannerFab from '@/components/common/AiPlannerFab'
 import AiConciergeTip, { AiConciergeTipHeading, AiConciergeTipIcon } from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { FullBleedMintImageHero } from '@/components/trip/MintProgressiveHero'
@@ -533,8 +532,6 @@ export default function TripNewDestinationPage() {
           </button>
         </div>
       </div>
-
-      <AiPlannerFab mobileBottomClassName="bottom-[10.25rem]" />
     </div>
   )
 }
