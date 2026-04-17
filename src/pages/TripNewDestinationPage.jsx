@@ -16,10 +16,10 @@ import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 import { FullBleedMintImageHero } from '@/components/trip/MintProgressiveHero'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
-import DestinationMobileRangeCalendar, {
-  formatTripNightsDaysLabel,
-} from '@/components/trip/DestinationMobileRangeCalendar'
+import DestinationMobileRangeCalendar from '@/components/trip/DestinationMobileRangeCalendar'
+import { formatKoreanDateRangeLine, formatTripNightsDaysLabel } from '@/utils/tripDateFormat'
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
+import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
 
 /** `<input type="date" min>` 용 — 브라우저 로컬 달력과 맞추기 위해 UTC가 아닌 로컬 날짜 사용 */
 function getLocalDateYYYYMMDD() {
@@ -55,14 +55,6 @@ const SUBTITLE_DESKTOP = (
     어디로, 언제 떠날지 알려주시면 저희가 당신만을 위한 체크리스트를 만들어드릴게요!
   </p>
 )
-
-function formatKoreanDateRangeLine(startStr, endStr) {
-  if (!startStr || !endStr) return ''
-  const [y1, m1, d1] = startStr.split('-').map(Number)
-  const [y2, m2, d2] = endStr.split('-').map(Number)
-  if (y1 === y2) return `${m1}월 ${d1}일 - ${m2}월 ${d2}일`
-  return `${y1}년 ${m1}월 ${d1}일 - ${y2}년 ${m2}월 ${d2}일`
-}
 
 function DestinationDateForm({
   comboRef,
@@ -387,6 +379,16 @@ export default function TripNewDestinationPage() {
       tripEndDate: endDate,
     }
     saveStep4NavigationState(navState)
+    saveActiveTripPlan({
+      destination: {
+        iata: selectedCountry.iata,
+        city: selectedCountry.city,
+        country: selectedCountry.country,
+        countryCode: selectedCountry.countryCode,
+      },
+      tripStartDate: startDate,
+      tripEndDate: endDate,
+    })
     navigate('/trips/new/step4', { state: navState })
   }
 
@@ -453,7 +455,7 @@ export default function TripNewDestinationPage() {
       <div className="md:hidden">
         <TripFlowMobileBar backTo="/trips/new/step2" centerTitle="여행지 & 일정 설정" />
 
-        <div className="px-4 pb-44 pt-4">
+        <div className="px-4 pb-56 pt-4">
           <div className="mb-6 flex items-center gap-3">
             <span className="shrink-0 rounded-full bg-teal-800 px-3 py-1.5 text-[11px] font-bold tracking-wide text-white">
               STEP {String(STEP_DESTINATION_CONFIG.currentStep).padStart(2, '0')}
@@ -586,7 +588,7 @@ export default function TripNewDestinationPage() {
             </span>
           </div>
 
-          <div className="relative rounded-2xl border border-sky-100/90 bg-sky-50/95 p-3 shadow-sm">
+          <div className="rounded-2xl border border-sky-100/90 bg-sky-50/95 p-3 shadow-sm">
             {!selectedCountry && (
               <p className="mb-2 rounded-xl bg-white/90 px-3 py-2 text-xs leading-relaxed text-gray-600 ring-1 ring-sky-100/80">
                 위에서 <strong className="text-sky-700">여행지</strong>를 먼저 선택하면 일정을 고를 수 있어요.
@@ -600,27 +602,38 @@ export default function TripNewDestinationPage() {
               disabled={!selectedCountry}
               onChangeRange={handleMobileRangeChange}
             />
-            {selectedCountry && startDate && endDate && (
-              <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-sky-200/90 bg-white px-3 py-2 text-[11px] font-semibold text-gray-800 shadow-lg sm:text-xs">
+          </div>
+        </div>
+
+        {/* 날짜 선택 완료 시: 예시 이미지처럼 노란 CTA 바로 위에 떠 있는 요약 캡슐 */}
+        <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col items-stretch px-4 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
+          {selectedCountry && startDate && endDate && (
+            <div
+              className="mb-2 flex justify-center px-1"
+              role="status"
+              aria-live="polite"
+            >
+              <div
+                className="flex max-w-full items-center gap-2.5 rounded-full border border-gray-100 bg-white px-4 py-2.5 shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 shrink-0 text-amber-400"
+                  className="h-[18px] w-[18px] shrink-0 text-amber-500"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   aria-hidden
                 >
                   <path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z" />
                 </svg>
-                <span className="truncate">
+                <p className="truncate text-center text-[13px] font-semibold leading-snug text-gray-900">
                   {formatKoreanDateRangeLine(startDate, endDate)} ({formatTripNightsDaysLabel(startDate, endDate)})
-                </span>
+                </p>
               </div>
-            )}
+            </div>
+          )}
+          <div className="px-1 pt-1">
+            <TripFlowNextStepButton variant="amber" disabled={!isValid} onClick={goNext} />
           </div>
-        </div>
-
-        <div className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 pb-3 pt-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
-          <TripFlowNextStepButton variant="amber" disabled={!isValid} onClick={goNext} />
         </div>
       </div>
     </div>

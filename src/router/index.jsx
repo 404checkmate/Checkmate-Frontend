@@ -26,7 +26,7 @@ import ErrorPage from '@/pages/ErrorPage'
  *   /trips/new              → /trips/new/step2 리다이렉트 (TripNewPage 제거)
  *   /trips/new/step2~       새 여행 플로우 (/destination = 예매 전 도시·날짜)
  *   /trips/:id/search       준비 항목 탐색         (Store Loop - DRD-1)
- *   /trips/:id/guide-archive 저장 가이드 목록
+ *   /trips/:id/guide-archive 저장 가이드 목록 → /guide-archive/:entryId 상세에서 준비물 체크
  *   /trips/:id/checklist    내 체크리스트          (Confirm Loop - DRD-2)
  *   *                       404 NotFound
  *

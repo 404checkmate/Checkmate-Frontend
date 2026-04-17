@@ -19,16 +19,6 @@ function daysInMonth(year, monthIndex) {
   return new Date(year, monthIndex + 1, 0).getDate()
 }
 
-/** start ≤ end 인 YYYY-MM-DD 구간의 밤·일 (한국식: n박 n+1일) */
-export function formatTripNightsDaysLabel(startStr, endStr) {
-  const a = parseYmd(startStr)
-  const b = parseYmd(endStr)
-  if (!a || !b || b < a) return null
-  const nights = Math.round((b - a) / 86400000)
-  const days = nights + 1
-  return `${nights}박 ${days}일`
-}
-
 function monthGrid(year, monthIndex) {
   const firstDow = new Date(year, monthIndex, 1).getDay()
   const dim = daysInMonth(year, monthIndex)

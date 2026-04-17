@@ -1,7 +1,13 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { getGuideArchiveEntry } from '@/utils/guideArchiveStorage'
-import GuideSnapshotView from '@/components/guide/GuideSnapshotView'
+import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+
+/**
+ * 라우트: /trips/:id/guide-archive/:entryId
+ * - 목록(TripGuideArchivePage)에서 저장된 여행 스냅샷을 누르면 진입
+ * - 검색에서 담은 필수품(entry.items)을 이 화면에서 하나씩 체크하며 준비 (상태는 entry 단위로 분리 저장)
+ */
 
 function TripGuideArchiveDetailInner({ tripId, entryId }) {
   const navigate = useNavigate()
@@ -69,7 +75,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
           맞춤 여행 준비 리스트
         </button>
       </div>
-      <GuideSnapshotView entry={entry} />
+      <GuideArchiveChecklistView tripId={tripId} entry={entry} />
     </div>
   )
 }

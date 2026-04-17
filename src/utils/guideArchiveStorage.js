@@ -1,6 +1,11 @@
 /**
  * 여행 검색(/trips/:id/search)에서 「저장」 시 스냅샷을 쌓아
  * 가이드 보관함(/trips/:id/guide-archive) 목록에서 조회합니다.
+ *
+ * 백엔드 연동 시 권장 스냅샷 필드 (목적지 페이지 `/trips/new/destination` 와 동일 의미):
+ * - tripStartDate, tripEndDate: YYYY-MM-DD
+ * - country, destination: 국가명 · 대표 도시(또는 지역 한 줄)
+ * - countryCode, iata: 공항/국가 코드 (검색·날씨 API 매핑용)
  */
 
 const STORAGE_PREFIX = 'travel_fe_guide_archive_v1_'
@@ -82,6 +87,10 @@ export function appendGuideArchiveEntry(tripId, snapshot) {
     items: Array.isArray(snapshot.items) ? snapshot.items : [],
     dailySummaries: Array.isArray(snapshot.dailySummaries) ? snapshot.dailySummaries : [],
     dailyGuidesFull: Array.isArray(snapshot.dailyGuidesFull) ? snapshot.dailyGuidesFull : [],
+    tripStartDate: snapshot.tripStartDate ?? '',
+    tripEndDate: snapshot.tripEndDate ?? '',
+    countryCode: snapshot.countryCode ?? '',
+    iata: snapshot.iata ?? '',
   }
   const next = [entry, ...prev]
   try {

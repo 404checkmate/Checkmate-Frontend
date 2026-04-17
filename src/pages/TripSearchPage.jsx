@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { CATEGORIES, MOCK_ITEMS, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
 import { saveItemForTrip, loadSavedItems } from '@/utils/savedTripItems'
+import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
 import { appendGuideArchiveEntry } from '@/utils/guideArchiveStorage'
+import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 import aiSparklesImg from '@/assets/ai-sparkles.png'
 
@@ -111,12 +113,24 @@ function TripSearchInner({ tripId }) {
       return next
     })
 
+    const plan = loadActiveTripPlan()
+    const dest = plan?.destination
+    const ts = plan?.tripStartDate
+    const te = plan?.tripEndDate
+    const fromDestination = Boolean(dest && ts && te)
+
     appendGuideArchiveEntry(tripId, {
-      pageTitle: TRIP_SEARCH_CONTEXT.title,
+      pageTitle: fromDestination
+        ? `${dest.country} · ${dest.city} 여행 준비`
+        : TRIP_SEARCH_CONTEXT.title,
       pageSubtitle: '',
-      destination: TRIP_SEARCH_CONTEXT.destination,
-      country: TRIP_SEARCH_CONTEXT.country,
-      tripWindowLabel: TRIP_SEARCH_CONTEXT.tripWindowLabel,
+      destination: fromDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
+      country: fromDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
+      tripWindowLabel: fromDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
+      tripStartDate: fromDestination ? ts : '',
+      tripEndDate: fromDestination ? te : '',
+      countryCode: fromDestination ? dest.countryCode : '',
+      iata: fromDestination ? dest.iata : '',
       weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
       temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
       rainChance: TRIP_SEARCH_CONTEXT.rainChance,

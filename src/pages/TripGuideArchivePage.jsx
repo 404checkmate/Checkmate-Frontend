@@ -9,14 +9,24 @@ import {
 } from '@/mocks/guideArchiveDesignDemos'
 import { ensureDefaultGuideArchiveSample } from '@/mocks/guideArchiveDefaultSample'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
+import { loadEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 
-function computeProgressPercent(entry, savedItems) {
+/** 보관함 entry별 저장된 체크 우선, 없으면 탐색 저장분(레거시)으로 진행률 계산 */
+function computeProgressPercent(entry, savedItems, tripId) {
   const items = entry.items || []
   if (items.length === 0) return 0
+  const scoped = loadEntryChecklistChecks(tripId, entry.id)
   const savedById = new Map(savedItems.map((s) => [String(s.id), s]))
+  const hasOwn = Object.prototype.hasOwnProperty.bind(scoped)
   let checked = 0
   for (const it of items) {
-    if (savedById.get(String(it.id))?.checked) checked += 1
+    const id = String(it.id)
+    if (hasOwn(id)) {
+      if (scoped[id]) checked += 1
+    } else if (savedById.get(id)?.checked) {
+      checked += 1
+    }
   }
   return Math.round((checked / items.length) * 100)
 }
@@ -26,15 +36,6 @@ function getProgressStatusLabel(progress) {
   if (progress <= 0) return '미작성'
   if (progress >= 100) return '완료'
   return '작성중'
-}
-
-function formatDestinationLine(entry) {
-  const dest = entry.destination?.trim()
-  const country = entry.country?.trim()
-  if (dest && country && !dest.includes(country)) {
-    return `${dest} · ${country}`
-  }
-  return dest || entry.pageTitle || '여행 체크리스트'
 }
 
 function ProgressBar({ value }) {
@@ -123,10 +124,10 @@ function TripGuideArchiveInner({ tripId }) {
 
   const entriesWithMeta = useMemo(() => {
     return entries.map((entry) => {
-      const progress = computeProgressPercent(entry, savedItems)
+      const progress = computeProgressPercent(entry, savedItems, tripId)
       return { entry, progress, statusLabel: getProgressStatusLabel(progress) }
     })
-  }, [entries, savedItems])
+  }, [entries, savedItems, tripId])
 
   const filtered = useMemo(() => {
     if (filterTab === 'all') return entriesWithMeta
@@ -355,8 +356,8 @@ function TripGuideArchiveInner({ tripId }) {
         ) : (
           <ul className="flex flex-col gap-4 md:gap-3">
             {filtered.map(({ entry, progress, statusLabel }, index) => {
-              const title = formatDestinationLine(entry)
-              const dateLine = entry.tripWindowLabel || '일정 미정'
+              const title = buildGuideArchiveListTitle(entry)
+              const dateLine = buildGuideArchiveDateLine(entry)
               const isDemo = isDemoDesignEntry(entry)
               const isSelected = selectedEntryIds.includes(String(entry.id))
               const mobileTint = index % 2 === 0 ? 'bg-sky-100/90' : 'bg-emerald-50/95'

@@ -55,6 +55,21 @@ export function removeSavedItem(tripId, itemId) {
   return list
 }
 
+/** 탐색에서 저장된 항목의 체크 여부 갱신 — 보관함 상세·통합 체크리스트와 동기화 */
+export function setSavedItemChecked(tripId, itemId, checked) {
+  const list = loadSavedItems(tripId)
+  const idx = list.findIndex((x) => String(x.id) === String(itemId))
+  if (idx < 0) return list
+  const next = [...list]
+  next[idx] = { ...next[idx], checked }
+  try {
+    localStorage.setItem(STORAGE_PREFIX + String(tripId), JSON.stringify(next))
+  } catch (e) {
+    console.warn('[savedTripItems] setSavedItemChecked failed', e)
+  }
+  return next
+}
+
 /**
  * 기본 체크리스트 항목 + 탐색에서만 추가된 저장 항목을 한 목록으로 합칩니다.
  * (동일 id가 초기 목록에 없으면 뒤에 붙입니다.)
