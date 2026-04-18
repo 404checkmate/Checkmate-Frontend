@@ -16,6 +16,7 @@ import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 import { FullBleedMintImageHero } from '@/components/trip/MintProgressiveHero'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import DestinationMobileRangeCalendar from '@/components/trip/DestinationMobileRangeCalendar'
 import { formatKoreanDateRangeLine, formatTripNightsDaysLabel } from '@/utils/tripDateFormat'
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
@@ -425,16 +426,14 @@ export default function TripNewDestinationPage() {
             <span className="shrink-0 rounded-full bg-teal-800 px-3 py-1.5 text-[11px] font-bold tracking-wide text-white">
               STEP {String(STEP_DESTINATION_CONFIG.currentStep).padStart(2, '0')}
             </span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-sky-100">
-              <div
-                className="h-full rounded-full bg-teal-500 transition-all duration-500"
-                style={{
-                  width: `${Math.round(
-                    (STEP_DESTINATION_CONFIG.currentStep / STEP_DESTINATION_CONFIG.totalSteps) * 100,
-                  )}%`,
-                }}
-              />
-            </div>
+            <StepProgressBarMascot
+              percent={Math.round(
+                (STEP_DESTINATION_CONFIG.currentStep / STEP_DESTINATION_CONFIG.totalSteps) * 100,
+              )}
+              trackClassName="bg-sky-100"
+              fillClassName="bg-teal-500"
+              barHeightClass="h-2"
+            />
           </div>
 
           <h2 className="mb-3 text-lg font-bold text-gray-900">방문 도시 검색</h2>

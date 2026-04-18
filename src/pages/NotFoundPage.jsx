@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
-
-const MASCOT_SRC = '/404-mascot.png'
+import notFoundMascotUrl from '@/assets/not-found-mascot.png'
 
 /** 끝까지 민트·화이트 톤으로 이어지도록 100% 구간 유지 (하단 흰 띠 방지) */
 const PAGE_BG = {
@@ -11,7 +10,7 @@ const PAGE_BG = {
 function NotFoundMascotImage({ className = '' }) {
   return (
     <img
-      src={MASCOT_SRC}
+      src={notFoundMascotUrl}
       alt=""
       role="presentation"
       className={`object-contain object-center ${className}`}
@@ -30,21 +29,17 @@ function NotFoundPage() {
 
       {/* 모바일 */}
       <div className="flex min-h-0 flex-1 flex-col items-center px-5 pb-28 pt-6 md:hidden">
-        <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">
-          Page not found
-        </span>
         <div className="mb-5 flex w-full max-w-[240px] items-center justify-center">
           <NotFoundMascotImage className="max-h-[200px] w-full object-contain" />
         </div>
         <h1 className="mb-2 text-center text-2xl font-extrabold leading-snug text-gray-900">
           길을 잃으셨나요?
         </h1>
-        <p className="mb-1 max-w-sm text-center text-sm leading-relaxed text-gray-600">
+        <p className="mb-8 max-w-sm text-center text-sm leading-relaxed text-gray-600">
           주소가 바뀌었거나, 존재하지 않는 페이지예요.
           <br />
           홈에서 다시 여행 준비를 시작해 보세요.
         </p>
-        <p className="mb-8 text-center text-xs text-gray-400">404</p>
         <button
           type="button"
           onClick={() => navigate('/')}
@@ -60,9 +55,6 @@ function NotFoundPage() {
           <NotFoundMascotImage className="w-full max-w-md max-h-72 object-contain lg:max-h-80" />
         </div>
         <div className="flex max-w-lg flex-1 flex-col justify-center text-left">
-          <span className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-600">
-            Page not found · 404
-          </span>
           <h1 className="mb-3 text-3xl font-extrabold leading-tight text-gray-900 lg:text-4xl">
             요청하신 페이지를
             <br />

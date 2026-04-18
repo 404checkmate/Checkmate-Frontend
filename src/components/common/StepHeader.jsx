@@ -1,3 +1,5 @@
+import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
+
 /**
  * StepHeader — 여행 플래닝 공용 스텝 헤더 컴포넌트
  *
@@ -37,17 +39,12 @@ export default function StepHeader({
         {title}
       </h1>
 
-      {/* 스텝 카운터 + 프로그레스 바 */}
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-sm font-bold text-gray-400 whitespace-nowrap tabular-nums">
+      {/* 스텝 카운터 + 프로그레스 바(마스코트는 채움 끝 = 현재 진행률) */}
+      <div className="mb-4 flex items-end gap-3">
+        <span className="shrink-0 pb-0.5 text-sm font-bold whitespace-nowrap text-gray-400 tabular-nums">
           {currentStep} / {totalSteps}
         </span>
-        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-cyan-500 rounded-full transition-all duration-500"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+        <StepProgressBarMascot percent={progressPct} />
       </div>
 
       {/* 부제목 (optional) — 문자열·복수 문단·목록 등 ReactNode 허용 */}

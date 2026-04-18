@@ -7,16 +7,16 @@ import {
   FLIGHT_NO_EXAMPLES_HINT,
   HERO_IMAGE,
   AI_TIP,
-  MOBILE_TIP,
 } from '@/mocks/tripNewStep3Data'
 import { fetchFlightInfo } from '@/mocks/flightMockData'
 import StepHeader from '@/components/common/StepHeader'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
-import AiConciergeTip, { AiConciergeTipHeading, AiConciergeTipIcon } from '@/components/common/AiConciergeTip'
+import AiConciergeTip from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 import { FullBleedMintImageHero } from '@/components/trip/MintProgressiveHero'
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
+import step3DesktopMascotUrl from '@/assets/step3-desktop-mascot.png'
 
 /* ─────────────────────────────────────────────
    범용 SVG 아이콘
@@ -34,9 +34,13 @@ function SvgIcon({ name, className = 'w-4 h-4' }) {
   )
 }
 
-/** Step3 헤더 부제 */
+/** Step3 헤더 부제 — 데스크톱 */
 const STEP3_SUBTITLE_TEXT =
   '맞춤 여행 준비를 도와드리려면, 먼저 예약하신 항공 일정이 필요해요. 가는편과 오는편 각각 탑승 날짜와 편명을 입력해 주세요.'
+
+/** Step3 헤더 부제 — 모바일(짧은 버전) */
+const STEP3_SUBTITLE_TEXT_MOBILE =
+  '예약하신 항공 일정이 필요해요. 가는편과 오는편 각각 탑승 날짜와 편명을 입력해 주세요.'
 
 const STEP3_SUBTITLE_DESKTOP = (
   <>
@@ -47,7 +51,7 @@ const STEP3_SUBTITLE_DESKTOP = (
 
 const STEP3_SUBTITLE_MOBILE = (
   <>
-    <p className="text-sm text-gray-600 leading-relaxed">{STEP3_SUBTITLE_TEXT}</p>
+    <p className="text-sm text-gray-600 leading-relaxed">{STEP3_SUBTITLE_TEXT_MOBILE}</p>
     <p className="mt-3 text-[11px] leading-relaxed text-gray-600">{FLIGHT_NO_EXAMPLES_HINT}</p>
   </>
 )
@@ -342,10 +346,22 @@ function TripNewStep3Page() {
           </>
         }
         right={
-          <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
-            <AiConciergeTip
-              description={AI_TIP.description}
-            />
+          <div className="relative h-full w-full">
+            {/* 데스크톱 전용: 오른쪽 히어로 이미지 위 큰 마스코트 */}
+            <div className="pointer-events-none absolute inset-x-0 top-[22vh] z-30 flex justify-center px-4 lg:px-8">
+              <img
+                src={step3DesktopMascotUrl}
+                alt=""
+                role="presentation"
+                draggable={false}
+                className="h-auto w-full max-w-2xl object-contain object-bottom drop-shadow-[0_12px_32px_rgba(15,23,42,0.12)] [max-height:min(52vh,560px)]"
+              />
+            </div>
+            <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
+              <AiConciergeTip
+                description={AI_TIP.description}
+              />
+            </div>
           </div>
         }
       />
@@ -370,23 +386,10 @@ function TripNewStep3Page() {
           />
 
           {/* 항공편 입력 카드 목록 */}
-          <div className="space-y-4 mb-5">
+          <div className="space-y-4">
             {FLIGHT_SECTIONS.map((section) => (
               <MobileFlightCard key={section.id} {...cardProps(section)} />
             ))}
-          </div>
-
-          {/* AI 팁 카드 */}
-          <div className="bg-white rounded-2xl p-4 mb-5 flex items-start gap-3 shadow-sm">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 p-0.5">
-              <AiConciergeTipIcon className="h-6 w-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="mb-1.5">
-                <AiConciergeTipHeading variant="onLight" />
-              </p>
-              <p className="text-sm leading-relaxed text-gray-600">{MOBILE_TIP}</p>
-            </div>
           </div>
         </div>
 

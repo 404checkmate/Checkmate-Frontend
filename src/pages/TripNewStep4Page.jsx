@@ -1,4 +1,16 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useNavigate, useLocation, Navigate } from 'react-router-dom'
 import {
   STEP4_CONFIG,
@@ -6,7 +18,6 @@ import {
   HERO_IMAGE,
   CITY_IMAGES,
   AI_TIP,
-  MOBILE_TIP,
   VIETNAM_STAY_OPTIONS,
   isVietnamArrival,
   heroImageForSelection,
@@ -22,7 +33,7 @@ import StepHeader from '@/components/common/StepHeader'
  * 그렇지 않아도 항공 카드 아래 추가 지역 입력창은 동일하게 표시됩니다.
  */
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
-import AiConciergeTip, { AiConciergeTipHeading, AiConciergeTipIcon } from '@/components/common/AiConciergeTip'
+import AiConciergeTip from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 import { FullBleedMintGlobeHero } from '@/components/trip/MintProgressiveHero'
@@ -50,11 +61,189 @@ function arrayMove(arr, fromIndex, toIndex) {
   return next
 }
 
+/** 선택된 도시 삭제 확인 — 삭제/취소만 가능 */
+function Step4RemoveCityConfirmDialog({ open, onCancel, onConfirm, title = '삭제하시겠습니까?' }) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onCancel])
+
+  if (!open || typeof document === 'undefined') return null
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="step4-remove-city-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/45"
+        onClick={onCancel}
+        aria-label="닫기"
+      />
+      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xl">
+        <p id="step4-remove-city-title" className="text-center text-base font-semibold leading-snug text-slate-900">
+          {title}
+        </p>
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="min-h-[44px] flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="min-h-[44px] flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-red-700"
+          >
+            삭제
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
 function SvgIcon({ name, className = 'w-4 h-4' }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d={STEP4_ICON_PATHS[name]} />
     </svg>
+  )
+}
+
+function SortableNonVnItem({ item, index, onRemoveRequest }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 40 : undefined,
+  }
+
+  const cardBase =
+    'flex min-h-[64px] min-w-0 flex-1 cursor-grab touch-manipulation items-center gap-3 rounded-[1.25rem] border border-slate-100 bg-white px-4 py-3 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.12)] transition-all duration-300 ease-out active:cursor-grabbing'
+
+  const draggingRing = isDragging
+    ? 'border-sky-300 ring-2 ring-sky-200/80 ring-offset-2 ring-offset-sky-50/50'
+    : ''
+
+  const inner = (
+    <>
+      <div className="min-w-0 flex-1 pr-1">
+        <p className="line-clamp-2 text-base font-bold text-slate-900">{item.label}</p>
+      </div>
+      <div className="flex flex-shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemoveRequest(item.id)
+          }}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+          aria-label="목록에서 제거"
+        >
+          <SvgIcon name="close" className="h-4 w-4" />
+        </button>
+      </div>
+    </>
+  )
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`relative flex items-stretch gap-3 ${isDragging ? 'opacity-70' : ''}`}
+    >
+      <div
+        className="hidden size-9 shrink-0 select-none items-center justify-center self-center rounded-full border border-sky-200/90 bg-sky-100 text-sm font-medium tabular-nums text-sky-800 md:flex"
+        aria-hidden
+      >
+        {index + 1}
+      </div>
+      <div
+        className={`${cardBase} ${draggingRing}`}
+        {...listeners}
+        {...attributes}
+        aria-label="드래그하여 순서 변경"
+      >
+        {inner}
+      </div>
+    </li>
+  )
+}
+
+/** 베트남 선택 도시 행 — 비베트남 SortableNonVnItem과 동일 UX */
+function SortableVietnamRow({ row, index, onRemoveRequest }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: row.key })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 40 : undefined,
+  }
+
+  const title = row.kind === 'preset' ? row.opt.city : row.custom.label
+  const sub =
+    row.kind === 'preset' ? `베트남, ${row.opt.hint}` : '직접 입력, 추가 지역'
+
+  const cardBase =
+    'flex min-h-[64px] min-w-0 flex-1 cursor-grab touch-manipulation items-center gap-3 rounded-[1.25rem] border border-slate-100 bg-white px-4 py-3 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.12)] transition-all duration-300 ease-out active:cursor-grabbing'
+
+  const draggingRing = isDragging
+    ? 'border-sky-300 ring-2 ring-sky-200/80 ring-offset-2 ring-offset-sky-50/50'
+    : ''
+
+  const inner = (
+    <>
+      <div className="min-w-0 flex-1 pr-1">
+        <p className="truncate text-base font-bold text-slate-900">{title}</p>
+        <p className="mt-0.5 truncate text-sm text-slate-500">{sub}</p>
+      </div>
+      <div className="flex flex-shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemoveRequest(row)
+          }}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+          aria-label="제거"
+        >
+          <SvgIcon name="close" className="h-4 w-4" />
+        </button>
+      </div>
+    </>
+  )
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`relative flex items-stretch gap-3 ${isDragging ? 'opacity-70' : ''}`}
+    >
+      <div
+        className="hidden size-9 shrink-0 select-none items-center justify-center self-center rounded-full border border-sky-200/90 bg-sky-100 text-sm font-medium tabular-nums text-sky-800 md:flex"
+        aria-hidden
+      >
+        {index + 1}
+      </div>
+      <div
+        className={`${cardBase} ${draggingRing}`}
+        {...listeners}
+        {...attributes}
+        aria-label="드래그하여 순서 변경"
+      >
+        {inner}
+      </div>
+    </li>
   )
 }
 
@@ -72,9 +261,7 @@ function Step4AdditionalCitySearchBar({ value, onChange, placeholder, hint }) {
             type="search"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={
-              placeholder ?? '도시 이름을 입력하세요 (예: 사파, 호이안...)'
-            }
+            placeholder={placeholder ?? '방문할 도시를 입력해주세요'}
             className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-[#5DA7C1]"
             autoComplete="off"
           />
@@ -113,7 +300,7 @@ function Step4NonVnAddRegionInput({ value, onChange, onConfirm }) {
             e.preventDefault()
             submit()
           }}
-          placeholder="추가로 방문할 도시·지역을 입력하세요"
+          placeholder="방문할 도시를 입력해주세요"
           className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-[#5DA7C1]"
           autoComplete="off"
         />
@@ -129,69 +316,97 @@ function Step4NonVnAddRegionInput({ value, onChange, onConfirm }) {
   )
 }
 
-/** 비베트남: 확정된 방문지 목록(무한 추가·순서 변경·삭제) */
-function Step4NonVnSelectedPlacesList({ items, onRemove, onReorder, countryLine }) {
+/** 비베트남: 확정된 방문지 목록(무한 추가·순서 변경·삭제) — @dnd-kit, 카드 전체 드래그(터치는 길게 누르기) */
+function Step4NonVnSelectedPlacesList({ items, onRemove, onReorder, onRemoveAll }) {
   const n = items.length
+  const [removeConfirmId, setRemoveConfirmId] = useState(null)
+  const [removeAllOpen, setRemoveAllOpen] = useState(false)
+  const [listRef] = useAutoAnimate({ duration: 280, easing: 'ease-out' })
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 400, tolerance: 12 },
+    }),
+  )
+
+  const sortableIds = useMemo(() => items.map((i) => i.id), [items])
+
+  const handleDragEnd = useCallback(
+    (event) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      const oldIndex = items.findIndex((i) => i.id === active.id)
+      const newIndex = items.findIndex((i) => i.id === over.id)
+      if (oldIndex < 0 || newIndex < 0) return
+      onReorder(oldIndex, newIndex)
+    },
+    [items, onReorder],
+  )
+
+  const handleConfirmRemove = useCallback(() => {
+    if (removeConfirmId != null) onRemove(removeConfirmId)
+    setRemoveConfirmId(null)
+  }, [removeConfirmId, onRemove])
+
+  const handleConfirmRemoveAll = useCallback(() => {
+    onRemoveAll()
+    setRemoveAllOpen(false)
+  }, [onRemoveAll])
 
   return (
-    <section className="rounded-2xl bg-sky-50/60 px-1 py-1 sm:px-2">
-      <div className="mb-3 flex items-center justify-between gap-3 px-1">
-        <p className="text-[15px] font-bold text-slate-900">선택된 도시</p>
-        <p className="text-sm font-semibold text-sky-600">{n}개 도시 추가됨</p>
-      </div>
-
-      {n === 0 ? (
-        <p className="px-1 text-center text-sm text-slate-500">선택된 곳이 없습니다</p>
-      ) : (
-        <ul className="space-y-3">
-          {items.map((item, index) => (
-            <li
-              key={item.id}
-              className="flex items-stretch gap-3"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault()
-                const from = Number(e.dataTransfer.getData('text/plain'))
-                if (Number.isNaN(from)) return
-                onReorder(from, index)
-              }}
+    <>
+      <section className="rounded-2xl bg-sky-50/60 px-1 py-1 sm:px-2">
+        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+          <p className="text-[15px] font-bold text-slate-900">선택된 도시</p>
+          {n > 0 ? (
+            <button
+              type="button"
+              onClick={() => setRemoveAllOpen(true)}
+              className="shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
             >
-              <div className="hidden h-[76px] w-[52px] flex-shrink-0 items-center justify-center rounded-2xl bg-sky-300/90 text-xl font-extrabold text-white shadow-sm md:flex">
-                {index + 1}
-              </div>
-              <div className="flex min-h-[64px] min-w-0 flex-1 items-center gap-3 rounded-[1.25rem] border border-slate-100 bg-white px-4 py-3 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.12)]">
-                <div className="min-w-0 flex-1 pr-1">
-                  <p className="line-clamp-2 text-base font-bold text-slate-900">{item.label}</p>
-                  <p className="mt-0.5 truncate text-sm text-slate-500">{countryLine}</p>
-                </div>
-                <div className="flex flex-shrink-0 items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => onRemove(item.id)}
-                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700 transition-colors hover:bg-sky-200"
-                    aria-label="목록에서 제거"
-                  >
-                    <SvgIcon name="close" className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.effectAllowed = 'move'
-                      e.dataTransfer.setData('text/plain', String(index))
-                    }}
-                    className="flex h-10 w-10 flex-shrink-0 cursor-grab items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:cursor-grabbing"
-                    aria-label="순서 변경"
-                  >
-                    <SvgIcon name="grip" className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+              전체 삭제
+            </button>
+          ) : null}
+        </div>
+
+        {n > 0 ? (
+          <p className="mb-3 flex items-center gap-2 px-1 text-[11px] leading-snug text-slate-500">
+            <SvgIcon name="grip" className="h-3.5 w-3.5 shrink-0 text-sky-500/80" aria-hidden />
+            <span>카드를 드래그해 순서를 바꿀 수 있어요</span>
+          </p>
+        ) : null}
+
+        {n === 0 ? (
+          <p className="px-1 text-center text-sm text-slate-500">선택된 곳이 없습니다</p>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+              <ul ref={listRef} className="space-y-3">
+                {items.map((item, index) => (
+                  <SortableNonVnItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    onRemoveRequest={setRemoveConfirmId}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+        )}
+      </section>
+      <Step4RemoveCityConfirmDialog
+        open={removeConfirmId !== null}
+        onCancel={() => setRemoveConfirmId(null)}
+        onConfirm={handleConfirmRemove}
+      />
+      <Step4RemoveCityConfirmDialog
+        open={removeAllOpen}
+        title="선택된 도시를 모두 삭제하시겠습니까?"
+        onCancel={() => setRemoveAllOpen(false)}
+        onConfirm={handleConfirmRemoveAll}
+      />
+    </>
   )
 }
 
@@ -365,6 +580,7 @@ function VietnamNeighborhoodPicker({
   customStops,
   onAddCustom,
   onRemoveCustom,
+  onClearAll,
   visitStopOrder,
   onReorderStopOrder,
   searchQuery,
@@ -372,6 +588,15 @@ function VietnamNeighborhoodPicker({
 }) {
   const [manual, setManual] = useState('')
   const manualInputRef = useRef(null)
+  const [visitListRef] = useAutoAnimate({ duration: 280, easing: 'ease-out' })
+  const [removeConfirm, setRemoveConfirm] = useState(null)
+  const [removeAllOpen, setRemoveAllOpen] = useState(false)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 400, tolerance: 12 },
+    }),
+  )
 
   const filteredOptions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
@@ -414,98 +639,103 @@ function VietnamNeighborhoodPicker({
 
   const totalCount = orderedRows.length
 
+  const sortableKeys = useMemo(() => orderedRows.map((r) => r.key), [orderedRows])
+
+  const handleVisitDragEnd = useCallback(
+    (event) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      const oldIndex = orderedRows.findIndex((r) => r.key === active.id)
+      const newIndex = orderedRows.findIndex((r) => r.key === over.id)
+      if (oldIndex < 0 || newIndex < 0) return
+      onReorderStopOrder(oldIndex, newIndex)
+    },
+    [orderedRows, onReorderStopOrder],
+  )
+
+  const handleRemoveRequest = useCallback((row) => {
+    setRemoveConfirm({ kind: row.kind === 'preset' ? 'preset' : 'custom', id: row.id })
+  }, [])
+
+  const handleConfirmVietnamRemove = useCallback(() => {
+    if (!removeConfirm) return
+    if (removeConfirm.kind === 'preset') onToggle(removeConfirm.id)
+    else onRemoveCustom(removeConfirm.id)
+    setRemoveConfirm(null)
+  }, [removeConfirm, onToggle, onRemoveCustom])
+
+  const handleConfirmClearAll = useCallback(() => {
+    onClearAll()
+    setRemoveAllOpen(false)
+  }, [onClearAll])
+
   return (
-    <div className="space-y-5">
+    <>
+      <div className="space-y-5">
       {/* 입력창 바로 아래: 선택된 도시 */}
       <section className="rounded-2xl bg-sky-50/60 px-1 py-1 sm:px-2">
         <div className="mb-3 flex items-center justify-between gap-3 px-1">
           <p className="text-[15px] font-bold text-slate-900">선택된 도시</p>
-          <p className="text-sm font-semibold text-sky-600">{totalCount}개 도시 추가됨</p>
+          {totalCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => setRemoveAllOpen(true)}
+              className="shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+            >
+              전체 삭제
+            </button>
+          ) : null}
         </div>
+
+        {totalCount > 0 ? (
+          <p className="mb-3 flex items-center gap-2 px-1 text-[11px] leading-snug text-slate-500">
+            <SvgIcon name="grip" className="h-3.5 w-3.5 shrink-0 text-sky-500/80" aria-hidden />
+            <span>카드를 드래그해 순서를 바꿀 수 있어요</span>
+          </p>
+        ) : null}
 
         {totalCount === 0 ? (
           <p className="px-1 text-sm text-slate-400">위에서 검색하거나 아래 추천·직접 추가로 도시를 골라 주세요.</p>
         ) : (
-          <ul className="space-y-3">
-            {orderedRows.map((row, index) => {
-              const title = row.kind === 'preset' ? row.opt.city : row.custom.label
-              const sub =
-                row.kind === 'preset'
-                  ? `베트남, ${row.opt.hint}`
-                  : '직접 입력, 추가 지역'
-
-              return (
-                <li
-                  key={row.key}
-                  className="flex items-stretch gap-3"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault()
-                    const from = Number(e.dataTransfer.getData('text/plain'))
-                    if (Number.isNaN(from)) return
-                    onReorderStopOrder(from, index)
-                  }}
-                >
-                  <div className="hidden h-[76px] w-[52px] flex-shrink-0 items-center justify-center rounded-2xl bg-sky-300/90 text-xl font-extrabold text-white shadow-sm md:flex">
-                    {index + 1}
-                  </div>
-                  <div className="flex min-h-[64px] min-w-0 flex-1 items-center gap-3 rounded-[1.25rem] border border-slate-100 bg-white px-4 py-3 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.12)]">
-                    <div className="min-w-0 flex-1 pr-1">
-                      <p className="truncate text-base font-bold text-slate-900">{title}</p>
-                      <p className="mt-0.5 truncate text-sm text-slate-500">{sub}</p>
-                    </div>
-                    <div className="flex flex-shrink-0 items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => (row.kind === 'preset' ? onToggle(row.id) : onRemoveCustom(row.id))}
-                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700 transition-colors hover:bg-sky-200"
-                        aria-label="제거"
-                      >
-                        <SvgIcon name="close" className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.effectAllowed = 'move'
-                          e.dataTransfer.setData('text/plain', String(index))
-                        }}
-                        className="flex h-10 w-10 flex-shrink-0 cursor-grab items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:cursor-grabbing"
-                        aria-label="순서 변경"
-                      >
-                        <SvgIcon name="grip" className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleVisitDragEnd}>
+            <SortableContext items={sortableKeys} strategy={verticalListSortingStrategy}>
+              <ul ref={visitListRef} className="space-y-3">
+                {orderedRows.map((row, index) => (
+                  <SortableVietnamRow
+                    key={row.key}
+                    row={row}
+                    index={index}
+                    onRemoveRequest={handleRemoveRequest}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
         )}
       </section>
 
       {searchQuery.trim() && filteredOptions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {filteredOptions.map((opt) => {
-            const on = selectedIds.includes(opt.id)
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => onToggle(opt.id)}
+      <div className="flex flex-wrap gap-2">
+        {filteredOptions.map((opt) => {
+          const on = selectedIds.includes(opt.id)
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onToggle(opt.id)}
                 className={`max-w-[220px] rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-all ${
-                  on
+                on
                     ? 'border-teal-600 bg-teal-600 text-white shadow-sm'
                     : 'border-sky-200 bg-white/95 text-slate-700 hover:border-teal-300'
-                }`}
-              >
-                <span className="block text-[10px] opacity-80">{opt.city}</span>
-                <span className="block">{opt.area}</span>
+              }`}
+            >
+              <span className="block text-[10px] opacity-80">{opt.city}</span>
+              <span className="block">{opt.area}</span>
                 <span className={`mt-0.5 block text-[10px] ${on ? 'text-white/90' : 'text-slate-400'}`}>{opt.hint}</span>
-              </button>
-            )
-          })}
-        </div>
+            </button>
+          )
+        })}
+      </div>
       )}
 
       {searchQuery.trim() && filteredOptions.length === 0 && (
@@ -541,7 +771,19 @@ function VietnamNeighborhoodPicker({
           </button>
         </div>
       </div>
-    </div>
+          </div>
+      <Step4RemoveCityConfirmDialog
+        open={removeConfirm !== null}
+        onCancel={() => setRemoveConfirm(null)}
+        onConfirm={handleConfirmVietnamRemove}
+      />
+      <Step4RemoveCityConfirmDialog
+        open={removeAllOpen}
+        title="선택된 도시를 모두 삭제하시겠습니까?"
+        onCancel={() => setRemoveAllOpen(false)}
+        onConfirm={handleConfirmClearAll}
+      />
+    </>
   )
 }
 
@@ -583,6 +825,17 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
 
   const onReorderNonVnPlaces = useCallback((fromIndex, toIndex) => {
     setNonVnPlaces((prev) => arrayMove(prev, fromIndex, toIndex))
+  }, [])
+
+  const clearAllNonVnPlaces = useCallback(() => {
+    setNonVnPlaces([])
+  }, [])
+
+  const clearAllVnStops = useCallback(() => {
+    setSelectedIds([])
+    setCustomStops([])
+    setVisitStopOrder([])
+    setVisitByPresetId({})
   }, [])
 
   const arrivalKey = `${arrival?.iata ?? ''}-${arrival?.city ?? ''}-${arrival?.country ?? ''}`
@@ -785,8 +1038,7 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
 
   const step4HeaderSubtitle = (
     <>
-      메인 도시 외에 여행 중 추가로 방문할 지역이 있다면 일정 순서대로 입력해 주세요! Mate가 그에 맞는 체크리스트를
-      제안해드릴게요!
+      메인 도시 기준으로 방문할 지역을 일정 순서대로 입력해 주세요! 저희가 그에 맞는 체크리스트를 만들어드릴게요!
     </>
   )
 
@@ -836,28 +1088,27 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
           <>
             <TripFlowDesktopBar backTo="/trips/new/step3" className="mb-6" />
 
-            <StepHeader
-              currentStep={STEP4_CONFIG.currentStep}
-              totalSteps={STEP4_CONFIG.totalSteps}
-              title="추가로 방문하는 지역이 있나요?"
+          <StepHeader
+            currentStep={STEP4_CONFIG.currentStep}
+            totalSteps={STEP4_CONFIG.totalSteps}
+              title="방문하는 지역이 어디인가요?"
               subtitle={step4HeaderSubtitle}
-              className="mb-6"
+            className="mb-6"
               subtitleClassName="text-sm"
-            />
+          />
 
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-1">
-              <FlightSummaryCard
-                arrival={arrival}
-                tripWindow={tripWindow}
-                tripDatesLoading={tripDatesLoading}
-                tripDatesError={tripDatesError}
-              />
+            <FlightSummaryCard
+              arrival={arrival}
+              tripWindow={tripWindow}
+              tripDatesLoading={tripDatesLoading}
+              tripDatesError={tripDatesError}
+            />
 
               {isVn ? (
                 <Step4AdditionalCitySearchBar
                   value={additionalCitySearchQuery}
                   onChange={setAdditionalCitySearchQuery}
-                  placeholder="도시 이름을 입력하세요 (예: 사파, 호이안...)"
                 />
               ) : (
                 <>
@@ -870,19 +1121,20 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
                     items={nonVnPlaces}
                     onRemove={removeNonVnPlace}
                     onReorder={onReorderNonVnPlaces}
-                    countryLine={`${arrival?.country ?? ''} · 추가 방문`}
+                    onRemoveAll={clearAllNonVnPlaces}
                   />
                 </>
               )}
 
               {isVn && (
                 <div className="space-y-4 rounded-2xl bg-white/90 p-5 shadow-md backdrop-blur-sm">
-                  <VietnamNeighborhoodPicker
-                    selectedIds={selectedIds}
-                    onToggle={toggleId}
-                    customStops={customStops}
-                    onAddCustom={addCustomStop}
-                    onRemoveCustom={removeCustomStop}
+                <VietnamNeighborhoodPicker
+                  selectedIds={selectedIds}
+                  onToggle={toggleId}
+                  customStops={customStops}
+                  onAddCustom={addCustomStop}
+                  onRemoveCustom={removeCustomStop}
+                  onClearAll={clearAllVnStops}
                     visitStopOrder={visitStopOrder}
                     onReorderStopOrder={onReorderStopOrder}
                     searchQuery={additionalCitySearchQuery}
@@ -891,20 +1143,20 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
                 </div>
               )}
 
-              {isVn && scheduleBlock && (
+            {isVn && scheduleBlock && (
                 <div className="space-y-4 rounded-2xl bg-white/90 p-5 shadow-md backdrop-blur-sm">{scheduleBlock}</div>
-              )}
-            </div>
+            )}
+          </div>
 
             <div className="mt-6">
               <TripFlowNextStepButton variant="amber" disabled={!canProceed} onClick={handleNext} />
-            </div>
+          </div>
           </>
         }
         right={
           <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
             <AiConciergeTip description={AI_TIP.description} />
-          </div>
+        </div>
         }
       />
 
@@ -915,7 +1167,7 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
           <StepHeader
             currentStep={STEP4_CONFIG.currentStep}
             totalSteps={STEP4_CONFIG.totalSteps}
-            title={<>추가로 방문하는<br />지역이 있나요?</>}
+            title={<>방문하는 지역이<br />어디인가요?</>}
             subtitle={step4HeaderSubtitle}
             className="mb-5"
             titleClassName="text-2xl"
@@ -930,11 +1182,10 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
               tripDatesError={tripDatesError}
             />
 
-            {isVn ? (
+              {isVn ? (
               <Step4AdditionalCitySearchBar
                 value={additionalCitySearchQuery}
                 onChange={setAdditionalCitySearchQuery}
-                placeholder="도시 이름을 입력하세요 (예: 사파, 호이안...)"
               />
             ) : (
               <>
@@ -947,7 +1198,7 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
                   items={nonVnPlaces}
                   onRemove={removeNonVnPlace}
                   onReorder={onReorderNonVnPlaces}
-                  countryLine={`${arrival?.country ?? ''} · 추가 방문`}
+                  onRemoveAll={clearAllNonVnPlaces}
                 />
               </>
             )}
@@ -960,29 +1211,18 @@ function TripNewStep4PageContent({ arrival, mergedNavState }) {
                   customStops={customStops}
                   onAddCustom={addCustomStop}
                   onRemoveCustom={removeCustomStop}
+                  onClearAll={clearAllVnStops}
                   visitStopOrder={visitStopOrder}
                   onReorderStopOrder={onReorderStopOrder}
                   searchQuery={additionalCitySearchQuery}
                   onSearchQueryChange={setAdditionalCitySearchQuery}
-                />
-              </div>
-            )}
+                  />
+                </div>
+              )}
 
             {isVn && scheduleBlock && (
               <div className="space-y-4 rounded-2xl bg-white/95 p-4 shadow-md backdrop-blur-sm">{scheduleBlock}</div>
             )}
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 flex items-start gap-3 shadow-sm mb-5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 p-0.5">
-              <AiConciergeTipIcon className="h-6 w-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="mb-1.5">
-                <AiConciergeTipHeading variant="onLight" />
-              </p>
-              <p className="text-sm leading-relaxed text-gray-600">{MOBILE_TIP}</p>
-            </div>
           </div>
 
           {isVn && totalVnStops > 0 && (

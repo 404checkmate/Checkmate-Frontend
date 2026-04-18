@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
+import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import {
   LOADING_VARIANTS,
   TIPS,
@@ -134,16 +135,19 @@ function TripLoadingPage() {
             </p>
           </div>
 
-          {/* 진행률 바 */}
-          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
-            <div
-              className="h-full rounded-full transition-all duration-150"
-              style={{
-                width: `${pct}%`,
-                background: 'linear-gradient(to right, #06B6D4, #22C55E, #EAB308)',
-              }}
-            />
-          </div>
+          {/* 진행률 바 + 스텝 플로우와 동일 마스코트(채움 끝 = 현재 %) */}
+          <StepProgressBarMascot
+            percent={pct}
+            className="mb-3 w-full"
+            trackClassName="bg-gray-100"
+            fillClassName=""
+            fillStyle={{
+              background: 'linear-gradient(to right, #06B6D4, #22C55E, #EAB308)',
+            }}
+            fillTransitionClassName="transition-all duration-150 ease-linear"
+            mascotTransitionClassName="transition-[left] duration-150 ease-linear"
+            barHeightClass="h-2"
+          />
 
           {/* 레이블 + % */}
           <div className="flex items-center justify-between">
