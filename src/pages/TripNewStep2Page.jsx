@@ -1,12 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import {
-  STEP2_CONFIG,
-  STEP2_ICON_PATHS,
-  OPTION_CARDS,
-  AI_TIP,
-} from '@/mocks/tripNewStep2Data'
+import { STEP2_CONFIG, STEP2_ICON_PATHS, OPTION_CARDS } from '@/mocks/tripNewStep2Data'
 import StepHeader from '@/components/common/StepHeader'
-import AiConciergeTip from '@/components/common/AiConciergeTip'
 import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 
 /* ─────────────────────────────────────────────
@@ -16,6 +10,42 @@ function SvgIcon({ name, className = 'w-4 h-4' }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d={STEP2_ICON_PATHS[name]} />
+    </svg>
+  )
+}
+
+/**
+ * 예매 여부 선택 — ○(예/맞음) · X(아직 아님)
+ * 틸/시안 카드 배경 위에서 currentColor로 대비 유지
+ */
+function Step2ChoiceGlyph({ booked, className }) {
+  if (booked) {
+    return (
+      <svg
+        className={className}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+      >
+        <circle cx="12" cy="12" r="7.35" fill="none" stroke="currentColor" strokeWidth="2.35" />
+      </svg>
+    )
+  }
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <path
+        d="M8.5 8.5l7 7M15.5 8.5l-7 7"
+        stroke="currentColor"
+        strokeWidth="2.35"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }
@@ -78,13 +108,13 @@ function TripNewStep2Page() {
                 className="text-left rounded-3xl p-8 bg-white shadow-lg shadow-slate-900/[0.08] ring-1 ring-slate-200/90 transition-all duration-300 hover:shadow-xl hover:scale-[1.01] hover:ring-slate-300/90"
               >
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-16 shadow-sm ${
+                  className={`mb-16 flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ring-1 ${
                     card.variant === 'primary'
-                      ? 'bg-cyan-100 text-teal-700'
-                      : 'bg-teal-700 text-white'
+                      ? 'bg-cyan-100 text-teal-700 ring-teal-600/15'
+                      : 'bg-teal-700 text-white ring-teal-900/10'
                   }`}
                 >
-                  <SvgIcon name={card.icon} className="w-6 h-6" />
+                  <Step2ChoiceGlyph booked={card.variant === 'primary'} className="h-7 w-7" />
                 </div>
                 <h3 className="text-xl font-extrabold text-gray-900 mb-2">
                   {card.titleDesktop}
@@ -95,9 +125,6 @@ function TripNewStep2Page() {
               </button>
             ))}
           </div>
-
-          {/* 꿀 Tip! 카드 */}
-          <AiConciergeTip description={AI_TIP.description} className="mb-12" />
 
           {/* 푸터 */}
           <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
@@ -149,13 +176,13 @@ function TripNewStep2Page() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ${
                       card.variant === 'primary'
-                        ? 'bg-cyan-100 text-teal-700'
-                        : 'bg-teal-700 text-white'
+                        ? 'bg-cyan-100 text-teal-700 ring-teal-600/15'
+                        : 'bg-teal-700 text-white ring-teal-900/10'
                     }`}
                   >
-                    <SvgIcon name={card.icon} className="w-5 h-5" />
+                    <Step2ChoiceGlyph booked={card.variant === 'primary'} className="h-5 w-5" />
                   </div>
                   <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center">
                     <SvgIcon name="chevronRight" className="w-4 h-4 text-gray-400" />
@@ -170,28 +197,6 @@ function TripNewStep2Page() {
               </button>
             ))}
           </div>
-
-          {/* 아래 카드(아직 안 했어요) 직후 · 이 모바일 열은 md 이상에서 전체 숨김 */}
-          <aside
-            className="mt-2 overflow-hidden rounded-2xl shadow-lg ring-1 ring-slate-200/50"
-            aria-label="AI 컨시어지 안내 배너"
-          >
-            <div
-              className="relative min-h-[148px] bg-slate-800 bg-cover bg-center"
-              style={{
-                backgroundImage: `linear-gradient(105deg, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.5) 55%, rgba(15, 23, 42, 0.28) 100%), url(${AI_TIP.mobileImage})`,
-              }}
-            >
-              <div className="relative px-5 py-5">
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/95">
-                  {AI_TIP.mobileTitle}
-                </p>
-                <p className="text-sm font-medium leading-relaxed text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]">
-                  {AI_TIP.mobileDesc}
-                </p>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
     </div>

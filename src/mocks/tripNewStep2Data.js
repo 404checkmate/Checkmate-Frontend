@@ -2,7 +2,7 @@
  * TripNewStep2Page 목데이터
  *
  * 항공편 예약 여부 선택 화면에 필요한
- * 옵션 카드, AI 팁, 아이콘 SVG paths 등을 관리합니다.
+ * 옵션 카드, 아이콘 SVG paths 등을 관리합니다.
  */
 
 /* ─────────────────────────────────────────────
@@ -14,23 +14,11 @@ export const STEP2_CONFIG = {
 }
 
 /* ─────────────────────────────────────────────
-   SVG path 상수 (아이콘 7종)
+   SVG path 상수 (공통 아이콘 — 옵션 카드는 TripNewStep2Page에서 ○ / X 전용 SVG 사용)
 ───────────────────────────────────────────── */
 export const STEP2_ICON_PATHS = {
-  airplane:
-    'M2.5 19h19v2h-19v-2zm19.57-9.36c-.21-.8-1.04-1.28-1.84-1.06L14.92 10l-6.9-6.43-1.93.51 4.14 7.17-4.97 1.33-1.97-1.54-1.45.39 2.59 4.49L21 11.49c.81-.23 1.28-1.05 1.07-1.85z',
-  calendarX:
-    'M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-3.17-6.83l-1.42-1.42L12 13.17l-2.42-2.42-1.41 1.42L10.59 14.58l-2.42 2.42 1.41 1.42L12 16l2.42 2.42 1.41-1.42-2.42-2.42 2.42-2.41z',
-  sparkle:
-    'M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z',
   chevronRight:
     'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z',
-  back:
-    'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
-  close:
-    'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
-  chat:
-    'M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z',
 }
 
 /* ─────────────────────────────────────────────
@@ -39,7 +27,6 @@ export const STEP2_ICON_PATHS = {
 export const OPTION_CARDS = [
   {
     id: 'booked',
-    icon: 'airplane',
     titleDesktop: '네, 예매했어요',
     titleMobile: '네, 예매했어요',
     descDesktop:
@@ -50,7 +37,6 @@ export const OPTION_CARDS = [
   },
   {
     id: 'notBooked',
-    icon: 'calendarX',
     titleDesktop: '아직 안 했어요',
     titleMobile: '아직 안 했어요',
     descDesktop:
@@ -60,17 +46,3 @@ export const OPTION_CARDS = [
     variant: 'secondary',
   },
 ]
-
-/* ─────────────────────────────────────────────
-   AI 팁 (제목 UI: 꿀 Tip! — AiConciergeTipHeading)
-───────────────────────────────────────────── */
-export const AI_TIP = {
-  description:
-    '항공권을 아직 예매하지 않으셨다면, <strong>화요일 오후 3시</strong>에 검색해 보세요! 통계적으로 가장 저렴한 티켓을 찾을 확률이 높습니다.',
-  /** 모바일 step2 하단 배너 (체크리스트 안내 + 자연 풍경 이미지) */
-  mobileTitle: 'TRAVEL CHECKLIST',
-  mobileDesc:
-    '목적지와 일정에 맞춰 필요한 준비물을 체크리스트로 정리하고, 출발 전까지 빠짐없이 확인해 보세요.',
-  mobileImage:
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=85&auto=format&fit=crop',
-}
