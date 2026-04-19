@@ -17,7 +17,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-4"
-        style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)' }}
       >
         <p className="text-gray-700 font-medium mb-2">저장된 리스트를 찾을 수 없습니다.</p>
         <p className="text-sm text-gray-500 mb-6 text-center">목록에서 삭제되었거나 다른 기기에서만 저장된 경우일 수 있습니다.</p>
@@ -36,7 +36,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-4"
-        style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)' }}
       >
         <p className="text-gray-800 font-semibold mb-2 text-center">이 항목은 UI 예시용입니다.</p>
         <p className="text-sm text-gray-600 mb-6 text-center">상세 화면은 제공되지 않습니다.</p>
@@ -54,7 +54,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
   return (
     <div
       className="min-h-screen"
-      style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)' }}
+      style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)' }}
     >
       <TripFlowMobileBar backTo={`/trips/${tripId}/guide-archive`} />
 

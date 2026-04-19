@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { loadSavedItems, setSavedItemChecked } from '@/utils/savedTripItems'
 import { patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
+import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 import {
   loadEntryChecklistChecks,
   seedEntryChecksFromSavedIfEmpty,
@@ -81,20 +82,20 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
 
   const bottomBar = (
     <div
-      className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-4 py-3 md:bottom-0 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
+      className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 py-3 md:bottom-0 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto flex max-w-3xl gap-3">
         <button
           type="button"
           onClick={handleBack}
-          className="min-w-0 flex-1 basis-0 rounded-xl border border-white/90 bg-white px-4 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50"
+          className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white/95 px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-cyan-50/80"
         >
           뒤로가기
         </button>
         <button
           type="button"
           onClick={() => setSaveConfirmOpen(true)}
-          className="min-w-0 flex-1 basis-0 rounded-xl bg-teal-700 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-teal-800"
+          className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
         >
           저장
         </button>
@@ -115,21 +116,21 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
         className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="guide-archive-save-confirm-title" className="mb-8 text-center text-base font-bold leading-snug text-slate-900">
+        <h2 id="guide-archive-save-confirm-title" className="mb-8 text-center text-base font-bold leading-snug text-gray-900">
           저장하시겠습니까?
         </h2>
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
           <button
             type="button"
             onClick={performSave}
-            className="min-h-12 flex-1 rounded-xl bg-teal-700 py-3 text-sm font-bold text-white transition-colors hover:bg-teal-800"
+            className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md"
           >
             확인
           </button>
           <button
             type="button"
             onClick={() => setSaveConfirmOpen(false)}
-            className="min-h-12 flex-1 rounded-xl border-2 border-teal-600 bg-white py-3 text-sm font-bold text-teal-800 transition-colors hover:bg-teal-50"
+            className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50"
           >
             취소
           </button>
@@ -142,14 +143,14 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
     return (
       <>
         {saveConfirmModal}
-        <div className="mx-auto max-w-2xl px-4 pb-36 pt-10 text-center md:pb-28">
-          <p className="text-lg font-bold text-slate-900">담긴 준비물이 없습니다</p>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <div className="mx-auto max-w-2xl px-5 pb-36 pt-10 text-center md:px-4 md:pb-28">
+          <p className="text-lg font-bold text-gray-900">담긴 준비물이 없습니다</p>
+          <p className="mt-2 text-sm leading-relaxed text-gray-600">
             맞춤 여행 준비 탐색에서 필요한 항목을 저장하면 여기에서 하나씩 체크할 수 있어요.
           </p>
           <Link
             to={`/trips/${tripId}/search`}
-            className="mt-6 inline-flex rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-teal-800"
+            className="mt-6 inline-flex rounded-2xl bg-amber-400 px-6 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
           >
             준비물 검색하러 가기
           </Link>
@@ -162,56 +163,41 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
   return (
     <>
       {saveConfirmModal}
-      <div className="mx-auto max-w-3xl px-4 pb-36 pt-4 md:pb-28 md:pt-6">
+      <div className="mx-auto max-w-3xl px-5 pb-36 pt-5 md:px-4 md:pb-28 md:pt-6">
       <header className="mb-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-800/90">체크리스트 상세</p>
-        <h1 className="mt-2 text-xl font-extrabold leading-snug text-slate-900 md:text-2xl">{title}</h1>
-        <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-600">
-          <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-sky-500" aria-hidden />
+        <h1 className="text-2xl font-extrabold leading-snug tracking-tight text-gray-900 md:text-3xl">{title}</h1>
+        <p className="mt-2 flex items-center gap-2 text-base font-semibold text-gray-700 md:text-lg">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-teal-600 md:h-2.5 md:w-2.5" aria-hidden />
           {dateLine}
         </p>
-        <p className="mt-4 text-sm leading-relaxed text-slate-600">
+        <p className="mt-4 text-sm leading-relaxed text-gray-600">
           골라 저장한 체크리스트로 필수품을 빠짐없이 챙겨보세요!
         </p>
       </header>
 
-      <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-slate-100/90 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] px-4 py-3 backdrop-blur-sm md:static md:mx-0 md:rounded-2xl md:border md:border-slate-100 md:bg-white md:px-5 md:py-4 md:shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-bold text-slate-800">
-            준비 진행 <span className="tabular-nums text-teal-700">{checkedCount}</span> /{' '}
-            <span className="tabular-nums">{total}</span>
-          </p>
-          <span className="text-sm font-extrabold tabular-nums text-teal-800">{progress}%</span>
+      <div className="sticky top-0 z-20 -mx-5 mb-6 border-b border-slate-100/90 bg-white px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:rounded-xl md:border md:border-slate-100 md:bg-white md:px-5 md:py-4 md:shadow-sm">
+        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+          <span>
+            준비 진행도{' '}
+            <span className="tabular-nums text-slate-800">
+              {checkedCount} / {total}
+            </span>
+          </span>
+          <span className="tabular-nums text-slate-800">{progress}%</span>
         </div>
-        <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/90" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-teal-600 transition-all duration-300" style={{ width: `${progress}%` }} />
-        </div>
+        <GuideArchiveProgressBar value={progress} />
       </div>
-
-      {entry.weatherSummary ? (
-        <section className="mb-6 rounded-2xl border border-sky-100 bg-white/90 p-4 shadow-sm">
-          <p className="text-xs font-bold text-sky-800">날씨·환경 요약</p>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">{entry.weatherSummary}</p>
-          {(entry.temperatureRange || entry.rainChance) && (
-            <p className="mt-2 text-xs text-slate-500">
-              {entry.temperatureRange ? <>기온 {entry.temperatureRange}</> : null}
-              {entry.temperatureRange && entry.rainChance ? ' · ' : null}
-              {entry.rainChance || ''}
-            </p>
-          )}
-        </section>
-      ) : null}
 
       <div className="mb-6 flex flex-wrap gap-2">
         <Link
           to={`/trips/${tripId}/search?archiveEntry=${encodeURIComponent(entry.id)}`}
-          className="inline-flex items-center rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 transition-colors hover:bg-teal-100"
+          className="inline-flex items-center rounded-2xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
         >
           준비물 더 검색·담기
         </Link>
         <Link
           to={`/trips/${tripId}/checklist`}
-          className="inline-flex items-center rounded-xl border-2 border-fuchsia-400 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-fuchsia-500/35 ring-2 ring-white/40 transition hover:brightness-110 active:scale-[0.98]"
+          className="inline-flex items-center rounded-2xl border-2 border-fuchsia-400/90 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-fuchsia-500/40 ring-2 ring-white/50 transition hover:brightness-110 hover:shadow-xl hover:shadow-fuchsia-500/30 active:scale-[0.98]"
         >
           이전 화면 UI 보기
         </Link>
@@ -220,7 +206,7 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
       <div className="space-y-8">
         {grouped.map(([categoryLabel, list]) => (
           <section key={categoryLabel}>
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">{categoryLabel}</h2>
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">{categoryLabel}</h2>
             <ul className="space-y-2">
               {list.map((it) => {
                 const id = String(it.id)
@@ -228,27 +214,35 @@ export default function GuideArchiveChecklistView({ tripId, entry }) {
                 return (
                   <li key={id}>
                     <label
-                      className={`flex cursor-pointer gap-3 rounded-2xl border px-4 py-3.5 transition-colors ${
-                        on ? 'border-teal-200 bg-teal-50/80' : 'border-slate-100 bg-white shadow-sm hover:border-slate-200'
+                      className={`flex cursor-pointer gap-3 rounded-2xl border-2 px-4 py-3.5 transition-all duration-200 ${
+                        on
+                          ? 'border-amber-400 bg-amber-200/95 shadow-sm ring-1 ring-amber-300/70'
+                          : 'border-gray-100 bg-white/95 shadow-sm hover:bg-cyan-50/80'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={on}
                         onChange={() => handleToggle(it.id)}
-                        className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 accent-teal-600"
+                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 accent-amber-600"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className={`block text-sm font-bold ${on ? 'text-teal-950 line-through decoration-teal-700/50' : 'text-slate-900'}`}>
+                        <span
+                          className={`block text-sm font-extrabold ${on ? 'text-gray-900 line-through decoration-amber-700/45' : 'text-gray-900'}`}
+                        >
                           {it.title}
                         </span>
                         {it.description ? (
-                          <span className={`mt-1 block text-xs leading-relaxed ${on ? 'text-teal-800/80' : 'text-slate-600'}`}>
+                          <span className={`mt-1 block text-xs leading-relaxed ${on ? 'text-gray-700' : 'text-gray-600'}`}>
                             {it.description}
                           </span>
                         ) : null}
                         {it.detail ? (
-                          <span className={`mt-2 block border-l-2 border-teal-200 pl-2 text-xs leading-relaxed ${on ? 'text-teal-800/70' : 'text-slate-500'}`}>
+                          <span
+                            className={`mt-2 block border-l-2 pl-2 text-xs leading-relaxed ${
+                              on ? 'border-amber-300 text-gray-700' : 'border-cyan-200 text-gray-500'
+                            }`}
+                          >
                             {it.detail}
                           </span>
                         ) : null}

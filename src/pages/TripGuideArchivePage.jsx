@@ -8,6 +8,7 @@ import {
   toggleGuideArchiveDesignDemos,
 } from '@/mocks/guideArchiveDesignDemos'
 import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
 import { loadEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 
@@ -35,19 +36,6 @@ function getProgressStatusLabel(progress) {
   if (progress <= 0) return '미작성'
   if (progress >= 100) return '완료'
   return '작성중'
-}
-
-function ProgressBar({ value }) {
-  const done = value >= 100
-  const draft = value <= 0
-  const track = done ? 'bg-teal-900/10' : draft ? 'bg-slate-200/90' : 'bg-sky-900/10'
-  const fill = done ? 'bg-teal-700' : draft ? 'bg-slate-300' : 'bg-sky-400'
-
-  return (
-    <div className={`h-2 w-full overflow-hidden rounded-full ${track}`} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
-      <div className={`h-full rounded-full transition-all duration-300 ${fill}`} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
-    </div>
-  )
 }
 
 function CalendarIcon({ className = 'h-4 w-4' }) {
@@ -397,7 +385,7 @@ function TripGuideArchiveInner({ tripId }) {
                       <span className="tabular-nums">{progress}%</span>
                     </div>
                     <div className="mt-2">
-                      <ProgressBar value={progress} />
+                      <GuideArchiveProgressBar value={progress} />
                     </div>
                   </div>
 
@@ -419,7 +407,7 @@ function TripGuideArchiveInner({ tripId }) {
                         <span>준비 진행도</span>
                         <span className="tabular-nums text-slate-800">{progress}%</span>
                       </div>
-                      <ProgressBar value={progress} />
+                      <GuideArchiveProgressBar value={progress} />
                     </div>
 
                     {!isDemo && !deleteMode ? (
