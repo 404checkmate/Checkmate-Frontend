@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   STEP5_CONFIG,
   STEP5_ICON_PATHS,
+  STEP5_ICON_COMPOSITE,
   STEP5_PAGE_TITLE,
   STEP5_PAGE_SUBTITLE,
   COMPANIONS,
@@ -14,6 +15,17 @@ import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripF
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
+  const composite = STEP5_ICON_COMPOSITE[name]
+  if (composite) {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+        {composite.circles.map((c, i) => (
+          <circle key={i} cx={c.cx} cy={c.cy} r={c.r} />
+        ))}
+        <path d={composite.path} />
+      </svg>
+    )
+  }
   const d = STEP5_ICON_PATHS[name]
   if (!d) return null
   return (
