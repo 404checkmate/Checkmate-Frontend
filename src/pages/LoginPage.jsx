@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import loginSideMascotUrl from '@/assets/login-side-mascot.png'
+import loginBrandMascotUrl from '@/assets/login-brand-mascot.png'
+import BrandLogo from '@/components/common/BrandLogo'
 
 /**
  * UI 보관용 플래그 — 이메일 로그인·비밀번호 찾기·회원가입 링크를 다시 켤 때 true로 변경.
@@ -26,8 +27,8 @@ function isEmailShape(value) {
 }
 
 /**
- * LoginPage — 웹은 좌측 브랜드 패널 + 우측 폼 카드, 모바일은 단일 컬럼.
- * 인증 연동 전: 폼 제출 시 홈으로 이동(플레이스홀더).
+ * LoginPage — 중앙 정렬 단일 컬럼(브랜딩 → 카피 → SNS), 체크메이트 톤 배경.
+ * 인증 연동 전: 이메일 폼 제출 시 홈으로 이동(플레이스홀더).
  */
 function LoginPage() {
   const navigate = useNavigate()
@@ -97,84 +98,53 @@ function LoginPage() {
   }
 
   return (
-    <div
-      className="flex min-h-0 w-full flex-1 flex-col items-center justify-center"
-      style={{
-        background: 'linear-gradient(180deg, #f0fdfa 0%, #f8fafc 45%, #ecfeff 100%)',
-      }}
-    >
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center px-4 py-6 md:px-6 md:py-8">
+    <div className="relative flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden">
+      {/* 체크메이트 톤: 시안·틸 그라데이션 + 상단/모서리 소프트 글로우 */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 120% 85% at 50% -15%, rgba(34, 211, 238, 0.22), transparent 52%),
+            radial-gradient(ellipse 70% 50% at 100% 85%, rgba(45, 212, 191, 0.14), transparent 55%),
+            radial-gradient(ellipse 60% 45% at 0% 60%, rgba(6, 182, 212, 0.1), transparent 50%),
+            linear-gradient(180deg, #f0fdfa 0%, #f8fafc 46%, #ecfeff 100%)
+          `,
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center justify-center px-4 py-10 md:px-8 md:py-12">
         <form
           onSubmit={SHOW_EMAIL_LOGIN ? handleLogin : (e) => e.preventDefault()}
-          className="mx-auto w-full max-w-5xl shrink-0 overflow-hidden rounded-2xl border border-cyan-100/80 bg-white shadow-lg shadow-cyan-900/5 md:flex md:flex-row md:rounded-3xl md:shadow-xl"
+          className="w-full max-w-[min(100%,460px)] shrink-0"
         >
-          {/* 데스크톱: 좌측 정보 패널 */}
-          <aside className="relative hidden w-full shrink-0 flex-col bg-gradient-to-br from-cyan-500 via-teal-500 to-teal-600 p-6 text-white md:flex md:w-[42%] md:p-8">
-            <div>
-              <div className="mb-4 flex items-center gap-2 text-white/95">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 3v3M12 18v3M3 12h3M18 12h3" strokeLinecap="round" />
-                    <path d="m16 8-4 4-2-2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              </div>
-              <h1 className="text-xl font-extrabold leading-snug tracking-tight lg:text-2xl">
-                더 체계적인 여행 준비의 시작
-              </h1>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-teal-50/95">
-                일정·체크리스트·가이드를 한곳에서 정리하고, 출발 전 놓치는 준비를 줄여 보세요.
-              </p>
-              <div className="mt-6 flex w-full justify-center lg:mt-8">
-                <img
-                  src={loginSideMascotUrl}
-                  alt=""
-                  role="presentation"
-                  decoding="async"
-                  className="max-h-[min(112px,18vh)] w-auto max-w-[min(100%,160px)] object-contain drop-shadow-md"
-                />
-              </div>
+          {/* 브랜딩: 마스코트 + 워드마크 + 한 줄 태그 — 배경 위에 직접 배치 (카드 박스 없음) */}
+          <div className="flex flex-col items-center text-center">
+            <img
+              src={loginBrandMascotUrl}
+              alt=""
+              role="presentation"
+              decoding="async"
+              className="h-[5rem] w-auto max-w-[min(100%,220px)] object-contain drop-shadow-md md:h-[5.75rem]"
+            />
+            <div className="mt-7 flex w-full justify-center md:mt-8">
+              <BrandLogo className="h-11 w-auto md:h-12 lg:h-[3.25rem]" alt="CHECKMATE" />
             </div>
-          </aside>
+            <p className="mt-3 text-sm font-semibold tracking-tight text-cyan-800 md:text-base">
+              골라 담고 · 체크하고 · 떠나자!
+            </p>
+          </div>
 
-          {/* 폼 영역: 모바일 전체 / 데스크톱 우측 */}
-          <div className="flex flex-col px-5 py-5 md:w-[58%] md:px-8 md:py-6 lg:px-10">
-            {/* 모바일 타이틀 블록 — 텍스트 왼쪽, 마스코트 오른쪽 위 */}
-            <div className="mb-4 flex items-start justify-between gap-2 md:hidden">
-              <div className="min-w-0 flex-1 pr-0 pt-0.5">
-                <h1 className="text-xl font-extrabold tracking-tight text-gray-900">
-                  반가워요!
-                </h1>
-                <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                  완벽한 여행 준비의 시작,
-                  <br />
-                  체크메이트와 함께하세요.
-                </p>
-              </div>
-              <img
-                src={loginSideMascotUrl}
-                alt=""
-                role="presentation"
-                decoding="async"
-                className="h-[72px] w-auto shrink-0 -translate-x-5 -translate-y-1 object-contain sm:h-20 sm:-translate-x-6"
-              />
-            </div>
-
-            {/* 데스크톱 타이틀 */}
-            <div className="mb-4 hidden md:block">
-              <h1 className="text-xl font-extrabold tracking-tight text-gray-900 lg:text-2xl">
-                반가워요!
-              </h1>
-              <p className="mt-2 text-sm text-gray-600 lg:text-base">
-                {SHOW_EMAIL_LOGIN
-                  ? '계정에 로그인하여 여행 계획을 관리하세요.'
-                  : 'SNS 계정으로 로그인하여 여행 계획을 관리하세요.'}
-              </p>
-            </div>
+          <div className="mt-10 text-center md:mt-12">
+            <p className="text-lg font-semibold leading-snug text-gray-900 md:text-xl lg:text-2xl">
+              복잡한 준비는 줄이고, 설렘은 올리고
+              <br />
+              나만의 여행 체크리스트
+            </p>
+          </div>
 
             {SHOW_EMAIL_LOGIN ? (
-            <div className="flex flex-1 flex-col gap-5">
+            <div className="mt-10 flex flex-col gap-5 md:mt-12">
               <div>
                 <label htmlFor="login-email" className="mb-1.5 block text-xs font-semibold text-gray-600 md:text-sm">
                   이메일 주소
@@ -277,64 +247,65 @@ function LoginPage() {
             ) : null}
 
             {SHOW_EMAIL_LOGIN ? (
-            <div className="relative my-8">
+            <div className="relative my-10">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-cyan-900/10" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">간편 로그인</span>
+                <span className="bg-[#f0fdfa] px-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  간편 로그인
+                </span>
               </div>
             </div>
-            ) : (
-              <p className="mb-2 mt-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-400 md:mb-3 md:mt-0 md:text-left">
-                SNS 로그인
-              </p>
-            )}
+            ) : null}
 
-            <div className="flex flex-col gap-3">
+            <div className="mt-10 flex flex-col gap-3 md:mt-12">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 shadow-sm transition hover:border-gray-300"
+                className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-200/90 bg-white py-4 text-base font-bold text-gray-900 shadow-sm transition hover:border-gray-300 hover:bg-white"
                 onClick={() => {
                   // TODO: Google OAuth
                 }}
               >
-                <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                구글 로그인
+                Google로 시작하기
               </button>
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03C75A] py-3 text-sm font-bold text-white shadow-sm transition hover:brightness-95"
-                onClick={() => {
-                  // TODO: Naver OAuth
-                }}
-              >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-white text-sm font-black text-[#03C75A]" aria-hidden="true">
-                  N
-                </span>
-                네이버 로그인
-              </button>
-              <button
-                type="button"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-3 text-sm font-bold text-[#191919] shadow-sm transition hover:brightness-95"
+                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500] py-4 text-base font-bold text-[#191919] shadow-sm transition hover:brightness-95"
                 onClick={() => {
                   // TODO: Kakao OAuth
                 }}
               >
-                <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <svg className="h-6 w-6 shrink-0 text-[#191919]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 3c5.523 0 10 3.582 10 8s-4.477 8-10 8c-.555 0-1.1-.036-1.633-.105L5.5 21.5l.825-3.96C3.93 16.32 2 13.86 2 11c0-4.418 4.477-8 10-8z" />
                 </svg>
-                카카오 로그인
+                Kakao로 시작하기
+              </button>
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#03C75A] py-4 text-base font-bold text-white shadow-sm transition hover:brightness-95"
+                onClick={() => {
+                  // TODO: Naver OAuth
+                }}
+              >
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white text-base font-black text-[#03C75A]"
+                  aria-hidden="true"
+                >
+                  N
+                </span>
+                Naver로 시작하기
               </button>
             </div>
 
             {SHOW_SIGNUP_LINK ? (
-            <p className="mt-8 text-center text-sm text-gray-600">
+            <p className="mt-10 text-center text-base text-gray-600">
               <span className="md:hidden">처음이신가요? </span>
               <span className="hidden md:inline">아직 계정이 없으신가요? </span>
               <Link to="/signup" className="font-bold text-cyan-600 hover:text-cyan-700 hover:underline">
@@ -342,7 +313,6 @@ function LoginPage() {
               </Link>
             </p>
             ) : null}
-          </div>
         </form>
 
         {SHOW_FORGOT_PASSWORD_MODAL && forgotOpen ? (
