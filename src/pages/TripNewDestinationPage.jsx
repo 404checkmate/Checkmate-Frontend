@@ -420,7 +420,7 @@ export default function TripNewDestinationPage() {
   return (
     <div className="min-h-screen" style={TRIP_FLOW_PAGE_BG_STYLE}>
       <TripStepDesktopSplit
-        fullBleed={<FullBleedMintImageHero src={HERO_IMAGE} alt="비행기 창문" />}
+        fullBleed={<FullBleedMintImageHero src={HERO_IMAGE} alt="여행 목적지 풍경" />}
         left={
           <>
             <TripFlowDesktopBar backTo="/trips/new/step2" className="mb-4" />

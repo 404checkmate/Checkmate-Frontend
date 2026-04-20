@@ -2,12 +2,14 @@
  * TripNewDestinationPage — 방문 국가·날짜 설정 (예매 전 플로우)
  */
 
+import tripNewDestinationHero from '../assets/trip-new-destination-hero.png'
+
 export const STEP_DESTINATION_CONFIG = {
   totalSteps: 5,
   currentStep: 2,
 }
 
-export const HERO_IMAGE = '/airplane-sky.png'
+export const HERO_IMAGE = tripNewDestinationHero
 
 export const PREVIEW_IMAGE =
   'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=600&auto=format&fit=crop'
