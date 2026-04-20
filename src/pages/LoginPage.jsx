@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import loginBrandMascotUrl from '@/assets/login-brand-mascot.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
+import { startGoogleLogin, startKakaoLogin, startNaverLogin } from '@/api/auth'
+import { isSupabaseConfigured } from '@/lib/supabase'
 
 /**
  * UI 보관용 플래그 — 이메일 로그인·비밀번호 찾기·회원가입 링크를 다시 켤 때 true로 변경.
@@ -39,9 +41,50 @@ function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotPhase, setForgotPhase] = useState('form')
   const [forgotError, setForgotError] = useState('')
+  const [socialError, setSocialError] = useState('')
+  const [socialPending, setSocialPending] = useState('')
   const forgotEmailInputRef = useRef(null)
   const forgotTitleId = useId()
   const forgotDescId = useId()
+
+  /**
+   * 소셜 로그인 핸들러 — Supabase env 가 있으면 실제 OAuth, 없으면 기존 mock 경로로 폴백.
+   * (env 없이 UI 작업 중인 팀원이 막히지 않도록 폴백 유지)
+   */
+  const handleSocialLogin = useCallback(
+    async (provider) => {
+      if (socialPending) return
+      setSocialError('')
+
+      // Naver 는 env 없이도 백엔드 중개 경로로 이동 가능 (백엔드에서 자체 실패 페이지 처리).
+      if (provider === 'naver') {
+        setSocialPending(provider)
+        try {
+          startNaverLogin()
+        } catch (err) {
+          setSocialError(err?.message || '네이버 로그인을 시작하지 못했습니다.')
+          setSocialPending('')
+        }
+        return
+      }
+
+      // Google/Kakao: Supabase 필요. 미설정이면 기존 플레이스홀더 동작(이동)으로 폴백.
+      if (!isSupabaseConfigured()) {
+        navigate(resolvePostSocialLoginPath(provider))
+        return
+      }
+
+      setSocialPending(provider)
+      try {
+        if (provider === 'google') await startGoogleLogin()
+        else if (provider === 'kakao') await startKakaoLogin()
+      } catch (err) {
+        setSocialError(err?.message || '로그인을 시작하지 못했습니다.')
+        setSocialPending('')
+      }
+    },
+    [navigate, socialPending],
+  )
 
   const closeForgotModal = useCallback(() => {
     setForgotOpen(false)
@@ -263,11 +306,9 @@ function LoginPage() {
             <div className="mt-10 flex flex-col gap-3 md:mt-12">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-200/90 bg-white py-4 text-base font-bold text-gray-900 shadow-sm transition hover:border-gray-300 hover:bg-white"
-                onClick={() => {
-                  // TODO: Google OAuth 콜백 성공 후에도 동일 분기(신규만 /onboarding)를 서버 플래그로 처리
-                  navigate(resolvePostSocialLoginPath('google'))
-                }}
+                disabled={Boolean(socialPending)}
+                className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-200/90 bg-white py-4 text-base font-bold text-gray-900 shadow-sm transition hover:border-gray-300 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => handleSocialLogin('google')}
               >
                 <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -279,11 +320,9 @@ function LoginPage() {
               </button>
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500] py-4 text-base font-bold text-[#191919] shadow-sm transition hover:brightness-95"
-                onClick={() => {
-                  // TODO: Kakao OAuth 콜백 성공 후 동일 분기
-                  navigate(resolvePostSocialLoginPath('kakao'))
-                }}
+                disabled={Boolean(socialPending)}
+                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500] py-4 text-base font-bold text-[#191919] shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => handleSocialLogin('kakao')}
               >
                 <svg className="h-6 w-6 shrink-0 text-[#191919]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 3c5.523 0 10 3.582 10 8s-4.477 8-10 8c-.555 0-1.1-.036-1.633-.105L5.5 21.5l.825-3.96C3.93 16.32 2 13.86 2 11c0-4.418 4.477-8 10-8z" />
@@ -292,11 +331,9 @@ function LoginPage() {
               </button>
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#03C75A] py-4 text-base font-bold text-white shadow-sm transition hover:brightness-95"
-                onClick={() => {
-                  // TODO: Naver OAuth 콜백 성공 후 동일 분기
-                  navigate(resolvePostSocialLoginPath('naver'))
-                }}
+                disabled={Boolean(socialPending)}
+                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#03C75A] py-4 text-base font-bold text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => handleSocialLogin('naver')}
               >
                 <span
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white text-base font-black text-[#03C75A]"
@@ -307,6 +344,12 @@ function LoginPage() {
                 Naver로 시작하기
               </button>
             </div>
+
+            {socialError ? (
+              <p role="alert" className="mt-4 text-center text-xs font-medium text-red-600">
+                {socialError}
+              </p>
+            ) : null}
 
             {SHOW_SIGNUP_LINK ? (
             <p className="mt-10 text-center text-base text-gray-600">
