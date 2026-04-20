@@ -3,6 +3,7 @@ import { useRoutes, Navigate } from 'react-router-dom'
 import RootLayout from '@/layouts/RootLayout'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
+import AuthConsentPage from '@/pages/AuthConsentPage'
 import OnboardingProfilePage from '@/pages/OnboardingProfilePage'
 /* 회원가입 UI 보관: 복구 시 아래 라우트를 SignupPage로 되돌리고 import 활성화 */
 // import SignupPage from '@/pages/SignupPage'
@@ -26,7 +27,8 @@ import ErrorPage from '@/pages/ErrorPage'
  * 페이지 구조:
  *   /                       홈 / 랜딩
  *   /login                  로그인 (회원가입은 현재 /login 으로 통합)
- *   /onboarding             소셜 로그인 직후 프로필(성함·닉네임·성별·생년월일·국적)
+ *   /auth/consent           소셜 로그인 직후 약관·개인정보 동의 → /onboarding
+ *   /onboarding             동의 완료 후 프로필·여권 정보. 분기: src/utils/onboardingGate.js
  *   /trips/new              → /trips/new/step2 리다이렉트 (TripNewPage 제거)
  *   /trips/new/step2~       새 여행 플로우 (/destination = 예매 전 도시·날짜)
  *   /trips/:id/search       준비 항목 탐색         (Store Loop - DRD-1)
@@ -51,6 +53,7 @@ const AppRoutes = () => {
       children: [
         { path: '/',                    element: <HomePage /> },
         { path: '/login',               element: <LoginPage /> },
+        { path: '/auth/consent',        element: <AuthConsentPage /> },
         { path: '/onboarding',          element: <OnboardingProfilePage /> },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <MyPage /> },

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import loginBrandMascotUrl from '@/assets/login-brand-mascot.png'
 import BrandLogo from '@/components/common/BrandLogo'
+import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
 
 /**
  * UI 보관용 플래그 — 이메일 로그인·비밀번호 찾기·회원가입 링크를 다시 켤 때 true로 변경.
@@ -264,7 +265,8 @@ function LoginPage() {
                 type="button"
                 className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-200/90 bg-white py-4 text-base font-bold text-gray-900 shadow-sm transition hover:border-gray-300 hover:bg-white"
                 onClick={() => {
-                  // TODO: Google OAuth
+                  // TODO: Google OAuth 콜백 성공 후에도 동일 분기(신규만 /onboarding)를 서버 플래그로 처리
+                  navigate(resolvePostSocialLoginPath('google'))
                 }}
               >
                 <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
@@ -279,7 +281,8 @@ function LoginPage() {
                 type="button"
                 className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500] py-4 text-base font-bold text-[#191919] shadow-sm transition hover:brightness-95"
                 onClick={() => {
-                  // TODO: Kakao OAuth
+                  // TODO: Kakao OAuth 콜백 성공 후 동일 분기
+                  navigate(resolvePostSocialLoginPath('kakao'))
                 }}
               >
                 <svg className="h-6 w-6 shrink-0 text-[#191919]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -291,7 +294,8 @@ function LoginPage() {
                 type="button"
                 className="flex w-full items-center justify-center gap-3 rounded-full bg-[#03C75A] py-4 text-base font-bold text-white shadow-sm transition hover:brightness-95"
                 onClick={() => {
-                  // TODO: Naver OAuth
+                  // TODO: Naver OAuth 콜백 성공 후 동일 분기
+                  navigate(resolvePostSocialLoginPath('naver'))
                 }}
               >
                 <span

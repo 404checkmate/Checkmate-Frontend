@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { IMAGES } from '@/images/constants'
 import { FEATURE_CARDS, FOOTER_SECTIONS, FOOTER_BOTTOM_LINKS } from '@/mocks/homeData'
 import BrandLogo from '@/components/common/BrandLogo'
-import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { AUTH_CONSENT_PATH, AUTH_CONSENT_PREVIEW_PARAM } from '@/utils/onboardingGate'
 
 const SLIDE_INTERVAL = 5000
 const HERO_SLIDES = IMAGES.home.heroSlides
@@ -55,8 +55,6 @@ function HomePage() {
 
   return (
     <div className="bg-white">
-      <TripFlowMobileBar showBack={false} />
-
       {/* 히어로 — 웹과 동일 카피·구조, 모바일은 세로 스택 */}
       <section
         className="relative overflow-hidden pb-10 md:min-h-[520px] md:pb-0"
@@ -119,7 +117,7 @@ function HomePage() {
               <br />
               저장부터 체크까지 한 번에 체크리스트로 여행 준비를 완성하세요.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => navigate('/trips/new/step2')}
@@ -127,6 +125,13 @@ function HomePage() {
                 style={{ background: 'linear-gradient(135deg, #06B6D4, #8B5CF6)' }}
               >
                 시작하기
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(`${AUTH_CONSENT_PATH}?${AUTH_CONSENT_PREVIEW_PARAM}=1`)}
+                className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm transition-colors hover:bg-amber-100"
+              >
+                약관 동의 페이지 (작업 중)
               </button>
             </div>
           </div>

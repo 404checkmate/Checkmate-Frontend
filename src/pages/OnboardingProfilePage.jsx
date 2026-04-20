@@ -6,6 +6,12 @@ import onboardingFinishMascotUrl from '@/assets/onboarding-finish-mascot.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import OnboardingBirthCalendar from '@/components/onboarding/OnboardingBirthCalendar'
 import OnboardingCustomSelect from '@/components/onboarding/OnboardingCustomSelect'
+import {
+  AUTH_CONSENT_PATH,
+  getActiveOnboardingSubject,
+  getOnboardingEntryRedirect,
+  markOnboardingComplete,
+} from '@/utils/onboardingGate'
 
 /** 국적 / 여권 발급국 공통 목록 (ISO 코드) */
 const COUNTRY_OPTIONS = [
@@ -244,6 +250,8 @@ export default function OnboardingProfilePage() {
       passportIssueDate,
     }
     void passportPayload
+    const sub = getActiveOnboardingSubject()
+    if (sub) markOnboardingComplete(sub)
     setFinishModalOpen(false)
     navigate('/', { replace: true })
   }, [
@@ -265,6 +273,22 @@ export default function OnboardingProfilePage() {
   const handleFormSubmit = (e) => {
     e.preventDefault()
   }
+
+  /** 소셜 로그인 직후 세션이 없거나 이미 온보딩을 마친 계정이면 분기 */
+  useEffect(() => {
+    const redirect = getOnboardingEntryRedirect()
+    if (redirect === 'login') {
+      navigate('/login', { replace: true })
+      return
+    }
+    if (redirect === 'home') {
+      navigate('/', { replace: true })
+      return
+    }
+    if (redirect === 'consent') {
+      navigate(AUTH_CONSENT_PATH, { replace: true })
+    }
+  }, [navigate])
 
   useEffect(() => {
     if (!finishModalOpen) return
