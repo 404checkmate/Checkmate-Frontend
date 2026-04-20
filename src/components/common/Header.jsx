@@ -65,7 +65,8 @@ function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white pt-[env(safe-area-inset-top,0px)]">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
+      {/* max-w-7xl + 가로 패딩: 홈 피처 2단 섹션 바깥 여백과 동일(md/lg) */}
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:gap-4 md:pl-9 md:pr-4 lg:pl-12 lg:pr-6">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <Link
             to="/"
@@ -110,7 +111,16 @@ function Header() {
             </Link>
           </div>
 
-          {/* 데스크톱(md+): 로그인 시 — 프로필 아이콘 → 가장 오른쪽 로그아웃(모바일과 동일 확인 모달) */}
+          {/* 데스크톱(md+): 로그인 시 — 로그아웃 → 맨 오른쪽 프로필(동일 확인 모달) */}
+          <button
+            type="button"
+            onClick={openLogoutConfirm}
+            className={`hidden shrink-0 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 ${
+              isWebLoggedIn ? 'md:inline-flex' : 'md:hidden'
+            }`}
+          >
+            로그아웃
+          </button>
           <button
             type="button"
             onClick={() => navigate('/mypage')}
@@ -122,15 +132,6 @@ function Header() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
             </svg>
-          </button>
-          <button
-            type="button"
-            onClick={openLogoutConfirm}
-            className={`hidden shrink-0 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 ${
-              isWebLoggedIn ? 'md:inline-flex' : 'md:hidden'
-            }`}
-          >
-            로그아웃
           </button>
 
           {/* 모바일: 햄버거 → 프로필 / 로그아웃(확인 모달) */}

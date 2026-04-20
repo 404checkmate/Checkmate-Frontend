@@ -178,7 +178,203 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 가치 제안 — 웹·모바일 동일 */}
+      {/* 공감 + 쓰는 법 — 심플 2단 */}
+      <section className="border-t border-gray-100 bg-white" aria-label="CHECKMATE 한눈에 보기">
+        <div className="mx-auto max-w-7xl px-3 pb-10 pt-16 md:pl-9 md:pr-4 md:pb-14 md:pt-24 lg:pl-12 lg:pr-6">
+          <div className="relative">
+            {/* 두 칸 콘텐츠 사이 정중앙 세로선 (그리드 열 경계가 아닌 컨테이너 50%) */}
+            <div
+              className="pointer-events-none absolute inset-y-0 left-1/2 z-0 hidden w-px -translate-x-1/2 bg-gray-100 md:block"
+              aria-hidden
+            />
+            <div className="relative z-10 grid grid-cols-1 gap-12 md:grid-cols-2 md:items-start md:gap-0">
+            {FEATURE_CARDS.map((card, index) => {
+              const isHighlight = card.variant === 'highlight'
+              const kicker = card.kicker ?? (isHighlight ? '어떻게 이용하지?' : '공감')
+              /** 두 섹션 같은 높이에서 시작 (수평 맞춤) */
+              const columnClass = 'md:justify-self-start md:max-w-[min(100%,36rem)]'
+              const stepBadgeClass = isHighlight
+                ? 'rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-800 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)] ring-amber-200/70'
+                : 'rounded-lg bg-gradient-to-br from-teal-50 to-cyan-50/60 text-teal-800 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] ring-teal-200/70'
+              const progressBorderClass = isHighlight ? 'border-amber-100' : 'border-teal-100'
+              const progressValueClass = isHighlight ? 'text-amber-500' : 'text-teal-600'
+              const showStepNumbers = card.showStepNumbers !== false
+              const StepListTag = showStepNumbers ? 'ol' : 'ul'
+
+              return (
+                <div
+                  key={card.id}
+                  className={`md:px-5 ${index === 0 ? 'md:pr-7' : 'md:pl-20'} lg:px-6 ${index === 0 ? 'lg:pr-8' : 'lg:pl-24'} ${index > 0 ? 'border-t border-gray-100 pt-12 md:border-t-0 md:pt-0' : ''} ${columnClass}`}
+                >
+                  <div className="mb-4 flex min-h-[2.75rem] items-center gap-3">
+                    <span
+                      className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+                        isHighlight ? 'bg-amber-100' : 'bg-teal-50'
+                      }`}
+                      aria-hidden
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-5 w-5 ${isHighlight ? 'text-amber-700' : 'text-teal-600'}`}
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d={card.desktopIcon.path} />
+                      </svg>
+                    </span>
+                    <span
+                      className={`text-lg font-extrabold leading-tight md:text-xl ${
+                        isHighlight ? 'text-amber-700' : 'text-teal-600'
+                      }`}
+                    >
+                      {kicker}
+                    </span>
+                  </div>
+
+                  <h3 className="whitespace-pre-line text-xl font-extrabold leading-snug text-gray-900 md:text-2xl">
+                    {card.title}
+                  </h3>
+
+                  {card.description && (
+                    <p className="mt-3 max-w-lg text-sm leading-relaxed text-gray-600">{card.description}</p>
+                  )}
+
+                  {!isHighlight && card.tags?.length > 0 && (
+                    <p className="mt-5 text-xs font-medium tracking-wide text-gray-400">
+                      {card.tags.join('  ·  ')}
+                    </p>
+                  )}
+
+                  {card.steps?.length > 0 && (
+                    <StepListTag
+                      className="mt-6 max-w-lg list-none space-y-4 overflow-visible md:space-y-5"
+                      aria-label={isHighlight ? '이용 순서' : '왜 쓰면 좋은지'}
+                    >
+                      {card.steps.map((line, i) => (
+                        <li
+                          key={line}
+                          className={showStepNumbers ? 'flex items-start gap-3.5 md:gap-4' : 'overflow-visible'}
+                        >
+                          {showStepNumbers ? (
+                            <>
+                              <span
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center text-sm font-black tabular-nums ring-1 md:h-[2.625rem] md:w-[2.625rem] md:text-[0.9375rem] ${stepBadgeClass}`}
+                                aria-hidden
+                              >
+                                {i + 1}
+                              </span>
+                              <p className="min-w-0 flex-1 pt-0.5 text-sm font-bold leading-snug tracking-tight text-gray-900 md:pt-0.5 md:text-[0.9375rem] md:leading-relaxed">
+                                {line}
+                              </p>
+                            </>
+                          ) : (
+                            <div
+                              className={`relative max-w-lg ${i === 1 ? 'ml-auto mr-0.5' : 'ml-0.5'}`}
+                            >
+                              {/*
+                                말풍선: i=1 만 오른쪽 꼬리·오른쪽 정렬(공감 털어놓기) — 앰버·로즈 톤으로 1·3번 틸과 구분.
+                              */}
+                              <div
+                                className={`relative overflow-visible rounded-2xl border px-4 py-3.5 ${
+                                  i === 1
+                                    ? 'border-amber-200/85 bg-gradient-to-bl from-amber-50/98 via-orange-50/75 to-rose-50/45 shadow-[0_4px_24px_-8px_rgba(217,119,6,0.18),0_2px_10px_-4px_rgba(244,114,182,0.14)]'
+                                    : 'border-teal-200/80 bg-gradient-to-br from-emerald-50/95 via-teal-50/70 to-cyan-50/55 shadow-[0_4px_24px_-8px_rgba(13,148,136,0.2),0_2px_8px_-4px_rgba(6,182,212,0.16)]'
+                                }`}
+                              >
+                                <span
+                                  aria-hidden
+                                  className={`pointer-events-none absolute top-1/2 z-0 block h-3 w-3 -translate-y-1/2 rotate-45 rounded-[2px] ${
+                                    i === 1
+                                      ? 'right-0 translate-x-1/2 border-t border-r border-amber-200/85 bg-amber-50/98'
+                                      : 'left-0 -translate-x-1/2 border-b border-l border-teal-200/80 bg-emerald-50/95'
+                                  }`}
+                                />
+                                <p className="relative z-10 m-0 whitespace-pre-line text-sm font-bold leading-relaxed tracking-tight text-gray-900 md:text-[0.9375rem]">
+                                  {line}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </StepListTag>
+                  )}
+
+                  {card.progress && (
+                    <div
+                      className={`mt-6 flex flex-wrap items-baseline gap-2 border-t pt-5 ${progressBorderClass}`}
+                    >
+                      <span
+                        className={`text-3xl font-black tabular-nums md:text-4xl ${progressValueClass}`}
+                      >
+                        {card.progress.value}
+                      </span>
+                      <span className="text-sm font-bold text-gray-800">{card.progress.label}</span>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 나의 체크리스트 유도 — 브랜드 톤(민트·스카이, 히어로와 맞춤) */}
+      <section
+        className="relative overflow-hidden py-12 md:py-16"
+        style={{
+          background:
+            'linear-gradient(180deg, #ECFDF5 0%, #E0F2FE 42%, rgba(236, 253, 245, 0.35) 72%, #ffffff 100%)',
+        }}
+      >
+        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-5 md:px-6 lg:flex-row lg:items-center lg:gap-16">
+          <div className="min-w-0 flex-1">
+            <p className="mb-3 text-xs font-semibold tracking-widest text-teal-600/90">나의 체크리스트</p>
+            <h2 className="mb-4 text-2xl font-extrabold leading-snug text-gray-900 md:text-[26px]">
+              챙길 것은 한곳에 모으고
+              <br />
+              출발 전까지 체크로 마무리하세요
+            </h2>
+            <p className="mb-6 max-w-md text-sm leading-relaxed text-gray-600">
+              여행 준비는 생각날 때마다 조금씩 늘어나기 마련이에요. 목적지와 일정에 맞춰 필요한 항목을 골라{' '}
+              <strong className="font-semibold text-gray-800">나의 체크리스트</strong>로 모아 두면, 잊기 쉬운 준비물도 한눈에
+              정리됩니다. 저장해 둔 가이드는 보관함에서 다시 열고, 떠나기 직전까지 체크하며 가볍게 마음을 비워 보세요.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/trips/1/guide-archive')}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-teal-700"
+            >
+              나의 체크리스트로
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex flex-shrink-0 justify-center gap-4 sm:gap-5 lg:justify-end">
+            <div className="h-52 w-36 overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5 sm:h-56 sm:w-44">
+              <img
+                src={IMAGES.home.editorial1}
+                alt="여행 준비 항목을 체크리스트로 정리하는 모습"
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="mt-6 h-52 w-36 overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5 sm:mt-10 sm:h-56 sm:w-44">
+              <img
+                src={IMAGES.home.editorial2}
+                alt="여행 전 체크리스트로 준비를 확인하는 모습"
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 가치 제안 — 나의 체크리스트 섹션 하단, 배경 순백 */}
       <section className="bg-white py-12 md:py-16">
         <div className="mx-auto max-w-6xl px-5 text-center md:px-6">
           <h2 className="mb-3 text-2xl font-extrabold text-gray-900 md:mb-4 md:text-3xl">
@@ -190,120 +386,6 @@ function HomePage() {
             항공·일정을 바탕으로 필요한 준비물과 방문 동선을 정리하고, 출발 전까지 체크리스트로 확인할 수 있도록 돕습니다. 흩어진
             메모와 검색에 그치지 않고, 저장부터 확인까지 이어지는 준비 흐름을 제공합니다.
           </p>
-        </div>
-      </section>
-
-      {/* 피처 카드 — 웹과 동일 카피·태그, 아이콘은 데스크톱 스타일로 통일 */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-6xl px-5 pb-10 md:px-6 md:py-12 md:pb-12">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-            {FEATURE_CARDS.map((card) => {
-              const isHighlight = card.variant === 'highlight'
-
-              return (
-                <div
-                  key={card.id}
-                  className={`relative overflow-hidden rounded-2xl p-6 shadow-sm ${
-                    isHighlight ? 'bg-amber-400' : 'border border-gray-100 bg-white'
-                  }`}
-                >
-                  <div className="mb-4">
-                    <span
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${card.desktopIcon.bg}`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`h-4 w-4 ${card.desktopIcon.color}`}
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d={card.desktopIcon.path} />
-                      </svg>
-                    </span>
-                  </div>
-
-                  <h3 className={`mb-2 text-base font-bold ${isHighlight ? 'text-amber-900' : 'text-gray-900'}`}>
-                    {card.title}
-                  </h3>
-
-                  <p className={`mb-4 text-sm leading-relaxed ${isHighlight ? 'text-amber-800 md:mb-6' : 'text-gray-500 md:mb-4'}`}>
-                    {card.description}
-                  </p>
-
-                  {card.tags && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {card.tags.map((tag) => (
-                        <span key={tag} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {card.progress && (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-extrabold text-amber-900">{card.progress.value}</span>
-                      <span className="text-sm font-medium text-amber-800">{card.progress.label}</span>
-                    </div>
-                  )}
-
-                  {isHighlight && (
-                    <>
-                      <div className="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-amber-300/40" />
-                      <div className="absolute -right-2 -top-8 h-20 w-20 rounded-full bg-amber-300/30" />
-                    </>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 여행 준비 흐름 — 웹·모바일 동일, 모바일은 세로 스택 */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-16">
-        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-5 md:px-6 lg:flex-row lg:items-center lg:gap-16">
-          <div className="min-w-0 flex-1">
-            <p className="mb-3 text-xs font-semibold tracking-widest text-teal-600/90">여행 준비 흐름</p>
-            <h2 className="mb-4 text-2xl font-extrabold leading-snug text-gray-900 md:text-[26px]">
-              항공·일정을 넣으면
-              <br />
-              준비물과 동선이 정리됩니다
-            </h2>
-            <p className="mb-6 max-w-md text-sm leading-relaxed text-gray-600">
-              목적지와 여행 기간에 맞춰 필요한 준비 항목을 골라 담고, 동네·일정별로 나눠 볼 수 있습니다. 저장해 둔 가이드는
-              보관함에서 다시 열고, 출발 전에는 체크리스트로 빠짐없이 확인하세요.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate('/trips/new/step2')}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-teal-700"
-            >
-              여행 준비 시작하기
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="flex flex-shrink-0 justify-center gap-4 sm:gap-5 lg:justify-end">
-            <div className="h-52 w-36 overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5 sm:h-56 sm:w-44">
-              <img
-                src={IMAGES.home.editorial1}
-                alt="여행 일정과 준비물을 정리하는 모습"
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <div className="mt-6 h-52 w-36 overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5 sm:mt-10 sm:h-56 sm:w-44">
-              <img
-                src={IMAGES.home.editorial2}
-                alt="목적지와 동선을 확인하는 지도"
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          </div>
         </div>
       </section>
 
