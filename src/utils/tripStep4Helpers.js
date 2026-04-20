@@ -20,28 +20,3 @@ export function arrayMove(arr, fromIndex, toIndex) {
   next.splice(toIndex, 0, item)
   return next
 }
-
-/** 방문 시작·종료가 여행 전체 기간 안에 있고 시작≤종료인지 */
-export function visitRangeOk(visitStart, visitEnd, tripStart, tripEnd) {
-  if (!visitStart || !visitEnd || !tripStart || !tripEnd) return false
-  if (new Date(visitEnd) < new Date(visitStart)) return false
-  if (visitStart < tripStart || visitEnd > tripEnd) return false
-  return true
-}
-
-/** API/목데이터로 여행 기간이 바뀌었을 때, 이미 입력된 방문일이 범위 밖이면 자동 보정 */
-export function clampVisitDatesToTripWindow(visit, tripStart, tripEnd) {
-  if (!tripStart || !tripEnd) return visit
-  let start = visit.start
-  let end = visit.end
-  if (start) {
-    if (start < tripStart) start = tripStart
-    if (start > tripEnd) start = ''
-  }
-  if (end) {
-    if (end > tripEnd) end = tripEnd
-    if (end < tripStart) end = ''
-  }
-  if (start && end && end < start) end = start
-  return { ...visit, start, end }
-}

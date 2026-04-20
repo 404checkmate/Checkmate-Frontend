@@ -2,7 +2,7 @@
  * TripNewStep4Page 목데이터
  *
  * 항공편으로 입국 국가·공항이 정해진 뒤, 현지 체류 기간과 방문 동네/도시를 고르는 단계입니다.
- * 백엔드 없을 때는 베트남 입국 시나리오를 기본값으로 둡니다.
+ * Step4는 입국지와 무관하게 동일한 지역 입력 UI를 사용합니다.
  */
 
 /* ─────────────────────────────────────────────
@@ -38,32 +38,6 @@ export const STEP4_ICON_PATHS = {
     'M4 10h16v2H4v-2zm0-4h16v2H4V6zm0 8h16v2H4v-2z',
 }
 
-/**
- * 항공 도착지가 베트남 현지 일정 선택 UI(동네 검색·일정)를 쓸지 판별합니다.
- * false면 Step4에서도 항공 카드·추가 지역 입력만 보이고, 베트남 전용 피커는 숨깁니다.
- */
-export function isVietnamArrival(arrival) {
-  if (!arrival) return true
-  if (arrival.countryCode === 'VN') return true
-  if (arrival.country === '베트남') return true
-  const { iata } = arrival
-  return ['SGN', 'HAN', 'DAD', 'CXR', 'PQC', 'HPH'].includes(iata)
-}
-
-/* ─────────────────────────────────────────────
-   베트남 내 방문 동네·도시 (준비물·동선 추천용 목데이터)
-───────────────────────────────────────────── */
-export const VIETNAM_STAY_OPTIONS = [
-  { id: 'sgn-1', city: '호치민', area: '1군 · 벤탄', hint: '중심가·쇼핑' },
-  { id: 'sgn-7', city: '호치민', area: '7군 · 푸미흥', hint: '신도시·카페거리' },
-  { id: 'dad-mk', city: '다낭', area: '미케 비치', hint: '해변·리조트' },
-  { id: 'dad-hv', city: '다낭', area: '호이안(근교)', hint: '올드타운 당일·숙박' },
-  { id: 'han-old', city: '하노이', area: '구시가지 · 호안끼엠', hint: '맛집·야시장' },
-  { id: 'han-tay', city: '하노이', area: '떠이호 · 서호', hint: '호수·산책' },
-  { id: 'cxr-beach', city: '나짱', area: '트랑 비치', hint: '해양 스포츠' },
-  { id: 'pqc-duong', city: '푸꾸옥', area: '듀온동 · 롱비치', hint: '일몰·리조트' },
-]
-
 /* ─────────────────────────────────────────────
    이미지
 ───────────────────────────────────────────── */
@@ -92,14 +66,6 @@ export const CITY_IMAGES = {
 
 export const DEFAULT_CITY_IMAGE =
   'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=400&auto=format&fit=crop'
-
-/** 선택한 체류지 첫 번째 옵션의 도시로 히어로 이미지 키 결정 */
-export function heroImageForSelection(selectedIds) {
-  if (!selectedIds?.length) return HERO_IMAGE
-  const first = VIETNAM_STAY_OPTIONS.find((o) => selectedIds.includes(o.id))
-  if (!first) return HERO_IMAGE
-  return CITY_IMAGES[first.city] || HERO_IMAGE
-}
 
 const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -159,8 +125,7 @@ export function getMockTripWindowForArrival(arrival) {
  * //   source: 'api',
  * // }
  *
- * Step4 마운트 시 한 번 호출되며, 응답이 바뀌면 동네별 날짜 입력의 min/max(선택 가능 일자)가
- * 자동으로 갱신됩니다. 사용자가 이미 고른 날짜는 새 기간 안으로 보정됩니다.
+ * Step4 마운트 시 한 번 호출되며, 응답이 바뀌면 항공 요약·다음 단계에 쓰는 여행 기간이 갱신됩니다.
  */
 /**
  * @param {object} arrival Step3/목적지에서 넘긴 입국 정보
@@ -193,8 +158,5 @@ export async function fetchTripDatesForStep4(arrival, opts = null) {
 ───────────────────────────────────────────── */
 export const AI_TIP = {
   description:
-    '입국 공항과 <strong>동네별 방문 날짜</strong>가 정해지면 날씨·일정에 맞는 <strong>준비물 리스트</strong>를 더 정확히 드릴 수 있어요.',
+    '입국 공항과 <strong>방문할 지역</strong>이 정해지면 날씨·일정에 맞는 <strong>준비물 리스트</strong>를 더 정확히 드릴 수 있어요.',
 }
-
-export const MOBILE_TIP =
-  '항공 예약에 맞춘 여행 기간 안에서 동네별 방문 날짜를 알려주시면 준비물과 동선 추천이 정확해집니다.'

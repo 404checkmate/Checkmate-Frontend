@@ -467,9 +467,15 @@ function TripSearchInner({ tripId }) {
               id="save-checklist-modal-title"
               className="text-center text-sm font-extrabold leading-relaxed text-gray-900 md:text-base md:leading-snug"
             >
-              {mergeToArchive
-                ? '선택한 항목을 이 체크리스트에 추가합니다. 확인 시 해당 체크리스트 화면으로 돌아갑니다.'
-                : '정말 저장하시겠습니까? 확인 시 가이드 보관함으로 이동하며, 되돌릴 수 없습니다.'}
+              {mergeToArchive ? (
+                '선택한 항목을 이 체크리스트에 추가합니다. 확인 시 해당 체크리스트 화면으로 돌아갑니다.'
+              ) : (
+                <>
+                  저장하시겠습니까?
+                  <br />
+                  확인 버튼을 클릭하면 체크리스트로 전환됩니다
+                </>
+              )}
             </h2>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button

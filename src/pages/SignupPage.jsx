@@ -90,7 +90,9 @@ function SignupPage() {
                 </span>
               </div>
               <h1 className="text-2xl font-extrabold leading-snug tracking-tight lg:text-3xl">
-                여행 준비, 첫걸음은 가입부터
+                여행 준비,
+                <br />
+                첫걸음은 가입부터
               </h1>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-teal-50/95">
                 무료로 시작하고 일정과 체크리스트를 저장해 두었다가, 출발 전에 다시 꺼내 보세요.
