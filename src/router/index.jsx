@@ -16,7 +16,6 @@ import TripLoadingPage from '@/pages/TripLoadingPage'
 import TripSearchPage from '@/pages/TripSearchPage'
 import TripGuideArchivePage from '@/pages/TripGuideArchivePage'
 import TripGuideArchiveDetailPage from '@/pages/TripGuideArchiveDetailPage'
-import TripChecklistPage from '@/pages/TripChecklistPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import MyPage from '@/pages/MyPage'
 import ErrorPage from '@/pages/ErrorPage'
@@ -33,11 +32,7 @@ import ErrorPage from '@/pages/ErrorPage'
  *   /trips/new/step2~       새 여행 플로우 (/destination = 예매 전 도시·날짜)
  *   /trips/:id/search       준비 항목 탐색         (Store Loop - DRD-1)
  *   /trips/:id/guide-archive 저장 가이드 목록 → /guide-archive/:entryId 상세에서 준비물 체크
- *   /trips/:id/checklist    내 체크리스트          (Confirm Loop - DRD-2)
  *   *                       404 NotFound
- *
- * ⚠️ /search 와 /checklist 는 반드시 분리된 페이지로 유지
- *    동시 수행 시 이벤트 집계 노이즈 발생 (DRD-3 배제 사항 참고)
  *
  * 페이지 추가 시:
  *   1. pages/ 에 컴포넌트 생성
@@ -67,7 +62,6 @@ const AppRoutes = () => {
         { path: '/trips/:id/search',                  element: <TripSearchPage /> },
         { path: '/trips/:id/guide-archive/:entryId',  element: <TripGuideArchiveDetailPage /> },
         { path: '/trips/:id/guide-archive',           element: <TripGuideArchivePage /> },
-        { path: '/trips/:id/checklist',     element: <TripChecklistPage /> },
         { path: '/404',                 element: <NotFoundPage /> },
       ],
     },

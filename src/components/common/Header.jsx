@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   {
     label: '체크리스트',
     path: '/trips/1/guide-archive',
-    match: (p) => p.includes('/guide-archive') || p.includes('/checklist'),
+    match: (p) => p.includes('/guide-archive'),
   },
 ]
 

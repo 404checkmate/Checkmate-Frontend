@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { STEP2_CONFIG, STEP2_ICON_PATHS, OPTION_CARDS } from '@/mocks/tripNewStep2Data'
 import StepHeader from '@/components/common/StepHeader'
-import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { TripFlowDesktopBar } from '@/components/common/TripFlowTopBar'
 
 /* ─────────────────────────────────────────────
    범용 SVG 아이콘
@@ -147,10 +147,13 @@ function TripNewStep2Page() {
           모바일 레이아웃 (md 미만)
       ══════════════════════════════════ */}
       <div className="md:hidden">
-
-        <TripFlowMobileBar backTo="/" />
-
         <div className="px-5 pt-4 pb-32">
+          <Link
+            to="/"
+            className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900"
+          >
+            ← 내 여행으로
+          </Link>
 
           <StepHeader
             currentStep={STEP2_CONFIG.currentStep}

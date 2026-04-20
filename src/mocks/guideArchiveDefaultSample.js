@@ -9,6 +9,7 @@ export const DEFAULT_ARCHIVE_SAMPLE_ID = 'archive-default-sample-1'
 function toArchiveItem(i) {
   return {
     id: i.id,
+    baggageType: i.baggageType,
     category: i.category,
     categoryLabel: i.categoryLabel,
     title: i.title,

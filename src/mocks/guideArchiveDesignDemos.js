@@ -35,6 +35,7 @@ function getAllSearchMockItemIds() {
 function toArchiveItem(i) {
   return {
     id: i.id,
+    baggageType: i.baggageType,
     category: i.category,
     categoryLabel: i.categoryLabel,
     title: i.title,
@@ -91,7 +92,7 @@ export function seedGuideArchiveDesignDemos(tripId) {
     ...baseSnapshot(),
     id: ID_0,
     savedAt: now,
-    pageTitle: '[예시] 0% · 미작성',
+    pageTitle: '[예시] 0% · 시작 전',
     destination: '산토리니, 그리스',
     country: '디자인 미리보기',
     items: items0.map(toArchiveItem),
@@ -100,7 +101,7 @@ export function seedGuideArchiveDesignDemos(tripId) {
     ...baseSnapshot(),
     id: ID_50,
     savedAt: now,
-    pageTitle: '[예시] 50% · 작성중',
+    pageTitle: '[예시] 50% · 준비 중',
     destination: '파리, 프랑스',
     country: '디자인 미리보기',
     items: items50.map(toArchiveItem),

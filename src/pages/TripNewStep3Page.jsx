@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   STEP3_CONFIG,
   STEP3_ICON_PATHS,
@@ -10,7 +10,7 @@ import {
 } from '@/mocks/tripNewStep3Data'
 import { fetchFlightInfo } from '@/mocks/flightMockData'
 import StepHeader from '@/components/common/StepHeader'
-import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { TripFlowDesktopBar } from '@/components/common/TripFlowTopBar'
 import AiConciergeTip from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
@@ -370,10 +370,13 @@ function TripNewStep3Page() {
           모바일 레이아웃 (md 미만)
       ══════════════════════════════════ */}
       <div className="md:hidden">
-
-        <TripFlowMobileBar backTo="/trips/new/step2" />
-
         <div className="px-5 pt-4 pb-44">
+          <Link
+            to="/trips/new/step2"
+            className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900"
+          >
+            ← 이전 단계
+          </Link>
 
           <StepHeader
             currentStep={STEP3_CONFIG.currentStep}

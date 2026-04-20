@@ -35,26 +35,186 @@ export const MOBILE_QUICK_DESTINATION_CHIPS = [
   { label: '제주도', countryName: '대한민국' },
 ]
 
+/**
+ * 국가별 주요 취항지(도시·공항). 없으면 `city` / `iata` 한 쌍만 있는 것으로 간주합니다.
+ * @typedef {{ city: string, iata: string, aliases?: string[] }} ArrivalOption
+ */
+
 export const COUNTRY_ARRIVAL_OPTIONS = [
-  { name: '대한민국', aliases: ['한국', '코리아'], iata: 'ICN', city: '인천', country: '대한민국', countryCode: 'KR' },
-  { name: '일본', aliases: ['재팬'], iata: 'NRT', city: '도쿄', country: '일본', countryCode: 'JP' },
-  { name: '중국', aliases: ['차이나'], iata: 'PEK', city: '베이징', country: '중국', countryCode: 'CN' },
-  { name: '미국', aliases: ['USA', 'America'], iata: 'LAX', city: '로스앤젤레스', country: '미국', countryCode: 'US' },
+  {
+    name: '대한민국',
+    aliases: ['한국', '코리아'],
+    iata: 'ICN',
+    city: '인천',
+    country: '대한민국',
+    countryCode: 'KR',
+    arrivals: [
+      { city: '인천', iata: 'ICN', aliases: ['서울'] },
+      { city: '김포', iata: 'GMP', aliases: ['서울'] },
+      { city: '제주', iata: 'CJU', aliases: ['제주도'] },
+      { city: '부산', iata: 'PUS', aliases: ['김해'] },
+    ],
+  },
+  {
+    name: '일본',
+    aliases: ['재팬'],
+    iata: 'NRT',
+    city: '도쿄',
+    country: '일본',
+    countryCode: 'JP',
+    arrivals: [
+      { city: '도쿄(나리타)', iata: 'NRT', aliases: ['나리타', '도쿄'] },
+      { city: '도쿄(하네다)', iata: 'HND', aliases: ['하네다'] },
+      { city: '오사카(간사이)', iata: 'KIX', aliases: ['오사카', '간사이'] },
+      { city: '후쿠오카', iata: 'FUK', aliases: [] },
+      { city: '삿포로(신치토세)', iata: 'CTS', aliases: ['삿포로'] },
+      { city: '오키나와(나하)', iata: 'OKA', aliases: ['나하'] },
+    ],
+  },
+  {
+    name: '중국',
+    aliases: ['차이나'],
+    iata: 'PEK',
+    city: '베이징',
+    country: '중국',
+    countryCode: 'CN',
+    arrivals: [
+      { city: '베이징(서우두)', iata: 'PEK', aliases: ['베이징', '북경'] },
+      { city: '상하이(푸둥)', iata: 'PVG', aliases: ['상해'] },
+      { city: '광저우', iata: 'CAN', aliases: [] },
+      { city: '선전', iata: 'SZX', aliases: [] },
+    ],
+  },
+  {
+    name: '미국',
+    aliases: ['USA', 'America'],
+    iata: 'LAX',
+    city: '로스앤젤레스',
+    country: '미국',
+    countryCode: 'US',
+    arrivals: [
+      { city: '로스앤젤레스', iata: 'LAX', aliases: ['LA'] },
+      { city: '뉴욕(JFK)', iata: 'JFK', aliases: ['뉴욕'] },
+      { city: '뉴욕(뉴왁)', iata: 'EWR', aliases: [] },
+      { city: '샌프란시스코', iata: 'SFO', aliases: [] },
+      { city: '시카고', iata: 'ORD', aliases: [] },
+      { city: '시애틀', iata: 'SEA', aliases: [] },
+      { city: '라스베이거스', iata: 'LAS', aliases: [] },
+      { city: '호놀룰루', iata: 'HNL', aliases: ['하와이'] },
+    ],
+  },
   { name: '미얀마', aliases: ['버마'], iata: 'RGN', city: '양곤', country: '미얀마', countryCode: 'MM' },
-  { name: '태국', aliases: [], iata: 'BKK', city: '방콕', country: '태국', countryCode: 'TH' },
-  { name: '베트남', aliases: [], iata: 'SGN', city: '호치민', country: '베트남', countryCode: 'VN' },
+  {
+    name: '태국',
+    aliases: [],
+    iata: 'BKK',
+    city: '방콕',
+    country: '태국',
+    countryCode: 'TH',
+    arrivals: [
+      { city: '방콕(수완나품)', iata: 'BKK', aliases: ['방콕'] },
+      { city: '치앙마이', iata: 'CNX', aliases: [] },
+      { city: '푸켓', iata: 'HKT', aliases: [] },
+      { city: '파타야(욧짭)', iata: 'UTP', aliases: ['람차방'] },
+    ],
+  },
+  {
+    name: '베트남',
+    aliases: [],
+    iata: 'SGN',
+    city: '호치민',
+    country: '베트남',
+    countryCode: 'VN',
+    arrivals: [
+      { city: '호치민', iata: 'SGN', aliases: ['사이공'] },
+      { city: '하노이', iata: 'HAN', aliases: [] },
+      { city: '다낭', iata: 'DAD', aliases: [] },
+      { city: '나트랑', iata: 'CXR', aliases: [] },
+    ],
+  },
   { name: '싱가포르', aliases: ['싱가폴'], iata: 'SIN', city: '싱가포르', country: '싱가포르', countryCode: 'SG' },
   { name: '말레이시아', aliases: [], iata: 'KUL', city: '쿠알라룸푸르', country: '말레이시아', countryCode: 'MY' },
   { name: '인도네시아', aliases: [], iata: 'DPS', city: '덴파사르', country: '인도네시아', countryCode: 'ID' },
   { name: '필리핀', aliases: [], iata: 'MNL', city: '마닐라', country: '필리핀', countryCode: 'PH' },
-  { name: '대만', aliases: ['타이완'], iata: 'TPE', city: '타이베이', country: '대만', countryCode: 'TW' },
+  {
+    name: '대만',
+    aliases: ['타이완'],
+    iata: 'TPE',
+    city: '타이베이',
+    country: '대만',
+    countryCode: 'TW',
+    arrivals: [
+      { city: '타이베이(타오위안)', iata: 'TPE', aliases: ['타오위안', '타이베이'] },
+      { city: '가오슝', iata: 'KHH', aliases: [] },
+    ],
+  },
   { name: '홍콩', aliases: ['HK'], iata: 'HKG', city: '홍콩', country: '홍콩', countryCode: 'HK' },
   { name: '마카오', aliases: [], iata: 'MFM', city: '마카오', country: '마카오', countryCode: 'MO' },
-  { name: '프랑스', aliases: [], iata: 'CDG', city: '파리', country: '프랑스', countryCode: 'FR' },
-  { name: '이탈리아', aliases: [], iata: 'FCO', city: '로마', country: '이탈리아', countryCode: 'IT' },
-  { name: '스페인', aliases: [], iata: 'MAD', city: '마드리드', country: '스페인', countryCode: 'ES' },
-  { name: '독일', aliases: [], iata: 'FRA', city: '프랑크푸르트', country: '독일', countryCode: 'DE' },
-  { name: '영국', aliases: ['UK', '잉글랜드'], iata: 'LHR', city: '런던', country: '영국', countryCode: 'GB' },
+  {
+    name: '프랑스',
+    aliases: [],
+    iata: 'CDG',
+    city: '파리',
+    country: '프랑스',
+    countryCode: 'FR',
+    arrivals: [
+      { city: '파리(CDG)', iata: 'CDG', aliases: ['샤를드골', '파리'] },
+      { city: '파리(오를리)', iata: 'ORY', aliases: ['오를리'] },
+      { city: '니스', iata: 'NCE', aliases: [] },
+    ],
+  },
+  {
+    name: '이탈리아',
+    aliases: [],
+    iata: 'FCO',
+    city: '로마',
+    country: '이탈리아',
+    countryCode: 'IT',
+    arrivals: [
+      { city: '로마(피우미치노)', iata: 'FCO', aliases: ['로마'] },
+      { city: '밀라노(말펜사)', iata: 'MXP', aliases: ['밀라노'] },
+      { city: '베네치아', iata: 'VCE', aliases: [] },
+    ],
+  },
+  {
+    name: '스페인',
+    aliases: [],
+    iata: 'MAD',
+    city: '마드리드',
+    country: '스페인',
+    countryCode: 'ES',
+    arrivals: [
+      { city: '마드리드', iata: 'MAD', aliases: [] },
+      { city: '바르셀로나', iata: 'BCN', aliases: [] },
+    ],
+  },
+  {
+    name: '독일',
+    aliases: [],
+    iata: 'FRA',
+    city: '프랑크푸르트',
+    country: '독일',
+    countryCode: 'DE',
+    arrivals: [
+      { city: '프랑크푸르트', iata: 'FRA', aliases: [] },
+      { city: '뮌헨', iata: 'MUC', aliases: [] },
+      { city: '베를린', iata: 'BER', aliases: [] },
+    ],
+  },
+  {
+    name: '영국',
+    aliases: ['UK', '잉글랜드'],
+    iata: 'LHR',
+    city: '런던',
+    country: '영국',
+    countryCode: 'GB',
+    arrivals: [
+      { city: '런던(히스로)', iata: 'LHR', aliases: ['히스로', '런던'] },
+      { city: '런던(개트윅)', iata: 'LGW', aliases: ['개트윅'] },
+      { city: '맨체스터', iata: 'MAN', aliases: [] },
+      { city: '에든버러', iata: 'EDI', aliases: [] },
+    ],
+  },
   { name: '스위스', aliases: [], iata: 'ZRH', city: '취리히', country: '스위스', countryCode: 'CH' },
   { name: '네덜란드', aliases: ['홀란드'], iata: 'AMS', city: '암스테르담', country: '네덜란드', countryCode: 'NL' },
   { name: '오스트리아', aliases: [], iata: 'VIE', city: '비엔나', country: '오스트리아', countryCode: 'AT' },
@@ -62,9 +222,33 @@ export const COUNTRY_ARRIVAL_OPTIONS = [
   { name: '폴란드', aliases: [], iata: 'WAW', city: '바르샤바', country: '폴란드', countryCode: 'PL' },
   { name: '터키', aliases: [], iata: 'IST', city: '이스탄불', country: '터키', countryCode: 'TR' },
   { name: '그리스', aliases: [], iata: 'ATH', city: '아테네', country: '그리스', countryCode: 'GR' },
-  { name: '호주', aliases: [], iata: 'SYD', city: '시드니', country: '호주', countryCode: 'AU' },
+  {
+    name: '호주',
+    aliases: [],
+    iata: 'SYD',
+    city: '시드니',
+    country: '호주',
+    countryCode: 'AU',
+    arrivals: [
+      { city: '시드니', iata: 'SYD', aliases: [] },
+      { city: '멜버른', iata: 'MEL', aliases: [] },
+      { city: '브리즈번', iata: 'BNE', aliases: [] },
+    ],
+  },
   { name: '뉴질랜드', aliases: [], iata: 'AKL', city: '오클랜드', country: '뉴질랜드', countryCode: 'NZ' },
-  { name: '캐나다', aliases: [], iata: 'YVR', city: '밴쿠버', country: '캐나다', countryCode: 'CA' },
+  {
+    name: '캐나다',
+    aliases: [],
+    iata: 'YVR',
+    city: '밴쿠버',
+    country: '캐나다',
+    countryCode: 'CA',
+    arrivals: [
+      { city: '밴쿠버', iata: 'YVR', aliases: [] },
+      { city: '토론토', iata: 'YYZ', aliases: [] },
+      { city: '몬트리올', iata: 'YUL', aliases: [] },
+    ],
+  },
   { name: '멕시코', aliases: [], iata: 'MEX', city: '멕시코시티', country: '멕시코', countryCode: 'MX' },
   { name: '브라질', aliases: [], iata: 'GRU', city: '상파울루', country: '브라질', countryCode: 'BR' },
   { name: '아르헨티나', aliases: [], iata: 'EZE', city: '부에노스아이레스', country: '아르헨티나', countryCode: 'AR' },
@@ -107,6 +291,32 @@ export function filterCountriesByQuery(rawQuery) {
   const q = rawQuery.trim()
   if (!q) return []
   return COUNTRY_ARRIVAL_OPTIONS.filter((c) => matchesCountryQuery(c, q)).slice(0, MAX_SUGGESTIONS)
+}
+
+/** 국가 행에 연결된 취항지 목록 (미정의 시 대표 `city`·`iata` 한 건만) */
+export function getArrivalsForCountry(entry) {
+  if (!entry) return []
+  if (Array.isArray(entry.arrivals) && entry.arrivals.length > 0) return entry.arrivals
+  return [{ city: entry.city, iata: entry.iata, aliases: [] }]
+}
+
+function arrivalMatchesQuery(a, q) {
+  if (a.city.includes(q)) return true
+  if (a.iata.toLowerCase().includes(q.toLowerCase())) return true
+  if (a.aliases?.some((x) => x.includes(q))) return true
+  return false
+}
+
+/** 취항지 자동완성 — 한글 도시명·IATA·aliases */
+export function filterArrivalsByQuery(arrivals, rawQuery) {
+  const q = rawQuery.trim()
+  if (!q) return arrivals
+  return arrivals.filter((a) => arrivalMatchesQuery(a, q))
+}
+
+/** 취항지 검색창 — 괄호·숫자·로마자 허용 */
+export function sanitizeArrivalInput(raw) {
+  return raw.replace(/[^\uAC00-\uD7A3\u3130-\u318F\u1100-\u11FFa-zA-Z0-9\s·()]/g, '')
 }
 
 /**

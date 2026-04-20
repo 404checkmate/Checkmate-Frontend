@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { CATEGORIES, MOCK_ITEMS, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
 import { saveItemForTrip, loadSavedItems } from '@/utils/savedTripItems'
 import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
@@ -7,7 +7,6 @@ import { appendGuideArchiveEntry, getGuideArchiveEntry, patchGuideArchiveEntry }
 import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
-import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 import aiSparklesImg from '@/assets/ai-sparkles.png'
 
 const trackEvent = (eventName, properties = {}) => {
@@ -18,6 +17,7 @@ const trackEvent = (eventName, properties = {}) => {
 function mapMockItemToArchiveItem(i) {
   return {
     id: i.id,
+    baggageType: i.baggageType,
     category: i.category,
     categoryLabel: i.categoryLabel,
     title: i.title,
@@ -275,22 +275,20 @@ function TripSearchInner({ tripId }) {
 
   const handleModalBack = () => setLeaveModalOpen(false)
 
-  /** 전체 탭: AI 맞춤 추천을 맨 위, 나머지 카테고리는 ㄱㄴㄷ 순 */
+  /** 전체 탭: AI 맞춤 추천 섹션을 맨 위, 나머지는 탭 순서(준비물 → 사전 예약/신청 → 출국 전 확인) */
   const groupedItemsAll = useMemo(() => {
-    const cats = CATEGORIES.filter((c) => c.value !== 'all')
-    const aiCat = cats.find((c) => c.value === 'ai_recommend')
-    const rest = cats.filter((c) => c.value !== 'ai_recommend')
-    const sortedRest = [...rest].sort((a, b) => a.label.localeCompare(b.label, 'ko'))
-    const orderedCats = aiCat ? [aiCat, ...sortedRest] : sortedRest
-    return orderedCats
-      .map((cat) => ({
-        categoryValue: cat.value,
-        categoryLabel: cat.label,
-        items: MOCK_ITEMS.filter((i) => i.category === cat.value).sort((a, b) =>
+    const order = CATEGORIES.filter((c) => c.value !== 'all').map((c) => c.value)
+    const sectionOrder = ['ai_recommend', ...order.filter((v) => v !== 'ai_recommend')]
+    return sectionOrder
+      .map((value) => {
+        const cat = CATEGORIES.find((c) => c.value === value)
+        if (!cat) return null
+        const items = MOCK_ITEMS.filter((i) => i.category === value).sort((a, b) =>
           a.title.localeCompare(b.title, 'ko'),
-        ),
-      }))
-      .filter((g) => g.items.length > 0)
+        )
+        return { categoryValue: value, categoryLabel: cat.label, items }
+      })
+      .filter((g) => g && g.items.length > 0)
   }, [])
 
   /** 단일 카테고리 탭: 제목 ㄱㄴㄷ 순 */
@@ -305,11 +303,24 @@ function TripSearchInner({ tripId }) {
 
   return (
     <div className="min-h-screen" style={{ background: pageBg }}>
-      <TripFlowMobileBar backTo="/" />
-
       <div className="mx-auto max-w-6xl px-5 py-8 md:px-8 md:py-12">
-        {/* 헤더 */}
         <div className="mb-8">
+          {mergeToArchive ? (
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="mb-3 flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900 md:hidden"
+            >
+              ← 이전으로
+            </button>
+          ) : (
+            <Link
+              to="/"
+              className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900 md:hidden"
+            >
+              ← 내 여행으로
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => (mergeToArchive ? navigate(-1) : navigate('/'))}

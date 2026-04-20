@@ -30,13 +30,4 @@ export const IMAGES = {
     passport:
       'https://images.unsplash.com/photo-1520637836993-5e545bde32ac?q=80&w=500&auto=format&fit=crop',
   },
-
-  checklist: {
-    weatherDanang:
-      'https://images.unsplash.com/photo-1569700119023-e4d1af7f3c66?q=80&w=300&auto=format&fit=crop',
-    destinationMap:
-      'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400&auto=format&fit=crop',
-    mountainBanner:
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop',
-  },
 }

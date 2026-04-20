@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import {
   STEP4_CONFIG,
   HERO_IMAGE,
@@ -10,7 +10,7 @@ import {
 import { loadStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { arrayMove } from '@/utils/tripStep4Helpers'
 import StepHeader from '@/components/common/StepHeader'
-import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { TripFlowDesktopBar } from '@/components/common/TripFlowTopBar'
 import AiConciergeTip from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
@@ -38,7 +38,7 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
   const [tripDatesLoading, setTripDatesLoading] = useState(true)
   const [tripDatesError, setTripDatesError] = useState(null)
 
-  /** 입력 초안 / 확인 시 목록에만 추가 → Step5 otherStopsNote로 합쳐 전달 */
+  /** 입력 초안 / 확인 시 목록에 추가(선택) → Step5 otherStopsNote로 합쳐 전달 */
   const [placeDraft, setPlaceDraft] = useState('')
   const [selectedPlaces, setSelectedPlaces] = useState([])
 
@@ -110,8 +110,8 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
 
   const canProceed = useMemo(() => {
     if (tripDatesLoading || tripDatesError || !tripWindow) return false
-    return selectedPlaces.length >= 1
-  }, [tripDatesLoading, tripDatesError, tripWindow, selectedPlaces.length])
+    return true
+  }, [tripDatesLoading, tripDatesError, tripWindow])
 
   const heroSrc = useMemo(() => CITY_IMAGES[arrival.city] || HERO_IMAGE, [arrival.city])
 
@@ -136,7 +136,12 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
 
   const step4HeaderSubtitle = (
     <>
-      메인 도시 기준으로 방문할 지역을 일정 순서대로 입력해 주세요! 저희가 그에 맞는 체크리스트를 만들어드릴게요!
+      <span className="block">
+        선택하신 취항지(입국 도시) 근처에 더 여행할 지역이 있으면 일정 순서대로 적어 주세요.
+      </span>
+      <span className="mt-2.5 block text-base font-semibold leading-snug text-teal-900 sm:text-[15px]">
+        없으면 그대로 다음 단계로 넘어가도 돼요.
+      </span>
     </>
   )
 
@@ -172,7 +177,7 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
             <StepHeader
               currentStep={STEP4_CONFIG.currentStep}
               totalSteps={STEP4_CONFIG.totalSteps}
-              title="방문하는 지역이 어디인가요?"
+              title="추가로 방문하는 지역이 있나요?"
               subtitle={step4HeaderSubtitle}
               className="mb-6"
               subtitleClassName="text-sm"
@@ -212,17 +217,21 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
       />
 
       <div className="md:hidden">
-        <TripFlowMobileBar backTo={step4PreviousPath} />
-
         <div className="px-5 pt-4 pb-44">
+          <Link
+            to={step4PreviousPath}
+            className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900"
+          >
+            ← 이전 단계
+          </Link>
           <StepHeader
             currentStep={STEP4_CONFIG.currentStep}
             totalSteps={STEP4_CONFIG.totalSteps}
             title={
               <>
-                방문하는 지역이
+                추가로 방문하는 지역이
                 <br />
-                어디인가요?
+                있나요?
               </>
             }
             subtitle={step4HeaderSubtitle}
@@ -258,7 +267,7 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
             <div className="absolute bottom-4 left-5">
               <p className="text-[10px] font-bold text-white/70 tracking-widest uppercase mb-0.5">PREVIEW</p>
               <p className="text-sm font-extrabold text-white">
-                {selectedPlaces.length >= 1 ? '방문 지역 입력 완료' : '방문할 지역을 한 곳 이상 추가해 주세요'}
+                {selectedPlaces.length >= 1 ? '방문 지역 입력 완료' : '추가 방문 지역은 선택 사항이에요'}
               </p>
             </div>
           </div>

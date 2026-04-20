@@ -19,7 +19,7 @@ const STORAGE_PREFIX = 'travel_fe_guide_archive_v1_'
  * @property {string} country
  * @property {string} tripWindowLabel
  * @property {string} weatherSummary
- * @property {Array<{ id: string, category: string, categoryLabel: string, title: string, description?: string, detail?: string }>} items
+ * @property {Array<{ id: string, category: string, categoryLabel: string, title: string, description?: string, detail?: string, baggageType?: 'carry_on'|'checked' }>} items
  * @property {Array<{ id: string, dateLabel: string, region: string, weatherLine: string }>} dailySummaries
  * @property {string} [pageSubtitle]
  * @property {string} [temperatureRange]

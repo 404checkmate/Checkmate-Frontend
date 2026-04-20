@@ -158,5 +158,5 @@ export async function fetchTripDatesForStep4(arrival, opts = null) {
 ───────────────────────────────────────────── */
 export const AI_TIP = {
   description:
-    '입국 공항과 <strong>방문할 지역</strong>이 정해지면 날씨·일정에 맞는 <strong>준비물 리스트</strong>를 더 정확히 드릴 수 있어요.',
+    '입국 공항만으로도 안내를 이어갈 수 있어요. <strong>방문할 지역</strong>을 추가로 적어 주시면 날씨·일정에 맞는 <strong>준비물</strong>을 더 정확히 드릴 수 있어요.',
 }

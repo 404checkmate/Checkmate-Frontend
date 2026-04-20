@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   STEP_DESTINATION_CONFIG,
   COUNTRY_ARRIVAL_OPTIONS,
   MOBILE_QUICK_DESTINATION_CHIPS,
   filterCountriesByQuery,
+  filterArrivalsByQuery,
+  getArrivalsForCountry,
   sanitizeCountryInput,
+  sanitizeArrivalInput,
   HERO_IMAGE,
   AI_TIP,
 } from '@/mocks/tripNewDestinationData'
@@ -14,7 +17,7 @@ import AiConciergeTip from '@/components/common/AiConciergeTip'
 import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 import { FullBleedMintImageHero } from '@/components/trip/MintProgressiveHero'
-import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { TripFlowDesktopBar } from '@/components/common/TripFlowTopBar'
 import DestinationMobileRangeCalendar from '@/components/trip/DestinationMobileRangeCalendar'
 import DestinationCountryAutocomplete from '@/components/trip/DestinationCountryAutocomplete'
 import SelectedCountryChip from '@/components/trip/SelectedCountryChip'
@@ -44,6 +47,12 @@ function findExactCountryMatch(trimmedQuery) {
   )
 }
 
+function countryRowWithoutArrivals(row) {
+  if (!row) return row
+  const { arrivals: _a, ...rest } = row
+  return rest
+}
+
 const SUBTITLE_DESKTOP = (
   <p className="text-gray-600">
     어디로, 언제 떠날지 알려주시면 저희가 당신만을 위한 체크리스트를 만들어드릴게요!
@@ -68,9 +77,17 @@ function DestinationDateForm({
   onCountryInputChange,
   onCountryKeyDown,
   onCountryFocus,
+  countryInputReadOnly,
+  onChangeCountryRequest,
   suggestions,
   showDropdown,
   onPickCountry,
+  pickerPhase,
+  arrivalQuery,
+  onArrivalQueryChange,
+  onArrivalKeyDown,
+  arrivalSuggestions,
+  onPickArrival,
   selectedCountry,
   onRemoveCountryTag,
   startDate,
@@ -79,7 +96,7 @@ function DestinationDateForm({
   onRangeChange,
 }) {
   const hasQuery = countryQuery.trim().length > 0
-  const panelOpen = showDropdown && hasQuery
+  const panelOpen = showDropdown && (pickerPhase === 'arrival' || hasQuery)
 
   return (
     <div className="space-y-4">
@@ -97,9 +114,17 @@ function DestinationDateForm({
           onCountryInputChange={onCountryInputChange}
           onCountryKeyDown={onCountryKeyDown}
           onCountryFocus={onCountryFocus}
+          countryInputReadOnly={countryInputReadOnly}
+          onChangeCountryRequest={onChangeCountryRequest}
           suggestions={suggestions}
           isPanelOpen={panelOpen}
           onPickCountry={onPickCountry}
+          pickerPhase={pickerPhase}
+          arrivalQuery={arrivalQuery}
+          onArrivalQueryChange={onArrivalQueryChange}
+          onArrivalKeyDown={onArrivalKeyDown}
+          arrivalSuggestions={arrivalSuggestions}
+          onPickArrival={onPickArrival}
           panelId="country-autocomplete-panel"
           placeholder="국가명 입력 후 엔터 또는 목록에서 선택"
         />
@@ -178,6 +203,9 @@ export default function TripNewDestinationPage() {
   const [countryQuery, setCountryQuery] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [pickerPhase, setPickerPhase] = useState('country')
+  const [draftCountry, setDraftCountry] = useState(null)
+  const [arrivalQuery, setArrivalQuery] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
@@ -188,6 +216,12 @@ export default function TripNewDestinationPage() {
   }, [today])
 
   const suggestions = useMemo(() => filterCountriesByQuery(countryQuery), [countryQuery])
+
+  const arrivalSuggestions = useMemo(() => {
+    if (pickerPhase !== 'arrival' || !draftCountry) return []
+    const all = getArrivalsForCountry(draftCountry)
+    return filterArrivalsByQuery(all, sanitizeArrivalInput(arrivalQuery))
+  }, [pickerPhase, draftCountry, arrivalQuery])
 
   useEffect(() => {
     function handlePointerDown(e) {
@@ -211,9 +245,45 @@ export default function TripNewDestinationPage() {
     setSelectedCountry(c)
     setCountryQuery('')
     setDropdownOpen(false)
+    setPickerPhase('country')
+    setDraftCountry(null)
+    setArrivalQuery('')
+  }
+
+  const beginArrivalPicker = (c) => {
+    setDraftCountry(c)
+    setPickerPhase('arrival')
+    setCountryQuery(c.name)
+    setArrivalQuery('')
+    setDropdownOpen(true)
+  }
+
+  const handlePickCountryFromList = (c) => {
+    const arrivals = getArrivalsForCountry(c)
+    if (arrivals.length === 1) {
+      const merged = { ...countryRowWithoutArrivals(c), city: arrivals[0].city, iata: arrivals[0].iata }
+      confirmCountry(merged)
+      return
+    }
+    beginArrivalPicker(c)
+  }
+
+  const handlePickArrival = (a) => {
+    if (!draftCountry) return
+    const merged = { ...countryRowWithoutArrivals(draftCountry), city: a.city, iata: a.iata }
+    confirmCountry(merged)
+  }
+
+  const handleChangeCountryRequest = () => {
+    setPickerPhase('country')
+    setDraftCountry(null)
+    setCountryQuery('')
+    setArrivalQuery('')
+    setDropdownOpen(true)
   }
 
   const handleCountryInputChange = (raw) => {
+    if (pickerPhase === 'arrival') return
     const v = sanitizeCountryInput(raw)
     setCountryQuery(v)
     setDropdownOpen(true)
@@ -230,6 +300,7 @@ export default function TripNewDestinationPage() {
   }
 
   const handleCountryKeyDown = (e) => {
+    if (pickerPhase === 'arrival') return
     if (e.key !== 'Enter') return
     if (e.nativeEvent.isComposing) return
     e.preventDefault()
@@ -239,23 +310,49 @@ export default function TripNewDestinationPage() {
 
     const exact = findExactCountryMatch(trimmed)
     if (exact) {
-      confirmCountry(exact)
+      handlePickCountryFromList(exact)
       return
     }
 
     const list = filterCountriesByQuery(countryQuery)
     if (list.length === 1) {
-      confirmCountry(list[0])
+      handlePickCountryFromList(list[0])
       return
     }
     if (list.length > 1) {
-      confirmCountry(list[0])
+      handlePickCountryFromList(list[0])
+    }
+  }
+
+  const handleArrivalQueryChange = (raw) => {
+    setArrivalQuery(sanitizeArrivalInput(raw))
+  }
+
+  const handleArrivalKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      handleChangeCountryRequest()
+      return
+    }
+    if (e.key !== 'Enter') return
+    if (e.nativeEvent.isComposing) return
+    e.preventDefault()
+    if (arrivalSuggestions.length === 1) {
+      handlePickArrival(arrivalSuggestions[0])
+      return
+    }
+    const t = arrivalQuery.trim()
+    if (t && arrivalSuggestions.length > 0) {
+      handlePickArrival(arrivalSuggestions[0])
     }
   }
 
   const removeCountryTag = () => {
     setSelectedCountry(null)
     setCountryQuery('')
+    setPickerPhase('country')
+    setDraftCountry(null)
+    setArrivalQuery('')
   }
 
   const handleMobileRangeChange = ({ start, end }) => {
@@ -301,9 +398,17 @@ export default function TripNewDestinationPage() {
     onCountryInputChange: handleCountryInputChange,
     onCountryKeyDown: handleCountryKeyDown,
     onCountryFocus: handleCountryFocus,
+    countryInputReadOnly: pickerPhase === 'arrival',
+    onChangeCountryRequest: handleChangeCountryRequest,
     suggestions,
     showDropdown: dropdownOpen,
-    onPickCountry: confirmCountry,
+    onPickCountry: handlePickCountryFromList,
+    pickerPhase,
+    arrivalQuery,
+    onArrivalQueryChange: handleArrivalQueryChange,
+    onArrivalKeyDown: handleArrivalKeyDown,
+    arrivalSuggestions,
+    onPickArrival: handlePickArrival,
     selectedCountry,
     onRemoveCountryTag: removeCountryTag,
     startDate,
@@ -351,9 +456,13 @@ export default function TripNewDestinationPage() {
       />
 
       <div className="md:hidden">
-        <TripFlowMobileBar backTo="/trips/new/step2" />
-
         <div className="px-5 pt-4 pb-56">
+          <Link
+            to="/trips/new/step2"
+            className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900"
+          >
+            ← 이전 단계
+          </Link>
           <StepHeader
             currentStep={STEP_DESTINATION_CONFIG.currentStep}
             totalSteps={STEP_DESTINATION_CONFIG.totalSteps}
@@ -375,9 +484,17 @@ export default function TripNewDestinationPage() {
               onCountryInputChange={handleCountryInputChange}
               onCountryKeyDown={handleCountryKeyDown}
               onCountryFocus={handleCountryFocus}
+              countryInputReadOnly={pickerPhase === 'arrival'}
+              onChangeCountryRequest={handleChangeCountryRequest}
               suggestions={suggestions}
-              isPanelOpen={dropdownOpen && countryQuery.trim().length > 0}
-              onPickCountry={confirmCountry}
+              isPanelOpen={dropdownOpen && (pickerPhase === 'arrival' || countryQuery.trim().length > 0)}
+              onPickCountry={handlePickCountryFromList}
+              pickerPhase={pickerPhase}
+              arrivalQuery={arrivalQuery}
+              onArrivalQueryChange={handleArrivalQueryChange}
+              onArrivalKeyDown={handleArrivalKeyDown}
+              arrivalSuggestions={arrivalSuggestions}
+              onPickArrival={handlePickArrival}
               panelId="country-autocomplete-panel-mobile"
               placeholder="어디로 떠나시나요?"
             />
@@ -389,7 +506,7 @@ export default function TripNewDestinationPage() {
                   type="button"
                   onClick={() => {
                     const c = COUNTRY_ARRIVAL_OPTIONS.find((x) => x.name === chip.countryName)
-                    if (c) confirmCountry(c)
+                    if (c) handlePickCountryFromList(c)
                   }}
                   className="rounded-full border border-sky-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-sky-800 shadow-sm transition active:scale-[0.98]"
                 >

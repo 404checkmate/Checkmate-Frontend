@@ -1,6 +1,6 @@
 /**
  * 탐색(TripSearchPage)에서 저장한 필수품을 localStorage에 보관하고
- * 체크리스트(TripChecklistPage)와 병합할 때 사용합니다.
+ * 가이드 보관함 체크리스트와 동기화할 때 사용합니다.
  */
 
 const STORAGE_PREFIX = 'travel_fe_trip_saved_items_v1_'
@@ -66,6 +66,25 @@ export function setSavedItemChecked(tripId, itemId, checked) {
     localStorage.setItem(STORAGE_PREFIX + String(tripId), JSON.stringify(next))
   } catch (e) {
     console.warn('[savedTripItems] setSavedItemChecked failed', e)
+  }
+  return next
+}
+
+/** 이미 저장된 행의 제목·부제만 갱신 (보관함 섹션 편집 등) */
+export function patchSavedItemContent(tripId, itemId, { title, subtitle }) {
+  const list = loadSavedItems(tripId)
+  const idx = list.findIndex((x) => String(x.id) === String(itemId))
+  if (idx < 0) return list
+  const next = [...list]
+  next[idx] = {
+    ...next[idx],
+    ...(title != null ? { title } : {}),
+    ...(subtitle != null ? { subtitle } : {}),
+  }
+  try {
+    localStorage.setItem(STORAGE_PREFIX + String(tripId), JSON.stringify(next))
+  } catch (e) {
+    console.warn('[savedTripItems] patchSavedItemContent failed', e)
   }
   return next
 }

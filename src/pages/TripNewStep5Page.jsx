@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import {
   STEP5_CONFIG,
   STEP5_ICON_PATHS,
@@ -11,7 +11,7 @@ import {
   EDITORIAL_PICK,
 } from '@/mocks/tripNewStep5Data'
 import StepHeader from '@/components/common/StepHeader'
-import { TripFlowDesktopBar, TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
+import { TripFlowDesktopBar } from '@/components/common/TripFlowTopBar'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
@@ -218,9 +218,13 @@ export default function TripNewStep5Page() {
 
       {/* ── 모바일: 앱 레퍼런스 — 세로 스택 + 하단 고정 CTA ── */}
       <div className="md:hidden">
-        <TripFlowMobileBar backTo="/trips/new/step4" />
-
         <div className="px-5 pt-5 pb-44">
+          <Link
+            to="/trips/new/step4"
+            className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900"
+          >
+            ← 이전 단계
+          </Link>
           <StepHeader
             currentStep={STEP5_CONFIG.currentStep}
             totalSteps={STEP5_CONFIG.totalSteps}

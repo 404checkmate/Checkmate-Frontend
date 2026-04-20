@@ -7,7 +7,6 @@ import {
   seedGuideArchiveDesignDemos,
   toggleGuideArchiveDesignDemos,
 } from '@/mocks/guideArchiveDesignDemos'
-import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
 import { loadEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
@@ -31,11 +30,11 @@ function computeProgressPercent(entry, savedItems, tripId) {
   return Math.round((checked / items.length) * 100)
 }
 
-/** 0: 미작성 · 1~99: 작성중 · 100: 완료 */
+/** 0: 시작 전 · 1~99: 준비 중 · 100: 완료 */
 function getProgressStatusLabel(progress) {
-  if (progress <= 0) return '미작성'
+  if (progress <= 0) return '시작 전'
   if (progress >= 100) return '완료'
-  return '작성중'
+  return '준비 중'
 }
 
 function CalendarIcon({ className = 'h-4 w-4' }) {
@@ -81,9 +80,8 @@ function FilterIcon({ className = 'h-6 w-6' }) {
 }
 
 const FILTER_TABS = [
-  { id: 'all', label: '전체' },
-  { id: 'draft', label: '미작성' },
-  { id: 'writing', label: '작성중' },
+  { id: 'draft', label: '시작 전' },
+  { id: 'writing', label: '준비 중' },
   { id: 'completed', label: '완료' },
 ]
 
@@ -103,7 +101,8 @@ function TripGuideArchiveInner({ tripId }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [entries, setEntries] = useState(() => loadGuideArchive(tripId))
   const [savedItems, setSavedItems] = useState(() => loadSavedItems(tripId))
-  const [filterTab, setFilterTab] = useState('all')
+  /** 기본: 시작 전. 같은 탭 재클릭으로 선택 해제되지 않음. */
+  const [filterTab, setFilterTab] = useState('draft')
   const [deleteMode, setDeleteMode] = useState(false)
   const [selectedEntryIds, setSelectedEntryIds] = useState([])
   /** 모바일: 필터 시트 — closed | open | closing(닫힘 애니메이션) */
@@ -118,7 +117,7 @@ function TripGuideArchiveInner({ tripId }) {
   /** 상세에서 저장 시 진행률 재계산(체크 상태는 entry 스토리지에 있음) */
   const [checklistRevision, setChecklistRevision] = useState(0)
 
-  const activeFilterLabel = FILTER_TABS.find((t) => t.id === filterTab)?.label ?? '전체'
+  const activeFilterLabel = FILTER_TABS.find((t) => t.id === filterTab)?.label ?? '필터'
 
   const openFilterSheet = useCallback(() => {
     setFilterEnterAnimActive(true)
@@ -224,7 +223,6 @@ function TripGuideArchiveInner({ tripId }) {
   }, [entries, savedItems, tripId, checklistRevision])
 
   const filtered = useMemo(() => {
-    if (filterTab === 'all') return entriesWithMeta
     if (filterTab === 'draft') return entriesWithMeta.filter((x) => x.progress === 0)
     if (filterTab === 'writing') return entriesWithMeta.filter((x) => x.progress > 0 && x.progress < 100)
     if (filterTab === 'completed') return entriesWithMeta.filter((x) => x.progress >= 100)
@@ -343,10 +341,14 @@ function TripGuideArchiveInner({ tripId }) {
       className="min-h-screen"
       style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)' }}
     >
-      <TripFlowMobileBar backTo="/" />
-
       {/* ——— 모바일: 헤더 ——— */}
       <div className="px-4 pb-2 pt-4 md:hidden">
+        <Link
+          to="/"
+          className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900"
+        >
+          ← 내 여행으로
+        </Link>
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-900/90">MY COLLECTIONS</p>
         <h1 className="mt-2 text-2xl font-extrabold leading-tight text-[#0a3d3d]">나의 체크리스트</h1>
         <button
@@ -707,6 +709,16 @@ function TripGuideArchiveInner({ tripId }) {
             })}
           </ul>
         )}
+        {entries.length > 0 ? (
+          <div className="mt-8 flex justify-center border-t border-slate-200/80 pt-8 md:mt-10 md:pt-10">
+            <Link
+              to="/trips/new/step2"
+              className="inline-block rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-teal-800"
+            >
+              여행 정보 입력하러 가기
+            </Link>
+          </div>
+        ) : null}
       </div>
     </div>
   )
