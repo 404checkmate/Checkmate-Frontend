@@ -4,6 +4,7 @@ import BrandLogo from '@/components/common/BrandLogo'
 import LegalConsentForm from '@/components/auth/LegalConsentForm'
 import {
   AUTH_CONSENT_PREVIEW_PARAM,
+  FEATURE_PROFILE_ONBOARDING_ENABLED,
   getActiveOnboardingSubject,
   getAuthConsentEntryRedirect,
   getOrCreateMockOAuthSubject,
@@ -12,7 +13,7 @@ import {
 } from '@/utils/onboardingGate'
 
 /**
- * 소셜 로그인 직후 — 이용약관·개인정보 동의 (필수) 후 온보딩으로 이동.
+ * 소셜 로그인 직후 — 이용약관·개인정보 동의 (필수) 후 홈 또는(온보딩 켜짐 시) 프로필 온보딩으로 이동.
  * `?preview=1`: 레이아웃 작업용(자동 리다이렉트 없음, 임시 세션만 설정).
  */
 export default function AuthConsentPage() {
@@ -41,7 +42,7 @@ export default function AuthConsentPage() {
       return
     }
     markLegalConsentAccepted(sub, { marketingOptIn: Boolean(marketingOptIn) })
-    navigate('/onboarding', { replace: true })
+    navigate(FEATURE_PROFILE_ONBOARDING_ENABLED ? '/onboarding' : '/', { replace: true })
   }, [navigate])
 
   return (
@@ -69,7 +70,9 @@ export default function AuthConsentPage() {
             약관에 동의해 주세요
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            필수 항목에 동의하시면 프로필 입력 단계로 이동합니다.
+            {FEATURE_PROFILE_ONBOARDING_ENABLED
+              ? '필수 항목에 동의하시면 프로필 입력 단계로 이동합니다.'
+              : '필수 항목에 동의하시면 서비스를 바로 이용하실 수 있어요.'}
           </p>
         </header>
 

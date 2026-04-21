@@ -1,75 +1,140 @@
 /**
- * HomePage 목데이터
- *
- * 피처 카드, 푸터 링크 등 반복 렌더링에 사용되는 정적 데이터입니다.
- * 추후 CMS 또는 API로 교체 시 이 파일만 수정하면 됩니다.
+ * HomePage 목데이터 (랜딩 레이아웃)
+ * 카피·톤: CHECKMATE — 차분한 틸/민트 계열 브랜드와 맞춤
  */
 
-/* ─────────────────────────────────────────────
-   SVG path 상수 (아이콘)
-───────────────────────────────────────────── */
-const ICON_PATHS = {
-  locationSimple:
-    'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',
-  checklist:
-    'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
-}
-
-/* ─────────────────────────────────────────────
-   피처 카드 데이터
-   variant: 'light' | 'highlight'
-───────────────────────────────────────────── */
-export const FEATURE_CARDS = [
-  {
-    id: 'why-checklist',
-    variant: 'light',
-    desktopIcon: { bg: 'bg-cyan-50', color: 'text-cyan-500', path: ICON_PATHS.locationSimple },
-    kicker: '왜 쓰면 좋을까?',
-    title: '조건만 입력하면,\n메이트가 자동 생성해드려요!',
-    description:
-      '여행 전, 아직도 여기저기 찾아보고 계신가요?',
-    /** 대화체 말풍선 — 원형 번호 뱃지 없이 나열 */
-    showStepNumbers: false,
-    steps: [
-      '아직도 여행 가기 전에 블로그, 유튜브, SNS에서 힘들게 찾고 계세요?',
-      '간단한 조건 입력만으로 메이트가 필요한 준비물과 주의사항을 \n한 번에 정리해드려요!',
-      '이제 메이트가 여러분의 여행 전 부담을 덜어드릴게요!',
-    ],
-  },
-  {
-    id: 'how-to-use',
-    variant: 'highlight',
-    desktopIcon: { bg: 'bg-amber-300', color: 'text-amber-800', path: ICON_PATHS.checklist },
-    kicker: '어떻게 이용하지?',
-    title: '저장하고, 열고, 체크하면 됩니다',
-    description: '복잡한 단계 없이 저장 → 확인 → 체크 흐름만 기억하세요.',
-    steps: [
-      '여행과 일정을 정한 뒤, 필요한 준비 항목을 찾아 저장합니다.',
-      '리스트를 다시 열고, 필요한 항목을 추가, 체크합니다.',
-      '체크리스트에서 하나씩 확인하며 출발 전까지 마무리합니다.',
-    ],
-    progress: { value: '3', label: '단계로 충분합니다' },
-  },
-]
-
-/* ─────────────────────────────────────────────
-   푸터 링크 데이터
-───────────────────────────────────────────── */
-export const FOOTER_SECTIONS = [
-  {
-    id: 'platform',
-    title: '서비스',
-    links: ['요금 안내', '연동·제휴', '기업·단체 문의'],
-  },
-  {
-    id: 'company',
-    title: '회사 소개',
-    links: ['서비스 소개', '운영 원칙', '문의하기'],
-  },
-]
+import homeHeroOceanSunsetUrl from '@/assets/home-hero-ocean-sunset.png'
 
 export const FOOTER_BOTTOM_LINKS = [
   { label: '문의하기', href: '#' },
   { label: '개인정보 처리방침', href: '#' },
   { label: '서비스 이용약관', href: '#' },
 ]
+
+export const FOOTER_SECTIONS = [
+  {
+    id: 'support',
+    title: '고객지원',
+    links: ['이용 가이드', '공지사항', '자주 묻는 질문'],
+  },
+  {
+    id: 'company',
+    title: '회사',
+    links: ['서비스 소개', '브랜드 스토리', '채용'],
+  },
+  {
+    id: 'legal',
+    title: '법적 고지',
+    links: ['이용약관', '개인정보처리방침', '운영 정책'],
+  },
+  {
+    id: 'contact',
+    title: '문의',
+    links: ['제휴·협력', 'B2B 문의', 'press@checkmate.app'],
+  },
+]
+
+export const FOOTER_SOCIAL_LINKS = [
+  { label: 'LinkedIn', href: '#', icon: 'linkedin' },
+  { label: 'Instagram', href: '#', icon: 'instagram' },
+]
+
+export const LANDING_SECTION_IDS = {
+  features: 'landing-features',
+  how: 'landing-how',
+}
+
+/**
+ * 히어로 메인 헤딩 — 순서대로 <br />로 연결
+ * 한 줄이 [앞, 강조, 뒤] 배열이면 가운데만 보라 그라데이션(HomePage)
+ */
+export const HOME_HERO_TITLE_LINES = [
+  '「뭐 챙기더라?」',
+  '검색 탭만 몇 개였죠?',
+  ['목적지 맞춤 ', 'AI 체크리스트', ','],
+  '지금 시작하세요.',
+]
+
+export const HOME_HERO_SUBTITLE =
+  '정보를 찾기 위한 반복 탐색 없이, 여행지에 맞는 준비 항목을 AI가 제안합니다. 필요한 것만 골라 저장하고 체크하며 준비하면 됩니다.'
+
+/** 히어로 배경 — 브랜드 제공 PNG (일몰·청록 바다) */
+export const HOME_HERO_BG = homeHeroOceanSunsetUrl
+
+export const HOME_CTA_SIDE_IMAGE =
+  'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1200&auto=format&fit=crop'
+
+/** 피처 섹션 키커 — “왜 쓰는가” 톤 */
+export const HOME_FEATURE_KICKER = 'CHECKMATE · 여행 준비를 가볍게 만드는 이유'
+
+/** 피처 섹션 메인 헤드라인 — 가치 제안(이유), 줄바꿈은 HomePage 에서 처리 */
+export const HOME_FEATURE_HEADING = {
+  line1: '여행은 설레는데 준비만 무겁다면,',
+  line2: '그 부담을 덜어드립니다',
+}
+
+export const HOME_FEATURE_CARDS = [
+  {
+    id: 'auto',
+    icon: 'folder',
+    accent: 'teal',
+    title: '흩어진 탭·메모 대신, 한 화면에서 시작해요',
+    description:
+      '북마크와 캡처를 뒤지느라 시간 쓰지 마세요. 목적지와 일정만 알려 주면 맞춤 준비 목록을 한 번에 받아볼 수 있어요.',
+  },
+  {
+    id: 'care',
+    icon: 'network',
+    accent: 'amber',
+    title: '빠뜨릴까 불안한 마음을, 체크로 조금 덜어요',
+    description:
+      '저장해 둔 리스트를 언제든 다시 열고 항목을 체크하며 정리할 수 있어요. 출발 직전·짐 싸기 전 마지막 점검도 같은 곳에서 이어가요.',
+  },
+  {
+    id: 'smart',
+    icon: 'list',
+    accent: 'cyan',
+    title: '정리된 흐름이라, 머릿속이 덜 복잡해져요',
+    description:
+      '이동·숙박·서류처럼 흐름이 잡혀 있어 “다음에 뭘 챙기지?”를 금방 파악할 수 있어요. 여러 앱과 메모를 오가며 정리할 부담이 줄어듭니다.',
+  },
+]
+
+export const HOME_PROCESS_HEADING = '저장하고, 열고, 체크하면 끝나요'
+
+export const HOME_PROCESS_STEPS = [
+  {
+    title: '여행 조건 입력하기',
+    description: '가는 곳과 날짜, 여행 스타일에 맞게 정보를 입력해 주세요.',
+  },
+  {
+    title: '체크리스트 받기',
+    description: '체크메이트가 상황에 맞는 준비 목록을 만들어 드립니다.',
+  },
+  {
+    title: '보관함에서 체크하기',
+    description: '저장한 리스트를 열고 항목을 체크하며 출발 전까지 마무리해 보세요.',
+  },
+]
+
+/** 홈 CTA 배너 — 나의 체크리스트(/trips/:id/guide-archive) 안내 (헤더와 동일 데모 tripId) */
+export const HOME_CTA = {
+  title: {
+    line1: '저장해 둔 체크리스트,',
+    line2: '나만의 체크리스트로 만들어요',
+  },
+  subtitle:
+    '여행 준비할 때 골라 담은 목록이 모이는 보관함이에요. 리스트를 열고 항목을 체크하며 출발 전 준비를 마무리하고, 계획 중인 여행과 지난 일정을 한곳에서 관리해 보세요.',
+  buttonLabel: '나의 체크리스트로',
+  buttonTo: '/trips/1/guide-archive',
+}
+
+/** 랜딩 하단 캐치프레이즈 — 1행 카피 + 2행은 로고 + afterLogo (줄바꿈) */
+export const HOME_CATCHPHRASE_DISPLAY = {
+  line1: '빠짐없는 여행 준비,',
+  afterLogo: '와 한곳에서 완성해 보세요.',
+}
+
+/** 히어로·푸터 등에 쓰는 짧은 브랜드 설명 (HomePage에서도 사용 가능) */
+export const HOME_BRAND_TAGLINE =
+  '저장부터 체크까지 이어지는 여행 준비. CHECKMATE가 동행합니다.'

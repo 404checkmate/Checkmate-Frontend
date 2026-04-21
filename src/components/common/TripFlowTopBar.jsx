@@ -12,9 +12,12 @@ export function TripFlowDesktopBar({
   showBackIcon = true,
   label,
   ariaLabel,
+  /** `start`: 좌측 정렬(예: step2 홈으로), 기본 `end`는 우측 */
+  align = 'end',
 }) {
+  const justify = align === 'start' ? 'justify-start' : 'justify-end'
   return (
-    <div className={`relative z-[35] flex justify-end ${className}`}>
+    <div className={`relative z-[35] flex ${justify} ${className}`}>
       {backTo != null && backTo !== '' ? (
         <BackButton to={backTo} showIcon={showBackIcon} label={label} ariaLabel={ariaLabel} />
       ) : (

@@ -177,7 +177,9 @@ export default function TripNewStep5Page() {
                   {EDITORIAL_PICK.eyebrow}
                 </p>
                 <p className="text-xl font-extrabold leading-snug">{EDITORIAL_PICK.title}</p>
-                <p className="text-sm text-white/85 mt-2 max-w-sm">{EDITORIAL_PICK.description}</p>
+                <p className="whitespace-pre-line text-sm text-white/85 mt-2 max-w-sm">
+                  {EDITORIAL_PICK.description}
+                </p>
               </div>
             </div>
           </div>

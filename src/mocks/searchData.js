@@ -5,7 +5,10 @@
  * (MVP: 날짜·지역별 세부 안내는 제외) API 연동 시 이 구조를 응답 타입으로 쓸 수 있습니다.
  */
 
-/** 카테고리 필터 탭 — `/trips/:id/search` 상단 탭과 동일 순서 */
+/**
+ * 서브 카테고리 필터 탭 — `/trips/:id/search`에서 「기내 반입 / 위탁 수하물」 선택 후
+ * 항목 유형(전체·준비물·…) 필터에 쓰는 순서입니다.
+ */
 export const CATEGORIES = [
   { value: 'all', label: '전체' },
   { value: 'supplies', label: '준비물' },

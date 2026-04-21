@@ -35,6 +35,24 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * 홈(/) 랜딩 전용 — HomePage 에서 documentElement 에 `home-page-scroll-snap` 클래스를 붙일 때만 적용.
+ * 휠/스와이프 시 한 번에 한 섹션 단위로 멈춤 (scroll-snap-stop: always 는 섹션에 지정).
+ * 마지막은 캐치프레이즈+푸터를 HomePage 의 SNAP_TAIL_GROUP 으로 묶어, 그 사이만 스냅 비적용.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html.home-page-scroll-snap {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 3.5rem;
+  }
+
+  @media (max-width: 767px) {
+    html.home-page-scroll-snap {
+      scroll-padding-bottom: 4.5rem;
+    }
+  }
+}
+
 body {
   margin: 0;
   font-family: 'SeoulNotice', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;

@@ -6,8 +6,44 @@ import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
 import { appendGuideArchiveEntry, getGuideArchiveEntry, patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
-import { buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
+import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
+import {
+  TRIP_MINT_PAGE_BACKGROUND_STYLE,
+  TRIP_SEARCH_MERGE_PAGE_BACKGROUND_STYLE,
+} from '@/utils/tripMintPageBackground'
+import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
+import {
+  BAGGAGE_CARRY_ON,
+  BAGGAGE_CHECKED,
+  BAGGAGE_SECTION_LABEL,
+  resolveBaggageSection,
+} from '@/utils/guideArchiveBaggage'
 import aiSparklesImg from '@/assets/ai-sparkles.png'
+
+/** 수하물 필터 — 전체: 기내+위탁 모두 */
+const BAGGAGE_FILTER_ALL = 'all'
+
+const SEARCH_BAGGAGE_TABS = [
+  { value: BAGGAGE_FILTER_ALL, label: '전체' },
+  { value: BAGGAGE_CARRY_ON, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CARRY_ON] },
+  { value: BAGGAGE_CHECKED, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CHECKED] },
+]
+
+/** 현재 풀 안에서 항목 유형(AI·준비물…)별 그룹 — 보관함 상세와 같이 수하물 블록 안에서 재사용 */
+function buildSubcategoryGroups(itemsPool) {
+  const order = CATEGORIES.filter((c) => c.value !== 'all').map((c) => c.value)
+  const sectionOrder = ['ai_recommend', ...order.filter((v) => v !== 'ai_recommend')]
+  return sectionOrder
+    .map((value) => {
+      const cat = CATEGORIES.find((c) => c.value === value)
+      if (!cat) return null
+      const items = itemsPool
+        .filter((i) => i.category === value)
+        .sort((a, b) => a.title.localeCompare(b.title, 'ko'))
+      return { categoryValue: value, categoryLabel: cat.label, items }
+    })
+    .filter((g) => g && g.items.length > 0)
+}
 
 const trackEvent = (eventName, properties = {}) => {
   console.debug('[Event]', eventName, properties)
@@ -26,7 +62,7 @@ function mapMockItemToArchiveItem(i) {
   }
 }
 
-/** PNG를 마스크로 써서 버튼·섹션 제목에 맞는 단색으로 표시 */
+/** PNG를 마스크로 써서 버튼·섹션 제목에 맞는 단색으로 표시 (AI 탭은 보라 톤) */
 function AiSparkleMaskIcon({ selected, className = 'h-3.5 w-3.5' }) {
   const mask = {
     maskImage: `url(${aiSparklesImg})`,
@@ -63,13 +99,16 @@ function TripSearchInner({ tripId }) {
 
   /** 병합 모드: 보관함에서 연 “여행 필수품 추가” 화면 전용 카피 */
   const pageMainTitle = mergeToArchive ? '여행 필수품 추가' : TRIP_SEARCH_CONTEXT.title
-  const sectionHeading = mergeToArchive ? '카테고리별 추가 선택' : '카테고리별 필수품'
+  /** 보관함 상세 「카테고리별 선택」 카드 제목과 동일 톤 — 병합 모드만 문구 구분 */
+  const categoryCardHeading = mergeToArchive ? '카테고리별 추가 선택' : '카테고리별 선택'
   const existingArchiveItemIds = useMemo(
     () => new Set((mergeToArchive ? archiveEntry.items ?? [] : []).map((i) => String(i.id))),
     [mergeToArchive, archiveEntry],
   )
 
   const searchStartRef = useRef(0)
+  /** 기내 반입 / 위탁 수하물 — 보관함 상세 수하물 구간과 동일 개념 */
+  const [selectedBaggage, setSelectedBaggage] = useState(BAGGAGE_CARRY_ON)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [savedIds, setSavedIds] = useState(() => new Set(loadSavedItems(tripId).map((x) => String(x.id))))
   /** 체크리스트에 넣을 항목 선택 (id 문자열) */
@@ -88,10 +127,23 @@ function TripSearchInner({ tripId }) {
     })
   }, [tripId, mergeToArchive, archiveEntryId])
 
+  const handleBaggageChange = (baggage) => {
+    if (baggage !== selectedBaggage) {
+      trackEvent('search_baggage_change', {
+        trip_id: tripId,
+        from_baggage: selectedBaggage,
+        to_baggage: baggage,
+      })
+    }
+    setSelectedBaggage(baggage)
+    setSelectedCategory('all')
+  }
+
   const handleCategoryChange = (category) => {
     if (selectedCategory !== 'all' && category !== selectedCategory) {
       trackEvent('research_trigger', {
         trip_id: tripId,
+        baggage: selectedBaggage,
         from_category: selectedCategory,
         to_category: category,
       })
@@ -238,6 +290,7 @@ function TripSearchInner({ tripId }) {
       phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
       items: itemsToSave.map((i) => ({
         id: i.id,
+        baggageType: i.baggageType,
         category: i.category,
         categoryLabel: i.categoryLabel,
         title: i.title,
@@ -275,195 +328,433 @@ function TripSearchInner({ tripId }) {
 
   const handleModalBack = () => setLeaveModalOpen(false)
 
-  /** 전체 탭: AI 맞춤 추천 섹션을 맨 위, 나머지는 탭 순서(준비물 → 사전 예약/신청 → 출국 전 확인) */
-  const groupedItemsAll = useMemo(() => {
-    const order = CATEGORIES.filter((c) => c.value !== 'all').map((c) => c.value)
-    const sectionOrder = ['ai_recommend', ...order.filter((v) => v !== 'ai_recommend')]
-    return sectionOrder
-      .map((value) => {
-        const cat = CATEGORIES.find((c) => c.value === value)
-        if (!cat) return null
-        const items = MOCK_ITEMS.filter((i) => i.category === value).sort((a, b) =>
-          a.title.localeCompare(b.title, 'ko'),
-        )
-        return { categoryValue: value, categoryLabel: cat.label, items }
-      })
-      .filter((g) => g && g.items.length > 0)
-  }, [])
+  /** 선택한 수하물 구간(전체 | 기내 | 위탁)에 해당하는 목록만 */
+  const baggageFilteredItems = useMemo(() => {
+    if (selectedBaggage === BAGGAGE_FILTER_ALL) return MOCK_ITEMS
+    return MOCK_ITEMS.filter((i) => resolveBaggageSection(i) === selectedBaggage)
+  }, [selectedBaggage])
 
-  /** 단일 카테고리 탭: 제목 ㄱㄴㄷ 순 */
+  /** 목록에 표시할 수하물 구간 순서(전체 필터면 기내 → 위탁, 아니면 선택 한 구간만) */
+  const baggageSectionKeys = useMemo(() => {
+    if (selectedBaggage === BAGGAGE_FILTER_ALL) return [BAGGAGE_CARRY_ON, BAGGAGE_CHECKED]
+    return [selectedBaggage]
+  }, [selectedBaggage])
+
+  /** 수하물 구간별 → 항목 유형별 그룹(조회 리스트에서 기내/위탁이 항상 나뉨) */
+  const groupedItemsByBaggage = useMemo(() => {
+    return baggageSectionKeys
+      .map((bagKey) => {
+        const pool = baggageFilteredItems.filter((i) => resolveBaggageSection(i) === bagKey)
+        const grouped = buildSubcategoryGroups(pool)
+        return { bagKey, bagTitle: BAGGAGE_SECTION_LABEL[bagKey], grouped }
+      })
+      .filter((section) => section.grouped.length > 0)
+  }, [baggageFilteredItems, baggageSectionKeys])
+
+  /** 단일 서브 카테고리: 수하물 구간별 목록(기내 / 위탁 분리) */
+  const singleCategoryBaggageSections = useMemo(() => {
+    if (selectedCategory === 'all') return []
+    return baggageSectionKeys
+      .map((bagKey) => ({
+        bagKey,
+        bagTitle: BAGGAGE_SECTION_LABEL[bagKey],
+        items: baggageFilteredItems
+          .filter((i) => resolveBaggageSection(i) === bagKey && i.category === selectedCategory)
+          .sort((a, b) => a.title.localeCompare(b.title, 'ko')),
+      }))
+      .filter((s) => s.items.length > 0)
+  }, [selectedCategory, baggageFilteredItems, baggageSectionKeys])
+
   const sortedItemsSingleCategory = useMemo(() => {
     if (selectedCategory === 'all') return []
-    return MOCK_ITEMS.filter((item) => item.category === selectedCategory).sort((a, b) =>
-      a.title.localeCompare(b.title, 'ko'),
-    )
-  }, [selectedCategory])
+    return singleCategoryBaggageSections.flatMap((s) => s.items)
+  }, [selectedCategory, singleCategoryBaggageSections])
 
-  const pageBg = 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)'
+  const visibleItemCount = selectedCategory === 'all' ? baggageFilteredItems.length : sortedItemsSingleCategory.length
+
+  /** 현재 탭에서 선택 가능한 항목(이미 보관함에 있는 것 제외) */
+  const selectableItemsInView = useMemo(() => {
+    const list = selectedCategory === 'all' ? baggageFilteredItems : sortedItemsSingleCategory
+    return list.filter((i) => !existingArchiveItemIds.has(String(i.id)))
+  }, [selectedCategory, sortedItemsSingleCategory, baggageFilteredItems, existingArchiveItemIds])
+
+  const allSelectableInViewSelected = useMemo(() => {
+    if (selectableItemsInView.length === 0) return false
+    return selectableItemsInView.every((i) => selectedForSave.has(String(i.id)))
+  }, [selectableItemsInView, selectedForSave])
+
+  const handleSelectAllInView = () => {
+    if (selectableItemsInView.length === 0) return
+    if (allSelectableInViewSelected) {
+      setSelectedForSave((prev) => {
+        const next = new Set(prev)
+        for (const item of selectableItemsInView) {
+          next.delete(String(item.id))
+        }
+        return next
+      })
+      trackEvent('search_deselect_all_in_view', {
+        trip_id: tripId,
+        baggage: selectedBaggage,
+        category: selectedCategory,
+        removed_count: selectableItemsInView.length,
+        merge_to_archive: mergeToArchive,
+      })
+      return
+    }
+    setSelectedForSave((prev) => {
+      const next = new Set(prev)
+      for (const item of selectableItemsInView) {
+        next.add(String(item.id))
+      }
+      return next
+    })
+    trackEvent('search_select_all_in_view', {
+      trip_id: tripId,
+      baggage: selectedBaggage,
+      category: selectedCategory,
+      added_count: selectableItemsInView.filter((i) => !selectedForSave.has(String(i.id))).length,
+      merge_to_archive: mergeToArchive,
+    })
+  }
+
+  /** 「전체」 탭 — 섹션(카테고리) 단위 전체 선택/해제 */
+  const selectionProgressPercent = useMemo(() => {
+    if (MOCK_ITEMS.length === 0) return 0
+    return Math.min(100, Math.round((selectedForSave.size / MOCK_ITEMS.length) * 100))
+  }, [selectedForSave.size])
+
+  const handleToggleSelectAllInGroup = (group) => {
+    const selectable = group.items.filter((i) => !existingArchiveItemIds.has(String(i.id)))
+    if (selectable.length === 0) return
+    const allOn = selectable.every((i) => selectedForSave.has(String(i.id)))
+    setSelectedForSave((prev) => {
+      const next = new Set(prev)
+      if (allOn) {
+        for (const item of selectable) next.delete(String(item.id))
+      } else {
+        for (const item of selectable) next.add(String(item.id))
+      }
+      return next
+    })
+    trackEvent(allOn ? 'search_deselect_all_in_group' : 'search_select_all_in_group', {
+      trip_id: tripId,
+      baggage: selectedBaggage,
+      group_category: group.categoryValue,
+      item_count: selectable.length,
+      merge_to_archive: mergeToArchive,
+    })
+  }
+
+  const headerDateLine =
+    mergeToArchive && archiveEntry
+      ? buildGuideArchiveDateLine(archiveEntry)
+      : TRIP_SEARCH_CONTEXT.tripWindowLabel
+
+  const headerDescription =
+    mergeToArchive && archiveEntry
+      ? `「${buildGuideArchiveListTitle(archiveEntry)}」에 담을 준비물을 고르세요.`
+      : '골라 저장한 체크리스트로 필수품을 빠짐없이 챙겨보세요!'
+
+  const pageBackgroundStyle = mergeToArchive
+    ? TRIP_SEARCH_MERGE_PAGE_BACKGROUND_STYLE
+    : TRIP_MINT_PAGE_BACKGROUND_STYLE
 
   return (
-    <div className="min-h-screen" style={{ background: pageBg }}>
-      <div className="mx-auto max-w-6xl px-5 py-8 md:px-8 md:py-12">
-        <div className="mb-8">
-          {mergeToArchive ? (
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="mb-3 flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900 md:hidden"
-            >
-              ← 이전으로
-            </button>
-          ) : (
-            <Link
-              to="/"
-              className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900 md:hidden"
-            >
-              ← 내 여행으로
-            </Link>
-          )}
+    <div className="min-h-screen" style={pageBackgroundStyle}>
+      <div className="mx-auto flex max-w-6xl items-center px-4 pt-4 md:pt-8">
+        {mergeToArchive ? (
           <button
             type="button"
-            onClick={() => (mergeToArchive ? navigate(-1) : navigate('/'))}
-            className="mb-3 hidden items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-900 md:flex"
+            onClick={() => navigate(`/trips/${tripId}/guide-archive`)}
+            className="text-sm font-medium text-teal-700 hover:text-teal-900"
           >
-            {mergeToArchive ? '← 이전으로' : '← 내 여행으로'}
+            ← 나의 체크리스트로
           </button>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">{pageMainTitle}</h1>
-          {mergeToArchive && archiveEntry ? (
-            <p className="mt-2 text-sm text-gray-600">
-              <span className="font-semibold text-gray-800">대상 체크리스트</span>
-              <span className="text-gray-500"> — </span>
-              {buildGuideArchiveListTitle(archiveEntry)}
-            </p>
-          ) : null}
+        ) : (
+          <Link to="/" className="text-sm font-medium text-teal-700 hover:text-teal-900">
+            ← 내 여행으로
+          </Link>
+        )}
+      </div>
+
+      <div className="mx-auto max-w-3xl px-5 pb-36 pt-5 md:px-4 md:pb-28 md:pt-6">
+        <header className="mb-6">
+          <h1 className="text-2xl font-extrabold leading-snug tracking-tight text-gray-900 md:text-3xl">
+            {pageMainTitle}
+          </h1>
+          <p className="mt-2 flex items-center gap-2 text-base font-semibold text-gray-700 md:text-lg">
+            <span
+              className="inline-block h-2 w-2 shrink-0 rounded-full bg-teal-600 md:h-2.5 md:w-2.5"
+              aria-hidden
+            />
+            {headerDateLine}
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-gray-600">{headerDescription}</p>
           {archiveTargetMissing ? (
             <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
               연결된 체크리스트를 찾을 수 없어 일반 검색으로 표시합니다. 보관함에서 다시 들어와 주세요.
             </p>
           ) : null}
+        </header>
+
+        <div className="sticky top-0 z-20 -mx-5 mb-6 border-b border-slate-100/90 bg-white px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:rounded-xl md:border md:border-slate-100 md:bg-white md:px-5 md:py-4 md:shadow-sm">
+          <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+            <span>
+              {mergeToArchive ? '추가 선택' : '담기 선택'}{' '}
+              <span className="tabular-nums text-slate-800">{selectedForSave.size}</span>
+              {' / '}
+              <span className="tabular-nums text-slate-800">{MOCK_ITEMS.length}</span>
+            </span>
+            <span className="tabular-nums text-slate-800">{selectionProgressPercent}%</span>
+          </div>
+          <GuideArchiveProgressBar value={selectionProgressPercent} />
         </div>
 
-        {/* 카테고리별 필수품 */}
-        <section>
-          <h2 className="mb-4 text-lg font-extrabold text-gray-900">{sectionHeading}</h2>
+        <section
+          className="mb-8 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] md:p-5"
+          aria-label="카테고리 필터"
+        >
+          <h2 className="mb-3.5 text-lg font-extrabold tracking-tight text-gray-900">{categoryCardHeading}</h2>
 
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-thin">
-            {CATEGORIES.map((cat) => {
-              const isAi = cat.value === 'ai_recommend'
-              const selected = selectedCategory === cat.value
-              const tabClass = isAi
-                ? selected
-                  ? 'bg-amber-400 text-gray-900 shadow-md'
-                  : 'border-2 border-gray-100 bg-white/95 text-gray-800 shadow-sm hover:bg-cyan-50/80'
-                : selected
-                  ? 'bg-amber-400 text-gray-900 shadow-md'
-                  : 'border-2 border-gray-100 bg-white/95 text-gray-600 shadow-sm hover:bg-cyan-50/80'
+          <p id="search-baggage-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+            수하물 구간
+          </p>
+          <div
+            className="mb-5 flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
+            role="tablist"
+            aria-labelledby="search-baggage-label"
+          >
+            {SEARCH_BAGGAGE_TABS.map((tab) => {
+              const selected = selectedBaggage === tab.value
+              const tabClass = selected
+                ? 'border-2 border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-900/15'
+                : 'border-2 border-teal-100 bg-teal-50/80 text-teal-900 shadow-sm hover:border-teal-300 hover:bg-teal-100/80'
               return (
                 <button
-                  key={cat.value}
+                  key={tab.value}
                   type="button"
-                  onClick={() => handleCategoryChange(cat.value)}
-                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tabClass}`}
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => handleBaggageChange(tab.value)}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${tabClass}`}
                 >
-                  {isAi ? <AiSparkleMaskIcon selected={selected} /> : null}
-                  {cat.label}
+                  {tab.label}
                 </button>
               )
             })}
           </div>
 
-          {/* 총 검색 결과 건수 — 카테고리 탭과 무관하게 전체 목록 기준 */}
-          <p className="mb-5 text-sm font-semibold text-gray-700 md:text-base">
-            {mergeToArchive ? (
-              <>
-                추가 후보 <span className="tabular-nums">{MOCK_ITEMS.length}</span>개
-              </>
-            ) : (
-              <>
-                총 검색 결과 : <span className="tabular-nums">{MOCK_ITEMS.length}</span>개
-              </>
-            )}
+          <p id="search-subcategory-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+            항목 유형
           </p>
+          <div
+            className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
+            role="tablist"
+            aria-labelledby="search-subcategory-label"
+          >
+            {CATEGORIES.map((cat) => {
+              const isAi = cat.value === 'ai_recommend'
+              const selected = selectedCategory === cat.value
+              const tabClass = isAi
+                ? selected
+                  ? 'border-2 border-violet-600 bg-violet-600 text-white shadow-md shadow-violet-900/20'
+                  : 'border-2 border-violet-200 bg-violet-50/95 text-violet-900 shadow-sm hover:border-violet-300 hover:bg-violet-100/90'
+                : selected
+                  ? 'border-2 border-sky-600 bg-sky-600 text-white shadow-md shadow-sky-900/15'
+                  : 'border-2 border-sky-100 bg-slate-50/80 text-slate-600 shadow-sm hover:border-sky-200 hover:bg-sky-50'
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => handleCategoryChange(cat.value)}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tabClass}`}
+                >
+                  {isAi ? <AiSparkleMaskIcon selected={selected} className="h-3.5 w-3.5" /> : null}
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
+        </section>
 
+        <div className="mb-6 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
+          <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
+            <span className="text-teal-900">
+              {selectedBaggage === BAGGAGE_FILTER_ALL ? '전체 구간' : BAGGAGE_SECTION_LABEL[selectedBaggage]}
+            </span>
+            <span className="mx-1.5 text-gray-400" aria-hidden>
+              ·
+            </span>
+            <span className="text-slate-700">
+              {selectedCategory === 'all' ? '전체 유형' : CATEGORIES.find((c) => c.value === selectedCategory)?.label}
+            </span>
+            <span className="ml-1.5 tabular-nums text-gray-900">{visibleItemCount}</span>개
+          </p>
+          <button
+            type="button"
+            onClick={handleSelectAllInView}
+            disabled={selectableItemsInView.length === 0}
+            className="shrink-0 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50 disabled:pointer-events-none disabled:opacity-40"
+          >
+            {allSelectableInViewSelected ? '전체 해제' : '전체 선택'}
+            <span className="ml-1 font-semibold text-sky-600 tabular-nums">({selectableItemsInView.length})</span>
+          </button>
+        </div>
+
+        <section aria-label="준비물 목록">
           {selectedCategory === 'all' ? (
             <div className="space-y-10">
-              {groupedItemsAll.map((group) => (
-                <div key={group.categoryValue}>
-                  <h3
-                    className={`mb-3 flex items-center gap-2 border-b pb-2 text-base font-extrabold ${
-                      group.categoryValue === 'ai_recommend'
-                        ? 'border-violet-200 text-violet-950'
-                        : 'border-gray-200 text-gray-900'
-                    }`}
-                  >
-                    {group.categoryValue === 'ai_recommend' ? (
-                      <AiSparkleMaskIcon selected={false} className="h-4 w-4" />
-                    ) : null}
-                    {group.categoryLabel}
-                  </h3>
-                  <div className="flex flex-col gap-3">
-                    {group.items.map((item) => (
-                      <SearchResultItem
-                        key={item.id}
-                        item={item}
-                        selected={selectedForSave.has(String(item.id))}
-                        inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
-                        onToggle={() => toggleItemSelect(item)}
-                      />
-                    ))}
+              {groupedItemsByBaggage.length === 0 ? (
+                <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-sm text-gray-500 shadow-sm">
+                  이 수하물 구간에 표시할 항목이 없습니다.
+                </div>
+              ) : null}
+              {groupedItemsByBaggage.map(({ bagKey, bagTitle, grouped }) => (
+                <div key={bagKey} className="space-y-6">
+                  <div className="flex flex-col gap-2 border-b border-teal-100/90 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                    <h2 className="text-base font-extrabold tracking-tight text-[#0a3d3d]">{bagTitle}</h2>
+                  </div>
+                  <div className="space-y-8">
+                    {grouped.map((group) => {
+                      const selectableInGroup = group.items.filter(
+                        (i) => !existingArchiveItemIds.has(String(i.id)),
+                      )
+                      const allInGroupSelected =
+                        selectableInGroup.length > 0 &&
+                        selectableInGroup.every((i) => selectedForSave.has(String(i.id)))
+                      const isAiGroup = group.categoryValue === 'ai_recommend'
+                      return (
+                        <div
+                          key={`${bagKey}-${group.categoryValue}`}
+                          className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm md:p-5"
+                        >
+                          <div
+                            className={`mb-3 flex flex-wrap items-center justify-between gap-2 border-b pb-2 ${
+                              isAiGroup ? 'border-violet-200/90' : 'border-teal-100/90'
+                            }`}
+                          >
+                            <h3
+                              className={`flex min-w-0 items-center gap-2 text-base font-extrabold tracking-tight ${
+                                isAiGroup ? 'text-violet-950' : 'text-[#0a3d3d]'
+                              }`}
+                            >
+                              {isAiGroup ? <AiSparkleMaskIcon selected={false} className="h-4 w-4 shrink-0" /> : null}
+                              {group.categoryLabel}
+                            </h3>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSelectAllInGroup(group)}
+                              disabled={selectableInGroup.length === 0}
+                              className={`shrink-0 rounded-lg border bg-white px-2.5 py-1.5 text-xs font-bold shadow-sm transition-colors disabled:pointer-events-none disabled:opacity-40 sm:text-sm sm:px-3 ${
+                                isAiGroup
+                                  ? 'border-violet-200 text-violet-900 hover:bg-violet-50'
+                                  : 'border-sky-200 text-sky-800 hover:bg-sky-50'
+                              }`}
+                            >
+                              {allInGroupSelected ? '전체 해제' : '전체 선택'}
+                              <span
+                                className={`ml-1 font-semibold tabular-nums ${
+                                  isAiGroup ? 'text-violet-600' : 'text-sky-600'
+                                }`}
+                              >
+                                ({selectableInGroup.length})
+                              </span>
+                            </button>
+                          </div>
+                          <div className="flex flex-col gap-3">
+                            {group.items.map((item) => (
+                              <SearchResultItem
+                                key={item.id}
+                                item={item}
+                                selected={selectedForSave.has(String(item.id))}
+                                inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+                                onToggle={() => toggleItemSelect(item)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-3">
-                {sortedItemsSingleCategory.map((item) => (
-                  <SearchResultItem
-                    key={item.id}
-                    item={item}
-                    selected={selectedForSave.has(String(item.id))}
-                    inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
-                    onToggle={() => toggleItemSelect(item)}
-                  />
-                ))}
-              </div>
-              {sortedItemsSingleCategory.length === 0 && (
+              {singleCategoryBaggageSections.length === 0 ? (
                 <div className="py-16 text-center text-sm text-gray-400">해당 카테고리에 항목이 없습니다.</div>
+              ) : (
+                <div className="space-y-10">
+                  {singleCategoryBaggageSections.map(({ bagKey, bagTitle, items }) => (
+                    <div key={bagKey} className="space-y-6">
+                      <div className="flex flex-col gap-2 border-b border-teal-100/90 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                        <h2 className="text-base font-extrabold tracking-tight text-[#0a3d3d]">{bagTitle}</h2>
+                      </div>
+                      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm md:p-5">
+                        <div
+                          className={`mb-3 border-b pb-2 ${
+                            selectedCategory === 'ai_recommend' ? 'border-violet-200/90' : 'border-teal-100/90'
+                          }`}
+                        >
+                          <h3
+                            className={`flex items-center gap-2 text-base font-extrabold tracking-tight ${
+                              selectedCategory === 'ai_recommend' ? 'text-violet-950' : 'text-[#0a3d3d]'
+                            }`}
+                          >
+                            {selectedCategory === 'ai_recommend' ? (
+                              <AiSparkleMaskIcon selected={false} className="h-4 w-4 shrink-0" />
+                            ) : null}
+                            {CATEGORIES.find((c) => c.value === selectedCategory)?.label ?? '준비물'}
+                          </h3>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          {items.map((item) => (
+                            <SearchResultItem
+                              key={item.id}
+                              item={item}
+                              selected={selectedForSave.has(String(item.id))}
+                              inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+                              onToggle={() => toggleItemSelect(item)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </>
           )}
-
-          {/* 저장 · 홈으로 */}
-          <div className="mt-8 flex flex-col gap-3 border-t border-gray-200/80 pt-6">
-            <p className="text-xs text-slate-600 md:text-sm">
-              추가할 항목 <span className="font-bold tabular-nums text-slate-800">{selectedForSave.size}</span>개
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={openSaveConfirmModal}
-                disabled={selectedForSave.size === 0}
-                className="min-h-12 flex-1 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md disabled:pointer-events-none disabled:opacity-40 sm:flex-none sm:min-w-[7.5rem] sm:px-8"
-              >
-                {mergeToArchive ? '추가' : '저장'}
-              </button>
-              <button
-                type="button"
-                onClick={openHomeConfirmModal}
-                className="min-h-12 flex-1 rounded-2xl border-2 border-gray-100 bg-white/95 px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-cyan-50/80 sm:flex-none sm:min-w-[7.5rem] sm:px-8"
-              >
-                {mergeToArchive ? '뒤로 가기' : '홈으로'}
-              </button>
-            </div>
-          </div>
         </section>
+      </div>
+
+      <div className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 py-3 md:bottom-0 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto flex max-w-3xl gap-3">
+          <button
+            type="button"
+            onClick={openHomeConfirmModal}
+            className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
+          >
+            {mergeToArchive ? '뒤로가기' : '홈으로'}
+          </button>
+          <button
+            type="button"
+            onClick={openSaveConfirmModal}
+            disabled={selectedForSave.size === 0}
+            className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
+          >
+            {mergeToArchive ? '추가' : '저장'}
+          </button>
+        </div>
       </div>
 
       {/* 저장 확인 → 가이드 보관함 이동 */}
       {saveConfirmModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-teal-950/40 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4"
           role="presentation"
           onClick={closeSaveConfirmModal}
         >
@@ -471,12 +762,12 @@ function TripSearchInner({ tripId }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="save-checklist-modal-title"
-            className="relative w-full max-w-md rounded-2xl border border-teal-100/90 bg-white p-6 shadow-2xl shadow-teal-900/15 ring-1 ring-teal-50"
+            className={`relative w-full rounded-2xl bg-white p-6 shadow-xl ${mergeToArchive ? 'max-w-md' : 'max-w-sm'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <h2
               id="save-checklist-modal-title"
-              className="text-center text-sm font-extrabold leading-relaxed text-gray-900 md:text-base md:leading-snug"
+              className={`text-center font-bold leading-snug text-gray-900 ${mergeToArchive ? 'mb-6 text-sm md:text-base' : 'mb-8 text-base'}`}
             >
               {mergeToArchive ? (
                 '선택한 항목을 이 체크리스트에 추가합니다. 확인 시 해당 체크리스트 화면으로 돌아갑니다.'
@@ -488,20 +779,20 @@ function TripSearchInner({ tripId }) {
                 </>
               )}
             </h2>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
               <button
                 type="button"
                 onClick={handleConfirmSaveAndGoArchive}
-                className="min-h-12 flex-1 rounded-2xl border-2 border-amber-300 bg-amber-50 py-3 text-sm font-bold text-amber-950 shadow-sm transition-colors hover:border-amber-400 hover:bg-amber-100"
+                className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md"
               >
                 확인
               </button>
               <button
                 type="button"
                 onClick={closeSaveConfirmModal}
-                className="min-h-12 flex-1 rounded-2xl border-2 border-teal-600 bg-white py-3 text-sm font-bold text-teal-800 shadow-sm transition-colors hover:bg-teal-50"
+                className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50"
               >
-                취소
+                닫기
               </button>
             </div>
           </div>
@@ -511,7 +802,7 @@ function TripSearchInner({ tripId }) {
       {/* 홈 이동 확인 모달 */}
       {leaveModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-teal-950/40 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4"
           role="presentation"
           onClick={handleModalBack}
         >
@@ -519,26 +810,26 @@ function TripSearchInner({ tripId }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="leave-modal-title"
-            className="relative w-full max-w-sm rounded-2xl border border-teal-100/90 bg-white p-6 shadow-2xl shadow-teal-900/15 ring-1 ring-teal-50"
+            className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="leave-modal-title" className="text-center text-base font-extrabold leading-snug text-gray-900">
+            <h2 id="leave-modal-title" className="mb-8 text-center text-base font-bold leading-snug text-gray-900">
               저장하지 않으시겠습니까?
             </h2>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
               <button
                 type="button"
                 onClick={handleLeaveWithoutSave}
-                className="min-h-12 flex-1 rounded-2xl border-2 border-amber-300 bg-amber-50 py-3 text-sm font-bold text-amber-950 shadow-sm transition-colors hover:border-amber-400 hover:bg-amber-100"
+                className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md"
               >
                 저장안함
               </button>
               <button
                 type="button"
                 onClick={handleModalBack}
-                className="min-h-12 flex-1 rounded-2xl border-2 border-teal-600 bg-white py-3 text-sm font-bold text-teal-800 shadow-sm transition-colors hover:bg-teal-50"
+                className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50"
               >
-                뒤로 가기
+                닫기
               </button>
             </div>
           </div>
@@ -554,7 +845,7 @@ function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, 
   if (inArchiveAlready) {
     return (
       <div
-        className={`w-full rounded-2xl border-2 border-gray-200 bg-cyan-50/40 p-4 text-left shadow-sm ${className}`.trim()}
+        className={`w-full rounded-2xl border-2 border-gray-200 bg-white p-4 text-left shadow-sm ${className}`.trim()}
         role="group"
         aria-label="이미 이 체크리스트에 담긴 항목"
       >
@@ -591,7 +882,7 @@ function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, 
 
   const btnShell = selected
     ? 'w-full cursor-pointer rounded-2xl border-2 border-amber-400 bg-amber-200/95 p-4 text-left shadow-sm ring-1 ring-amber-300/70 transition-all duration-200'
-    : 'w-full cursor-pointer rounded-2xl border-2 border-gray-100 bg-white/95 p-4 text-left shadow-sm transition-all duration-200 hover:bg-cyan-50/80'
+    : 'w-full cursor-pointer rounded-2xl border-2 border-gray-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:bg-gray-50'
 
   const checkShell = selected ? 'border-amber-600 bg-amber-600' : 'border-gray-300 bg-white'
 

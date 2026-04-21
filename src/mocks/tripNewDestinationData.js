@@ -3,6 +3,8 @@
  */
 
 import tripNewDestinationHero from '../assets/trip-new-destination-hero.png'
+/** 데스크톱 우측 패널 장식 PNG — TripNewStep3Page 마스코트와 동일 레이아웃·크기, 교체 시 이 파일만 갈아끼우면 됨 */
+import destinationDesktopRight from '../assets/destination-desktop-right.png'
 
 export const STEP_DESTINATION_CONFIG = {
   totalSteps: 4,
@@ -10,6 +12,9 @@ export const STEP_DESTINATION_CONFIG = {
 }
 
 export const HERO_IMAGE = tripNewDestinationHero
+
+/** `/trips/new/destination` 우측 — step3와 동일한 `img` 클래스·배치에 사용 */
+export const DESTINATION_DESKTOP_RIGHT_IMAGE = destinationDesktopRight
 
 export const PREVIEW_IMAGE =
   'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=600&auto=format&fit=crop'
@@ -28,7 +33,7 @@ export const DESTINATION_ICON_PATHS = {
  * name: 표시·검색 기준 국가명
  * aliases: 보조 검색어 (예: '한국' → 대한민국)
  */
-/** 모바일 빠른 선택 칩 — 표시 라벨 → `COUNTRY_ARRIVAL_OPTIONS`의 `name`과 매칭 */
+/** 빠른 선택(추천) 칩 — 모바일·데스크톱 공용, 표시 라벨 → `COUNTRY_ARRIVAL_OPTIONS`의 `name`과 매칭 */
 export const MOBILE_QUICK_DESTINATION_CHIPS = [
   { label: '파리', countryName: '프랑스' },
   { label: '도쿄', countryName: '일본' },
