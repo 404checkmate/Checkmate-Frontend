@@ -4,6 +4,7 @@ import RootLayout from '@/layouts/RootLayout'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import AuthConsentPage from '@/pages/AuthConsentPage'
+import AuthCallbackPage from '@/pages/AuthCallbackPage'
 import OnboardingProfilePage from '@/pages/OnboardingProfilePage'
 /* 회원가입 UI 보관: 복구 시 아래 라우트를 SignupPage로 되돌리고 import 활성화 */
 // import SignupPage from '@/pages/SignupPage'
@@ -49,6 +50,7 @@ const AppRoutes = () => {
         { path: '/',                    element: <HomePage /> },
         { path: '/login',               element: <LoginPage /> },
         { path: '/auth/consent',        element: <AuthConsentPage /> },
+        { path: '/auth/callback',       element: <AuthCallbackPage /> },
         { path: '/onboarding',          element: <OnboardingProfilePage /> },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <MyPage /> },
