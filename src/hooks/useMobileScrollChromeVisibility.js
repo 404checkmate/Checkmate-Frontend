@@ -1,24 +1,24 @@
 import { useState, useEffect, useRef } from 'react'
 
-/** Tailwind `md` 미만과 동일 (768px 미만만 모바일 하단 탭) */
+/** Tailwind `md` 미만과 동일 (768px 미만만 모바일 크롬) */
 const MOBILE_MAX_PX = 767
 
-/** 이 높이 이하면 항상 네비 표시 */
+/** 이 높이 이하면 항상 상단·하단 크롬 표시 */
 const TOP_ALWAYS_SHOW_PX = 32
 
 /** 너무 작은 스크롤은 무시 (터치 지터 완화) */
 const DELTA_MIN = 8
 
 /**
- * 모바일에서 스크롤 방향에 따라 하단 탭 표시 여부.
+ * 모바일에서 스크롤 방향에 따라 상단 헤더·하단 탭 동시 표시 여부.
  * - 아래로 스크롤 → 숨김
  * - 위로 스크롤 → 표시
  * - 거의 맨 위 → 항상 표시
  *
- * @param {boolean} enabled 네비가 실제로 렌더되는 화면에서만 true (약관·온보딩 제외)
- * @param {string} pathname 라우트 변경 시 표시 상태를 맨 위 기준으로 리셋
+ * @param {boolean} enabled 약관·온보딩 등 제외 화면에서만 true
+ * @param {string} pathname 라우트 변경 시 표시를 맨 위 기준으로 리셋
  */
-export function useMobileBottomNavScrollVisibility(enabled, pathname) {
+export function useMobileScrollChromeVisibility(enabled, pathname) {
   const [visible, setVisible] = useState(true)
   const lastYRef = useRef(0)
 

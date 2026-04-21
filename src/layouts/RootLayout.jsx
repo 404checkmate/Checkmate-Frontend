@@ -6,7 +6,7 @@ import {
   shouldHideMobileBottomNav,
   shouldPadMainForMobileBottomNav,
 } from '@/utils/tripLayoutPaths'
-import { useMobileBottomNavScrollVisibility } from '@/hooks/useMobileBottomNavScrollVisibility'
+import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 
 /** 홈·준비 항목 탐색(/trips/:id/search)에서만 메이퀸 FAB 표시. /trips/new/*(destination 포함)에서는 비표시 */
 function shouldShowAiPlannerFab(pathname) {
@@ -54,13 +54,29 @@ function RootLayout() {
   const hideHeaderOnMobile = shouldHideGlobalHeaderOnMobile(pathname)
   const padMainMobile = shouldPadMainForMobileBottomNav(pathname)
   const hideMobileBottomNav = shouldHideMobileBottomNav(pathname)
-  const showMobileBottomNav = !hideMobileBottomNav
-  const bottomNavScrollVisible = useMobileBottomNavScrollVisibility(showMobileBottomNav, pathname)
+  /** 약관·온보딩 제외: 모바일에서 스크롤 시 헤더·하단 탭 함께 숨김/표시 */
+  const scrollChromeEnabled = !hideMobileBottomNav
+  const scrollChromeVisible = useMobileScrollChromeVisibility(scrollChromeEnabled, pathname)
   const showAiPlannerFab = shouldShowAiPlannerFab(pathname)
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <div className={hideHeaderOnMobile ? 'hidden md:block' : ''}>
+      <div
+        className={
+          hideHeaderOnMobile
+            ? 'hidden md:block md:sticky md:top-0 md:z-[60] md:w-full'
+            : [
+                'sticky top-0 z-[60] w-full',
+                'transition-transform duration-300 ease-out motion-reduce:transition-none',
+                scrollChromeEnabled
+                  ? scrollChromeVisible
+                    ? 'translate-y-0'
+                    : 'pointer-events-none -translate-y-full'
+                  : 'translate-y-0',
+                'md:translate-y-0',
+              ].join(' ')
+        }
+      >
         <Header />
       </div>
 
@@ -71,11 +87,11 @@ function RootLayout() {
         <Outlet />
       </main>
 
-      {/* 모바일 바텀 네비 (md 이상 숨김). 약관·온보딩 제외. 모바일: 아래로 스크롤 시 숨김, 위로 스크롤 시 표시 */}
+      {/* 모바일 바텀 네비 (md 이상 숨김). 약관·온보딩 제외. 헤더와 동일 스크롤 규칙 */}
       {!hideMobileBottomNav ? (
         <nav
           className={`md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none ${
-            bottomNavScrollVisible ? 'translate-y-0' : 'pointer-events-none translate-y-full'
+            scrollChromeVisible ? 'translate-y-0' : 'pointer-events-none translate-y-full'
           }`}
         >
           {BOTTOM_NAV_ITEMS.map((item) => {

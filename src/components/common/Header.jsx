@@ -64,7 +64,7 @@ function Header() {
   const isWebLoggedIn = isMockWebSessionLoggedIn()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white pt-[env(safe-area-inset-top,0px)]">
+    <header className="relative w-full border-b border-gray-100 bg-white pt-[env(safe-area-inset-top,0px)]">
       {/* max-w-7xl + 가로 패딩: 홈 피처 2단 섹션 바깥 여백과 동일(md/lg) */}
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:gap-4 md:pl-9 md:pr-4 lg:pl-12 lg:pr-6">
         <div className="flex min-w-0 flex-1 items-center gap-2">
