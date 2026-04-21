@@ -6,6 +6,7 @@ import {
   shouldHideMobileBottomNav,
   shouldPadMainForMobileBottomNav,
 } from '@/utils/tripLayoutPaths'
+import { useMobileBottomNavScrollVisibility } from '@/hooks/useMobileBottomNavScrollVisibility'
 
 /** 홈·준비 항목 탐색(/trips/:id/search)에서만 메이퀸 FAB 표시. /trips/new/*(destination 포함)에서는 비표시 */
 function shouldShowAiPlannerFab(pathname) {
@@ -53,6 +54,8 @@ function RootLayout() {
   const hideHeaderOnMobile = shouldHideGlobalHeaderOnMobile(pathname)
   const padMainMobile = shouldPadMainForMobileBottomNav(pathname)
   const hideMobileBottomNav = shouldHideMobileBottomNav(pathname)
+  const showMobileBottomNav = !hideMobileBottomNav
+  const bottomNavScrollVisible = useMobileBottomNavScrollVisibility(showMobileBottomNav, pathname)
   const showAiPlannerFab = shouldShowAiPlannerFab(pathname)
 
   return (
@@ -68,9 +71,13 @@ function RootLayout() {
         <Outlet />
       </main>
 
-      {/* 모바일 바텀 네비게이션 (md 이상에서 숨김). 약관 동의·온보딩은 모바일에서 비표시 */}
+      {/* 모바일 바텀 네비 (md 이상 숨김). 약관·온보딩 제외. 모바일: 아래로 스크롤 시 숨김, 위로 스크롤 시 표시 */}
       {!hideMobileBottomNav ? (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white">
+        <nav
+          className={`md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none ${
+            bottomNavScrollVisible ? 'translate-y-0' : 'pointer-events-none translate-y-full'
+          }`}
+        >
           {BOTTOM_NAV_ITEMS.map((item) => {
             const isActive = item.match(location.pathname)
             return (
