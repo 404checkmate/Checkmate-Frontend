@@ -1,7 +1,11 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import Header from '@/components/common/Header'
 import AiPlannerFab from '@/components/common/AiPlannerFab'
-import { shouldHideGlobalHeaderOnMobile, shouldPadMainForMobileBottomNav } from '@/utils/tripLayoutPaths'
+import {
+  shouldHideGlobalHeaderOnMobile,
+  shouldHideMobileBottomNav,
+  shouldPadMainForMobileBottomNav,
+} from '@/utils/tripLayoutPaths'
 
 /** 홈·준비 항목 탐색(/trips/:id/search)에서만 메이퀸 FAB 표시. /trips/new/*(destination 포함)에서는 비표시 */
 function shouldShowAiPlannerFab(pathname) {
@@ -48,6 +52,7 @@ function RootLayout() {
   const { pathname } = location
   const hideHeaderOnMobile = shouldHideGlobalHeaderOnMobile(pathname)
   const padMainMobile = shouldPadMainForMobileBottomNav(pathname)
+  const hideMobileBottomNav = shouldHideMobileBottomNav(pathname)
   const showAiPlannerFab = shouldShowAiPlannerFab(pathname)
 
   return (
@@ -63,25 +68,27 @@ function RootLayout() {
         <Outlet />
       </main>
 
-      {/* 모바일 바텀 네비게이션 (md 이상에서 숨김) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 flex">
-        {BOTTOM_NAV_ITEMS.map((item) => {
-          const isActive = item.match(location.pathname)
-          return (
-            <Link
-              key={item.label}
-              to={item.path}
-              title={item.label}
-              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-2.5 text-[10px] font-medium leading-tight transition-colors sm:text-xs ${
-                isActive ? 'text-cyan-500' : 'text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              {item.icon}
-              <span className="max-w-full truncate text-center">{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
+      {/* 모바일 바텀 네비게이션 (md 이상에서 숨김). 약관 동의·온보딩은 모바일에서 비표시 */}
+      {!hideMobileBottomNav ? (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white">
+          {BOTTOM_NAV_ITEMS.map((item) => {
+            const isActive = item.match(location.pathname)
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                title={item.label}
+                className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-2.5 text-[10px] font-medium leading-tight transition-colors sm:text-xs ${
+                  isActive ? 'text-cyan-500' : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {item.icon}
+                <span className="max-w-full truncate text-center">{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      ) : null}
 
       {showAiPlannerFab ? <AiPlannerFab /> : null}
     </div>
