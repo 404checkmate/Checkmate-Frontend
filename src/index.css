@@ -44,6 +44,22 @@ body {
   background-color: #ffffff;
 }
 
+/*
+ * iOS Safari: input/textarea/select 의 computed font-size 가 16px 미만이면
+ * 포커스 시 페이지가 확대된다. 모바일 뷰포트에서만 1rem(보통 16px)으로 맞춘다.
+ * (viewport 에 user-scalable=no 를 넣는 방식은 접근성 때문에 사용하지 않음)
+ */
+@media (max-width: 639px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='button']):not(
+      [type='submit']
+    ):not([type='reset']):not([type='image']):not([type='file']):not([type='color']),
+  textarea,
+  select {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
 #root {
   min-height: 100svh;
 }
