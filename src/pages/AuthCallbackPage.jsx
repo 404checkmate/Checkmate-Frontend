@@ -10,7 +10,7 @@ import {
 } from '@/utils/onboardingGate'
 
 /**
- * /auth/callback — Google/Kakao (Supabase) 와 Naver (백엔드 중개) 로그인을 한 화면에서 처리.
+ * /auth/callback — Google/Kakao (Supabase) 로그인을 한 화면에서 처리.
  *
  * 흐름:
  *   1. URL hash 또는 Supabase 세션에서 access_token + provider + sub 추출 (`consumeAuthCallback`).
@@ -19,52 +19,105 @@ import {
  *   3. 기존/신규 사용자 분기: 온보딩 완료 → /, 약관 미동의 → /auth/consent, 약관만 OK → /onboarding.
  *
  * 이 페이지는 팀원 작업 중인 `AuthConsentPage.jsx` / `onboardingGate.js` 를 **수정하지 않고** 동일 계약을 재사용.
+ *
+ * ## StrictMode 안전성
+ * React StrictMode 하에서는 dev 환경에서 `useEffect` 가 두 번 실행된다.
+ * 컴포넌트 로컬 `useRef` 가드 + cleanup 의 `alive=false` 조합을 쓰면, 1차 effect 의
+ * async 가 완료되기 전에 1차 cleanup 이 `alive=false` 로 바꿔버려 `navigate` 가 영원히
+ * 호출되지 않고 스피너가 무한히 도는 문제가 생긴다. 따라서 다음 두 가지로 방어한다:
+ *   (1) **모듈 레벨 Promise 캐시**로 `consumeAuthCallback()` 을 세션 중 단 한 번만 실행.
+ *   (2) cleanup 에서 in-flight 작업을 "취소"하지 않음 (취소 대신 모듈 캐시로 중복 실행 방지).
+ *   (3) 결과로 `navigate` 는 async 완료 시 항상 호출되므로 로딩 상태가 반드시 해제된다.
  */
 
 const ONBOARDING_MOCK_SUB_KEY = (provider) => `checkmate:mock_oauth_sub:${provider}`
 
+/** 안전장치: 콜백 처리가 너무 오래 걸리면 에러 화면으로 넘긴다. */
+const CALLBACK_TIMEOUT_MS = 15000
+
+/**
+ * `consumeAuthCallback` 을 1회만 실행하도록 모듈 레벨에 Promise 를 캐시한다.
+ * StrictMode 의 이중 mount / 라우터 재렌더에서도 안전.
+ */
+let _callbackPromise = null
+function runCallbackOnce() {
+  if (!_callbackPromise) {
+    _callbackPromise = (async () => {
+      try {
+        // Supabase `detectSessionInUrl` 이 해시 파싱을 완료하기 전일 수 있어
+        // 세션을 짧게 재시도한다. (총 최대 ~1.5s)
+        let result = await consumeAuthCallback()
+        for (let i = 0; i < 5 && (!result || (!result.ok && result.error === 'no_session')); i += 1) {
+          await new Promise((r) => setTimeout(r, 300))
+          result = await consumeAuthCallback()
+        }
+        return result
+      } catch (err) {
+        return { ok: false, error: err?.message || 'unknown_error' }
+      }
+    })()
+  }
+  return _callbackPromise
+}
+
 export default function AuthCallbackPage() {
   const navigate = useNavigate()
-  const ranRef = useRef(false)
   const [status, setStatus] = useState('processing')
   const [errorMessage, setErrorMessage] = useState('')
+  const settledRef = useRef(false)
 
   useEffect(() => {
-    if (ranRef.current) return
-    ranRef.current = true
+    let mounted = true
 
-    let alive = true
+    const markSettled = () => {
+      settledRef.current = true
+    }
+
+    const showError = (code) => {
+      if (!mounted || settledRef.current) return
+      markSettled()
+      setStatus('error')
+      setErrorMessage(mapCallbackError(code))
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      showError('timeout')
+    }, CALLBACK_TIMEOUT_MS)
+
     ;(async () => {
-      const result = await consumeAuthCallback()
-      if (!alive) return
-
-      if (!result.ok) {
-        setStatus('error')
-        setErrorMessage(mapCallbackError(result.error))
-        return
-      }
-
-      const { provider, sub } = result
-
-      // 기존 프론트 게이트(`onboardingGate.js`) 와 호환되도록 실제 sub 를
-      // mock sub 슬롯에 주입. 이 한 줄 덕분에 `AuthConsentPage` / `OnboardingProfilePage` 는 수정 불필요.
       try {
-        if (sub) localStorage.setItem(ONBOARDING_MOCK_SUB_KEY(provider), sub)
-        sessionStorage.setItem(SESSION_LAST_SOCIAL_PROVIDER, provider)
-        // URL hash 정리 (토큰 노출 방지)
-        if (window.location.hash) {
-          window.history.replaceState(null, '', window.location.pathname + window.location.search)
-        }
-      } catch {
-        /* storage access issues: 무시 */
-      }
+        const result = await runCallbackOnce()
+        if (!mounted || settledRef.current) return
 
-      const next = resolveNext(sub)
-      navigate(next, { replace: true })
+        if (!result || !result.ok) {
+          showError(result?.error)
+          return
+        }
+
+        const { provider, sub } = result
+
+        // 기존 프론트 게이트(`onboardingGate.js`) 와 호환되도록 실제 sub 를
+        // mock sub 슬롯에 주입. 이 한 줄 덕분에 `AuthConsentPage` / `OnboardingProfilePage` 는 수정 불필요.
+        try {
+          if (sub) localStorage.setItem(ONBOARDING_MOCK_SUB_KEY(provider), sub)
+          sessionStorage.setItem(SESSION_LAST_SOCIAL_PROVIDER, provider)
+          if (window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search)
+          }
+        } catch {
+          /* storage access issues: 무시 */
+        }
+
+        markSettled()
+        navigate(resolveNext(sub), { replace: true })
+      } catch (err) {
+        showError(err?.message || 'unknown_error')
+      }
     })()
 
     return () => {
-      alive = false
+      mounted = false
+      window.clearTimeout(timeoutId)
     }
   }, [navigate])
 
@@ -81,7 +134,10 @@ export default function AuthCallbackPage() {
           <button
             type="button"
             className="mt-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-3 text-sm font-bold text-white shadow-md shadow-cyan-600/20 transition hover:from-cyan-600 hover:to-teal-600"
-            onClick={() => navigate('/login', { replace: true })}
+            onClick={() => {
+              _callbackPromise = null
+              navigate('/login', { replace: true })
+            }}
           >
             로그인 화면으로 돌아가기
           </button>
@@ -121,8 +177,6 @@ function mapCallbackError(code) {
       return '인증 요청이 만료되었거나 일치하지 않습니다. 다시 시도해 주세요.'
     case 'storage_unavailable':
       return '브라우저 저장소에 접근할 수 없어 로그인 상태를 유지할 수 없습니다.'
-    case 'naver_login_failed':
-      return '네이버 로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.'
     default:
       return code ? `오류: ${code}` : '알 수 없는 오류가 발생했습니다.'
   }

@@ -10,16 +10,11 @@ import {
  *
  * 설계 원칙:
  * - Google/Kakao 는 Supabase Auth 가 처리(`supabase.auth.signInWithOAuth`).
- * - Naver 는 Supabase 가 네이티브 지원하지 않아 **백엔드 `/auth/naver/login` 중개 경로** 로 이동.
- * - 콜백 처리(`consumeAuthCallback`)는 두 경로 모두 `/auth/callback` 한 곳에서 통합.
+ * - 콜백 처리(`consumeAuthCallback`)는 `/auth/callback` 한 곳에서 통합.
  */
 
 const FRONT_ORIGIN = typeof window !== 'undefined' ? window.location.origin : ''
 const DEFAULT_CALLBACK = `${FRONT_ORIGIN}/auth/callback`
-
-const NAVER_LOGIN_URL =
-  import.meta.env.VITE_AUTH_NAVER_LOGIN_URL ||
-  `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/auth/naver/login`
 
 // ------------------------------------------------------------------
 // 로그인 진입
@@ -33,11 +28,6 @@ export async function startGoogleLogin(opts = {}) {
 /** @param {{ redirectTo?: string }} [opts] */
 export async function startKakaoLogin(opts = {}) {
   await startSupabaseOAuth('kakao', opts)
-}
-
-/** 네이버는 페이지 전체 리다이렉트로 백엔드 중개 경로 진입. */
-export function startNaverLogin() {
-  window.location.href = NAVER_LOGIN_URL
 }
 
 async function startSupabaseOAuth(provider, opts) {
@@ -63,54 +53,49 @@ async function startSupabaseOAuth(provider, opts) {
 /**
  * /auth/callback 에서 호출:
  * - Supabase 경로(`detectSessionInUrl: true`) 는 세션이 자동 생성되므로 `getSession()` 만 읽으면 됨.
- * - Naver 경로는 URL fragment 에 `access_token=...` 이 수동 첨부되어 있음 → 파싱해 localStorage 에 저장.
  *
- * @returns {Promise<{ ok: true, provider: 'google'|'kakao'|'naver', sub: string } | { ok: false, error: string }>}
+ * @returns {Promise<{ ok: true, provider: 'google'|'kakao', sub: string } | { ok: false, error: string }>}
  */
 export async function consumeAuthCallback() {
-  const hashParams = parseHashParams(
-    typeof window !== 'undefined' ? window.location.hash : '',
-  )
+  try {
+    const hashParams = parseHashParams(
+      typeof window !== 'undefined' ? window.location.hash : '',
+    )
 
-  if (hashParams.error) {
-    return { ok: false, error: hashParams.error }
-  }
-
-  // Naver (우리 백엔드 중개) — hash 에 provider=naver 와 access_token 이 함께 옴.
-  if (hashParams.provider === 'naver' && hashParams.access_token) {
-    try {
-      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, hashParams.access_token)
-      localStorage.setItem(AUTH_PROVIDER_STORAGE_KEY, 'naver')
-    } catch {
-      return { ok: false, error: 'storage_unavailable' }
+    // Supabase 가 provider 측 에러를 hash 로 전달하는 경우 (예: access_denied) — 바로 반환.
+    if (hashParams.error) {
+      return { ok: false, error: hashParams.error_code || hashParams.error }
     }
-    const sub = decodeJwtSub(hashParams.access_token)
-    return { ok: true, provider: 'naver', sub: sub ?? '' }
-  }
 
-  // Google / Kakao — Supabase 가 URL 을 파싱했을 수도 있음. getSession() 으로 확인.
-  const supabase = getSupabaseClient()
-  if (supabase) {
-    const { data } = await supabase.auth.getSession()
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      return { ok: false, error: 'supabase_not_configured' }
+    }
+
+    const { data, error } = await supabase.auth.getSession()
+    if (error) {
+      return { ok: false, error: error.message || 'get_session_failed' }
+    }
+
     const session = data?.session
-    if (session?.access_token) {
-      const provider =
-        session.user?.app_metadata?.provider === 'kakao'
-          ? 'kakao'
-          : session.user?.app_metadata?.provider === 'google'
-            ? 'google'
-            : null
-      try {
-        localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.access_token)
-        if (provider) localStorage.setItem(AUTH_PROVIDER_STORAGE_KEY, provider)
-      } catch {
-        /* ignore */
-      }
-      return { ok: true, provider: provider ?? 'google', sub: session.user?.id ?? '' }
+    if (!session?.access_token) {
+      return { ok: false, error: 'no_session' }
     }
-  }
 
-  return { ok: false, error: 'no_session' }
+    const rawProvider = session.user?.app_metadata?.provider
+    const provider = rawProvider === 'kakao' ? 'kakao' : rawProvider === 'google' ? 'google' : null
+
+    try {
+      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.access_token)
+      if (provider) localStorage.setItem(AUTH_PROVIDER_STORAGE_KEY, provider)
+    } catch {
+      /* quota/access issues: 토큰 저장 실패해도 콜백 처리는 계속 진행 */
+    }
+
+    return { ok: true, provider: provider ?? 'google', sub: session.user?.id ?? '' }
+  } catch (err) {
+    return { ok: false, error: err?.message || 'callback_exception' }
+  }
 }
 
 // ------------------------------------------------------------------
@@ -148,16 +133,4 @@ function parseHashParams(hash) {
   const out = {}
   for (const [k, v] of params.entries()) out[k] = v
   return out
-}
-
-function decodeJwtSub(token) {
-  try {
-    const payload = token.split('.')[1]
-    const b64 = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const json = atob(b64)
-    const obj = JSON.parse(json)
-    return typeof obj.sub === 'string' ? obj.sub : null
-  } catch {
-    return null
-  }
 }

@@ -6,9 +6,7 @@ import { getSupabaseClient } from '@/lib/supabase'
  *
  * 토큰 우선순위:
  *   1. Supabase 세션 (`getSession`) — Google/Kakao 로그인
- *   2. localStorage `checkmate:auth_token` — Naver (백엔드 중개) 로그인
- *
- * 이 구조 덕분에 프로바이더에 관계없이 동일하게 `client.get('/trips', ...)` 사용 가능.
+ *   2. localStorage `checkmate:auth_token` — 백업 (세션 저장 실패 시 캐시)
  */
 
 export const AUTH_TOKEN_STORAGE_KEY = 'checkmate:auth_token'

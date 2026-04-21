@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import loginBrandMascotUrl from '@/assets/login-brand-mascot.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
-import { startGoogleLogin, startKakaoLogin, startNaverLogin } from '@/api/auth'
+import { startGoogleLogin, startKakaoLogin } from '@/api/auth'
 import { isSupabaseConfigured } from '@/lib/supabase'
 
 /**
@@ -50,23 +50,17 @@ function LoginPage() {
   /**
    * 소셜 로그인 핸들러 — Supabase env 가 있으면 실제 OAuth, 없으면 기존 mock 경로로 폴백.
    * (env 없이 UI 작업 중인 팀원이 막히지 않도록 폴백 유지)
+   *
+   * 안전장치:
+   * - `signInWithOAuth` 는 성공 시 브라우저를 provider 로 리다이렉트하지만, 팝업 차단·네트워크
+   *   단절 등으로 리다이렉트가 일어나지 않을 수 있다. 8초가 지나도 페이지가 살아있으면
+   *   `socialPending` 을 해제해 버튼이 영구히 잠기는 현상을 방지한다.
+   * - try/catch 로 모든 예외를 잡아 `socialPending` 과 에러 메시지를 반드시 갱신한다.
    */
   const handleSocialLogin = useCallback(
     async (provider) => {
       if (socialPending) return
       setSocialError('')
-
-      // Naver 는 env 없이도 백엔드 중개 경로로 이동 가능 (백엔드에서 자체 실패 페이지 처리).
-      if (provider === 'naver') {
-        setSocialPending(provider)
-        try {
-          startNaverLogin()
-        } catch (err) {
-          setSocialError(err?.message || '네이버 로그인을 시작하지 못했습니다.')
-          setSocialPending('')
-        }
-        return
-      }
 
       // Google/Kakao: Supabase 필요. 미설정이면 기존 플레이스홀더 동작(이동)으로 폴백.
       if (!isSupabaseConfigured()) {
@@ -75,10 +69,18 @@ function LoginPage() {
       }
 
       setSocialPending(provider)
+
+      const safetyTimeout = window.setTimeout(() => {
+        setSocialPending('')
+        setSocialError('로그인 화면으로 이동하지 못했습니다. 팝업 차단을 해제하고 다시 시도해 주세요.')
+      }, 8000)
+
       try {
         if (provider === 'google') await startGoogleLogin()
         else if (provider === 'kakao') await startKakaoLogin()
+        // 성공 시 브라우저가 provider 로 리다이렉트되며 페이지가 언마운트됨 → 상태 해제 불필요.
       } catch (err) {
+        window.clearTimeout(safetyTimeout)
         setSocialError(err?.message || '로그인을 시작하지 못했습니다.')
         setSocialPending('')
       }
@@ -328,20 +330,6 @@ function LoginPage() {
                   <path d="M12 3c5.523 0 10 3.582 10 8s-4.477 8-10 8c-.555 0-1.1-.036-1.633-.105L5.5 21.5l.825-3.96C3.93 16.32 2 13.86 2 11c0-4.418 4.477-8 10-8z" />
                 </svg>
                 Kakao로 시작하기
-              </button>
-              <button
-                type="button"
-                disabled={Boolean(socialPending)}
-                className="flex w-full items-center justify-center gap-3 rounded-full bg-[#03C75A] py-4 text-base font-bold text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
-                onClick={() => handleSocialLogin('naver')}
-              >
-                <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white text-base font-black text-[#03C75A]"
-                  aria-hidden="true"
-                >
-                  N
-                </span>
-                Naver로 시작하기
               </button>
             </div>
 
