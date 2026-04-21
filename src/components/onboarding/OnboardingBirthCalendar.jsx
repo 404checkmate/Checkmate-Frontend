@@ -105,10 +105,10 @@ export default function OnboardingBirthCalendar({
 
   return (
     <div
-      className="onboarding-birth-calendar-wrap overflow-hidden rounded-2xl border border-cyan-100/90 bg-gradient-to-b from-white to-cyan-50/40 p-4 shadow-md shadow-cyan-900/[0.06] sm:p-5"
+      className="onboarding-birth-calendar-wrap overflow-hidden rounded-2xl border border-teal-100/90 bg-gradient-to-b from-white to-teal-50/35 p-4 shadow-md shadow-teal-900/[0.07] sm:p-5"
       style={{
-        ['--rdp-accent-color']: '#0891b2',
-        ['--rdp-accent-background-color']: '#cffafe',
+        ['--rdp-accent-color']: '#0f7663',
+        ['--rdp-accent-background-color']: '#ccfbf1',
         ['--rdp-day_button-border-radius']: '10px',
         ['--rdp-day-height']: '2.25rem',
         ['--rdp-day-width']: '2.25rem',
@@ -118,7 +118,7 @@ export default function OnboardingBirthCalendar({
     >
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         <label className="flex flex-col gap-2">
-          <span className="text-xs font-semibold tracking-wide text-cyan-900/75">연도</span>
+          <span className="text-xs font-semibold tracking-wide text-teal-900/80">연도</span>
           <OnboardingCustomSelect
             aria-label="연도 선택"
             value={year}
@@ -130,7 +130,7 @@ export default function OnboardingBirthCalendar({
           />
         </label>
         <label className="flex flex-col gap-2">
-          <span className="text-xs font-semibold tracking-wide text-cyan-900/75">월</span>
+          <span className="text-xs font-semibold tracking-wide text-teal-900/80">월</span>
           <OnboardingCustomSelect
             aria-label="월 선택"
             value={monthIndex}
@@ -173,14 +173,14 @@ export default function OnboardingBirthCalendar({
           month_grid: 'w-full table-fixed border-collapse',
           weekdays: '',
           weekday:
-            'w-[14.28%] p-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-cyan-800/85 sm:text-xs',
+            'w-[14.28%] p-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-teal-800/90 sm:text-xs',
           weeks: '',
           week: '',
           day: 'rdp-day p-0.5 text-center align-middle',
           day_button:
-            'rdp-day_button mx-auto flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium text-gray-800 transition hover:bg-cyan-100/90 sm:h-10 sm:w-10',
+            'rdp-day_button mx-auto flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium text-gray-800 transition hover:bg-teal-100/90 sm:h-10 sm:w-10',
           selected: 'rdp-selected font-bold',
-          today: 'rdp-today font-semibold text-cyan-700',
+          today: 'rdp-today font-semibold text-teal-700',
           disabled: 'rdp-disabled opacity-35',
           outside: 'rdp-outside opacity-40',
         }}

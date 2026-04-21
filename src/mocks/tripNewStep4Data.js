@@ -8,9 +8,9 @@
 /* ─────────────────────────────────────────────
    스텝 설정
 ───────────────────────────────────────────── */
-/** StepHeader: STEP 03 · 카운터 3 / 5 (전체 플로우 기준 진행도) */
+/** StepHeader: STEP 03 · 카운터 3 / 4 (전체 플로우 기준 진행도) */
 export const STEP4_CONFIG = {
-  totalSteps: 5,
+  totalSteps: 4,
   currentStep: 3,
 }
 

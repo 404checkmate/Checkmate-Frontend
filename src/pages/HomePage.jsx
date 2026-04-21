@@ -242,7 +242,9 @@ function HomePage() {
                   </h3>
 
                   {card.description && (
-                    <p className="mt-3 max-w-lg text-sm leading-relaxed text-gray-600">{card.description}</p>
+                    <p className="mt-3 max-w-lg whitespace-pre-line text-sm leading-relaxed text-gray-600">
+                      {card.description}
+                    </p>
                   )}
 
                   {!isHighlight && card.tags?.length > 0 && (

@@ -5,28 +5,12 @@ import step3DesktopMascotUrl from '@/assets/step3-desktop-mascot.png'
 import onboardingFinishMascotUrl from '@/assets/onboarding-finish-mascot.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import OnboardingBirthCalendar from '@/components/onboarding/OnboardingBirthCalendar'
-import OnboardingCustomSelect from '@/components/onboarding/OnboardingCustomSelect'
 import {
   AUTH_CONSENT_PATH,
   getActiveOnboardingSubject,
   getOnboardingEntryRedirect,
   markOnboardingComplete,
 } from '@/utils/onboardingGate'
-
-/** 국적 / 여권 발급국 공통 목록 (ISO 코드) */
-const COUNTRY_OPTIONS = [
-  { value: 'KR', label: '대한민국' },
-  { value: 'US', label: '미국' },
-  { value: 'JP', label: '일본' },
-  { value: 'CN', label: '중국' },
-  { value: 'TW', label: '대만' },
-  { value: 'VN', label: '베트남' },
-  { value: 'TH', label: '태국' },
-  { value: 'GB', label: '영국' },
-  { value: 'DE', label: '독일' },
-  { value: 'FR', label: '프랑스' },
-  { value: 'OTHER', label: '기타' },
-]
 
 /** 온보딩 마지막「체크메이트 시작하기」 */
 const ONBOARDING_FINISH_BTN_CLASS =
@@ -44,28 +28,12 @@ function isoToLabel(iso) {
   return `${y}년 ${parseInt(m, 10)}월 ${parseInt(d, 10)}일`
 }
 
-/**
- * 여권 국가 선택: 열린 listbox 내부·`data-onboarding-next` 버튼은 그대로 둠
- */
-function handleEnterToAdvanceSection(e, canProceed, advance) {
-  if (e.key !== 'Enter' || e.repeat) return
-  if (e.nativeEvent?.isComposing) return
-  const el = e.target
-  if (typeof el?.closest === 'function') {
-    if (el.closest('[data-onboarding-next]')) return
-    if (el.closest('[role="listbox"]')) return
-  }
-  if (!canProceed) return
-  e.preventDefault()
-  advance()
-}
-
 /** 섹션 입력이 조건을 만족할 때 표시하는 완료 피드백 */
 function SectionInputConfirmed({ show, align = 'start' }) {
   if (!show) return null
   const justify = align === 'center' ? 'justify-center' : 'justify-start'
   return (
-    <p className={`mt-3 flex items-center gap-1.5 text-sm font-medium text-cyan-600 ${justify}`} role="status">
+    <p className={`mt-3 flex items-center gap-1.5 text-sm font-medium text-teal-600 ${justify}`} role="status">
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
           d="M9 12.5l2.5 2.5L15 10"
@@ -82,7 +50,7 @@ function SectionInputConfirmed({ show, align = 'start' }) {
 }
 
 /**
- * 소셜 로그인 직후 1회 프로필 수집 — **성별·생년월일** → **여권에 기재된 국가**.
+ * 소셜 로그인 직후 1회 프로필 수집 — **성별·생년월일**.
  * 섹션은 순차적으로만 펼쳐지며(@formkit/auto-animate), 이전 단계는 살짝 흐리게.
  */
 export default function OnboardingProfilePage() {
@@ -91,10 +59,8 @@ export default function OnboardingProfilePage() {
 
   const [gender, setGender] = useState('')
   const [birthDate, setBirthDate] = useState('')
-  /** 여권 데이터에 표시되는 국가(국적·발급국 등 여권 상 국가 필드에 해당) */
-  const [passportCountryOnRecord, setPassportCountryOnRecord] = useState('')
 
-  /** 순차 단계: 성별 1, 생년월일 2, 여권 국가(+하단 완료 버튼) 3 */
+  /** 순차 단계: 성별 1, 생년월일 2, 하단 완료 버튼 3 */
   const [revealed, setRevealed] = useState(1)
   const [finishModalOpen, setFinishModalOpen] = useState(false)
 
@@ -102,9 +68,8 @@ export default function OnboardingProfilePage() {
 
   const genderOk = gender !== ''
   const birthOk = birthDate !== ''
-  const passportCountryOk = passportCountryOnRecord !== ''
 
-  const canFinish = genderOk && birthOk && passportCountryOk
+  const canFinish = genderOk && birthOk
 
   const scrollToBottom = useCallback(() => {
     window.setTimeout(() => {
@@ -112,25 +77,19 @@ export default function OnboardingProfilePage() {
     }, 80)
   }, [])
 
-  const openFinishModalIfReady = useCallback(() => {
-    if (!passportCountryOk) return
-    setFinishModalOpen(true)
-  }, [passportCountryOk])
-
   const completeOnboarding = useCallback(() => {
     if (!canFinish) return
     // TODO: API `PATCH /users/me` 또는 Supabase 등
     const profilePayload = {
       gender,
       dateOfBirth: birthDate,
-      passportCountryCode: passportCountryOnRecord,
     }
     void profilePayload
     const sub = getActiveOnboardingSubject()
     if (sub) markOnboardingComplete(sub)
     setFinishModalOpen(false)
     navigate('/', { replace: true })
-  }, [birthDate, canFinish, gender, navigate, passportCountryOnRecord])
+  }, [birthDate, canFinish, gender, navigate])
 
   const handleFormSubmit = (e) => {
     e.preventDefault()
@@ -173,8 +132,8 @@ export default function OnboardingProfilePage() {
   const sectionShell = (isDimmed) =>
     `rounded-2xl border transition-colors ${
       isDimmed
-        ? 'border-gray-100 bg-gray-50/60 opacity-[0.72]'
-        : 'border-cyan-100/80 bg-white shadow-sm shadow-cyan-900/5'
+        ? 'border-teal-100/50 bg-teal-50/35 opacity-[0.72]'
+        : 'border-teal-200/85 bg-white shadow-sm shadow-teal-900/[0.07]'
     }`
 
   return (
@@ -182,8 +141,12 @@ export default function OnboardingProfilePage() {
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            'linear-gradient(180deg, #ecfeff 0%, #ffffff 28%, #f8fafc 100%)',
+          background: `
+            radial-gradient(ellipse 120% 80% at 50% -18%, rgba(45, 212, 191, 0.14), transparent 55%),
+            radial-gradient(ellipse 70% 55% at 100% 20%, rgba(34, 211, 238, 0.12), transparent 50%),
+            radial-gradient(ellipse 65% 50% at 0% 55%, rgba(204, 251, 241, 0.45), transparent 52%),
+            linear-gradient(180deg, #f0fdfa 0%, #ffffff 32%, #f8fafc 100%)
+          `,
         }}
         aria-hidden="true"
       />
@@ -205,7 +168,7 @@ export default function OnboardingProfilePage() {
             <span>에 오신 것을 환영합니다!</span>
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            성별·생년월일과 여권에 적힌 국가만 입력하면 나중에 서비스에 안전하게 저장할 수 있어요.
+            보다 정확하고 구체적인 체크리스트 제공을 위해서는 몇 가지 정보가 필요해요!
           </p>
         </header>
 
@@ -235,8 +198,8 @@ export default function OnboardingProfilePage() {
                       }}
                       className={`rounded-xl border-2 py-3 text-sm font-bold transition ${
                         gender === v
-                          ? 'border-cyan-500 bg-cyan-50 text-cyan-800'
-                          : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-cyan-200'
+                          ? 'border-teal-500 bg-teal-50 text-teal-900 shadow-sm shadow-teal-900/10'
+                          : 'border-gray-200 bg-white/90 text-gray-700 hover:border-teal-200 hover:bg-teal-50/40'
                       }`}
                     >
                       {label}
@@ -266,42 +229,13 @@ export default function OnboardingProfilePage() {
                     }}
                   />
                   {birthDate ? (
-                    <p className="mt-3 text-center text-sm font-medium text-cyan-800">선택: {isoToLabel(birthDate)}</p>
+                    <p className="mt-3 text-center text-sm font-medium text-teal-800">선택: {isoToLabel(birthDate)}</p>
                   ) : null}
                   <SectionInputConfirmed show={birthOk} align="center" />
                 </div>
               </section>
             )}
 
-            {revealed >= 3 && birthOk && (
-              <div className="pt-2">
-                <h2 className="mb-3 text-left text-base font-bold tracking-tight text-gray-900">여권에 적힌 국가</h2>
-                <p className="text-xs text-gray-500">
-                  여권 정보 페이지에 표시된 국가(국적·발급국 등)에 맞게 선택해 주세요.
-                </p>
-              </div>
-            )}
-
-            {revealed >= 3 && birthOk && (
-              <section className={sectionShell(passportCountryOk)}>
-                <div
-                  className="p-5"
-                  onKeyDown={(e) => handleEnterToAdvanceSection(e, passportCountryOk, openFinishModalIfReady)}
-                >
-                  <label htmlFor="onboarding-passport-country" className="mb-3 block text-sm font-semibold text-gray-800">
-                    여권에 기재된 국가
-                  </label>
-                  <OnboardingCustomSelect
-                    id="onboarding-passport-country"
-                    value={passportCountryOnRecord}
-                    onValueChange={setPassportCountryOnRecord}
-                    placeholder="국가를 선택해 주세요"
-                    options={COUNTRY_OPTIONS}
-                  />
-                  <SectionInputConfirmed show={passportCountryOk} />
-                </div>
-              </section>
-            )}
           </div>
 
           <div ref={bottomAnchorRef} className="h-px w-full shrink-0" aria-hidden="true" />

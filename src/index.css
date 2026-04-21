@@ -104,10 +104,10 @@ body {
   animation: guide-archive-filter-sheet-down 0.32s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* 온보딩 생년월일 캘린더 — 선택일 (react-day-picker) 체크메이트 그라데이션 */
+/* 온보딩 생년월일 캘린더 — 선택일 (react-day-picker) 틸·시안 그라데이션 (로그인/플로우와 통일) */
 .onboarding-birth-calendar-wrap .rdp-selected .rdp-day_button {
-  background: linear-gradient(135deg, #06b6d4, #0d9488);
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 4px 14px rgba(8, 145, 178, 0.35);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
 }

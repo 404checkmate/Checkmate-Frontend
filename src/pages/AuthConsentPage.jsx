@@ -71,11 +71,6 @@ export default function AuthConsentPage() {
           <p className="mt-2 text-sm text-gray-500">
             필수 항목에 동의하시면 프로필 입력 단계로 이동합니다.
           </p>
-          {isLayoutPreview ? (
-            <p className="mx-auto mt-4 max-w-md rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-900">
-              약관 동의 화면 작업 중 — 미리보기 모드(?preview=1). 실제 이용자 플로우와는 별도입니다.
-            </p>
-          ) : null}
         </header>
 
         <LegalConsentForm onContinue={handleContinue} />

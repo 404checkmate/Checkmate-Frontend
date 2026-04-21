@@ -65,16 +65,6 @@ export default function LegalConsentForm({ onContinue, disabled = false }) {
         </label>
       </div>
 
-      <p className="text-center text-xs text-gray-500">
-        문의:{' '}
-        <a
-          href="mailto:help@travel-checklist.app"
-          className="font-semibold text-cyan-700 underline-offset-2 hover:underline"
-        >
-          help@travel-checklist.app
-        </a>
-      </p>
-
       <button
         type="submit"
         disabled={!canSubmit}

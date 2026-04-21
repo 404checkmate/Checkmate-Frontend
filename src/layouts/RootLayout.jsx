@@ -8,6 +8,12 @@ import {
 } from '@/utils/tripLayoutPaths'
 import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 
+/**
+ * 메이퀸 FAB 전역 표시 여부.
+ * false: 화면에 안 보이지만 `AiPlannerFab`·경로 규칙 코드는 그대로 유지(다시 켤 때 true).
+ */
+const SHOW_AI_PLANNER_FAB = false
+
 /** 홈·준비 항목 탐색(/trips/:id/search)에서만 메이퀸 FAB 표시. /trips/new/*(destination 포함)에서는 비표시 */
 function shouldShowAiPlannerFab(pathname) {
   if (pathname === '/') return true
@@ -57,7 +63,7 @@ function RootLayout() {
   /** 약관·온보딩 제외: 모바일에서 스크롤 시 헤더·하단 탭 함께 숨김/표시 */
   const scrollChromeEnabled = !hideMobileBottomNav
   const scrollChromeVisible = useMobileScrollChromeVisibility(scrollChromeEnabled, pathname)
-  const showAiPlannerFab = shouldShowAiPlannerFab(pathname)
+  const showAiPlannerFab = SHOW_AI_PLANNER_FAB && shouldShowAiPlannerFab(pathname)
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

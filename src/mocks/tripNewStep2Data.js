@@ -9,7 +9,7 @@
    스텝 설정
 ───────────────────────────────────────────── */
 export const STEP2_CONFIG = {
-  totalSteps: 5,
+  totalSteps: 4,
   currentStep: 1,
 }
 

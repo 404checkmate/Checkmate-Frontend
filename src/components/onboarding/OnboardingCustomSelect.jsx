@@ -133,14 +133,14 @@ export default function OnboardingCustomSelect({
   }, [options, value])
 
   const triggerClass = [
-    'flex w-full items-center justify-between gap-2 rounded-xl border-2 border-cyan-100/95',
-    'bg-gradient-to-b from-white via-white to-cyan-50/60',
+    'flex w-full items-center justify-between gap-2 rounded-xl border-2 border-teal-100/95',
+    'bg-gradient-to-b from-white via-white to-teal-50/55',
     'py-3.5 pl-4 pr-3 text-left text-base font-semibold text-gray-900',
-    'shadow-sm shadow-cyan-900/[0.04] outline-none transition',
-    'hover:border-cyan-200 hover:shadow-md hover:shadow-cyan-900/[0.06]',
-    'focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/30',
+    'shadow-sm shadow-teal-900/[0.05] outline-none transition',
+    'hover:border-teal-200 hover:shadow-md hover:shadow-teal-900/[0.07]',
+    'focus-visible:border-teal-500 focus-visible:ring-2 focus-visible:ring-teal-500/30',
     'disabled:cursor-not-allowed disabled:opacity-55',
-    open ? 'border-cyan-500 ring-2 ring-cyan-500/25' : '',
+    open ? 'border-teal-500 ring-2 ring-teal-500/25' : '',
     className,
   ]
     .filter(Boolean)
@@ -151,7 +151,7 @@ export default function OnboardingCustomSelect({
       ref={listRef}
       id={listId}
       role="listbox"
-      className="fixed z-[10000] overflow-y-auto overflow-x-hidden rounded-xl border-2 border-cyan-100 bg-white py-1.5 shadow-xl shadow-cyan-900/15 ring-1 ring-cyan-900/5"
+      className="fixed z-[10000] overflow-y-auto overflow-x-hidden rounded-xl border-2 border-teal-100 bg-white py-1.5 shadow-xl shadow-teal-900/15 ring-1 ring-teal-900/5"
       style={{
         top: fixedStyle.placement === 'above' ? 'auto' : fixedStyle.top,
         bottom: fixedStyle.placement === 'above' ? fixedStyle.bottom : 'auto',
@@ -170,8 +170,8 @@ export default function OnboardingCustomSelect({
             aria-selected={isActive}
             className={`flex w-full items-center px-4 py-2.5 text-left text-sm font-semibold transition sm:text-base ${
               isActive
-                ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white'
-                : 'text-gray-800 hover:bg-cyan-50 active:bg-cyan-100/80'
+                ? 'bg-gradient-to-r from-teal-500 to-teal-700 text-white shadow-sm'
+                : 'text-gray-800 hover:bg-teal-50 active:bg-teal-100/80'
             }`}
             onClick={() => {
               onValueChange(opt.value)
@@ -201,8 +201,8 @@ export default function OnboardingCustomSelect({
       >
         <span className={selectedLabel ? 'text-gray-900' : 'text-gray-400'}>{selectedLabel ?? placeholder}</span>
         <span
-          className={`flex shrink-0 items-center justify-center rounded-lg border border-cyan-100/80 bg-gradient-to-b from-cyan-50 to-teal-50/80 px-2 py-1 text-cyan-700 shadow-sm transition ${
-            open ? 'border-cyan-300 text-cyan-800' : ''
+          className={`flex shrink-0 items-center justify-center rounded-lg border border-teal-100/90 bg-gradient-to-b from-teal-50 to-cyan-50/70 px-2 py-1 text-teal-700 shadow-sm transition ${
+            open ? 'border-teal-300 text-teal-900' : ''
           }`}
         >
           {CHEVRON}

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import loginBrandMascotUrl from '@/assets/login-brand-mascot.png'
-import BrandLogo from '@/components/common/BrandLogo'
+import loginCheckmateBrandUrl from '@/assets/login-checkmate-brand.png'
 import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
 import { startGoogleLogin, startKakaoLogin, startNaverLogin } from '@/api/auth'
 import { isSupabaseConfigured } from '@/lib/supabase'
@@ -162,19 +161,15 @@ function LoginPage() {
           onSubmit={SHOW_EMAIL_LOGIN ? handleLogin : (e) => e.preventDefault()}
           className="w-full max-w-[min(100%,460px)] shrink-0"
         >
-          {/* 브랜딩: 마스코트 + 워드마크 + 한 줄 태그 — 배경 위에 직접 배치 (카드 박스 없음) */}
+          {/* 브랜딩: 체크메이트 로고 락업(PNG) + 한 줄 태그 — 배경 위에 직접 배치 (카드 박스 없음) */}
           <div className="flex flex-col items-center text-center">
             <img
-              src={loginBrandMascotUrl}
-              alt=""
-              role="presentation"
+              src={loginCheckmateBrandUrl}
+              alt="CHECKMATE"
               decoding="async"
-              className="h-[5rem] w-auto max-w-[min(100%,220px)] object-contain drop-shadow-md md:h-[5.75rem]"
+              className="h-auto w-auto max-h-[11rem] max-w-[min(100%,280px)] object-contain object-center drop-shadow-md md:max-h-[12.5rem] md:max-w-[min(100%,320px)]"
             />
-            <div className="mt-7 flex w-full justify-center md:mt-8">
-              <BrandLogo className="h-11 w-auto md:h-12 lg:h-[3.25rem]" alt="CHECKMATE" />
-            </div>
-            <p className="mt-3 text-sm font-semibold tracking-tight text-cyan-800 md:text-base">
+            <p className="mt-6 text-sm font-semibold tracking-tight text-cyan-800 md:mt-7 md:text-base">
               골라 담고 · 체크하고 · 떠나자!
             </p>
           </div>
@@ -183,7 +178,7 @@ function LoginPage() {
             <p className="text-lg font-semibold leading-snug text-gray-900 md:text-xl lg:text-2xl">
               복잡한 준비는 줄이고, 설렘은 올리고
               <br />
-              나만의 여행 체크리스트
+              나만의 여행 준비 메이트
             </p>
           </div>
 

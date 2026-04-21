@@ -28,7 +28,7 @@ import ErrorPage from '@/pages/ErrorPage'
  *   /                       홈 / 랜딩
  *   /login                  로그인 (회원가입은 현재 /login 으로 통합)
  *   /auth/consent           소셜 로그인 직후 약관·개인정보 동의 → /onboarding
- *   /onboarding             동의 완료 후 프로필·여권 정보. 분기: src/utils/onboardingGate.js
+ *   /onboarding             동의 완료 후 프로필(성별·생년월일). 분기: src/utils/onboardingGate.js
  *   /trips/new              → /trips/new/step2 리다이렉트 (TripNewPage 제거)
  *   /trips/new/step2~       새 여행 플로우 (/destination = 예매 전 도시·날짜)
  *   /trips/:id/search       준비 항목 탐색         (Store Loop - DRD-1)
