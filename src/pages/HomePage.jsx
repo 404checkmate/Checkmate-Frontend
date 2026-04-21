@@ -143,8 +143,14 @@ function HomePage() {
                 onClick={() => navigate(`${AUTH_CONSENT_PATH}?${AUTH_CONSENT_PREVIEW_PARAM}=1`)}
                 className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm transition-colors hover:bg-amber-100"
               >
-                약관 동의 페이지 (작업 중)
+                약관 동의 페이지 예시
               </button>
+              <Link
+                to="/onboarding"
+                className="rounded-xl border-2 border-teal-300 bg-teal-50/90 px-4 py-3 text-sm font-semibold text-teal-900 shadow-sm transition-colors hover:bg-teal-100/90"
+              >
+                온보딩 페이지
+              </Link>
             </div>
           </div>
         </div>
