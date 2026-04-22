@@ -20,6 +20,7 @@ import TripGuideArchiveDetailPage from '@/pages/TripGuideArchiveDetailPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import MyPage from '@/pages/MyPage'
 import ErrorPage from '@/pages/ErrorPage'
+import { FEATURE_PROFILE_ONBOARDING_ENABLED } from '@/utils/onboardingGate'
 
 /**
  * AppRoutes - useRoutes 기반 라우터 설정 (03_decision_log.md 기반)
@@ -27,8 +28,8 @@ import ErrorPage from '@/pages/ErrorPage'
  * 페이지 구조:
  *   /                       홈 / 랜딩
  *   /login                  로그인 (회원가입은 현재 /login 으로 통합)
- *   /auth/consent           소셜 로그인 직후 약관·개인정보 동의 → /onboarding
- *   /onboarding             동의 완료 후 프로필(성별·생년월일). 분기: src/utils/onboardingGate.js
+ *   /auth/consent           소셜 로그인 직후 약관·개인정보 동의 → (온보딩 켜짐 시 /onboarding, 아니면 /)
+ *   /onboarding             보관용 프로필 온보딩 — FEATURE_PROFILE_ONBOARDING_ENABLED 일 때만 표시, 아니면 / 로 리다이렉트
  *   /trips/new              → /trips/new/step2 리다이렉트 (TripNewPage 제거)
  *   /trips/new/step2~       새 여행 플로우 (/destination = 예매 전 도시·날짜)
  *   /trips/:id/search       준비 항목 탐색         (Store Loop - DRD-1)
@@ -51,7 +52,11 @@ const AppRoutes = () => {
         { path: '/login',               element: <LoginPage /> },
         { path: '/auth/consent',        element: <AuthConsentPage /> },
         { path: '/auth/callback',       element: <AuthCallbackPage /> },
-        { path: '/onboarding',          element: <OnboardingProfilePage /> },
+        {
+          path: '/onboarding',
+          element:
+            FEATURE_PROFILE_ONBOARDING_ENABLED ? <OnboardingProfilePage /> : <Navigate to="/" replace />,
+        },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <MyPage /> },
         { path: '/trips/new',           element: <Navigate to="/trips/new/step2" replace /> },

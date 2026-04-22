@@ -53,25 +53,25 @@ export const LOADING_VARIANTS = [
     subDesktop: 'Building your checklist before you board 🌏',
     highlight: '목적지 정보',
     subMobileSuffix: '를 바탕으로\n놓치기 쉬운 준비까지 챙겨요.',
-    cardLabel: '목적지 맞춤 프렙',
+    cardLabel: '여행지 맞춤 체크리스트',
     barLabel: 'READY TO FLY',
     descDesktop:
-      '비자·날씨·현지 팁까지 한눈에! 여행지에 맞춰 빠지기 쉬운 준비를 미리 짚어 드릴게요.',
+      '목적지와 일정을 반영해 비자·날씨·현지 정보까지 한곳에 모읍니다. 빠지기 쉬운 준비를 미리 짚어 드릴게요.',
     descMobile:
-      '목적지에 맞춰 비자·날씨·꿀팁까지 한 번에 정리 중이에요.',
+      '목적지에 맞춰 비자·날씨·유용한 정보를 체크리스트로 정리하고 있어요.',
   },
   {
-    headlineDesktop: '완벽한 여행은 완벽한 준비에서 시작돼요',
-    headlineMobile: '완벽한 준비, 재밌게 완성 중!',
-    subDesktop: 'Fun prep today, smooth trip tomorrow 💫',
+    headlineDesktop: '완벽한 여행은 꼼꼼한 준비에서 시작돼요',
+    headlineMobile: '준비는 든든하게, 체크리스트 완성 중',
+    subDesktop: 'Smart prep today, a smooth trip tomorrow 💫',
     highlight: '당신만의 여행',
-    subMobileSuffix: '에 맞춰\n체크리스트를 재미있게 채워 넣고 있어요.',
-    cardLabel: '맞춤 프렙 파티 타임',
+    subMobileSuffix: '에 맞춰\n필요한 준비만 체크리스트에 담고 있어요.',
+    cardLabel: '맞춤 체크리스트 구성',
     barLabel: 'LET\'S CHECK IT',
     descDesktop:
-      '무료한 준비는 싫죠? 여행 전 설렘 그대로, 필요한 것만 쏙 담은 리스트를 만들고 있어요.',
+      'CHECKMATE가 여행 스타일과 일정을 읽고, 꼭 필요한 항목만 골라 저장하기 좋은 리스트로 정리하고 있어요.',
     descMobile:
-      '필요한 것만 쏙! 재미있게 채우는 맞춤 체크리스트, 거의 다 됐어요.',
+      '필요한 준비만 담은 맞춤 체크리스트를 거의 다 만들었어요. 잠시만 기다려 주세요.',
   },
 ]
 

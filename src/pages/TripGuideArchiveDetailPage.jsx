@@ -2,21 +2,13 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { getGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
+import { TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE } from '@/utils/tripMintPageBackground'
 
 /**
  * 라우트: /trips/:id/guide-archive/:entryId
  * - 목록(TripGuideArchivePage)에서 저장된 여행 스냅샷을 누르면 진입
  * - 검색에서 담은 필수품(entry.items)을 이 화면에서 하나씩 체크하며 준비 (상태는 entry 단위로 분리 저장)
  */
-
-/** 콘텐츠 높이(필터·목록 길이)에 따라 그라데이션이 늘어나 색이 달라 보이지 않도록 뷰포트에 고정 */
-const GUIDE_ARCHIVE_DETAIL_PAGE_BG = {
-  backgroundImage: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)',
-  backgroundAttachment: 'fixed',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '100vw 100vh',
-  backgroundPosition: '0 0',
-}
 
 function TripGuideArchiveDetailInner({ tripId, entryId }) {
   const navigate = useNavigate()
@@ -31,7 +23,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-4"
-        style={GUIDE_ARCHIVE_DETAIL_PAGE_BG}
+        style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}
       >
         <p className="text-gray-700 font-medium mb-2">저장된 리스트를 찾을 수 없습니다.</p>
         <p className="text-sm text-gray-500 mb-6 text-center">목록에서 삭제되었거나 다른 기기에서만 저장된 경우일 수 있습니다.</p>
@@ -50,7 +42,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-4"
-        style={GUIDE_ARCHIVE_DETAIL_PAGE_BG}
+        style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}
       >
         <p className="text-gray-800 font-semibold mb-2 text-center">이 항목은 UI 예시용입니다.</p>
         <p className="text-sm text-gray-600 mb-6 text-center">상세 화면은 제공되지 않습니다.</p>
@@ -66,7 +58,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
   }
 
   return (
-    <div className="min-h-screen" style={GUIDE_ARCHIVE_DETAIL_PAGE_BG}>
+    <div className="min-h-screen" style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}>
       <div className="mx-auto flex max-w-6xl items-center px-4 pt-4 md:pt-8">
         <button
           type="button"

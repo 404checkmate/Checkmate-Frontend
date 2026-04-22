@@ -11,6 +11,7 @@ import {
   sanitizeArrivalInput,
   HERO_IMAGE,
   AI_TIP,
+  DESTINATION_DESKTOP_RIGHT_IMAGE,
 } from '@/mocks/tripNewDestinationData'
 import StepHeader from '@/components/common/StepHeader'
 import AiConciergeTip from '@/components/common/AiConciergeTip'
@@ -131,6 +132,22 @@ function DestinationDateForm({
           panelId="country-autocomplete-panel"
           placeholder="국가명 입력 후 엔터 또는 목록에서 선택"
         />
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {MOBILE_QUICK_DESTINATION_CHIPS.map((chip) => (
+            <button
+              key={chip.label}
+              type="button"
+              onClick={() => {
+                const c = COUNTRY_ARRIVAL_OPTIONS.find((x) => x.name === chip.countryName)
+                if (c) onPickCountry(c)
+              }}
+              className="rounded-full border border-sky-200/90 bg-white px-3 py-1.5 text-sm font-semibold text-sky-800 shadow-sm transition hover:border-sky-300/90 hover:bg-sky-50/80"
+            >
+              #{chip.label}
+            </button>
+          ))}
+        </div>
 
         {selectedCountry && (
           <SelectedCountryChip country={selectedCountry} onRemove={onRemoveCountryTag} variant="desktop" />
@@ -426,7 +443,7 @@ export default function TripNewDestinationPage() {
         fullBleed={<FullBleedMintImageHero src={HERO_IMAGE} alt="여행 목적지 풍경" />}
         left={
           <>
-            <TripNewFlowDesktopPrevBar className="mb-4" />
+            <TripNewFlowDesktopPrevBar className="mb-4" align="start" />
 
             <StepHeader
               currentStep={STEP_DESTINATION_CONFIG.currentStep}
@@ -452,8 +469,20 @@ export default function TripNewDestinationPage() {
           </>
         }
         right={
-          <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
-            <AiConciergeTip description={AI_TIP.description} />
+          <div className="relative h-full w-full">
+            {/* TripNewStep3Page 우측과 동일: 히어로 위 장식 PNG + 하단 AI 팁 */}
+            <div className="pointer-events-none absolute inset-x-0 top-[22vh] z-30 flex justify-center px-4 lg:px-8">
+              <img
+                src={DESTINATION_DESKTOP_RIGHT_IMAGE}
+                alt=""
+                role="presentation"
+                draggable={false}
+                className="h-auto w-full max-w-2xl object-contain object-bottom drop-shadow-[0_12px_32px_rgba(15,23,42,0.12)] [max-height:min(52vh,560px)]"
+              />
+            </div>
+            <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
+              <AiConciergeTip description={AI_TIP.description} />
+            </div>
           </div>
         }
       />
@@ -472,7 +501,7 @@ export default function TripNewDestinationPage() {
             }
             className="mb-4"
             titleClassName="text-2xl"
-            topEndAction={<TripNewFlowMobilePrevAction />}
+            topStartAction={<TripNewFlowMobilePrevAction />}
           />
 
           <div className="mb-8 rounded-2xl border border-sky-100/90 bg-sky-50/95 p-4 shadow-sm">

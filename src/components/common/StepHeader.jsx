@@ -11,6 +11,7 @@ import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
  *   className      {string}  (optional) 외부 여백 등 추가 클래스
  *   titleClassName   {string}  (optional) 제목(h1) 타이포 — 예: 모바일만 `text-2xl`
  *   subtitleClassName {string} (optional) 부제 영역 타이포 — 기본 `text-base`
+ *   topStartAction  {ReactNode} (optional) STEP 배지 왼쪽 (예: step2 홈으로)
  *   topEndAction    {ReactNode} (optional) STEP 배지와 같은 줄 오른쪽 (예: 모바일 뒤로가기)
  */
 export default function StepHeader({
@@ -21,19 +22,23 @@ export default function StepHeader({
   className = '',
   titleClassName,
   subtitleClassName,
+  topStartAction,
   topEndAction,
 }) {
   const progressPct = Math.round((currentStep / totalSteps) * 100)
 
   return (
     <div className={className}>
-      {/* STEP 라벨 + (optional) 같은 줄 오른쪽 액션 */}
+      {/* STEP 라벨 + (optional) 같은 줄 좌·우 액션 */}
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="mb-0 min-w-0">
-          <span className="inline-block rounded-full bg-sky-100 px-3 py-1 text-xs font-bold tracking-wide text-sky-700">
-            STEP {String(currentStep).padStart(2, '0')}
-          </span>
-        </p>
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          {topStartAction}
+          <p className="mb-0 min-w-0">
+            <span className="inline-block rounded-full bg-sky-100 px-3 py-1 text-xs font-bold tracking-wide text-sky-700">
+              STEP {String(currentStep).padStart(2, '0')}
+            </span>
+          </p>
+        </div>
         {topEndAction}
       </div>
 

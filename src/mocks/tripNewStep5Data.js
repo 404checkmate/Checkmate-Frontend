@@ -60,10 +60,22 @@ export const COMPANIONS = [
     icon: 'person',
   },
   {
+    id: 'friends',
+    label: '친구와',
+    description: '함께라서 더 신나는 여행',
+    icon: 'group',
+  },
+  {
     id: 'couple',
     label: '연인과',
     description: '로맨틱한 둘만의 여행',
     icon: 'heart',
+  },
+  {
+    id: 'parents',
+    label: '부모님과',
+    description: '사랑하는 부모님과 함께',
+    icon: 'home',
   },
   {
     id: 'withKids',
@@ -76,18 +88,6 @@ export const COMPANIONS = [
     label: '반려동물과',
     description: '펫 프렌들리 동선으로 함께',
     icon: 'pet',
-  },
-  {
-    id: 'friends',
-    label: '친구와',
-    description: '함께라서 더 신나는 여행',
-    icon: 'group',
-  },
-  {
-    id: 'parents',
-    label: '부모님과',
-    description: '사랑하는 부모님과 함께',
-    icon: 'home',
   },
 ]
 
@@ -107,7 +107,7 @@ export const TRAVEL_STYLES = [
 ]
 
 export const EDITORIAL_PICK = {
-  eyebrow: 'EDITORIAL PICK',
-  title: '이번 시즌 추천 동선',
-  description: '동행과 스타일에 맞춰 코스를 구성해 드릴게요.',
+  eyebrow: 'CHECKMATE',
+  title: '동행·스타일에 맞춘 준비 리스트',
+  description: 'CHECKMATE와 함께 필요한 항목만 골라\n체크리스트로 정리해보세요.',
 }

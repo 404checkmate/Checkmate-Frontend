@@ -9,7 +9,7 @@ const MOBILE_PREV_CLASS = 'shrink-0 text-teal-700 hover:text-teal-900'
  * - `to` 없음: `navigate(-1)`
  * - `to` 있음: 해당 경로 (예: step2 홈 — `to="/"`, `label="홈으로"`)
  */
-export function TripNewFlowDesktopPrevBar({ className = '', to, label, ariaLabel }) {
+export function TripNewFlowDesktopPrevBar({ className = '', to, label, ariaLabel, align }) {
   return (
     <TripFlowDesktopBar
       backTo={to}
@@ -17,6 +17,7 @@ export function TripNewFlowDesktopPrevBar({ className = '', to, label, ariaLabel
       showBackIcon={false}
       label={label}
       ariaLabel={ariaLabel}
+      align={align}
     />
   )
 }

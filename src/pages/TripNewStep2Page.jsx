@@ -95,7 +95,7 @@ function TripNewStep2Page() {
       <div className="hidden md:block">
         <div className="mx-auto max-w-5xl px-6 py-10">
 
-          <TripNewFlowDesktopPrevBar className="mb-4" to="/" label="홈으로" />
+          <TripNewFlowDesktopPrevBar className="mb-4" align="start" to="/" label="홈으로" />
 
           <StepHeader
             currentStep={STEP2_CONFIG.currentStep}
@@ -171,7 +171,7 @@ function TripNewStep2Page() {
             }
             className="mb-4"
             titleClassName="text-2xl"
-            topEndAction={<TripNewFlowMobilePrevAction to="/" label="홈으로" />}
+            topStartAction={<TripNewFlowMobilePrevAction to="/" label="홈으로" />}
           />
 
           {/* 옵션 카드 */}

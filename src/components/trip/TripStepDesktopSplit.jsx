@@ -12,7 +12,7 @@ export default function TripStepDesktopSplit({ left, right, fullBleed }) {
       {fullBleed}
       <div className="relative z-10 grid h-full min-h-0 w-full grid-cols-1 md:grid-cols-2">
         <div className="relative z-20 flex min-h-0 min-w-0 flex-col overflow-x-hidden md:col-start-1 md:h-full">
-          <div className="relative z-20 flex min-h-0 w-full flex-1 flex-col overflow-y-auto px-8 py-10 lg:px-10 xl:px-12">
+          <div className="scrollbar-hide relative z-20 flex min-h-0 w-full flex-1 flex-col overflow-y-auto px-8 py-10 lg:px-10 xl:px-12">
             {left}
           </div>
         </div>
