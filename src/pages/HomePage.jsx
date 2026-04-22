@@ -331,7 +331,7 @@ function HomePage() {
             >
               <button
                 type="button"
-                onClick={() => navigate('/trips/new/step2')}
+                onClick={() => navigate('/trips/new/destination')}
                 className="w-full max-w-sm self-start rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-teal-900/35 transition hover:from-cyan-400 hover:to-teal-500 md:w-auto md:max-w-none md:px-8"
               >
                 여행 준비 시작하기

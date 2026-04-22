@@ -1,33 +1,16 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
-import { LANDING_SECTION_IDS } from '@/mocks/homeData'
 import { clearClientSessionForLogout, isMockWebSessionLoggedIn } from '@/utils/onboardingGate'
 
 const NAV_ITEMS = [
   { label: '홈', path: '/', match: (p) => p === '/' },
-  { label: '여행 준비', path: '/trips/new/step2', match: (p) => p.startsWith('/trips/new') },
+  { label: '여행 준비', path: '/trips/new/destination', match: (p) => p.startsWith('/trips/new') },
   {
     label: '체크리스트',
     path: '/trips/1/guide-archive',
     match: (p) => p.includes('/guide-archive'),
   },
-]
-
-/** 비로그인 랜딩 헤더 — 홈 섹션 앵커·주요 진입 */
-const LANDING_NAV_ITEMS = [
-  { label: '보관함', to: '/trips/1/guide-archive', match: (p) => p.includes('/guide-archive') },
-  {
-    label: '이용 안내',
-    to: { pathname: '/', hash: `#${LANDING_SECTION_IDS.features}` },
-    match: (p, hash) => p === '/' && hash === `#${LANDING_SECTION_IDS.features}`,
-  },
-  {
-    label: '탐색',
-    to: '/trips/1/search',
-    match: (p) => /^\/trips\/[^/]+\/search/.test(p),
-  },
-  { label: '여행 만들기', to: '/trips/new/step2', match: (p) => p.startsWith('/trips/new') },
 ]
 
 function Header() {
@@ -79,7 +62,7 @@ function Header() {
 
   /** 데스크톱 전용 분기 — 백엔드 연동 시 isMockWebSessionLoggedIn 대신 세션 훅으로 교체 */
   const isWebLoggedIn = isMockWebSessionLoggedIn()
-  const { pathname, hash } = location
+  const { pathname } = location
 
   return (
     <header className="relative w-full border-b border-gray-100 bg-white pt-[env(safe-area-inset-top,0px)]">
@@ -93,39 +76,27 @@ function Header() {
           </Link>
         </div>
 
-        {/* 데스크톱: 화면 정중앙 네비 (PNG 랜딩과 동일 구조) */}
-        <nav
-          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 md:flex"
-          aria-label="주요 메뉴"
-        >
-          {isWebLoggedIn
-            ? NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
-                    item.match(pathname)
-                      ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))
-            : LANDING_NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
-                    item.match(pathname, hash)
-                      ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-        </nav>
+        {/* 데스크톱: 로그인 시에만 중앙 네비 표시 — 비로그인은 하단 푸터 등에서 진입 */}
+        {isWebLoggedIn ? (
+          <nav
+            className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 md:flex"
+            aria-label="주요 메뉴"
+          >
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                to={item.path}
+                className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
+                  item.match(pathname)
+                    ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
 
         <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
           {isWebLoggedIn ? (
@@ -161,7 +132,7 @@ function Header() {
                 로그인
               </Link>
               <Link
-                to="/trips/new/step2"
+                to="/trips/new/destination"
                 className="hidden rounded-lg bg-gradient-to-r from-cyan-500 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-teal-900/20 transition hover:from-cyan-400 hover:to-teal-500 md:inline-flex"
               >
                 시작하기
@@ -179,7 +150,7 @@ function Header() {
                 로그인
               </Link>
               <Link
-                to="/trips/new/step2"
+                to="/trips/new/destination"
                 className="rounded-lg bg-gradient-to-r from-cyan-500 to-teal-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-teal-900/15"
               >
                 시작

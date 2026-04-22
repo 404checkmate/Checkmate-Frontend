@@ -1,3 +1,7 @@
+/**
+ * 보관용 — 활성 새 여행 플로우에서는 사용하지 않습니다.
+ * 라우트 `/trips/new/step3`는 유지(직접 URL·복구용). 메인 플로우: `/trips/new/destination` → step4 → step5 (3단계).
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {

@@ -34,14 +34,9 @@ import aiSparklesImg from '@/assets/ai-sparkles.png'
  * 실제 DB 에 저장된 trip 에서 들어올 때는 이 placeholder 가 아닌 진짜 id 가 URL 에 박힌다.
  */
 const PLACEHOLDER_TRIP_ID = '1'
-/** 수하물 필터 — 전체: 기내+위탁 모두 */
-const BAGGAGE_FILTER_ALL = 'all'
 
-const SEARCH_BAGGAGE_TABS = [
-  { value: BAGGAGE_FILTER_ALL, label: '전체' },
-  { value: BAGGAGE_CARRY_ON, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CARRY_ON] },
-  { value: BAGGAGE_CHECKED, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CHECKED] },
-]
+/** 목록은 항상 기내 → 위탁 두 블록으로만 나눔(카드 상단 수하물 탭 없음) */
+const SEARCH_BAGGAGE_SECTION_ORDER = [BAGGAGE_CARRY_ON, BAGGAGE_CHECKED]
 
 /** 현재 풀 안에서 항목 유형(AI·준비물…)별 그룹 — 보관함 상세와 같이 수하물 블록 안에서 재사용 */
 function buildSubcategoryGroups(itemsPool) {
@@ -154,8 +149,6 @@ function TripSearchInner({ tripId }) {
   )
 
   const searchStartRef = useRef(0)
-  /** 기내 반입 / 위탁 수하물 — 보관함 상세 수하물 구간과 동일 개념 */
-  const [selectedBaggage, setSelectedBaggage] = useState(BAGGAGE_CARRY_ON)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [savedIds, setSavedIds] = useState(() => new Set(loadSavedItems(tripId).map((x) => String(x.id))))
   /** 체크리스트에 넣을 항목 선택 (id 문자열) */
@@ -276,23 +269,11 @@ function TripSearchInner({ tripId }) {
       cancelled = true
     }
   }, [tripId])
-  const handleBaggageChange = (baggage) => {
-    if (baggage !== selectedBaggage) {
-      trackEvent('search_baggage_change', {
-        trip_id: tripId,
-        from_baggage: selectedBaggage,
-        to_baggage: baggage,
-      })
-    }
-    setSelectedBaggage(baggage)
-    setSelectedCategory('all')
-  }
 
   const handleCategoryChange = (category) => {
     if (selectedCategory !== 'all' && category !== selectedCategory) {
       trackEvent('research_trigger', {
         trip_id: tripId,
-        baggage: selectedBaggage,
         from_category: selectedCategory,
         to_category: category,
       })
@@ -512,55 +493,40 @@ function TripSearchInner({ tripId }) {
 
   const totalItemCount = sourceItems.length
   const aiRecommendCount = sourceItems.filter((i) => i.category === 'ai_recommend').length
-  /** 선택한 수하물 구간(전체 | 기내 | 위탁)에 해당하는 목록만 */
-  const baggageFilteredItems = useMemo(() => {
-    if (selectedBaggage === BAGGAGE_FILTER_ALL) return sourceItems
-    return sourceItems.filter((i) => resolveBaggageSection(i) === selectedBaggage)
-  }, [selectedBaggage, sourceItems])
 
-  /** 목록에 표시할 수하물 구간 순서(전체 필터면 기내 → 위탁, 아니면 선택 한 구간만) */
-  const baggageSectionKeys = useMemo(() => {
-    if (selectedBaggage === BAGGAGE_FILTER_ALL) return [BAGGAGE_CARRY_ON, BAGGAGE_CHECKED]
-    return [selectedBaggage]
-  }, [selectedBaggage])
-
-  /** 수하물 구간별 → 항목 유형별 그룹(조회 리스트에서 기내/위탁이 항상 나뉨) */
+  /** 수하물 구간별 → 항목 유형별 그룹(목록에서는 기내/위탁 블록만 유지) */
   const groupedItemsByBaggage = useMemo(() => {
-    return baggageSectionKeys
-      .map((bagKey) => {
-        const pool = baggageFilteredItems.filter((i) => resolveBaggageSection(i) === bagKey)
-        const grouped = buildSubcategoryGroups(pool)
-        return { bagKey, bagTitle: BAGGAGE_SECTION_LABEL[bagKey], grouped }
-      })
-      .filter((section) => section.grouped.length > 0)
-  }, [baggageFilteredItems, baggageSectionKeys])
+    return SEARCH_BAGGAGE_SECTION_ORDER.map((bagKey) => {
+      const pool = sourceItems.filter((i) => resolveBaggageSection(i) === bagKey)
+      const grouped = buildSubcategoryGroups(pool)
+      return { bagKey, bagTitle: BAGGAGE_SECTION_LABEL[bagKey], grouped }
+    }).filter((section) => section.grouped.length > 0)
+  }, [sourceItems])
 
   /** 단일 서브 카테고리: 수하물 구간별 목록(기내 / 위탁 분리) */
   const singleCategoryBaggageSections = useMemo(() => {
     if (selectedCategory === 'all') return []
-    return baggageSectionKeys
-      .map((bagKey) => ({
-        bagKey,
-        bagTitle: BAGGAGE_SECTION_LABEL[bagKey],
-        items: baggageFilteredItems
-          .filter((i) => resolveBaggageSection(i) === bagKey && i.category === selectedCategory)
-          .sort((a, b) => a.title.localeCompare(b.title, 'ko')),
-      }))
-      .filter((s) => s.items.length > 0)
-  }, [selectedCategory, baggageFilteredItems, baggageSectionKeys])
+    return SEARCH_BAGGAGE_SECTION_ORDER.map((bagKey) => ({
+      bagKey,
+      bagTitle: BAGGAGE_SECTION_LABEL[bagKey],
+      items: sourceItems
+        .filter((i) => resolveBaggageSection(i) === bagKey && i.category === selectedCategory)
+        .sort((a, b) => a.title.localeCompare(b.title, 'ko')),
+    })).filter((s) => s.items.length > 0)
+  }, [selectedCategory, sourceItems])
 
   const sortedItemsSingleCategory = useMemo(() => {
     if (selectedCategory === 'all') return []
     return singleCategoryBaggageSections.flatMap((s) => s.items)
   }, [selectedCategory, singleCategoryBaggageSections])
 
-  const visibleItemCount = selectedCategory === 'all' ? baggageFilteredItems.length : sortedItemsSingleCategory.length
+  const visibleItemCount = selectedCategory === 'all' ? sourceItems.length : sortedItemsSingleCategory.length
 
   /** 현재 탭에서 선택 가능한 항목(이미 보관함에 있는 것 제외) */
   const selectableItemsInView = useMemo(() => {
-    const list = selectedCategory === 'all' ? baggageFilteredItems : sortedItemsSingleCategory
+    const list = selectedCategory === 'all' ? sourceItems : sortedItemsSingleCategory
     return list.filter((i) => !existingArchiveItemIds.has(String(i.id)))
-  }, [selectedCategory, sortedItemsSingleCategory, baggageFilteredItems, existingArchiveItemIds])
+  }, [selectedCategory, sortedItemsSingleCategory, sourceItems, existingArchiveItemIds])
 
   const allSelectableInViewSelected = useMemo(() => {
     if (selectableItemsInView.length === 0) return false
@@ -579,7 +545,6 @@ function TripSearchInner({ tripId }) {
       })
       trackEvent('search_deselect_all_in_view', {
         trip_id: tripId,
-        baggage: selectedBaggage,
         category: selectedCategory,
         removed_count: selectableItemsInView.length,
         merge_to_archive: mergeToArchive,
@@ -595,7 +560,6 @@ function TripSearchInner({ tripId }) {
     })
     trackEvent('search_select_all_in_view', {
       trip_id: tripId,
-      baggage: selectedBaggage,
       category: selectedCategory,
       added_count: selectableItemsInView.filter((i) => !selectedForSave.has(String(i.id))).length,
       merge_to_archive: mergeToArchive,
@@ -623,7 +587,6 @@ function TripSearchInner({ tripId }) {
     })
     trackEvent(allOn ? 'search_deselect_all_in_group' : 'search_select_all_in_group', {
       trip_id: tripId,
-      baggage: selectedBaggage,
       group_category: group.categoryValue,
       item_count: selectable.length,
       merge_to_archive: mergeToArchive,
@@ -638,7 +601,7 @@ function TripSearchInner({ tripId }) {
   const headerDescription =
     mergeToArchive && archiveEntry
       ? `「${buildGuideArchiveListTitle(archiveEntry)}」에 담을 준비물을 고르세요.`
-      : '골라 저장한 체크리스트로 필수품을 빠짐없이 챙겨보세요!'
+      : '맞춤 준비 항목을 확인하고 나의 체크리스트에 담아보세요!'
 
   const pageBackgroundStyle = mergeToArchive
     ? TRIP_SEARCH_MERGE_PAGE_BACKGROUND_STYLE
@@ -704,7 +667,7 @@ function TripSearchInner({ tripId }) {
         <div className="sticky top-0 z-20 -mx-5 mb-6 border-b border-slate-100/90 bg-white px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:rounded-xl md:border md:border-slate-100 md:bg-white md:px-5 md:py-4 md:shadow-sm">
           <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
             <span>
-              {mergeToArchive ? '추가 선택' : '담기 선택'}{' '}
+              {mergeToArchive ? '추가 선택' : '선택한 항목'}{' '}
               <span className="tabular-nums text-slate-800">{selectedForSave.size}</span>
               {' / '}
               <span className="tabular-nums text-slate-800">{totalItemCount}</span>
@@ -719,34 +682,6 @@ function TripSearchInner({ tripId }) {
           aria-label="카테고리 필터"
         >
           <h2 className="mb-3.5 text-lg font-extrabold tracking-tight text-gray-900">{categoryCardHeading}</h2>
-
-          <p id="search-baggage-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-            수하물 구간
-          </p>
-          <div
-            className="mb-5 flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
-            role="tablist"
-            aria-labelledby="search-baggage-label"
-          >
-            {SEARCH_BAGGAGE_TABS.map((tab) => {
-              const selected = selectedBaggage === tab.value
-              const tabClass = selected
-                ? 'border-2 border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-900/15'
-                : 'border-2 border-teal-100 bg-teal-50/80 text-teal-900 shadow-sm hover:border-teal-300 hover:bg-teal-100/80'
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => handleBaggageChange(tab.value)}
-                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${tabClass}`}
-                >
-                  {tab.label}
-                </button>
-              )
-            })}
-          </div>
 
           <p id="search-subcategory-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
             항목 유형
@@ -783,26 +718,8 @@ function TripSearchInner({ tripId }) {
           </div>
         </section>
 
-        <p className="mb-3 text-sm font-semibold text-gray-700 md:text-base">
-          {mergeToArchive ? (
-            <>
-              추가 후보 <span className="tabular-nums">{totalItemCount}</span>개
-            </>
-          ) : (
-            <>
-              총 검색 결과 <span className="tabular-nums">{totalItemCount}</span>개
-            </>
-          )}
-        </p>
-
         <div className="mb-6 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
           <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
-            <span className="text-teal-900">
-              {selectedBaggage === BAGGAGE_FILTER_ALL ? '전체 구간' : BAGGAGE_SECTION_LABEL[selectedBaggage]}
-            </span>
-            <span className="mx-1.5 text-gray-400" aria-hidden>
-              ·
-            </span>
             <span className="text-slate-700">
               {selectedCategory === 'all'
                 ? '전체 유형'
@@ -839,7 +756,7 @@ function TripSearchInner({ tripId }) {
             <div className="space-y-10">
               {groupedItemsByBaggage.length === 0 ? (
                 <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-sm text-gray-500 shadow-sm">
-                  이 수하물 구간에 표시할 항목이 없습니다.
+                  표시할 항목이 없습니다.
                 </div>
               ) : null}
               {groupedItemsByBaggage.map(({ bagKey, bagTitle, grouped }) => (

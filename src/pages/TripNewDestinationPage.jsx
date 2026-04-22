@@ -9,15 +9,9 @@ import {
   getArrivalsForCountry,
   sanitizeCountryInput,
   sanitizeArrivalInput,
-  HERO_IMAGE,
-  AI_TIP,
-  DESTINATION_DESKTOP_RIGHT_IMAGE,
 } from '@/mocks/tripNewDestinationData'
 import StepHeader from '@/components/common/StepHeader'
-import AiConciergeTip from '@/components/common/AiConciergeTip'
-import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
-import { FullBleedMintImageHero } from '@/components/trip/MintProgressiveHero'
 import {
   TripNewFlowDesktopPrevBar,
   TripNewFlowMobilePrevAction,
@@ -29,6 +23,7 @@ import { TripDestinationSvgIcon } from '@/components/trip/TripDestinationIcons'
 import { formatKoreanDateRangeLine, formatTripNightsDaysLabel } from '@/utils/tripDateFormat'
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { clearActiveTripId } from '@/utils/activeTripIdStorage'
 
 /** `<input type="date" min>` 용 — 브라우저 로컬 달력과 맞추기 위해 UTC가 아닌 로컬 날짜 사용 */
 function getLocalDateYYYYMMDD() {
@@ -63,15 +58,13 @@ const SUBTITLE_DESKTOP = (
   </p>
 )
 
-/** TripNewStep2Page와 동일한 페이지 배경 — 플로우 화면 통일 */
+/** 이미지 히어로 없이 — CHECKMATE 플로우 틸·민트·시안 톤 (step2·step4와 계열 통일) */
 const TRIP_FLOW_PAGE_BG_STYLE = {
   background: `
-    radial-gradient(ellipse 110% 75% at 50% -8%, rgba(165, 243, 252, 0.35), transparent 58%),
-    radial-gradient(ellipse 85% 60% at 100% 12%, rgba(204, 251, 241, 0.45), transparent 52%),
-    radial-gradient(ellipse 80% 55% at 100% 92%, rgba(167, 243, 208, 0.22), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 0% 45%, rgba(236, 253, 245, 0.9), transparent 52%),
-    radial-gradient(ellipse 95% 65% at 50% 105%, rgba(207, 250, 254, 0.35), transparent 55%),
-    linear-gradient(152deg, #f0fdfa 0%, #ecfeff 18%, #f0fdfa 42%, #eefcf6 68%, #f7fef9 100%)
+    radial-gradient(ellipse 120% 80% at 50% -15%, rgba(45, 212, 191, 0.18), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 0% 30%, rgba(204, 251, 241, 0.55), transparent 50%),
+    radial-gradient(ellipse 85% 60% at 100% 70%, rgba(167, 243, 208, 0.28), transparent 52%),
+    linear-gradient(165deg, #ecfdf5 0%, #f0fdfa 22%, #ecfeff 48%, #f8fafc 100%)
   `,
 }
 
@@ -98,6 +91,10 @@ function DestinationDateForm({
   endDate,
   today,
   onRangeChange,
+  scheduleMode,
+  onScheduleModeChange,
+  flexibilityDays,
+  onFlexibilityDaysChange,
 }) {
   const hasQuery = countryQuery.trim().length > 0
   const panelOpen = showDropdown && (pickerPhase === 'arrival' || hasQuery)
@@ -155,43 +152,40 @@ function DestinationDateForm({
       </div>
 
       <div
-        className={`rounded-2xl border border-sky-100/90 bg-sky-50/90 p-5 shadow-sm transition-opacity ${
+        className={`rounded-2xl border border-teal-100/90 bg-gradient-to-br from-teal-50/70 via-white to-cyan-50/40 p-5 shadow-sm transition-opacity ${
           selectedCountry ? '' : 'opacity-60'
         }`}
         aria-disabled={!selectedCountry}
       >
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm ${
-                selectedCountry ? 'bg-white/90 text-sky-600' : 'bg-gray-100 text-gray-400'
-              }`}
-            >
-              <TripDestinationSvgIcon name="calendar" className="h-5 w-5" />
-            </div>
-            <span className={`text-base font-bold ${selectedCountry ? 'text-gray-900' : 'text-gray-500'}`}>
-              언제 떠나시나요?
-            </span>
+        <div className="mb-4 flex items-center gap-2">
+          <div
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm ${
+              selectedCountry ? 'bg-white/90 text-teal-600' : 'bg-gray-100 text-gray-400'
+            }`}
+          >
+            <TripDestinationSvgIcon name="calendar" className="h-5 w-5" />
           </div>
-          <span className="shrink-0 text-sm font-semibold tabular-nums text-gray-500">
-            {(startDate ? parseInt(startDate.slice(0, 4), 10) : new Date().getFullYear())}년
+          <span className={`text-base font-bold ${selectedCountry ? 'text-gray-900' : 'text-gray-500'}`}>
+            언제 떠나시나요?
           </span>
         </div>
         {!selectedCountry && (
-          <p className="mb-3 rounded-xl bg-white/80 px-3 py-2 text-xs text-gray-500 ring-1 ring-sky-100/80">
-            위에서 <strong className="text-sky-700">여행 국가</strong>를 먼저 선택하면 일정을 입력할 수 있어요.
+          <p className="mb-3 rounded-xl bg-white/80 px-3 py-2 text-xs text-gray-500 ring-1 ring-teal-100/80">
+            위에서 <strong className="text-teal-700">여행 국가</strong>를 먼저 선택하면 일정을 입력할 수 있어요.
           </p>
         )}
-        <div className="rounded-xl border border-sky-100/80 bg-white/70 p-3 shadow-inner">
-          <DestinationMobileRangeCalendar
-            startDate={startDate}
-            endDate={endDate}
-            todayYmd={today}
-            minDateYmd={today}
-            disabled={!selectedCountry}
-            onChangeRange={onRangeChange}
-          />
-        </div>
+        <DestinationMobileRangeCalendar
+          startDate={startDate}
+          endDate={endDate}
+          todayYmd={today}
+          minDateYmd={today}
+          disabled={!selectedCountry}
+          onChangeRange={onRangeChange}
+          scheduleMode={scheduleMode}
+          onScheduleModeChange={onScheduleModeChange}
+          flexibilityDays={flexibilityDays}
+          onFlexibilityDaysChange={onFlexibilityDaysChange}
+        />
       </div>
     </div>
   )
@@ -204,9 +198,27 @@ export default function TripNewDestinationPage() {
 
   /** 오늘(로컬) 기준으로 갱신 — 탭 복귀·분 단위 체크로 자정 넘김 반영 */
   useEffect(() => {
+    clearActiveTripId()
+  }, [])
+
+  useEffect(() => {
     const syncToday = () => setToday(getLocalDateYYYYMMDD())
     syncToday()
-    const intervalId = setInterval(syncToday, 60_000)
+
+    const intervalId = setInterval(syncToday, 30_000)
+
+    let midnightTimerId = null
+    const scheduleNextMidnight = () => {
+      const now = new Date()
+      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0)
+      const ms = Math.max(500, next.getTime() - now.getTime())
+      midnightTimerId = window.setTimeout(() => {
+        syncToday()
+        scheduleNextMidnight()
+      }, ms)
+    }
+    scheduleNextMidnight()
+
     const onFocus = () => syncToday()
     const onVisibility = () => {
       if (document.visibilityState === 'visible') syncToday()
@@ -215,6 +227,7 @@ export default function TripNewDestinationPage() {
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       clearInterval(intervalId)
+      if (midnightTimerId != null) window.clearTimeout(midnightTimerId)
       window.removeEventListener('focus', onFocus)
       document.removeEventListener('visibilitychange', onVisibility)
     }
@@ -228,6 +241,8 @@ export default function TripNewDestinationPage() {
   const [arrivalQuery, setArrivalQuery] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [dateScheduleMode, setDateScheduleMode] = useState('fixed')
+  const [dateFlexibilityDays, setDateFlexibilityDays] = useState(0)
 
   /** 자정 등으로 today가 바뀌면 과거로 밀린 값은 비움 */
   useEffect(() => {
@@ -258,6 +273,8 @@ export default function TripNewDestinationPage() {
     if (!selectedCountry) {
       setStartDate('')
       setEndDate('')
+      setDateScheduleMode('fixed')
+      setDateFlexibilityDays(0)
     }
   }, [selectedCountry])
 
@@ -397,6 +414,8 @@ export default function TripNewDestinationPage() {
       fromDestinationPage: true,
       tripStartDate: startDate,
       tripEndDate: endDate,
+      tripScheduleMode: dateScheduleMode,
+      tripDateFlexibilityDays: dateFlexibilityDays,
     }
     saveStep4NavigationState(navState)
     saveActiveTripPlan({
@@ -408,6 +427,8 @@ export default function TripNewDestinationPage() {
       },
       tripStartDate: startDate,
       tripEndDate: endDate,
+      tripScheduleMode: dateScheduleMode,
+      tripDateFlexibilityDays: dateFlexibilityDays,
     })
     navigate('/trips/new/step4', { state: navState })
   }
@@ -435,16 +456,21 @@ export default function TripNewDestinationPage() {
     endDate,
     today,
     onRangeChange: handleMobileRangeChange,
+    scheduleMode: dateScheduleMode,
+    onScheduleModeChange: setDateScheduleMode,
+    flexibilityDays: dateFlexibilityDays,
+    onFlexibilityDaysChange: setDateFlexibilityDays,
   }
 
   return (
     <div className="min-h-screen" style={TRIP_FLOW_PAGE_BG_STYLE}>
-      <TripStepDesktopSplit
-        fullBleed={<FullBleedMintImageHero src={HERO_IMAGE} alt="여행 목적지 풍경" />}
-        left={
-          <>
-            <TripNewFlowDesktopPrevBar className="mb-4" align="start" />
-
+      {/* 데스크톱: 풀블리드 이미지 없음 — 본문만 뷰포트 중앙 정렬 */}
+      <div className="hidden min-h-screen flex-col md:flex">
+        <div className="shrink-0 px-8 pt-8 lg:px-12 lg:pt-10">
+          <TripNewFlowDesktopPrevBar align="start" />
+        </div>
+        <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-8 lg:px-12 lg:py-10">
+          <div className="scrollbar-hide w-full max-w-xl overflow-y-auto">
             <StepHeader
               currentStep={STEP_DESTINATION_CONFIG.currentStep}
               totalSteps={STEP_DESTINATION_CONFIG.totalSteps}
@@ -456,36 +482,15 @@ export default function TripNewDestinationPage() {
                 </>
               }
               subtitle={SUBTITLE_DESKTOP}
-              className="mb-10"
+              className="mb-8"
             />
-
-            <div className="flex-1">
-              <DestinationDateForm {...formProps} />
-            </div>
-
+            <DestinationDateForm {...formProps} />
             <div className="mt-6">
               <TripFlowNextStepButton variant="amber" disabled={!isValid} onClick={goNext} />
             </div>
-          </>
-        }
-        right={
-          <div className="relative h-full w-full">
-            {/* TripNewStep3Page 우측과 동일: 히어로 위 장식 PNG + 하단 AI 팁 */}
-            <div className="pointer-events-none absolute inset-x-0 top-[22vh] z-30 flex justify-center px-4 lg:px-8">
-              <img
-                src={DESTINATION_DESKTOP_RIGHT_IMAGE}
-                alt=""
-                role="presentation"
-                draggable={false}
-                className="h-auto w-full max-w-2xl object-contain object-bottom drop-shadow-[0_12px_32px_rgba(15,23,42,0.12)] [max-height:min(52vh,560px)]"
-              />
-            </div>
-            <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
-              <AiConciergeTip description={AI_TIP.description} />
-            </div>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       <div className="md:hidden">
         <div className="px-5 pt-4 pb-56">
@@ -501,7 +506,7 @@ export default function TripNewDestinationPage() {
             }
             className="mb-4"
             titleClassName="text-2xl"
-            topStartAction={<TripNewFlowMobilePrevAction />}
+            topEndAction={<TripNewFlowMobilePrevAction />}
           />
 
           <div className="mb-8 rounded-2xl border border-sky-100/90 bg-sky-50/95 p-4 shadow-sm">
@@ -547,19 +552,16 @@ export default function TripNewDestinationPage() {
             )}
           </div>
 
-          <div className="mb-3 flex items-baseline justify-between gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <h2 className={`text-lg font-bold ${selectedCountry ? 'text-gray-900' : 'text-gray-400'}`}>
-              여행 기간 선택
+              언제 떠나시나요?
             </h2>
-            <span className="text-sm font-semibold text-gray-500">
-              {(startDate ? parseInt(startDate.slice(0, 4), 10) : new Date().getFullYear())}년
-            </span>
           </div>
 
-          <div className="rounded-2xl border border-sky-100/90 bg-sky-50/95 p-3 shadow-sm">
+          <div className="rounded-2xl border border-teal-100/90 bg-gradient-to-br from-teal-50/60 to-cyan-50/30 p-3 shadow-sm">
             {!selectedCountry && (
-              <p className="mb-2 rounded-xl bg-white/90 px-3 py-2 text-xs leading-relaxed text-gray-600 ring-1 ring-sky-100/80">
-                위에서 <strong className="text-sky-700">여행지</strong>를 먼저 선택하면 일정을 고를 수 있어요.
+              <p className="mb-2 rounded-xl bg-white/90 px-3 py-2 text-xs leading-relaxed text-gray-600 ring-1 ring-teal-100/80">
+                위에서 <strong className="text-teal-700">여행지</strong>를 먼저 선택하면 일정을 고를 수 있어요.
               </p>
             )}
             <DestinationMobileRangeCalendar
@@ -569,6 +571,10 @@ export default function TripNewDestinationPage() {
               minDateYmd={today}
               disabled={!selectedCountry}
               onChangeRange={handleMobileRangeChange}
+              scheduleMode={dateScheduleMode}
+              onScheduleModeChange={setDateScheduleMode}
+              flexibilityDays={dateFlexibilityDays}
+              onFlexibilityDaysChange={setDateFlexibilityDays}
             />
           </div>
         </div>

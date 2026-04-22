@@ -30,8 +30,8 @@ import { FEATURE_PROFILE_ONBOARDING_ENABLED } from '@/utils/onboardingGate'
  *   /login                  로그인 (회원가입은 현재 /login 으로 통합)
  *   /auth/consent           소셜 로그인 직후 약관·개인정보 동의 → (온보딩 켜짐 시 /onboarding, 아니면 /)
  *   /onboarding             보관용 프로필 온보딩 — FEATURE_PROFILE_ONBOARDING_ENABLED 일 때만 표시, 아니면 / 로 리다이렉트
- *   /trips/new              → /trips/new/step2 리다이렉트 (TripNewPage 제거)
- *   /trips/new/step2~       새 여행 플로우 (/destination = 예매 전 도시·날짜)
+ *   /trips/new              → /trips/new/destination (3단계 플로우 1/3)
+ *   /trips/new/step2, step3 보관용 라우트(활성 플로우 미사용) / destination → step4 → step5
  *   /trips/:id/search       준비 항목 탐색         (Store Loop - DRD-1)
  *   /trips/:id/guide-archive 저장 가이드 목록 → /guide-archive/:entryId 상세에서 준비물 체크
  *   *                       404 NotFound
@@ -59,9 +59,11 @@ const AppRoutes = () => {
         },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <MyPage /> },
-        { path: '/trips/new',           element: <Navigate to="/trips/new/step2" replace /> },
+        { path: '/trips/new',           element: <Navigate to="/trips/new/destination" replace /> },
+        /** 보관: 예전 예매 분기 UI — 직접 URL로만 진입. 활성 플로우는 destination부터 */
         { path: '/trips/new/step2',     element: <TripNewStep2Page /> },
         { path: '/trips/new/destination', element: <TripNewDestinationPage /> },
+        /** 보관: 항공편 입력 UI — 직접 URL로만 진입 */
         { path: '/trips/new/step3',     element: <TripNewStep3Page /> },
         /** Step4: 이 경로는 TripNewStep4Page 단 하나만 사용 (중복 라우트 없음) */
         { path: '/trips/new/step4',     element: <TripNewStep4Page /> },

@@ -5,11 +5,11 @@
  */
 
 /* ─────────────────────────────────────────────
-   스텝 설정 (화면에 4 / 4 표시)
+   스텝 설정 (활성 플로우 3단계 중 3/3)
 ───────────────────────────────────────────── */
 export const STEP5_CONFIG = {
-  totalSteps: 4,
-  currentStep: 4,
+  totalSteps: 3,
+  currentStep: 3,
 }
 
 export const STEP5_PAGE_TITLE = '누구와 함께 하고 싶으세요?'
@@ -80,7 +80,7 @@ export const COMPANIONS = [
   {
     id: 'withKids',
     label: '아이와',
-    description: '즐거운..? 육아 여행',
+    description: '소중한 아이와 행복한 여행',
     icon: 'child',
   },
   {
@@ -108,6 +108,6 @@ export const TRAVEL_STYLES = [
 
 export const EDITORIAL_PICK = {
   eyebrow: 'CHECKMATE',
-  title: '동행·스타일에 맞춘 준비 리스트',
-  description: 'CHECKMATE와 함께 필요한 항목만 골라\n체크리스트로 정리해보세요.',
+  title: '동행 · 여행 스타일에 맞춘 준비 리스트',
+  description: 'CHECKMATE와 함께 필요한 항목만 골라\n나만의 체크리스트를 생성해보세요 !',
 }

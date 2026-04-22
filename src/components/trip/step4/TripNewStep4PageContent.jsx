@@ -1,12 +1,6 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import {
-  STEP4_CONFIG,
-  HERO_IMAGE,
-  CITY_IMAGES,
-  AI_TIP,
-  fetchTripDatesForStep4,
-} from '@/mocks/tripNewStep4Data'
+import { STEP4_CONFIG, fetchTripDatesForStep4 } from '@/mocks/tripNewStep4Data'
 import { loadStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { arrayMove } from '@/utils/tripStep4Helpers'
 import StepHeader from '@/components/common/StepHeader'
@@ -14,15 +8,20 @@ import {
   TripNewFlowDesktopPrevBar,
   TripNewFlowMobilePrevAction,
 } from '@/components/trip/TripNewFlowPrevControls'
-import AiConciergeTip from '@/components/common/AiConciergeTip'
-import TripStepDesktopSplit from '@/components/trip/TripStepDesktopSplit'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
-import { FullBleedMintGlobeHero } from '@/components/trip/MintProgressiveHero'
 import FlightSummaryCard from '@/components/trip/step4/FlightSummaryCard'
 import Step4NonVnAddRegionInput from '@/components/trip/step4/Step4NonVnAddRegionInput'
 import Step4NonVnSelectedPlacesList from '@/components/trip/step4/Step4NonVnSelectedPlacesList'
 
-const Step4GlobeHero = lazy(() => import('@/components/trip/Step4GlobeHero'))
+/** TripNewDestinationPage와 동일 — 이미지 히어로 없이 틸·민트 계열 */
+const TRIP_FLOW_PAGE_BG_STYLE = {
+  background: `
+    radial-gradient(ellipse 120% 80% at 50% -15%, rgba(45, 212, 191, 0.18), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 0% 30%, rgba(204, 251, 241, 0.55), transparent 50%),
+    radial-gradient(ellipse 85% 60% at 100% 70%, rgba(167, 243, 208, 0.28), transparent 52%),
+    linear-gradient(165deg, #ecfdf5 0%, #f0fdfa 22%, #ecfeff 48%, #f8fafc 100%)
+  `,
+}
 
 /**
  * Step4 본문 — 항공 요약 + 방문 지역 자유 입력(모든 입국지 동일 UI).
@@ -111,8 +110,6 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
     return true
   }, [tripDatesLoading, tripDatesError, tripWindow])
 
-  const heroSrc = useMemo(() => CITY_IMAGES[arrival.city] || HERO_IMAGE, [arrival.city])
-
   const handleNext = () => {
     if (!canProceed) return
     navigate('/trips/new/step5', {
@@ -144,44 +141,34 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
   )
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 100%)' }}
-    >
-      <TripStepDesktopSplit
-        fullBleed={
-          <FullBleedMintGlobeHero
-            globe={
-              <Suspense
-                fallback={
-                  <div
-                    className="absolute inset-0 animate-pulse opacity-50"
-                    style={{
-                      background:
-                        'radial-gradient(ellipse 80% 70% at 50% 45%, rgba(0, 200, 190, 0.15) 0%, transparent 55%)',
-                    }}
-                  />
-                }
-              >
-                <Step4GlobeHero />
-              </Suspense>
-            }
+    <div className="min-h-screen" style={TRIP_FLOW_PAGE_BG_STYLE}>
+      <div className="hidden min-h-screen flex-col md:flex">
+        <div className="shrink-0 px-8 pt-8 lg:px-12 lg:pt-10">
+          <TripNewFlowDesktopPrevBar
+            align="start"
+            to="/trips/new/destination"
+            label="이전으로"
+            ariaLabel="목적지·날짜 선택으로 돌아가기"
           />
-        }
-        left={
-          <>
-            <TripNewFlowDesktopPrevBar className="mb-6" />
-
+        </div>
+        <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-8 lg:px-12 lg:py-10">
+          <div className="scrollbar-hide w-full max-w-xl overflow-y-auto">
             <StepHeader
               currentStep={STEP4_CONFIG.currentStep}
               totalSteps={STEP4_CONFIG.totalSteps}
-              title="추가로 방문하는 지역이 있나요?"
+              title={
+                <>
+                  추가로 방문하는 지역이 있나요?
+                  <br />
+                  <span className="text-2xl font-bold text-gray-700">(선택사항)</span>
+                </>
+              }
               subtitle={step4HeaderSubtitle}
               className="mb-6"
               subtitleClassName="text-sm"
             />
 
-            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-1">
+            <div className="space-y-5">
               <FlightSummaryCard
                 arrival={arrival}
                 tripWindow={tripWindow}
@@ -205,14 +192,9 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
             <div className="mt-6">
               <TripFlowNextStepButton variant="amber" disabled={!canProceed} onClick={handleNext} />
             </div>
-          </>
-        }
-        right={
-          <div className="pointer-events-auto absolute bottom-8 left-8 right-8 z-30">
-            <AiConciergeTip description={AI_TIP.description} />
           </div>
-        }
-      />
+        </div>
+      </div>
 
       <div className="md:hidden">
         <div className="px-5 pt-4 pb-44">
@@ -221,19 +203,25 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
             totalSteps={STEP4_CONFIG.totalSteps}
             title={
               <>
-                추가로 방문하는 지역이
+                추가로 방문하는 지역이 있나요?
                 <br />
-                있나요?
+                <span className="text-lg font-bold text-gray-700">(선택사항)</span>
               </>
             }
             subtitle={step4HeaderSubtitle}
             className="mb-5"
             titleClassName="text-2xl"
             subtitleClassName="text-sm"
-            topEndAction={<TripNewFlowMobilePrevAction />}
+            topEndAction={
+              <TripNewFlowMobilePrevAction
+                to="/trips/new/destination"
+                label="이전으로"
+                ariaLabel="목적지·날짜 선택으로 돌아가기"
+              />
+            }
           />
 
-          <div className="space-y-4 mb-5">
+          <div className="mb-5 space-y-4">
             <FlightSummaryCard
               arrival={arrival}
               tripWindow={tripWindow}
@@ -253,20 +241,8 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
               onRemoveAll={clearAllPlaces}
             />
           </div>
-
-          <div className="relative rounded-2xl overflow-hidden h-44 mb-4">
-            <img src={heroSrc} alt="" className="w-full h-full object-cover" loading="lazy" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-5">
-              <p className="text-[10px] font-bold text-white/70 tracking-widest uppercase mb-0.5">PREVIEW</p>
-              <p className="text-sm font-extrabold text-white">
-                {selectedPlaces.length >= 1 ? '방문 지역 입력 완료' : '추가 방문 지역은 선택 사항이에요'}
-              </p>
-            </div>
-          </div>
         </div>
 
-        {/* 바텀 네비에 가리지 않도록 목적지·Step3와 동일: 탭 높이만큼 위에 고정 */}
         <div className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 pb-3 pt-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
           <TripFlowNextStepButton variant="amber" disabled={!canProceed} onClick={handleNext} />
         </div>

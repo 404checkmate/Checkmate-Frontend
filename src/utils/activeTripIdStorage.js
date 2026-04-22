@@ -9,7 +9,7 @@
  * 저장 시점: Trip 생성 성공 직후 (Step5 handleCreatePlan)
  * 제거 시점:
  *   - 체크리스트 선택 완료 후 `/guide-archive` 로 이동할 때 또는
- *   - 신규 여행 흐름을 다시 시작할 때 (`/trips/new/step2` 진입 시 자동 cleanup)
+ *   - 신규 여행 흐름을 다시 시작할 때 (`/trips/new/destination` 등 플로우 시작 시 cleanup)
  */
 
 const STORAGE_KEY = 'travel_fe_active_trip_id_v1'

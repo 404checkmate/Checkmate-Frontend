@@ -8,10 +8,10 @@
 /* ─────────────────────────────────────────────
    스텝 설정
 ───────────────────────────────────────────── */
-/** StepHeader: STEP 03 · 카운터 3 / 4 (전체 플로우 기준 진행도) */
+/** StepHeader: 활성 플로우 3단계 중 2단계 (destination → step4 → step5) */
 export const STEP4_CONFIG = {
-  totalSteps: 4,
-  currentStep: 3,
+  totalSteps: 3,
+  currentStep: 2,
 }
 
 /* ─────────────────────────────────────────────
@@ -151,12 +151,4 @@ export async function fetchTripDatesForStep4(arrival, opts = null) {
     /** UI에 목데이터 문구를 붙이지 않기 위한 구분값 (추후 API 연동 시 대체) */
     source: 'itinerary',
   }
-}
-
-/* ─────────────────────────────────────────────
-   AI 팁 (제목: 꿀 Tip!)
-───────────────────────────────────────────── */
-export const AI_TIP = {
-  description:
-    '입국 공항만으로도 안내를 이어갈 수 있어요. <strong>방문할 지역</strong>을 추가로 적어 주시면 날씨·일정에 맞는 <strong>준비물</strong>을 더 정확히 드릴 수 있어요.',
 }

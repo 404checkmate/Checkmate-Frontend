@@ -7,8 +7,8 @@ import tripNewDestinationHero from '../assets/trip-new-destination-hero.png'
 import destinationDesktopRight from '../assets/destination-desktop-right.png'
 
 export const STEP_DESTINATION_CONFIG = {
-  totalSteps: 4,
-  currentStep: 2,
+  totalSteps: 3,
+  currentStep: 1,
 }
 
 export const HERO_IMAGE = tripNewDestinationHero
@@ -334,11 +334,3 @@ export function sanitizeArrivalInput(raw) {
 export function sanitizeCountryInput(raw) {
   return raw.replace(/[^\uAC00-\uD7A3\u3130-\u318F\u1100-\u11FFa-zA-Z\s·]/g, '')
 }
-
-export const AI_TIP = {
-  description:
-    '목록에서 <strong>국가</strong>를 고르고 여행 기간을 정하면, 그에 맞는 <strong>일정·준비물</strong> 안내를 이어갈 수 있어요. 나중에 항공편을 예약하시면 공항 정보만 다듬으면 됩니다.',
-}
-
-export const MOBILE_TIP =
-  '국가는 자동완성에서 선택해 주세요. 출발·귀국일까지 입력하면 다음 단계로 갈 수 있어요.'

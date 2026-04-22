@@ -7,6 +7,27 @@ import {
   resolveBaggageSection,
 } from '@/utils/guideArchiveBaggage'
 
+/** 목 데이터·레거시 스냅샷용. 백엔드에서 항목이 실제 탭 카테고리로 내려오면 이 값은 사라짐. */
+export const GUIDE_ARCHIVE_LEGACY_AI_CATEGORY = 'ai_recommend'
+
+/**
+ * 보관함 목록/드래그에서만 사용: AI 전용 탭 제거 후 레거시 ai_recommend 는 준비물(supplies)과 같은 섹션으로 취급.
+ * @param {Record<string, unknown>|undefined|null} item
+ * @returns {string}
+ */
+export function resolveGuideArchiveCategoryForSection(item) {
+  const c = item?.category ?? '_misc'
+  if (c === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY) return 'supplies'
+  return c
+}
+
+/** 목록 표시: `ai_recommend` 항목을 같은 섹션 안에서 항상 위쪽에 */
+export function compareGuideArchiveAiFirst(a, b) {
+  const aAi = (a?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ? 0 : 1
+  const bAi = (b?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ? 0 : 1
+  return aAi - bAi
+}
+
 /**
  * 가이드 보관함 체크리스트 — 동일 수하물 구간·카테고리(직접 추가 제외) 내에서만 순서 변경.
  * @param {Array<Record<string, unknown>>} allItems
@@ -20,8 +41,8 @@ export function reorderGuideArchiveSectionItems(allItems, bagKey, categoryValue,
   for (const it of allItems) {
     if (resolveBaggageSection(it) !== bagKey) continue
     const cv = it.category ?? '_misc'
-    if (cv !== categoryValue) continue
     if (cv === GUIDE_USER_DIRECT_CATEGORY) continue
+    if (resolveGuideArchiveCategoryForSection(it) !== categoryValue) continue
     sectionItems.push(it)
   }
   if (sectionItems.length <= 1 || fromIdx === toIdx) return allItems
@@ -142,7 +163,7 @@ export function moveItemAppendToSection(
     const x = rest[i]
     if ((x.category ?? '_misc') === GUIDE_USER_DIRECT_CATEGORY) continue
     if (resolveBaggageSection(x) !== targetBagKey) continue
-    if ((x.category ?? '_misc') !== targetCategoryValue) continue
+    if (resolveGuideArchiveCategoryForSection(x) !== targetCategoryValue) continue
     lastInTarget = i
   }
 
@@ -220,7 +241,7 @@ export function moveItemInsertIntoSection(
   const inTargetSection = (x) =>
     (x.category ?? '_misc') !== GUIDE_USER_DIRECT_CATEGORY &&
     resolveBaggageSection(x) === targetBagKey &&
-    (x.category ?? '_misc') === targetCategoryValue
+    resolveGuideArchiveCategoryForSection(x) === targetCategoryValue
 
   if (beforeId) {
     const insertIdx = rest.findIndex((x) => String(x.id) === beforeId)
@@ -234,7 +255,7 @@ export function moveItemInsertIntoSection(
     const x = rest[i]
     if ((x.category ?? '_misc') === GUIDE_USER_DIRECT_CATEGORY) continue
     if (resolveBaggageSection(x) !== targetBagKey) continue
-    if ((x.category ?? '_misc') !== targetCategoryValue) continue
+    if (resolveGuideArchiveCategoryForSection(x) !== targetCategoryValue) continue
     lastInTarget = i
   }
 

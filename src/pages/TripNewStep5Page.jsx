@@ -193,8 +193,16 @@ export default function TripNewStep5Page() {
     >
       {/* ── 데스크톱: 웹 레퍼런스 — 좌 동행·에디토리얼 / 우 스타일 그리드 ── */}
       <div className="hidden md:flex flex-col min-h-screen">
-        <div className="max-w-[1320px] mx-auto w-full px-12 pt-10 pb-4">
-          <TripNewFlowDesktopPrevBar className="mb-6" />
+        {/* TripNewStep4PageContent와 동일 — 상단 풀폭 행 + 좌측 정렬 이전으로 */}
+        <div className="shrink-0 px-8 pt-8 lg:px-12 lg:pt-10">
+          <TripNewFlowDesktopPrevBar
+            align="start"
+            to="/trips/new/step4"
+            label="이전으로"
+            ariaLabel="방문 지역 단계로 돌아가기"
+          />
+        </div>
+        <div className="max-w-[1320px] mx-auto w-full px-12 pb-4 pt-2">
           <StepHeader
             currentStep={STEP5_CONFIG.currentStep}
             totalSteps={STEP5_CONFIG.totalSteps}
@@ -205,74 +213,81 @@ export default function TripNewStep5Page() {
           />
         </div>
 
-        <div className="max-w-[1320px] mx-auto w-full px-12 pb-16 flex gap-12 flex-1 items-stretch">
-          {/* 좌측 패널 */}
-          <div className="w-[480px] flex-shrink-0 flex flex-col gap-6">
-            <SectionLabel num={1} label="동행인 선택" />
-            <div className="grid grid-cols-2 gap-3 auto-rows-fr">
-              {COMPANIONS.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setCompanionId(c.id)}
-                  className={companionCardClass(c.id)}
-                >
-                  <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                      companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white/80 text-teal-700'
-                    }`}
-                  >
-                    <SvgIcon name={c.icon} className="w-6 h-6" />
-                  </div>
-                  <span className="font-extrabold text-lg leading-tight">{c.label}</span>
-                  <span className="text-xs text-gray-600 leading-snug">{c.description}</span>
-                </button>
-              ))}
+        <div className="max-w-[1320px] mx-auto w-full px-12 pb-16 flex gap-8 flex-1 items-stretch">
+          {/* 좌측 패널: 흰 박스(동행인) + 하단 배너(분리) */}
+          <div className="flex-1 min-w-0 flex flex-col gap-6">
+            <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm min-h-0">
+              <SectionLabel num={1} label="동행인 선택" />
+              <p className="text-sm text-gray-500 mb-5">누구와 함께 여행하시나요?</p>
+              <div className="flex-1 min-h-0">
+                <div className="grid grid-cols-2 gap-3 auto-rows-fr">
+                  {COMPANIONS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setCompanionId(c.id)}
+                      className={companionCardClass(c.id)}
+                    >
+                      <div
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+                          companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white/80 text-teal-700'
+                        }`}
+                      >
+                        <SvgIcon name={c.icon} className="w-6 h-6" />
+                      </div>
+                      <span className="font-extrabold text-base leading-tight">{c.label}</span>
+                      <span className="text-xs text-gray-600 leading-snug">{c.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden min-h-[140px] shadow-md border border-teal-900/20">
+            <div className="relative h-[188px] overflow-hidden rounded-2xl border border-slate-300/40 shadow-md">
               <img
                 src="/airplane-sky.png"
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-900/92 via-teal-800/75 to-cyan-800/55" />
-              <div className="relative z-10 p-6 text-white">
-                <p className="text-[10px] font-bold tracking-[0.2em] text-white/80 mb-1">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/74 via-sky-800/62 to-amber-300/32" />
+              <div className="relative z-10 px-6 py-5 text-white">
+                <p className="mb-1 text-[10px] font-bold tracking-[0.2em] text-white/80">
                   {EDITORIAL_PICK.eyebrow}
                 </p>
-                <p className="text-xl font-extrabold leading-snug">{EDITORIAL_PICK.title}</p>
-                <p className="whitespace-pre-line text-sm text-white/85 mt-2 max-w-sm">
+                <p className="text-[30px] font-extrabold leading-tight">{EDITORIAL_PICK.title}</p>
+                <p className="mt-2 max-w-sm whitespace-pre-line text-sm text-white/85">
                   {EDITORIAL_PICK.description}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 우측 패널 */}
-          <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm min-h-0">
-            <SectionLabel num={2} label="여행 스타일" />
-            <p className="text-sm text-gray-500 mb-5">원하는 만큼 골라 주세요. (복수 선택)</p>
+          {/* 우측 패널: 흰 박스(여행 스타일) + 하단 버튼(분리) */}
+          <div className="flex-1 min-w-0 flex flex-col gap-6">
+            <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm min-h-0">
+              <SectionLabel num={2} label="여행 스타일" />
+              <p className="text-sm text-gray-500 mb-5">어떤 여행을 계획하고 있나요? (복수 선택 가능)</p>
 
-            <div className="grid w-full flex-1 grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
-              {TRAVEL_STYLES.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => toggleStyle(s.id)}
-                  className={styleCardClass(s.id)}
-                >
-                  <TravelStyleIcon
-                    src={s.iconSrc}
-                    selected={styleIds.includes(s.id)}
-                    className="h-9 w-9 md:h-11 md:w-11"
-                  />
-                  <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
-                </button>
-              ))}
+              <div className="grid w-full flex-1 grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
+                {TRAVEL_STYLES.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => toggleStyle(s.id)}
+                    className={styleCardClass(s.id)}
+                  >
+                    <TravelStyleIcon
+                      src={s.iconSrc}
+                      selected={styleIds.includes(s.id)}
+                      className="h-9 w-9 md:h-11 md:w-11"
+                    />
+                    <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3 mt-10 pt-4 border-t border-slate-200/70">
+            <div className="flex min-h-[188px] flex-col justify-end gap-3">
               {submitError ? (
                 <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-950">
                   {submitError}
@@ -280,7 +295,7 @@ export default function TripNewStep5Page() {
               ) : null}
               <div className="flex justify-end">
                 <TripFlowNextStepButton
-                  variant="teal"
+                  variant="amber"
                   fullWidth={false}
                   disabled={!canSubmit}
                   onClick={handleCreatePlan}
@@ -295,19 +310,26 @@ export default function TripNewStep5Page() {
 
       {/* ── 모바일: 앱 레퍼런스 — 세로 스택 + 하단 고정 CTA ── */}
       <div className="md:hidden">
-        <div className="px-5 pt-5 pb-44">
+        <div className="px-5 pt-4 pb-44">
           <StepHeader
             currentStep={STEP5_CONFIG.currentStep}
             totalSteps={STEP5_CONFIG.totalSteps}
             title={<>누구와 함께<br />하고 싶으세요?</>}
             subtitle={STEP5_PAGE_SUBTITLE}
-            className="mb-6"
+            className="mb-5"
             titleClassName="text-2xl"
             subtitleClassName="text-sm"
-            topEndAction={<TripNewFlowMobilePrevAction />}
+            topEndAction={
+              <TripNewFlowMobilePrevAction
+                to="/trips/new/step4"
+                label="이전으로"
+                ariaLabel="방문 지역 단계로 돌아가기"
+              />
+            }
           />
 
           <SectionLabel num={1} label="동행인 선택" />
+          <p className="text-sm text-gray-500 mb-4">누구와 함께 여행하시나요?</p>
           <div className="grid grid-cols-2 gap-3 mb-8">
             {COMPANIONS.map((c) => (
               <button
@@ -323,7 +345,7 @@ export default function TripNewStep5Page() {
                 >
                   <SvgIcon name={c.icon} className="w-5 h-5" />
                 </div>
-                <span className="font-extrabold text-base text-center">{c.label}</span>
+                <span className="font-extrabold text-sm leading-tight text-center">{c.label}</span>
               </button>
             ))}
           </div>
@@ -346,6 +368,24 @@ export default function TripNewStep5Page() {
               </button>
             ))}
           </div>
+
+          <div className="relative mt-8 overflow-hidden rounded-2xl border border-slate-300/40 shadow-md">
+            <img
+              src="/airplane-sky.png"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/74 via-sky-800/62 to-amber-300/32" />
+            <div className="relative z-10 px-5 py-4 text-white">
+              <p className="mb-1 text-[10px] font-bold tracking-[0.2em] text-white/80">
+                {EDITORIAL_PICK.eyebrow}
+              </p>
+              <p className="text-xl font-extrabold leading-snug">{EDITORIAL_PICK.title}</p>
+              <p className="mt-2 whitespace-pre-line text-sm text-white/85">
+                {EDITORIAL_PICK.description}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col gap-2 bg-transparent px-5 pb-3 pt-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
@@ -355,10 +395,9 @@ export default function TripNewStep5Page() {
             </p>
           ) : null}
           <TripFlowNextStepButton
-            variant="teal"
+            variant="amber"
             disabled={!canSubmit}
             onClick={handleCreatePlan}
-            showTrailingIcon={false}
           >
             {submitting ? '여행 계획 저장 중…' : '여행 계획 생성하기'}
           </TripFlowNextStepButton>

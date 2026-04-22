@@ -12,10 +12,10 @@ export default function GuideArchiveSectionDndList({
   list,
   sortableDisabled,
   checks,
-  deleteSelectMode,
-  selectedItemIdsForDelete,
   handleToggle,
-  toggleItemSelectForDelete,
+  onEditItem,
+  onDeleteItem,
+  actionVariant = 'default',
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: droppableId,
@@ -44,10 +44,10 @@ export default function GuideArchiveSectionDndList({
             item={it}
             sortableDisabled={sortableDisabled}
             checks={checks}
-            deleteSelectMode={deleteSelectMode}
-            selectedItemIdsForDelete={selectedItemIdsForDelete}
             handleToggle={handleToggle}
-            toggleItemSelectForDelete={toggleItemSelectForDelete}
+            onEditItem={onEditItem}
+            onDeleteItem={onDeleteItem}
+            actionVariant={actionVariant}
           />
         ))}
       </ul>

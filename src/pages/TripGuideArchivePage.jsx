@@ -568,7 +568,7 @@ function TripGuideArchiveInner({ tripId }) {
           <div className="rounded-3xl border border-dashed border-teal-200/60 bg-white/60 px-6 py-16 text-center md:rounded-2xl md:border-slate-200">
             <p className="mb-4 text-sm text-slate-600">아직 저장된 체크리스트가 없습니다.</p>
             <Link
-              to="/trips/new/step2"
+              to="/trips/new/destination"
               className="inline-block rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-teal-800"
             >
               여행 정보 입력하러 가기
@@ -712,7 +712,7 @@ function TripGuideArchiveInner({ tripId }) {
         {entries.length > 0 ? (
           <div className="mt-8 flex justify-center border-t border-slate-200/80 pt-8 md:mt-10 md:pt-10">
             <Link
-              to="/trips/new/step2"
+              to="/trips/new/destination"
               className="inline-block rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-teal-800"
             >
               여행 정보 입력하러 가기

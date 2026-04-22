@@ -33,7 +33,7 @@ const BOTTOM_NAV_ITEMS = [
   },
   {
     label: '여행 준비',
-    path: '/trips/new/step2',
+    path: '/trips/new/destination',
     match: (p) => p.startsWith('/trips/new') || p.includes('/search'),
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

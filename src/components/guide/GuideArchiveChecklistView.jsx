@@ -45,37 +45,29 @@ import {
   parseGuideArchiveDropTarget,
   reorderGuideArchiveDirectItems,
   reorderGuideArchiveSectionItems,
+  resolveGuideArchiveCategoryForSection,
+  compareGuideArchiveAiFirst,
 } from '@/utils/guideArchiveChecklistReorder'
 import GuideArchiveSectionDndList from '@/components/guide/GuideArchiveSectionDndList'
 import { GuideArchiveChecklistDragPreview } from '@/components/guide/GuideArchiveSortableChecklistItem'
-import aiSparklesImg from '@/assets/ai-sparkles.png'
 
-const GUIDE_CHECKLIST_BAGGAGE_TABS = [
+/** 카테고리별 선택 — 1차: 준비물 유형 vs 수하물 유형(보기 기준) */
+const VIEW_BASIS_SUPPLIES = 'supplies'
+const VIEW_BASIS_BAGGAGE = 'baggage'
+
+const GUIDE_VIEW_BASIS_OPTIONS = [
+  { value: VIEW_BASIS_SUPPLIES, label: '준비물 유형' },
+  { value: VIEW_BASIS_BAGGAGE, label: '수하물 유형' },
+]
+
+const GUIDE_BAGGAGE_TYPE_TABS = [
   { value: 'all', label: '전체' },
   { value: BAGGAGE_CARRY_ON, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CARRY_ON] },
   { value: BAGGAGE_CHECKED, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CHECKED] },
 ]
 
-/** 탐색 페이지와 동일 — AI 섹션 아이콘 */
-function AiSparkleMaskIcon({ selected, className = 'h-3.5 w-3.5' }) {
-  const mask = {
-    maskImage: `url(${aiSparklesImg})`,
-    WebkitMaskImage: `url(${aiSparklesImg})`,
-    maskSize: 'contain',
-    maskRepeat: 'no-repeat',
-    maskPosition: 'center',
-    WebkitMaskSize: 'contain',
-    WebkitMaskRepeat: 'no-repeat',
-    WebkitMaskPosition: 'center',
-  }
-  return (
-    <span
-      className={`inline-block shrink-0 ${className} ${selected ? 'bg-white' : 'bg-violet-700'}`}
-      style={mask}
-      aria-hidden
-    />
-  )
-}
+/** 가이드 보관함 항목 유형 탭 — 탐색의 `CATEGORIES` 중 AI 전용 탭 제외(AI 추천은 백엔드에서 일반 카테고리로 귀속). */
+const GUIDE_ARCHIVE_SUPPLIES_CATEGORY_TABS = CATEGORIES.filter((c) => c.value !== 'ai_recommend')
 
 function filterGroupedByItemCategory(grouped, filterItemCategory) {
   if (filterItemCategory === 'all') return grouped
@@ -91,16 +83,16 @@ const GUIDE_ARCHIVE_DROP_ANIMATION = {
  * 가이드 보관함 상세 — 이 여행 스냅샷에 담긴 필수품을 하나씩 체크하며 준비합니다.
  * 체크 상태는 entry 단위로 저장되며, 같은 trip에 다른 여행지 목록이 있어도 섞이지 않습니다.
  * 화면에서의 체크/해제는 메모리만 바꾸고, **저장 → 확인**을 눌렀을 때만 스토리지에 반영합니다(뒤로가기 시 폐기).
- * 준비물 **삭제**(선택 삭제)는 스토리지에 즉시 반영됩니다. 보관함에서 빠진 항목 id는 탐색 저장(`savedTripItems`)에서도 제거합니다.
- * **삭제·수정**으로 관리 모드 진입 후, 같은 카테고리(섹션) 항목을 체크하고 「수정」을 누르면 **선택한 항목만** 편집 모달에 표시·저장됩니다.
- * **직접 추가**: 직접 추가로 항목을 저장하면 **기내 반입**으로 분류되어 본문 **맨 아래** `직접 추가` 블록에 붙습니다(상단 필터 반영).
- * **순서 변경**: 항목 카드에서 드래그(@dnd-kit·Mouse/Touch 센서, 터치는 길게 누른 뒤 이동). 같은 카테고리 안에서는 순서 변경, 다른 섹션으로 옮길 때는 **놓은 항목 앞**에 끼워 넣습니다(빈 드롭 영역이면 해당 섹션 맨 뒤). 스토리지 반영은 「완료」와 동일 시점.
- * `onArchiveMutated`: 삭제·섹션 저장 후 부모가 스토리지에서 entry를 다시 읽을 때 호출합니다.
+ * 준비물 **삭제**는 각 행의 휴지통에서 확인 후 스토리지에 즉시 반영됩니다. 보관함에서 빠진 항목 id는 탐색 저장(`savedTripItems`)에서도 제거합니다.
+ * **수정**: 각 행의 연필 아이콘으로 해당 항목만 편집 모달을 엽니다.
+ * **직접 추가**: 직접 추가로 항목을 저장하면 **기내 반입**으로 분류되어 본문 **맨 아래** `직접 추가` 블록에 붙습니다(보기 기준·수하물 유형 필터 반영).
+ * **순서 변경**: 카드 오른쪽 **드래그 핸들**만 잡고 이동(@dnd-kit·Mouse/Touch 센서, 터치는 길게 누른 뒤 이동). 같은 카테고리 안에서는 순서 변경, 다른 섹션으로 옮길 때는 **놓은 항목 앞**에 끼워 넣습니다(빈 드롭 영역이면 해당 섹션 맨 뒤). 스토리지 반영은 「완료」와 동일 시점.
+ * **AI 추천**: AI 전용 탭·섹션 제목은 없고, `category === ai_recommend` 인 항목은 **준비물(supplies)** 등 실제 탭과 같은 블록에 섞이되 **보라 톤 카드**로 구분하고 **같은 소섹션(기내/위탁) 목록 상단**에 둡니다. 백엔드는 동일 필드로 내려주면 됩니다.
+ * `onArchiveMutated`: 삭제·저장 후 부모가 스토리지에서 entry를 다시 읽을 때 호출합니다.
  */
 export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMutated }) {
   const navigate = useNavigate()
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false)
-  const [manageMode, setManageMode] = useState(false)
   const [sectionEditModalOpen, setSectionEditModalOpen] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
   const [sectionEditDraft, setSectionEditDraft] = useState(null)
@@ -110,11 +102,12 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
     description: '',
     detail: '',
   })
-  const [selectedItemIdsForDelete, setSelectedItemIdsForDelete] = useState([])
-  /** 'all' | carry_on | checked — 상단 「수하물 구간」(탐색 페이지와 동일) */
-  const [filterBaggage, setFilterBaggage] = useState('all')
-  /** 'all' | supplies | … — 「항목 유형」 서브 탭 */
-  const [filterItemCategory, setFilterItemCategory] = useState('all')
+  /** 보기 기준: 준비물 유형(항목 카테고리 탭) vs 수하물 유형(기내/위탁 탭) */
+  const [viewBasis, setViewBasis] = useState(VIEW_BASIS_SUPPLIES)
+  /** 준비물 유형 모드일 때만 사용 — CATEGORIES value */
+  const [suppliesCategory, setSuppliesCategory] = useState('all')
+  /** 수하물 유형 모드일 때만 사용 — 전체 | 기내 | 위탁 */
+  const [baggageSection, setBaggageSection] = useState('all')
   /** @dnd-kit DragOverlay용 — 드래그 중인 항목 id */
   const [activeDragId, setActiveDragId] = useState(null)
   /** 드래그 시작 시 원본 행의 측정 크기(오버레이를 카드와 동일 너비로) */
@@ -147,8 +140,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
     setChecks(loadEntryChecklistChecks(tripId, entry.id))
   }, [tripId, entry.id, archiveItemsFingerprint, entry.items])
 
-  const exitManageMode = useCallback(() => {
-    setManageMode(false)
+  const closeAllModals = useCallback(() => {
     setSectionEditModalOpen(false)
     setEditingSection(null)
     setSectionEditDraft(null)
@@ -158,26 +150,33 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       description: '',
       detail: '',
     })
-    setSelectedItemIdsForDelete([])
   }, [])
 
   useEffect(() => {
     if (items.length === 0) {
-      exitManageMode()
+      closeAllModals()
     }
-  }, [items.length, exitManageMode])
+  }, [items.length, closeAllModals])
 
   useEffect(() => {
-    if (manageMode) {
-      setActiveDragId(null)
-      setActiveDragRect(null)
+    if (suppliesCategory === 'ai_recommend') {
+      setSuppliesCategory('all')
     }
-  }, [manageMode])
+  }, [suppliesCategory])
 
-  const setBaggageFilter = useCallback((value) => {
-    setFilterBaggage(value)
-    setFilterItemCategory('all')
+  const setViewBasisAndReset = useCallback((next) => {
+    setViewBasis((current) => {
+      if (current === next) return current
+      if (next === VIEW_BASIS_SUPPLIES) setSuppliesCategory('all')
+      else setBaggageSection('all')
+      return next
+    })
   }, [])
+
+  /** 목록 필터: 수하물 모드면 선택 구간, 준비물 모드면 항상 전체 구간 표시 */
+  const effectiveBaggageFilter = viewBasis === VIEW_BASIS_BAGGAGE ? baggageSection : 'all'
+  /** 목록 필터: 준비물 모드면 선택 카테고리, 수하물 모드면 유형 구분 없음 */
+  const effectiveItemCategory = viewBasis === VIEW_BASIS_SUPPLIES ? suppliesCategory : 'all'
 
   /** 수하물 구역(기내/위탁) → 카테고리 값 단위 소그룹(필터용 value 보존) */
   const sectionsByBaggage = useMemo(() => {
@@ -185,13 +184,20 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       const catMap = new Map()
       for (const it of items) {
         if (resolveBaggageSection(it) !== bagKey) continue
-        const categoryValue = it.category ?? '_misc'
+        let categoryValue = it.category ?? '_misc'
         if (categoryValue === GUIDE_USER_DIRECT_CATEGORY) continue
-        const categoryLabel = it.categoryLabel || it.category || '준비물'
+        categoryValue = resolveGuideArchiveCategoryForSection(it)
+        const categoryLabel =
+          categoryValue === 'supplies'
+            ? CATEGORIES.find((c) => c.value === 'supplies')?.label ?? '준비물'
+            : it.categoryLabel || it.category || '준비물'
         if (!catMap.has(categoryValue)) {
           catMap.set(categoryValue, { label: categoryLabel, list: [] })
         }
         catMap.get(categoryValue).list.push(it)
+      }
+      for (const { list } of catMap.values()) {
+        list.sort(compareGuideArchiveAiFirst)
       }
       const grouped = Array.from(catMap.entries()).map(([categoryValue, { label, list }]) => ({
         categoryValue,
@@ -207,9 +213,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
   }, [items])
 
   const visibleSectionsByBaggage = useMemo(() => {
-    if (filterBaggage === 'all') return sectionsByBaggage
-    return sectionsByBaggage.filter((s) => s.bagKey === filterBaggage)
-  }, [sectionsByBaggage, filterBaggage])
+    if (effectiveBaggageFilter === 'all') return sectionsByBaggage
+    return sectionsByBaggage.filter((s) => s.bagKey === effectiveBaggageFilter)
+  }, [sectionsByBaggage, effectiveBaggageFilter])
 
   /** 「직접 추가」는 수하물 블록 밖 페이지 최하단에만 표시 (필터 반영) */
   const directAddSectionItems = useMemo(() => {
@@ -217,37 +223,105 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
     for (const it of items) {
       if ((it.category ?? '_misc') !== GUIDE_USER_DIRECT_CATEGORY) continue
       const bag = resolveBaggageSection(it)
-      if (filterBaggage !== 'all' && bag !== filterBaggage) continue
+      if (effectiveBaggageFilter !== 'all' && bag !== effectiveBaggageFilter) continue
       out.push(it)
     }
     return out
-  }, [items, filterBaggage])
+  }, [items, effectiveBaggageFilter])
 
-  /** 현재 수하물·항목 유형 필터로 화면에 보이는 항목 수(탐색 페이지 요약 줄과 동일 용도) */
+  /**
+   * 준비물 유형 보기: 최상위를 항목 유형(준비물·사전 예약·…)으로만 나눔. 기내/위탁은 카드 안에서만 구분.
+   */
+  const suppliesViewSections = useMemo(() => {
+    if (viewBasis !== VIEW_BASIS_SUPPLIES) return []
+
+    const tabOrder = CATEGORIES.filter((c) => c.value !== 'all' && c.value !== 'ai_recommend').map(
+      (c) => c.value,
+    )
+    const catMap = new Map()
+
+    for (const it of items) {
+      const raw = it.category ?? '_misc'
+      if (raw === GUIDE_USER_DIRECT_CATEGORY) continue
+      const cv = resolveGuideArchiveCategoryForSection(it)
+      if (effectiveItemCategory !== 'all' && cv !== effectiveItemCategory) continue
+
+      if (!catMap.has(cv)) {
+        const categoryLabel =
+          cv === 'supplies'
+            ? CATEGORIES.find((c) => c.value === 'supplies')?.label ?? '준비물'
+            : it.categoryLabel || it.category || '준비물'
+        catMap.set(cv, {
+          categoryValue: cv,
+          categoryLabel,
+          carry: [],
+          checked: [],
+        })
+      }
+      const bucket = catMap.get(cv)
+      if (resolveBaggageSection(it) === BAGGAGE_CHECKED) bucket.checked.push(it)
+      else bucket.carry.push(it)
+    }
+
+    for (const g of catMap.values()) {
+      g.carry.sort(compareGuideArchiveAiFirst)
+      g.checked.sort(compareGuideArchiveAiFirst)
+    }
+
+    const ordered = []
+    for (const cv of tabOrder) {
+      const g = catMap.get(cv)
+      if (!g || (g.carry.length === 0 && g.checked.length === 0)) continue
+      ordered.push(g)
+      catMap.delete(cv)
+    }
+    for (const g of catMap.values()) {
+      if (g.carry.length || g.checked.length) ordered.push(g)
+    }
+    return ordered
+  }, [viewBasis, items, effectiveItemCategory])
+
+  /** 현재 보기 기준·필터로 화면에 보이는 항목 수 */
   const visibleChecklistItemCount = useMemo(() => {
+    if (viewBasis === VIEW_BASIS_SUPPLIES) {
+      let n = 0
+      for (const s of suppliesViewSections) {
+        n += s.carry.length + s.checked.length
+      }
+      if (effectiveItemCategory === 'all') n += directAddSectionItems.length
+      return n
+    }
     let n = 0
     for (const s of visibleSectionsByBaggage) {
-      const gr = filterGroupedByItemCategory(s.grouped, filterItemCategory)
+      const gr = filterGroupedByItemCategory(s.grouped, effectiveItemCategory)
       for (const g of gr) n += g.items.length
     }
-    if (filterItemCategory === 'all') n += directAddSectionItems.length
+    if (effectiveItemCategory === 'all') n += directAddSectionItems.length
     return n
-  }, [visibleSectionsByBaggage, filterItemCategory, directAddSectionItems])
+  }, [
+    viewBasis,
+    suppliesViewSections,
+    visibleSectionsByBaggage,
+    effectiveItemCategory,
+    directAddSectionItems,
+  ])
 
-  /** 필터 후 첫 수하물 블록에만 드래그 안내 표시 */
+  /** 필터 후 첫 수하물 블록에만 드래그 안내 표시(수하물 유형 보기) */
   const firstVisibleBagKeyForHint = useMemo(() => {
     for (const s of visibleSectionsByBaggage) {
-      if (filterGroupedByItemCategory(s.grouped, filterItemCategory).length > 0) return s.bagKey
+      if (filterGroupedByItemCategory(s.grouped, effectiveItemCategory).length > 0) return s.bagKey
     }
     return null
-  }, [visibleSectionsByBaggage, filterItemCategory])
+  }, [visibleSectionsByBaggage, effectiveItemCategory])
 
-  /** 현재 필터에서 편집 가능한 카테고리 섹션이 1개 이상인지 */
-  const hasEditableSection = useMemo(
-    () =>
-      visibleSectionsByBaggage.some((s) => s.grouped.length > 0) || directAddSectionItems.length > 0,
-    [visibleSectionsByBaggage, directAddSectionItems],
-  )
+  /** 준비물 유형 보기 — 첫 항목 유형 블록에만 드래그 안내 */
+  const firstSuppliesCategoryForHint = useMemo(() => {
+    if (viewBasis !== VIEW_BASIS_SUPPLIES) return null
+    for (const s of suppliesViewSections) {
+      if (s.carry.length || s.checked.length) return s.categoryValue
+    }
+    return null
+  }, [viewBasis, suppliesViewSections])
 
   const total = items.length
   const checkedCount = useMemo(() => items.filter((it) => checks[String(it.id)]).length, [items, checks])
@@ -256,25 +330,6 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
   const handleToggle = useCallback((itemId) => {
     const id = String(itemId)
     setChecks((prev) => ({ ...prev, [id]: !prev[id] }))
-  }, [])
-
-  const toggleItemSelectForDelete = useCallback((itemId) => {
-    const id = String(itemId)
-    setSelectedItemIdsForDelete((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
-  }, [])
-
-  const enterManageMode = useCallback(() => {
-    setManageMode(true)
-    setSectionEditModalOpen(false)
-    setEditingSection(null)
-    setSectionEditDraft(null)
-    setDirectAddModalOpen(false)
-    setDirectAddDraft({
-      title: '',
-      description: '',
-      detail: '',
-    })
-    setSelectedItemIdsForDelete([])
   }, [])
 
   const openDirectAddModal = useCallback(() => {
@@ -343,37 +398,24 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
     onArchiveMutated?.()
   }, [directAddDraft, items, checks, tripId, entry.id, onArchiveMutated])
 
-  /** 관리 모드에서 체크한 항목만 모달에 넣는다. 서로 다른 섹션이 섞이면 안내 후 중단 */
-  const openEditFromManageSelection = useCallback(() => {
-    if (selectedItemIdsForDelete.length === 0) return
-    const idSet = new Set(selectedItemIdsForDelete.map(String))
-    const selectedItems = items.filter((it) => idSet.has(String(it.id)))
-    if (selectedItems.length === 0) return
-
-    const first = selectedItems[0]
-    const bagKey = resolveBaggageSection(first)
-    const categoryValue = first.category ?? '_misc'
-    const sameSection = selectedItems.every(
-      (it) => resolveBaggageSection(it) === bagKey && (it.category ?? '_misc') === categoryValue,
-    )
-    if (!sameSection) {
-      window.alert('수정하려면 같은 카테고리(섹션)에 속한 항목만 선택해 주세요.')
-      return
-    }
-
-    const categoryLabel = first.categoryLabel || first.category || '준비물'
+  const openSectionEditorForSingleItem = useCallback((item) => {
+    const bagKey = resolveBaggageSection(item)
+    const categoryValue = item.category ?? '_misc'
+    const categoryLabel = item.categoryLabel || item.category || '준비물'
     setEditingSection({ bagKey, categoryValue })
     setSectionEditDraft({
-      categoryLabel: categoryLabel ?? '',
-      rows: selectedItems.map((it) => ({
-        id: it.id,
-        title: it.title ?? '',
-        description: it.description ?? '',
-        detail: it.detail ?? '',
-      })),
+      categoryLabel,
+      rows: [
+        {
+          id: item.id,
+          title: item.title ?? '',
+          description: item.description ?? '',
+          detail: item.detail ?? '',
+        },
+      ],
     })
     setSectionEditModalOpen(true)
-  }, [selectedItemIdsForDelete, items])
+  }, [])
 
   const cancelSectionEditor = useCallback(() => {
     setSectionEditModalOpen(false)
@@ -409,11 +451,26 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
         checklistProgressPercent: progressN,
         checklistSavedAt: new Date().toISOString(),
       })
+      setLocalItems(newItems)
       setChecks(nextChecks)
-      exitManageMode()
       onArchiveMutated?.()
     },
-    [tripId, entry.id, items, exitManageMode, onArchiveMutated],
+    [tripId, entry.id, items, onArchiveMutated],
+  )
+
+  const confirmDeleteSingleItem = useCallback(
+    (item) => {
+      const title = (item.title ?? '').trim() || '이 항목'
+      if (!window.confirm(`「${title}」을(를) 이 체크리스트에서 삭제할까요? 되돌릴 수 없습니다.`)) return
+      const id = String(item.id)
+      const newItems = items.filter((it) => String(it.id) !== id)
+      const nextChecks = {}
+      for (const it of newItems) {
+        nextChecks[String(it.id)] = Boolean(checks[String(it.id)])
+      }
+      persistItemsAndChecks(newItems, nextChecks)
+    },
+    [items, checks, persistItemsAndChecks],
   )
 
   const saveSectionEdit = useCallback(() => {
@@ -424,7 +481,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       const id = String(it.id)
       const row = rowById.get(id)
       if (!row) return it
-      if (resolveBaggageSection(it) !== bagKey || (it.category ?? '_misc') !== categoryValue) return it
+      if ((it.category ?? '_misc') !== categoryValue) return it
+      if (bagKey != null && resolveBaggageSection(it) !== bagKey) return it
       return {
         ...it,
         title: (row.title ?? '').trim() || it.title,
@@ -451,31 +509,12 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
         subtitle: sub,
       })
     }
+    setLocalItems(newItems)
     setSectionEditModalOpen(false)
     setEditingSection(null)
     setSectionEditDraft(null)
-    setManageMode(false)
     onArchiveMutated?.()
   }, [editingSection, sectionEditDraft, items, tripId, entry.id, checks, onArchiveMutated])
-
-  const handleDeleteSelectedItems = useCallback(() => {
-    if (selectedItemIdsForDelete.length === 0) return
-    if (
-      !window.confirm(
-        `선택한 ${selectedItemIdsForDelete.length}개 필수품을 이 체크리스트에서 삭제할까요? 되돌릴 수 없습니다.`,
-      )
-    ) {
-      return
-    }
-    const drop = new Set(selectedItemIdsForDelete)
-    const newItems = items.filter((it) => !drop.has(String(it.id)))
-    const nextChecks = {}
-    for (const it of newItems) {
-      const id = String(it.id)
-      nextChecks[id] = Boolean(checks[id])
-    }
-    persistItemsAndChecks(newItems, nextChecks)
-  }, [selectedItemIdsForDelete, items, checks, persistItemsAndChecks])
 
   const performSave = useCallback(() => {
     const persisted = {}
@@ -517,8 +556,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
   const title = buildGuideArchiveListTitle(entry)
   const dateLine = buildGuideArchiveDateLine(entry)
 
-  /** 항목 체크박스로 「삭제 대상」 고를 때만 true */
-  const deleteSelectMode = manageMode && !sectionEditModalOpen && !directAddModalOpen
+  const dndLocked = sectionEditModalOpen || directAddModalOpen
 
   /** 마우스: 짧게 끌면 시작. 터치: 길게 누른 뒤(delay) 움직이면 드래그 — 스크롤·탭과 구분 */
   const dndSensors = useSensors(
@@ -530,7 +568,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
 
   const handleGuideArchiveDragEnd = useCallback(
     (event) => {
-      if (manageMode) return
+      if (dndLocked) return
       const { active, over } = event
       if (!over) return
 
@@ -546,29 +584,31 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       const overItem = dropParsed ? null : localItems.find((x) => String(x.id) === oid)
 
       const activeBag = resolveBaggageSection(activeItem)
-      const activeCat = activeItem.category ?? '_misc'
+      const activeRaw = activeItem.category ?? '_misc'
+      const activeCat = resolveGuideArchiveCategoryForSection(activeItem)
 
       if (overItem) {
         const overBag = resolveBaggageSection(overItem)
-        const overCat = overItem.category ?? '_misc'
+        const overRaw = overItem.category ?? '_misc'
+        const overCat = resolveGuideArchiveCategoryForSection(overItem)
 
         const sameNormalSection =
-          activeCat !== GUIDE_USER_DIRECT_CATEGORY &&
-          overCat !== GUIDE_USER_DIRECT_CATEGORY &&
+          activeRaw !== GUIDE_USER_DIRECT_CATEGORY &&
+          overRaw !== GUIDE_USER_DIRECT_CATEGORY &&
           activeBag === overBag &&
           activeCat === overCat
 
         const sameDirect =
-          activeCat === GUIDE_USER_DIRECT_CATEGORY &&
-          overCat === GUIDE_USER_DIRECT_CATEGORY &&
-          (filterBaggage === 'all' || activeBag === filterBaggage) &&
-          (filterBaggage === 'all' || overBag === filterBaggage)
+          activeRaw === GUIDE_USER_DIRECT_CATEGORY &&
+          overRaw === GUIDE_USER_DIRECT_CATEGORY &&
+          (effectiveBaggageFilter === 'all' || activeBag === effectiveBaggageFilter) &&
+          (effectiveBaggageFilter === 'all' || overBag === effectiveBaggageFilter)
 
         if (sameNormalSection) {
           const sectionList = localItems.filter(
             (x) =>
               resolveBaggageSection(x) === activeBag &&
-              (x.category ?? '_misc') === activeCat &&
+              resolveGuideArchiveCategoryForSection(x) === activeCat &&
               (x.category ?? '_misc') !== GUIDE_USER_DIRECT_CATEGORY,
           )
           const oldI = sectionList.findIndex((x) => String(x.id) === aid)
@@ -585,34 +625,42 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
           const directList = localItems.filter(
             (x) =>
               (x.category ?? '_misc') === GUIDE_USER_DIRECT_CATEGORY &&
-              (filterBaggage === 'all' || resolveBaggageSection(x) === filterBaggage),
+              (effectiveBaggageFilter === 'all' || resolveBaggageSection(x) === effectiveBaggageFilter),
           )
           const oldI = directList.findIndex((x) => String(x.id) === aid)
           const newI = directList.findIndex((x) => String(x.id) === oid)
           if (oldI >= 0 && newI >= 0 && oldI !== newI) {
-            setLocalItems((p) => reorderGuideArchiveDirectItems(p, filterBaggage, oldI, newI))
+            setLocalItems((p) => reorderGuideArchiveDirectItems(p, effectiveBaggageFilter, oldI, newI))
           }
           return
         }
 
-        if (overCat === GUIDE_USER_DIRECT_CATEGORY) {
-          if (activeCat === GUIDE_USER_DIRECT_CATEGORY) return
-          setLocalItems((p) => moveItemInsertIntoDirectSection(p, aid, oid, filterBaggage))
+        if (overRaw === GUIDE_USER_DIRECT_CATEGORY) {
+          if (activeRaw === GUIDE_USER_DIRECT_CATEGORY) return
+          setLocalItems((p) => moveItemInsertIntoDirectSection(p, aid, oid, effectiveBaggageFilter))
           return
         }
 
-        if (activeCat === GUIDE_USER_DIRECT_CATEGORY) {
-          const catLabel = overItem.categoryLabel || overItem.category || '준비물'
+        if (activeRaw === GUIDE_USER_DIRECT_CATEGORY) {
+          const targetCv = resolveGuideArchiveCategoryForSection(overItem)
+          const catLabel =
+            targetCv === 'supplies'
+              ? CATEGORIES.find((c) => c.value === 'supplies')?.label ?? '준비물'
+              : overItem.categoryLabel || overItem.category || '준비물'
           setLocalItems((p) =>
-            moveItemInsertIntoSection(p, aid, overBag, overCat, catLabel, oid),
+            moveItemInsertIntoSection(p, aid, overBag, targetCv, catLabel, oid),
           )
           return
         }
 
         if (activeBag !== overBag || activeCat !== overCat) {
-          const catLabel = overItem.categoryLabel || overItem.category || '준비물'
+          const targetCv = resolveGuideArchiveCategoryForSection(overItem)
+          const catLabel =
+            targetCv === 'supplies'
+              ? CATEGORIES.find((c) => c.value === 'supplies')?.label ?? '준비물'
+              : overItem.categoryLabel || overItem.category || '준비물'
           setLocalItems((p) =>
-            moveItemInsertIntoSection(p, aid, overBag, overCat, catLabel, oid),
+            moveItemInsertIntoSection(p, aid, overBag, targetCv, catLabel, oid),
           )
         }
         return
@@ -621,14 +669,14 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       if (!dropParsed) return
 
       if (dropParsed.kind === 'direct') {
-        if (activeCat === GUIDE_USER_DIRECT_CATEGORY) return
+        if (activeRaw === GUIDE_USER_DIRECT_CATEGORY) return
         setLocalItems((p) => moveItemAppendToDirectSection(p, aid))
         return
       }
 
       const { bagKey, categoryValue, categoryLabel } = dropParsed
       const sameAsActive =
-        activeCat !== GUIDE_USER_DIRECT_CATEGORY &&
+        activeRaw !== GUIDE_USER_DIRECT_CATEGORY &&
         activeBag === bagKey &&
         activeCat === categoryValue
 
@@ -638,7 +686,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
         moveItemAppendToSection(p, aid, bagKey, categoryValue, categoryLabel),
       )
     },
-    [manageMode, localItems, filterBaggage],
+    [dndLocked, localItems, effectiveBaggageFilter],
   )
 
   const handleGuideArchiveDragStart = useCallback(({ active }) => {
@@ -797,7 +845,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
           {dateLine}
         </p>
         <p className="mt-4 text-sm leading-relaxed text-gray-600">
-          골라 저장한 체크리스트로 필수품을 빠짐없이 챙겨보세요!
+          저장한 체크리스트를 확인하고 빠짐없이 준비해보세요
         </p>
       </header>
 
@@ -820,83 +868,111 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       >
         <h2 className="mb-3.5 text-lg font-extrabold tracking-tight text-gray-900">카테고리별 선택</h2>
 
-        <p id="guide-checklist-baggage-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-          수하물 구간
+        <p id="guide-checklist-view-basis-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+          보기 기준
         </p>
         <div
-          className="mb-5 flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
+          className="mb-5 flex w-full max-w-md rounded-2xl border-2 border-slate-200/90 bg-slate-100/80 p-1 shadow-inner"
           role="tablist"
-          aria-labelledby="guide-checklist-baggage-label"
+          aria-label="보기 기준"
+          aria-labelledby="guide-checklist-view-basis-label"
         >
-          {GUIDE_CHECKLIST_BAGGAGE_TABS.map((tab) => {
-            const selected = filterBaggage === tab.value
-            const tabClass = selected
-              ? 'border-2 border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-900/15'
-              : 'border-2 border-teal-100 bg-teal-50/80 text-teal-900 shadow-sm hover:border-teal-300 hover:bg-teal-100/80'
+          {GUIDE_VIEW_BASIS_OPTIONS.map((opt) => {
+            const selected = viewBasis === opt.value
             return (
               <button
-                key={tab.value}
+                key={opt.value}
                 type="button"
                 role="tab"
                 aria-selected={selected}
-                onClick={() => setBaggageFilter(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${tabClass}`}
+                onClick={() => setViewBasisAndReset(opt.value)}
+                className={`min-h-11 flex-1 rounded-xl px-3 py-2.5 text-center text-sm font-bold transition-all ${
+                  selected
+                    ? 'bg-white text-teal-900 shadow-sm ring-1 ring-slate-200/80'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
               >
-                {tab.label}
+                {opt.label}
               </button>
             )
           })}
         </div>
 
         <p id="guide-checklist-subcategory-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-          항목 유형
+          {viewBasis === VIEW_BASIS_SUPPLIES ? '항목 유형' : '수하물 구간'}
         </p>
-        <div
-          className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
-          role="tablist"
-          aria-labelledby="guide-checklist-subcategory-label"
-        >
-          {CATEGORIES.map((cat) => {
-            const isAi = cat.value === 'ai_recommend'
-            const selected = filterItemCategory === cat.value
-            const tabClass = isAi
-              ? selected
-                ? 'border-2 border-violet-600 bg-violet-600 text-white shadow-md shadow-violet-900/20'
-                : 'border-2 border-violet-200 bg-violet-50/95 text-violet-900 shadow-sm hover:border-violet-300 hover:bg-violet-100/90'
-              : selected
+        {viewBasis === VIEW_BASIS_SUPPLIES ? (
+          <div
+            className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+            aria-labelledby="guide-checklist-subcategory-label"
+          >
+            {GUIDE_ARCHIVE_SUPPLIES_CATEGORY_TABS.map((cat) => {
+              const selected = suppliesCategory === cat.value
+              const tabClass = selected
                 ? 'border-2 border-sky-600 bg-sky-600 text-white shadow-md shadow-sky-900/15'
                 : 'border-2 border-sky-100 bg-slate-50/80 text-slate-600 shadow-sm hover:border-sky-200 hover:bg-sky-50'
-            return (
-              <button
-                key={cat.value}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => setFilterItemCategory(cat.value)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tabClass}`}
-              >
-                {isAi ? <AiSparkleMaskIcon selected={selected} className="h-3.5 w-3.5" /> : null}
-                {cat.label}
-              </button>
-            )
-          })}
-        </div>
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setSuppliesCategory(cat.value)}
+                  className={`inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors ${tabClass}`}
+                >
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <div
+            className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
+            role="tablist"
+            aria-labelledby="guide-checklist-subcategory-label"
+          >
+            {GUIDE_BAGGAGE_TYPE_TABS.map((tab) => {
+              const selected = baggageSection === tab.value
+              const tabClass = selected
+                ? 'border-2 border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-900/15'
+                : 'border-2 border-teal-100 bg-teal-50/80 text-teal-900 shadow-sm hover:border-teal-300 hover:bg-teal-100/80'
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setBaggageSection(tab.value)}
+                  className={`inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors ${tabClass}`}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       <div className="mb-4 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
         <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
-          <span className="text-teal-900">
-            {filterBaggage === 'all' ? '전체 구간' : BAGGAGE_SECTION_LABEL[filterBaggage]}
-          </span>
-          <span className="mx-1.5 text-gray-400" aria-hidden>
-            ·
-          </span>
-          <span className="text-slate-700">
-            {filterItemCategory === 'all'
-              ? '전체 유형'
-              : CATEGORIES.find((c) => c.value === filterItemCategory)?.label}
-          </span>
-          <span className="ml-1.5 tabular-nums text-gray-900">{visibleChecklistItemCount}</span>개
+          {viewBasis === VIEW_BASIS_SUPPLIES ? (
+            <>
+              <span className="text-slate-700">
+                {suppliesCategory === 'all'
+                  ? '전체 유형'
+                  : CATEGORIES.find((c) => c.value === suppliesCategory)?.label}
+              </span>
+              <span className="ml-1.5 tabular-nums text-gray-900">{visibleChecklistItemCount}</span>개
+            </>
+          ) : (
+            <>
+              <span className="text-teal-900">
+                {baggageSection === 'all' ? '전체 구간' : BAGGAGE_SECTION_LABEL[baggageSection]}
+              </span>
+              <span className="ml-1.5 tabular-nums text-gray-900">{visibleChecklistItemCount}</span>개
+            </>
+          )}
         </p>
       </div>
 
@@ -909,57 +985,22 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
           <p className="w-full text-sm text-gray-500 sm:max-w-md">
             직접 추가 창을 닫으면 다시 이 화면을 사용할 수 있어요.
           </p>
-        ) : manageMode ? (
-          <div className="flex flex-wrap items-center gap-2 gap-y-3">
+        ) : (
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 gap-y-3">
+            <Link
+              to={`/trips/${tripId}/search?archiveEntry=${encodeURIComponent(entry.id)}`}
+              className="inline-flex shrink-0 items-center rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
+            >
+              필수품 추가
+            </Link>
             <button
               type="button"
-              onClick={handleDeleteSelectedItems}
-              disabled={selectedItemIdsForDelete.length === 0}
-              className="shrink-0 rounded-xl border border-red-300 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-800 shadow-sm transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={openDirectAddModal}
+              className="shrink-0 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 shadow-sm transition-colors hover:bg-teal-100/90"
             >
-              삭제
-            </button>
-            <button
-              type="button"
-              onClick={openEditFromManageSelection}
-              disabled={!hasEditableSection || selectedItemIdsForDelete.length === 0}
-              className="shrink-0 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              수정
-            </button>
-            <button
-              type="button"
-              onClick={exitManageMode}
-              className="shrink-0 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
-            >
-              닫기
+              직접 추가
             </button>
           </div>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={enterManageMode}
-              className="shrink-0 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50"
-            >
-              삭제·수정
-            </button>
-            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 gap-y-3">
-              <Link
-                to={`/trips/${tripId}/search?archiveEntry=${encodeURIComponent(entry.id)}`}
-                className="inline-flex shrink-0 items-center rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
-              >
-                필수품 추가
-              </Link>
-              <button
-                type="button"
-                onClick={openDirectAddModal}
-                className="shrink-0 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-900 shadow-sm transition-colors hover:bg-teal-100/90"
-              >
-                직접 추가
-              </button>
-            </div>
-          </>
         )}
       </div>
 
@@ -971,82 +1012,155 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
         onDragEnd={handleGuideArchiveDragEndWithOverlay}
       >
         <div className="space-y-10">
-          {visibleSectionsByBaggage.map(({ bagKey, bagTitle, grouped }) => {
-            const displayGrouped = filterGroupedByItemCategory(grouped, filterItemCategory)
-            if (displayGrouped.length === 0) return null
-            return (
-            <div key={bagKey} className="space-y-6">
-              <div className="flex flex-col gap-2 border-b border-teal-100/90 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-                <h2 className="text-base font-extrabold tracking-tight text-[#0a3d3d]">{bagTitle}</h2>
-                {bagKey === firstVisibleBagKeyForHint && total > 0 ? (
-                  <p
-                    className="max-w-md shrink-0 text-left text-xs font-medium leading-relaxed text-slate-500 sm:text-right sm:text-[13px]"
-                    role="note"
-                  >
-                    원하는 준비물을 드래그하여 옮기면서 정리해보세요!
-                    <span className="mt-1 block text-[11px] font-normal leading-snug text-slate-400 sm:text-[12px]">
-                      휴대폰·태블릿은 카드를 잠시 꾹 누른 뒤 끌어 옮겨 주세요.
-                    </span>
-                  </p>
-                ) : null}
-              </div>
-              <div className="space-y-8">
-                {displayGrouped.map(({ categoryValue, categoryLabel, items: list }) => {
-                  const isAi = categoryValue === 'ai_recommend'
-                  return (
-                  <section
-                    key={`${bagKey}-${categoryValue}`}
-                    className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition md:p-5"
-                  >
-                    <div
-                      className={`mb-3 border-b pb-2 ${
-                        isAi ? 'border-violet-200/90' : 'border-teal-100/90'
-                      }`}
-                    >
-                      <h3
-                        className={`flex min-w-0 items-center gap-2 text-base font-extrabold tracking-tight ${
-                          isAi ? 'text-violet-950' : 'text-[#0a3d3d]'
-                        }`}
-                      >
-                        {isAi ? <AiSparkleMaskIcon selected={false} className="h-4 w-4 shrink-0" /> : null}
+          {viewBasis === VIEW_BASIS_SUPPLIES
+            ? suppliesViewSections.map(({ categoryValue, categoryLabel, carry, checked }) => {
+                const showBagSublabels = carry.length > 0 && checked.length > 0
+                return (
+                  <div key={categoryValue} className="space-y-6">
+                    <div className="flex flex-col gap-2 border-b border-teal-100/90 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                      <h2 className="flex min-w-0 items-center gap-2 text-base font-extrabold tracking-tight text-[#0a3d3d]">
                         {categoryLabel}
-                      </h3>
+                      </h2>
+                      {categoryValue === firstSuppliesCategoryForHint && total > 0 ? (
+                        <p
+                          className="max-w-md shrink-0 text-left text-xs font-medium leading-relaxed text-slate-500 sm:text-right sm:text-[13px]"
+                          role="note"
+                        >
+                          <span className="sm:hidden">
+                            오른쪽 드래그 아이콘을 잡고 길게 누른 뒤 끌어 옮겨 주세요.
+                          </span>
+                          <span className="hidden sm:inline">
+                            준비 항목을 드래그하여 순서를 변경할 수 있어요!
+                          </span>
+                        </p>
+                      ) : null}
                     </div>
-                    <GuideArchiveSectionDndList
-                      droppableId={buildGuideArchiveSectionDroppableId(
-                        bagKey,
-                        categoryValue,
-                        categoryLabel,
-                      )}
-                      list={list}
-                      sortableDisabled={manageMode}
-                      checks={checks}
-                      deleteSelectMode={deleteSelectMode}
-                      selectedItemIdsForDelete={selectedItemIdsForDelete}
-                      handleToggle={handleToggle}
-                      toggleItemSelectForDelete={toggleItemSelectForDelete}
-                    />
-                  </section>
-                  )
-                })}
-              </div>
-            </div>
-            )
-          })}
-          {filterItemCategory === 'all' && directAddSectionItems.length > 0 ? (
+                    <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition md:p-5">
+                      <div className="space-y-6">
+                        {carry.length > 0 ? (
+                          <div>
+                            {showBagSublabels ? (
+                              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                {BAGGAGE_SECTION_LABEL[BAGGAGE_CARRY_ON]}
+                              </p>
+                            ) : null}
+                            <GuideArchiveSectionDndList
+                              droppableId={buildGuideArchiveSectionDroppableId(
+                                BAGGAGE_CARRY_ON,
+                                categoryValue,
+                                categoryLabel,
+                              )}
+                              list={carry}
+                              sortableDisabled={dndLocked}
+                              checks={checks}
+                              handleToggle={handleToggle}
+                              onEditItem={openSectionEditorForSingleItem}
+                              onDeleteItem={confirmDeleteSingleItem}
+                              actionVariant="default"
+                            />
+                          </div>
+                        ) : null}
+                        {checked.length > 0 ? (
+                          <div className={carry.length > 0 ? 'border-t border-slate-100 pt-6' : ''}>
+                            {showBagSublabels ? (
+                              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                {BAGGAGE_SECTION_LABEL[BAGGAGE_CHECKED]}
+                              </p>
+                            ) : null}
+                            <GuideArchiveSectionDndList
+                              droppableId={buildGuideArchiveSectionDroppableId(
+                                BAGGAGE_CHECKED,
+                                categoryValue,
+                                categoryLabel,
+                              )}
+                              list={checked}
+                              sortableDisabled={dndLocked}
+                              checks={checks}
+                              handleToggle={handleToggle}
+                              onEditItem={openSectionEditorForSingleItem}
+                              onDeleteItem={confirmDeleteSingleItem}
+                              actionVariant="default"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    </section>
+                  </div>
+                )
+              })
+            : visibleSectionsByBaggage.map(({ bagKey, bagTitle, grouped }) => {
+                const displayGrouped = filterGroupedByItemCategory(grouped, effectiveItemCategory)
+                if (displayGrouped.length === 0) return null
+                return (
+                  <div key={bagKey} className="space-y-6">
+                    <div className="flex flex-col gap-2 border-b border-teal-100/90 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                      <h2 className="text-base font-extrabold tracking-tight text-[#0a3d3d]">{bagTitle}</h2>
+                      {bagKey === firstVisibleBagKeyForHint && total > 0 ? (
+                        <p
+                          className="max-w-md shrink-0 text-left text-xs font-medium leading-relaxed text-slate-500 sm:text-right sm:text-[13px]"
+                          role="note"
+                        >
+                          <span className="sm:hidden">
+                            오른쪽 드래그 아이콘을 잡고 길게 누른 뒤 끌어 옮겨 주세요.
+                          </span>
+                          <span className="hidden sm:inline">
+                            준비 항목을 드래그하여 순서를 변경할 수 있어요!
+                          </span>
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="space-y-8">
+                      {displayGrouped.map(({ categoryValue, categoryLabel, items: list }) => {
+                        return (
+                          <section
+                            key={`${bagKey}-${categoryValue}`}
+                            className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition md:p-5"
+                          >
+                            <div className="mb-3 border-b border-teal-100/90 pb-2">
+                              <h3 className="flex min-w-0 items-center gap-2 text-base font-extrabold tracking-tight text-[#0a3d3d]">
+                                {categoryLabel}
+                              </h3>
+                            </div>
+                            <GuideArchiveSectionDndList
+                              droppableId={buildGuideArchiveSectionDroppableId(
+                                bagKey,
+                                categoryValue,
+                                categoryLabel,
+                              )}
+                              list={list}
+                              sortableDisabled={dndLocked}
+                              checks={checks}
+                              handleToggle={handleToggle}
+                              onEditItem={openSectionEditorForSingleItem}
+                              onDeleteItem={confirmDeleteSingleItem}
+                              actionVariant="default"
+                            />
+                          </section>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+          {effectiveItemCategory === 'all' && directAddSectionItems.length > 0 ? (
             <div className="mt-10 space-y-6">
               <div className="flex flex-col gap-2 border-b border-teal-100/90 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                 <h2 className="text-base font-extrabold tracking-tight text-[#0a3d3d]">
                   {GUIDE_USER_DIRECT_SECTION_LABEL}
                 </h2>
-                {visibleSectionsByBaggage.length === 0 && total > 0 ? (
+                {(viewBasis === VIEW_BASIS_BAGGAGE
+                  ? visibleSectionsByBaggage.length === 0
+                  : suppliesViewSections.length === 0) &&
+                total > 0 ? (
                   <p
                     className="max-w-md shrink-0 text-left text-xs font-medium leading-relaxed text-slate-500 sm:text-right sm:text-[13px]"
                     role="note"
                   >
-                    원하는 준비물을 드래그하여 옮기면서 정리해보세요!
-                    <span className="mt-1 block text-[11px] font-normal leading-snug text-slate-400 sm:text-[12px]">
-                      휴대폰·태블릿은 카드를 잠시 꾹 누른 뒤 끌어 옮겨 주세요.
+                    <span className="sm:hidden">
+                      오른쪽 드래그 아이콘을 잡고 길게 누른 뒤 끌어 옮겨 주세요.
+                    </span>
+                    <span className="hidden sm:inline">
+                      준비 항목을 드래그하여 순서를 변경할 수 있어요!
                     </span>
                   </p>
                 ) : null}
@@ -1055,19 +1169,18 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
                 <GuideArchiveSectionDndList
                   droppableId={buildGuideArchiveDirectDroppableId()}
                   list={directAddSectionItems}
-                  sortableDisabled={manageMode}
+                  sortableDisabled={dndLocked}
                   checks={checks}
-                  deleteSelectMode={deleteSelectMode}
-                  selectedItemIdsForDelete={selectedItemIdsForDelete}
                   handleToggle={handleToggle}
-                  toggleItemSelectForDelete={toggleItemSelectForDelete}
+                  onEditItem={openSectionEditorForSingleItem}
+                  onDeleteItem={confirmDeleteSingleItem}
                 />
               </div>
             </div>
           ) : null}
         </div>
         <DragOverlay adjustScale={false} dropAnimation={GUIDE_ARCHIVE_DROP_ANIMATION}>
-          {activeDragItem && !manageMode ? (
+          {activeDragItem && !dndLocked ? (
             <div
               className="box-border max-w-[calc(100vw-2.5rem)]"
               style={
@@ -1102,11 +1215,11 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
               id="guide-archive-section-edit-title"
               className="mb-4 text-lg font-extrabold text-[#0a3d3d]"
             >
-              섹션 수정
+              {sectionEditDraft.rows.length === 1 ? '항목 수정' : '섹션 수정'}
             </h2>
             <div className="mb-4">
               <p id="guide-archive-section-name-label" className="mb-1 text-xs font-bold text-gray-600">
-                섹션 이름
+                {sectionEditDraft.rows.length === 1 ? '항목 유형(카테고리)' : '섹션 이름'}
               </p>
               <p
                 aria-labelledby="guide-archive-section-name-label"
@@ -1184,7 +1297,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
                 onClick={saveSectionEdit}
                 className="min-h-12 rounded-xl bg-sky-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-sky-700 sm:min-h-0 sm:px-5"
               >
-                이 섹션 저장
+                {sectionEditDraft.rows.length === 1 ? '저장' : '이 섹션 저장'}
               </button>
               <button
                 type="button"
