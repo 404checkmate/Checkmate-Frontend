@@ -154,10 +154,6 @@ function TripSearchInner({ tripId }) {
   )
 
   const searchStartRef = useRef(0)
-  // StrictMode(dev) 이중 mount 때 동일 요청이 두 번 나가지 않도록 가드.
-  // AuthCallbackPage 와 같은 패턴: ranRef 로 중복 실행 방지 + cancelledRef 로 구 effect 결과 무시.
-  const loadRanRef = useRef(false)
-  const loadCancelledRef = useRef(false)
   /** 기내 반입 / 위탁 수하물 — 보관함 상세 수하물 구간과 동일 개념 */
   const [selectedBaggage, setSelectedBaggage] = useState(BAGGAGE_CARRY_ON)
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -174,7 +170,6 @@ function TripSearchInner({ tripId }) {
    */
   const [loadState, setLoadState] = useState({ status: 'loading', fromApi: false })
   const [apiItems, setApiItems] = useState([])
-  const [apiSections, setApiSections] = useState([])
   const [apiSummary, setApiSummary] = useState(null)
 
   useEffect(() => {
@@ -189,17 +184,14 @@ function TripSearchInner({ tripId }) {
   }, [tripId, mergeToArchive, archiveEntryId])
 
   useEffect(() => {
-    loadCancelledRef.current = false
-    if (loadRanRef.current) return
-    loadRanRef.current = true
+    let cancelled = false
 
     setLoadState({ status: 'loading', fromApi: false })
 
     const applyAdapted = (data, via) => {
-      if (loadCancelledRef.current) return
+      if (cancelled) return
       const adapted = adaptGeneratedChecklist(data)
       setApiItems(adapted.items)
-      setApiSections(adapted.sections)
       setApiSummary(adapted.summary)
       setLoadState({ status: 'ready', fromApi: true, via })
       trackEvent('search_items_loaded', {
@@ -214,9 +206,8 @@ function TripSearchInner({ tripId }) {
     }
 
     const applyFallback = (errorMessage) => {
-      if (loadCancelledRef.current) return
+      if (cancelled) return
       setApiItems([])
-      setApiSections([])
       setApiSummary(null)
       setLoadState({
         status: 'fallback',
@@ -238,7 +229,7 @@ function TripSearchInner({ tripId }) {
           applyAdapted(data, 'context')
           return
         } catch (err) {
-          if (loadCancelledRef.current) return
+          if (cancelled) return
           console.warn(
             '[TripSearchPage] generateFromContext (fast path) 실패, 목데이터로 폴백:',
             err?.message ?? err,
@@ -255,7 +246,7 @@ function TripSearchInner({ tripId }) {
         return
       } catch (err1) {
         const status = err1?.response?.status
-        if (loadCancelledRef.current) return
+        if (cancelled) return
         if (status === 404 || status === 400) {
           if (contextInput) {
             try {
@@ -263,7 +254,7 @@ function TripSearchInner({ tripId }) {
               applyAdapted(data2, 'context')
               return
             } catch (err2) {
-              if (loadCancelledRef.current) return
+              if (cancelled) return
               console.warn(
                 '[TripSearchPage] generateFromContext 실패, 목데이터로 폴백:',
                 err2?.message ?? err2,
@@ -282,7 +273,7 @@ function TripSearchInner({ tripId }) {
     })()
 
     return () => {
-      loadCancelledRef.current = true
+      cancelled = true
     }
   }, [tripId])
   const handleBaggageChange = (baggage) => {
@@ -519,51 +510,13 @@ function TripSearchInner({ tripId }) {
 
   const handleModalBack = () => setLeaveModalOpen(false)
 
-  /**
-   * 전체 탭 그룹핑.
-   * - API 성공 시: 백엔드 sections(세부 카테고리) 그대로 사용, AI 추천은 adapter 에서 이미 최상단.
-   * - 폴백(목데이터): 기존처럼 상위 탭 단위로 묶어서 표시.
-   */
-  const groupedItemsAll = useMemo(() => {
-    if (loadState.fromApi) {
-      return apiSections.map((sec) => ({
-        categoryValue: sec.categoryCode,
-        categoryLabel: sec.categoryLabel,
-        items: sec.items,
-      }))
-    }
-    const order = CATEGORIES.filter((c) => c.value !== 'all').map((c) => c.value)
-    const sectionOrder = ['ai_recommend', ...order.filter((v) => v !== 'ai_recommend')]
-    return sectionOrder
-      .map((value) => {
-        const cat = CATEGORIES.find((c) => c.value === value)
-        if (!cat) return null
-        const items = MOCK_ITEMS.filter((i) => i.category === value).sort((a, b) =>
-          a.title.localeCompare(b.title, 'ko'),
-        )
-        return { categoryValue: value, categoryLabel: cat.label, items }
-      })
-      .filter((g) => g && g.items.length > 0)
-  }, [loadState.fromApi, apiSections])
-
-  /** 단일 카테고리 탭: 상위 탭(preparedness 카테고리) 기준으로 필터. */
-  const sortedItemsSingleCategory = useMemo(() => {
-    if (selectedCategory === 'all') return []
-    if (loadState.fromApi) {
-      return apiItems.filter((item) => item.category === selectedCategory)
-    }
-    return MOCK_ITEMS.filter((item) => item.category === selectedCategory).sort((a, b) =>
-      a.title.localeCompare(b.title, 'ko'),
-    )
-  }, [selectedCategory, loadState.fromApi, apiItems])
-
   const totalItemCount = sourceItems.length
   const aiRecommendCount = sourceItems.filter((i) => i.category === 'ai_recommend').length
   /** 선택한 수하물 구간(전체 | 기내 | 위탁)에 해당하는 목록만 */
   const baggageFilteredItems = useMemo(() => {
-    if (selectedBaggage === BAGGAGE_FILTER_ALL) return MOCK_ITEMS
-    return MOCK_ITEMS.filter((i) => resolveBaggageSection(i) === selectedBaggage)
-  }, [selectedBaggage])
+    if (selectedBaggage === BAGGAGE_FILTER_ALL) return sourceItems
+    return sourceItems.filter((i) => resolveBaggageSection(i) === selectedBaggage)
+  }, [selectedBaggage, sourceItems])
 
   /** 목록에 표시할 수하물 구간 순서(전체 필터면 기내 → 위탁, 아니면 선택 한 구간만) */
   const baggageSectionKeys = useMemo(() => {
@@ -651,9 +604,9 @@ function TripSearchInner({ tripId }) {
 
   /** 「전체」 탭 — 섹션(카테고리) 단위 전체 선택/해제 */
   const selectionProgressPercent = useMemo(() => {
-    if (MOCK_ITEMS.length === 0) return 0
-    return Math.min(100, Math.round((selectedForSave.size / MOCK_ITEMS.length) * 100))
-  }, [selectedForSave.size])
+    if (sourceItems.length === 0) return 0
+    return Math.min(100, Math.round((selectedForSave.size / sourceItems.length) * 100))
+  }, [selectedForSave.size, sourceItems.length])
 
   const handleToggleSelectAllInGroup = (group) => {
     const selectable = group.items.filter((i) => !existingArchiveItemIds.has(String(i.id)))
@@ -754,7 +707,7 @@ function TripSearchInner({ tripId }) {
               {mergeToArchive ? '추가 선택' : '담기 선택'}{' '}
               <span className="tabular-nums text-slate-800">{selectedForSave.size}</span>
               {' / '}
-              <span className="tabular-nums text-slate-800">{MOCK_ITEMS.length}</span>
+              <span className="tabular-nums text-slate-800">{totalItemCount}</span>
             </span>
             <span className="tabular-nums text-slate-800">{selectionProgressPercent}%</span>
           </div>
@@ -795,8 +748,6 @@ function TripSearchInner({ tripId }) {
             })}
           </div>
 
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-thin">
-            {tabCategories.map((cat) => {
           <p id="search-subcategory-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
             항목 유형
           </p>
@@ -805,7 +756,7 @@ function TripSearchInner({ tripId }) {
             role="tablist"
             aria-labelledby="search-subcategory-label"
           >
-            {CATEGORIES.map((cat) => {
+            {tabCategories.map((cat) => {
               const isAi = cat.value === 'ai_recommend'
               const selected = selectedCategory === cat.value
               const tabClass = isAi
@@ -832,17 +783,18 @@ function TripSearchInner({ tripId }) {
           </div>
         </section>
 
-          {/* 총 검색 결과 건수 — 카테고리 탭과 무관하게 전체 목록 기준 */}
-          <p className="mb-5 text-sm font-semibold text-gray-700 md:text-base">
-            {mergeToArchive ? (
-              <>
-                추가 후보 <span className="tabular-nums">{totalItemCount}</span>개
-              </>
-            ) : (
-              <>
-                총 검색 결과 : <span className="tabular-nums">{totalItemCount}</span>개
-              </>
-            )}
+        <p className="mb-3 text-sm font-semibold text-gray-700 md:text-base">
+          {mergeToArchive ? (
+            <>
+              추가 후보 <span className="tabular-nums">{totalItemCount}</span>개
+            </>
+          ) : (
+            <>
+              총 검색 결과 <span className="tabular-nums">{totalItemCount}</span>개
+            </>
+          )}
+        </p>
+
         <div className="mb-6 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
           <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
             <span className="text-teal-900">
@@ -852,7 +804,9 @@ function TripSearchInner({ tripId }) {
               ·
             </span>
             <span className="text-slate-700">
-              {selectedCategory === 'all' ? '전체 유형' : CATEGORIES.find((c) => c.value === selectedCategory)?.label}
+              {selectedCategory === 'all'
+                ? '전체 유형'
+                : tabCategories.find((c) => c.value === selectedCategory)?.label}
             </span>
             <span className="ml-1.5 tabular-nums text-gray-900">{visibleItemCount}</span>개
           </p>
@@ -867,6 +821,7 @@ function TripSearchInner({ tripId }) {
           </button>
         </div>
 
+        <section aria-label="준비물 목록">
           {loadState.status === 'loading' ? (
             <div className="flex flex-col gap-3">
               {Array.from({ length: 6 }).map((_, idx) => (
@@ -881,35 +836,6 @@ function TripSearchInner({ tripId }) {
               </p>
             </div>
           ) : selectedCategory === 'all' ? (
-            <div className="space-y-10">
-              {groupedItemsAll.map((group) => {
-                const isAi = group.categoryValue === 'ai_recommend'
-                return (
-                  <div key={group.categoryValue}>
-                    <h3
-                      className={`mb-3 flex items-center gap-2 border-b pb-2 text-base font-extrabold ${
-                        isAi ? 'border-violet-200 text-violet-950' : 'border-gray-200 text-gray-900'
-                      }`}
-                    >
-                      {isAi ? <AiSparkleMaskIcon selected={false} className="h-4 w-4" /> : null}
-                      {group.categoryLabel}
-                      <span className="ml-1 text-xs font-semibold text-gray-400 tabular-nums">
-                        ({group.items.length})
-                      </span>
-                    </h3>
-                    <div className="flex flex-col gap-3">
-                      {group.items.map((item) => (
-                        <SearchResultItem
-                          key={item.id}
-                          item={item}
-                          selected={selectedForSave.has(String(item.id))}
-                          inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
-                          onToggle={() => toggleItemSelect(item)}
-                        />
-                      ))}
-                    </div>
-        <section aria-label="준비물 목록">
-          {selectedCategory === 'all' ? (
             <div className="space-y-10">
               {groupedItemsByBaggage.length === 0 ? (
                 <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-sm text-gray-500 shadow-sm">
@@ -983,11 +909,8 @@ function TripSearchInner({ tripId }) {
                       )
                     })}
                   </div>
-                )
-              })}
-              {groupedItemsAll.length === 0 ? (
-                <div className="py-16 text-center text-sm text-gray-400">표시할 항목이 없습니다.</div>
-              ) : null}
+                </div>
+              ))}
             </div>
           ) : (
             <>
@@ -1014,7 +937,7 @@ function TripSearchInner({ tripId }) {
                             {selectedCategory === 'ai_recommend' ? (
                               <AiSparkleMaskIcon selected={false} className="h-4 w-4 shrink-0" />
                             ) : null}
-                            {CATEGORIES.find((c) => c.value === selectedCategory)?.label ?? '준비물'}
+                            {tabCategories.find((c) => c.value === selectedCategory)?.label ?? '준비물'}
                           </h3>
                         </div>
                         <div className="flex flex-col gap-3">
