@@ -101,6 +101,12 @@ function WheelColumn({ ariaLabel, options, value, onCommit, disabled, alignTrigg
   const valueRef = useRef(value)
   const suppressScrollCommit = useRef(true)
   const userDraggingRef = useRef(false)
+  const pointerDragRef = useRef({
+    active: false,
+    pointerId: null,
+    startY: 0,
+    startScrollTop: 0,
+  })
 
   optionsRef.current = options
   valueRef.current = value
@@ -198,6 +204,39 @@ function WheelColumn({ ariaLabel, options, value, onCommit, disabled, alignTrigg
     settleTimer.current = window.setTimeout(snapAndCommit, 160)
   }
 
+  const handlePointerDown = (e) => {
+    if (disabled) return
+    const el = ref.current
+    if (!el) return
+    userDraggingRef.current = true
+    pointerDragRef.current = {
+      active: true,
+      pointerId: e.pointerId,
+      startY: e.clientY,
+      startScrollTop: el.scrollTop,
+    }
+    el.setPointerCapture?.(e.pointerId)
+  }
+
+  const handlePointerMove = (e) => {
+    if (disabled) return
+    const el = ref.current
+    const state = pointerDragRef.current
+    if (!el || !state.active || state.pointerId !== e.pointerId) return
+    const deltaY = e.clientY - state.startY
+    el.scrollTop = state.startScrollTop - deltaY
+  }
+
+  const handlePointerUp = (e) => {
+    const el = ref.current
+    const state = pointerDragRef.current
+    if (state.active && state.pointerId === e.pointerId) {
+      pointerDragRef.current = { active: false, pointerId: null, startY: 0, startScrollTop: 0 }
+      el?.releasePointerCapture?.(e.pointerId)
+    }
+    endDrag()
+  }
+
   return (
     <div
       className={`relative min-w-0 flex-1 ${disabled ? 'pointer-events-none opacity-45' : ''}`}
@@ -220,14 +259,12 @@ function WheelColumn({ ariaLabel, options, value, onCommit, disabled, alignTrigg
         role="listbox"
         aria-label={ariaLabel}
         onScroll={handleScroll}
-        onPointerDownCapture={() => {
-          if (disabled) return
-          userDraggingRef.current = true
-        }}
-        onPointerUpCapture={endDrag}
-        onPointerCancelCapture={endDrag}
+        onPointerDownCapture={handlePointerDown}
+        onPointerMoveCapture={handlePointerMove}
+        onPointerUpCapture={handlePointerUp}
+        onPointerCancelCapture={handlePointerUp}
         onLostPointerCapture={endDrag}
-        className="relative z-0 h-full touch-pan-y overflow-y-auto overflow-x-hidden overscroll-y-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="relative z-0 h-full cursor-ns-resize touch-pan-y overflow-y-auto overflow-x-hidden overscroll-y-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden active:cursor-grabbing"
         style={{ touchAction: 'pan-y' }}
       >
         <div className="shrink-0" style={{ height: WHEEL_PAD_PX }} aria-hidden />
@@ -700,40 +737,12 @@ export default function DestinationMobileRangeCalendar({
             </div>
           </div>
 
-          <div className="border-t border-teal-100/60 bg-gradient-to-b from-teal-50/40 to-white px-3 py-3 sm:px-4 sm:py-4">
-            <p className="mb-2 text-[11px] font-semibold text-teal-900/80 sm:text-xs">일정 여유</p>
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {FLEXIBILITY_OPTIONS.map((opt) => {
-                const on = flexibilityDays === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => onFlexibilityDaysChange?.(opt.value)}
-                    className={`rounded-full border px-2.5 py-1.5 text-[10px] font-bold transition sm:px-3 sm:text-xs ${
-                      on
-                        ? 'border-teal-700 bg-teal-50 text-teal-900 shadow-sm'
-                        : 'border-gray-200/90 bg-white text-gray-600 hover:border-teal-200 hover:bg-teal-50/50'
-                    } ${disabled ? 'opacity-50' : ''}`}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
-            </div>
-            <p className="mt-2 text-[10px] leading-relaxed text-gray-500 sm:text-[11px]">
-              체크리스트는 고른 출발·귀국일을 기준으로 만들어요. 여유 일수는 이후 일정 조정 시 참고할 수 있어요.
-            </p>
-          </div>
         </>
       ) : (
         <div className="border-t border-teal-100/60 px-3 py-4 sm:px-4">
           <p className="mb-1 text-sm font-semibold text-teal-900">유연한 일정</p>
           <p className="mb-4 text-xs leading-relaxed text-gray-600 sm:text-sm">
-            <strong className="text-teal-800">연도</strong>·<strong className="text-teal-800">월</strong>은 스크롤하거나, 가운데 기준으로 보이는 위·아래 항목을{' '}
-            <strong className="text-teal-800">탭</strong>해 바로 고를 수 있어요. 멈추면 가운데 줄에 맞춰 고정돼요. 정확한 날은{' '}
-            <strong className="text-teal-800">날짜 지정</strong>에서 고를 수 있어요.
+            여행 날짜가 정해지지 않았다면 유연하게 일정을 설정해주세요!
           </p>
 
           <div className="relative rounded-2xl border border-teal-100/80 bg-gradient-to-b from-teal-50/50 to-white px-2 py-3 shadow-inner">

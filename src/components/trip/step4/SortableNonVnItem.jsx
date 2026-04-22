@@ -56,6 +56,12 @@ export default function SortableNonVnItem({ item, index, onRemoveRequest }) {
         {...attributes}
         aria-label="드래그하여 순서 변경"
       >
+        <span
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sky-200/90 bg-sky-50 text-sky-600"
+          aria-hidden
+        >
+          <Step4SvgIcon name="grip" className="h-4 w-4" />
+        </span>
         {inner}
       </div>
     </li>
