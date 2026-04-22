@@ -91,7 +91,14 @@ const HOME_QUICK_FLOW_CARDS = [
       <>
         저장한 리스트를 확인하고,
         <br />
-        필요한 항목을 <span className="text-amber-500">추가, 수정</span>합니다
+        <span className="md:hidden">
+          필요한 항목을
+          <br />
+          <span className="text-amber-500">추가, 수정</span>합니다
+        </span>
+        <span className="hidden md:inline">
+          필요한 항목을 <span className="text-amber-500">추가, 수정</span>합니다
+        </span>
       </>
     ),
   },
@@ -440,7 +447,9 @@ function HomePage() {
           <RevealBlock show={featuresRevealed} delayClass="delay-[620ms]">
             <p className="mx-auto mt-8 max-w-4xl text-center text-[1.05rem] font-extrabold leading-snug text-[#083a4a] md:mt-10 md:text-[1.7rem]">
               <span className="md:hidden">
-                간단한 조건 입력만으로 메이트가 필요한 준비물과 주의사항을
+                간단한 조건 입력만으로 메이트가
+                <br />
+                필요한 준비물과 주의사항을
                 <br />
                 한 번에 정리해서 <span className="text-amber-500">체크리스트</span>로 제공해드려요!
               </span>
@@ -469,9 +478,17 @@ function HomePage() {
               어떻게 이용할까요?
             </h2>
             <p className="mt-2 text-center text-base font-extrabold text-[#0d4b5b] md:text-[1.25rem]">
-              복잡한 단계 없이 <span className="text-amber-500">저장</span> -&gt;{' '}
-              <span className="text-amber-500">확인</span> -&gt; <span className="text-amber-500">체크</span>만
-              기억하세요!
+              <span className="md:hidden">
+                복잡한 단계 없이
+                <br />
+                <span className="text-amber-500">저장</span> -&gt; <span className="text-amber-500">확인</span>{' '}
+                -&gt; <span className="text-amber-500">체크</span>만 기억하세요!
+              </span>
+              <span className="hidden md:inline">
+                복잡한 단계 없이 <span className="text-amber-500">저장</span> -&gt;{' '}
+                <span className="text-amber-500">확인</span> -&gt; <span className="text-amber-500">체크</span>만
+                기억하세요!
+              </span>
             </p>
           </RevealBlock>
 
