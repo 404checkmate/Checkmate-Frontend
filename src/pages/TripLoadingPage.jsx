@@ -9,6 +9,8 @@ import {
   BLUR_ORBS,
   BRAND_DOTS,
 } from '@/mocks/loadingData'
+import loadingWordMatePng from '@/assets/loading-word-mate-user-latest.png'
+import loadingWordChecklistPng from '@/assets/loading-word-checklist-user-latest.png'
 
 /* ─────────────────────────────────────────────
    범용 SVG 아이콘 — LOADING_ICON_PATHS 데이터 기반
@@ -113,28 +115,31 @@ function TripLoadingPage() {
         </div>
 
         {/* 고정 카피 — 워드마크 PNG + 한글 (예시 레이아웃과 동일: 한 줄·줄바꿈 시 가운데 정렬) */}
-        <p
-          className="mb-6 flex w-full max-w-xl flex-wrap items-center justify-center gap-x-1.5 gap-y-2 px-1 text-center text-[15px] font-semibold leading-snug text-gray-900 sm:text-base md:mb-8 md:text-lg"
+        <div
+          className="mb-6 w-full max-w-xl px-1 text-center text-[15px] font-semibold leading-snug text-gray-900 sm:text-base md:mb-8 md:text-lg"
           role="status"
-          aria-label="MATE가 맞춤 CHECK LIST를 준비하고 있어요"
+          aria-label="MATE가 맞춤 CHECK LIST를 준비하고 있어요!"
         >
-          <img
-            src="/loading-word-mate.png"
-            alt=""
-            className="inline-block h-7 w-auto max-w-[4.75rem] object-contain object-bottom sm:h-8 md:h-9 md:max-w-[5.75rem]"
-            draggable={false}
-            aria-hidden
-          />
-          <span className="whitespace-nowrap">가 맞춤</span>
-          <img
-            src="/loading-word-checklist.png"
-            alt=""
-            className="inline-block h-7 w-auto max-w-[9rem] object-contain object-bottom sm:h-8 sm:max-w-[10.5rem] md:h-9 md:max-w-[12.5rem]"
-            draggable={false}
-            aria-hidden
-          />
-          <span className="whitespace-nowrap">를 준비하고 있어요!</span>
-        </p>
+          <div className="inline-flex w-full items-end justify-center gap-0 whitespace-nowrap">
+            <img
+              src={loadingWordMatePng}
+              alt=""
+              className="inline-block h-7 w-auto max-w-[4.75rem] object-contain object-bottom sm:h-8 md:h-9 md:max-w-[5.75rem]"
+              draggable={false}
+              aria-hidden
+            />
+            <span className="whitespace-nowrap">가 맞춤</span>
+            <img
+              src={loadingWordChecklistPng}
+              alt=""
+              className="inline-block h-7 w-auto max-w-[9rem] object-contain object-bottom sm:h-8 sm:max-w-[10.5rem] md:h-9 md:max-w-[12.5rem]"
+              draggable={false}
+              aria-hidden
+            />
+            <span className="whitespace-nowrap">를</span>
+          </div>
+          <p className="mt-2 whitespace-nowrap text-center">준비하고 있어요!</p>
+        </div>
 
         {/* 분석 카드 */}
         <div className="w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-md px-5 py-5 mb-6 md:mb-8 text-left">

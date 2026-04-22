@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase'
 import { signOut } from '@/api/auth'
+import defaultProfileImg from '@/assets/default-profile.png'
 
 const PAGE_BG = {
   background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F0FDFA 100%)',
@@ -279,26 +280,15 @@ function ProviderBadge({ provider }) {
 }
 
 function Avatar({ src, name }) {
-  const initial = (name || '?').trim().charAt(0).toUpperCase() || '?'
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt=""
-        className="h-14 w-14 shrink-0 rounded-full border border-gray-100 object-cover md:h-16 md:w-16"
-        onError={(e) => {
-          e.currentTarget.style.display = 'none'
-        }}
-      />
-    )
-  }
   return (
-    <div
-      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 text-xl font-extrabold text-white md:h-16 md:w-16"
-      aria-hidden
-    >
-      {initial}
-    </div>
+    <img
+      src={src || defaultProfileImg}
+      alt={name ? `${name} 프로필 이미지` : '기본 프로필 이미지'}
+      className="h-14 w-14 shrink-0 rounded-full border border-gray-100 object-cover md:h-16 md:w-16"
+      onError={(e) => {
+        e.currentTarget.src = defaultProfileImg
+      }}
+    />
   )
 }
 

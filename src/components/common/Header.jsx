@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
 import { clearClientSessionForLogout, isMockWebSessionLoggedIn } from '@/utils/onboardingGate'
+import defaultProfileImg from '@/assets/default-profile.png'
 
 const NAV_ITEMS = [
   { label: '홈', path: '/', match: (p) => p === '/' },
@@ -111,12 +112,10 @@ function Header() {
               <button
                 type="button"
                 onClick={() => navigate('/mypage')}
-                className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200 md:flex"
+                className="hidden h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-100 transition-colors hover:bg-gray-200 md:flex"
                 aria-label="마이페이지"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                </svg>
+                <img src={defaultProfileImg} alt="" className="h-full w-full object-cover" aria-hidden />
               </button>
             </>
           ) : (

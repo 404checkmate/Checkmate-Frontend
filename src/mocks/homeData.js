@@ -49,14 +49,12 @@ export const LANDING_SECTION_IDS = {
  * 한 줄이 [앞, 강조, 뒤] 배열이면 가운데만 보라 그라데이션(HomePage)
  */
 export const HOME_HERO_TITLE_LINES = [
-  '「뭐 챙기더라?」',
-  '검색 탭만 몇 개였죠?',
-  ['목적지 맞춤 ', 'AI 체크리스트', ','],
-  '지금 시작하세요.',
+  '준비는 쉽게,',
+  ['여행은 ', '완벽하게', ''],
 ]
 
 export const HOME_HERO_SUBTITLE =
-  '정보를 찾기 위한 반복 탐색 없이, 여행지에 맞는 준비 항목을 AI가 제안합니다. 필요한 것만 골라 저장하고 체크하며 준비하면 됩니다.'
+  '복잡한 여행 준비, 이제는 메이트가 도와드릴게요'
 
 /** 히어로 배경 — 브랜드 제공 PNG (일몰·청록 바다) */
 export const HOME_HERO_BG = homeHeroOceanSunsetUrl

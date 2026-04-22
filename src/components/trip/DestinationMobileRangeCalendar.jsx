@@ -700,16 +700,16 @@ export default function DestinationMobileRangeCalendar({
               <span className="hidden truncate text-sm font-bold text-gray-900 md:block">
                 {right.year}년 {right.monthIndex + 1}월
               </span>
-            </div>
-            <button
-              type="button"
+          </div>
+                    <button
+                      type="button"
               aria-label="다음 달"
               disabled={!canGoNext || disabled}
               onClick={goNext}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-teal-800 transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-30"
             >
               <ChevronRight className="h-5 w-5" />
-            </button>
+                    </button>
           </div>
 
           <div className="grid grid-cols-1 gap-2 border-t border-teal-100/60 px-2 pb-3 pt-2 sm:px-4 md:grid-cols-2 md:gap-4 md:pb-4">
@@ -768,7 +768,7 @@ export default function DestinationMobileRangeCalendar({
                 alignTrigger={minDateYmd}
                 onCommit={(m1) => applyFlexPair(wheelYear, m1)}
               />
-            </div>
+              </div>
           </div>
         </div>
       )}

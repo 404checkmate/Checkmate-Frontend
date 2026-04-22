@@ -1,6 +1,14 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import homeHeroMascotUrl from '@/assets/home-hero-mascot.png'
+import homeHeroMascotUrl from '@/assets/home-hero-mascot-camera.png'
+import featureMascotQuestionUrl from '@/assets/home-feature-mascot-question.png'
+import processCardSaveUrl from '@/assets/home-process-card-save.png'
+import processCardOpenUrl from '@/assets/home-process-card-open.png'
+import processCardCheckUrl from '@/assets/home-process-card-check.png'
+import ctaMascotLuggageUrl from '@/assets/home-cta-mascot-luggage.png'
+import ctaFlagPawnUrl from '@/assets/home-cta-flag-pawn.png'
+import ctaWordMateUrl from '@/assets/home-cta-word-mate.png'
+import ctaWordCheckUrl from '@/assets/home-cta-word-check.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import { useRevealOnScrollOnce } from '@/hooks/useRevealOnScrollOnce'
 import {
@@ -9,16 +17,8 @@ import {
   FOOTER_SOCIAL_LINKS,
   HOME_BRAND_TAGLINE,
   HOME_CATCHPHRASE_DISPLAY,
-  HOME_CTA,
-  HOME_CTA_SIDE_IMAGE,
-  HOME_FEATURE_CARDS,
-  HOME_FEATURE_HEADING,
-  HOME_FEATURE_KICKER,
-  HOME_HERO_BG,
   HOME_HERO_SUBTITLE,
   HOME_HERO_TITLE_LINES,
-  HOME_PROCESS_HEADING,
-  HOME_PROCESS_STEPS,
   LANDING_SECTION_IDS,
 } from '@/mocks/homeData'
 
@@ -33,6 +33,16 @@ const SNAP_SLIDE =
  * 캐치프레이즈 ~ 푸터: 한 스냅 단위로만 정렬(CTA 다음 한 번). 둘 사이는 스냅 없이 연속 스크롤.
  */
 const SNAP_TAIL_GROUP = 'snap-start snap-always flex w-full flex-col'
+
+/** 홈 전체 배경 — 사용자 시안 기준의 연한 민트/스카이 원톤 */
+const HOME_PAGE_BG_STYLE = {
+  backgroundColor: '#f3fff8',
+  backgroundImage: `radial-gradient(circle at 8% 12%, rgba(117, 221, 255, 0.34) 0%, rgba(117, 221, 255, 0) 20%),
+    radial-gradient(circle at 80% 16%, rgba(248, 215, 116, 0.34) 0%, rgba(248, 215, 116, 0) 24%),
+    radial-gradient(circle at 10% 44%, rgba(117, 221, 255, 0.18) 0%, rgba(117, 221, 255, 0) 20%),
+    radial-gradient(circle at 68% 78%, rgba(251, 222, 132, 0.2) 0%, rgba(251, 222, 132, 0) 28%),
+    linear-gradient(180deg, #e8fffe 0%, #f4fff1 52%, #fff9e8 100%)`,
+}
 
 /** 홈 섹션 공통 리빌: 더 길게·부드럽게 (prefers-reduced-motion 은 duration 0) */
 const REVEAL_EASE =
@@ -53,6 +63,52 @@ function RevealBlock({ show, delayClass = '', className = '', children }) {
     </div>
   )
 }
+
+const HOME_QUICK_FLOW_CARDS = [
+  {
+    id: 'save',
+    imageSrc: processCardSaveUrl,
+    imageAlt: '저장 단계를 안내하는 메이트',
+    topLine: '여행과 일정을 정한 뒤,',
+    bottomLine: (
+      <>
+        필요한 준비 항목을 찾아
+        <br />
+        <span className="text-amber-500">저장</span>합니다
+      </>
+    ),
+  },
+  {
+    id: 'open',
+    imageSrc: processCardOpenUrl,
+    imageAlt: '확인 및 수정 단계를 안내하는 메이트',
+    topLine: (
+      <>
+        <span className="text-amber-500">나의 체크리스트</span>에서
+      </>
+    ),
+    bottomLine: (
+      <>
+        저장한 리스트를 확인하고,
+        <br />
+        필요한 항목을 <span className="text-amber-500">추가, 수정</span>합니다
+      </>
+    ),
+  },
+  {
+    id: 'check',
+    imageSrc: processCardCheckUrl,
+    imageAlt: '체크 단계를 안내하는 메이트',
+    topLine: '체크리스트에서',
+    bottomLine: (
+      <>
+        하나씩 준비하면서 <span className="text-amber-500">체크</span>하며
+        <br />
+        출발 전까지 마무리합니다
+      </>
+    ),
+  },
+]
 
 /** 홈 푸터 전용: 클릭·포커스는 되지만 라우팅 등 동작 없음 */
 function noopFooterAction() {}
@@ -87,83 +143,6 @@ function LegalFooterLinks({ className = '', nonInteractive = false }) {
         </span>
       ))}
     </nav>
-  )
-}
-
-function FeatureIcon({ type, accent }) {
-  const ring =
-    accent === 'teal'
-      ? 'bg-teal-50 text-teal-600 ring-teal-100'
-      : accent === 'amber'
-        ? 'bg-amber-50 text-amber-600 ring-amber-100'
-        : 'bg-cyan-50 text-cyan-600 ring-cyan-100'
-  const paths = {
-    folder: (
-      <path
-        fill="currentColor"
-        d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
-      />
-    ),
-    network: (
-      <path
-        fill="currentColor"
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
-      />
-    ),
-    list: (
-      <path
-        fill="currentColor"
-        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-      />
-    ),
-  }
-  return (
-    <span
-      className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ring-1 ${ring}`}
-      aria-hidden
-    >
-      <svg className="h-6 w-6" viewBox="0 0 24 24" aria-hidden>
-        {paths[type]}
-      </svg>
-    </span>
-  )
-}
-
-function ProcessMockup() {
-  const rows = ['여권 & 서류', '항공·교통', '숙소 확인', '짐 싸기', '환전·카드']
-  return (
-    <div
-      className="mx-auto w-full max-w-sm rounded-[1.75rem] border border-gray-800 bg-gray-900 p-4 shadow-2xl shadow-gray-900/40 ring-1 ring-white/10"
-      aria-hidden
-    >
-      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-        <span className="text-xs font-semibold text-white/90">CHECKMATE · 여행 체크리스트</span>
-        <span className="h-2 w-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.7)]" />
-      </div>
-      <ul className="space-y-2.5">
-        {rows.map((label, i) => (
-          <li
-            key={label}
-            className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white/90"
-          >
-            <span
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-                i < 3 ? 'bg-teal-500 text-white' : 'border border-white/20 text-white/40'
-              }`}
-            >
-              {i < 3 ? (
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-              ) : (
-                <span className="text-[10px] font-bold">{i + 1}</span>
-              )}
-            </span>
-            <span className="truncate font-medium">{label}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
   )
 }
 
@@ -216,6 +195,48 @@ function SocialIcon({ icon }) {
   )
 }
 
+function FeatureSpeechBubble({ text, tone = 'light', tail = 'left' }) {
+  const toneClass =
+    tone === 'teal'
+      ? 'border-teal-500/30 bg-gradient-to-r from-teal-300/58 via-cyan-200/52 to-teal-200/56'
+      : 'border-slate-300/70 bg-gradient-to-r from-slate-100/76 to-slate-200/74'
+  const textClass = tone === 'teal' ? 'text-[#08414f]' : 'text-[#0e3a45]'
+  const bubbleLayoutClass = tone === 'teal' ? 'flex items-center' : 'flex items-center md:block'
+  const textLayoutClass = tone === 'teal' ? 'w-full text-center' : 'w-full text-center md:text-left'
+  const bubblePaddingClass = tone === 'teal' ? 'px-8 md:px-12' : 'px-8 md:px-12 md:pt-7'
+  const tailPositionClass = tail === 'right' ? 'right-10' : 'left-10'
+  const tailColorStyle =
+    tone === 'teal'
+      ? {
+          background:
+            'linear-gradient(90deg, rgba(94,234,212,0.58) 0%, rgba(165,243,252,0.52) 55%, rgba(153,246,228,0.56) 100%)',
+        }
+      : {
+          background: 'linear-gradient(90deg, rgba(241,245,249,0.76) 0%, rgba(226,232,240,0.74) 100%)',
+        }
+
+  return (
+    <div
+      className={`relative h-[76px] w-full max-w-[520px] rounded-2xl border shadow-[0_10px_24px_rgba(5,46,66,0.10)] backdrop-blur-[3px] md:h-[94px] ${toneClass} ${bubbleLayoutClass} ${bubblePaddingClass}`}
+    >
+      <span
+        className={`absolute -bottom-[14px] h-4 w-8 drop-shadow-[0_4px_6px_rgba(5,46,66,0.08)] ${tailPositionClass}`}
+        style={{
+          ...tailColorStyle,
+          clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+        }}
+        aria-hidden
+      />
+      <p
+        className={`text-base font-bold leading-tight md:text-[2rem] ${textClass} ${textLayoutClass}`}
+        style={{ fontFamily: "'SeoulNotice', system-ui, sans-serif" }}
+      >
+        {text}
+      </p>
+    </div>
+  )
+}
+
 function HomePage() {
   const navigate = useNavigate()
   const [heroRevealed, setHeroRevealed] = useState(() => {
@@ -265,55 +286,35 @@ function HomePage() {
   }, [])
 
   return (
-    <div className="bg-white">
+    <div className="relative" style={HOME_PAGE_BG_STYLE}>
       {/* 히어로 — 풀블리드 배경, 왼쪽 카피·CTA / 오른쪽 마스코트 PNG */}
       <section
-        className={`relative isolate overflow-hidden ${SNAP_SLIDE}`}
+        className={`relative isolate overflow-hidden bg-transparent ${SNAP_SLIDE}`}
       >
-        <img
-          src={HOME_HERO_BG}
-          alt="일몰이 비친 청록빛 바다 풍경"
-          className="absolute inset-0 h-full w-full object-cover"
-          loading="eager"
-        />
-        {/* 상·중앙만 살짝 어둡게 — 제목·본문 대비 */}
         <div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{
-            background:
-              'linear-gradient(to bottom, rgba(15,23,42,0.48) 0%, rgba(15,23,42,0.22) 32%, rgba(15,23,42,0.08) 48%, transparent 58%)',
-          }}
+          className="pointer-events-none absolute right-[-2%] top-[-12%] h-[62vw] w-[62vw] max-h-[560px] max-w-[560px] rounded-full bg-amber-200/58 blur-3xl"
           aria-hidden
         />
-        {/* 하단 ~70% 부근부터 이미지가 흰색으로 스며듦 (레퍼런스와 유사) */}
         <div
-          className="pointer-events-none absolute inset-0 z-[1]"
-          style={{
-            background:
-              'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 48%, rgba(255,255,255,0.35) 68%, rgba(255,255,255,0.88) 86%, #ffffff 100%)',
-          }}
+          className="pointer-events-none absolute bottom-[-14%] left-[-6%] h-[36vw] w-[36vw] max-h-[300px] max-w-[300px] rounded-full bg-cyan-300/40 blur-3xl"
           aria-hidden
         />
-        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 pb-[clamp(3.5rem,10vh,7rem)] pt-[clamp(4.5rem,12vh,8rem)] md:gap-10 md:px-8 md:pb-[clamp(4rem,12vh,7rem)] md:pt-[clamp(5rem,14vh,8rem)] lg:flex-row lg:flex-wrap lg:items-end lg:justify-between lg:gap-8 lg:px-12">
+        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 pb-[clamp(3.5rem,10vh,7rem)] pt-[clamp(4.5rem,12vh,8rem)] md:gap-10 md:px-8 md:pb-[clamp(4rem,12vh,7rem)] md:pt-[clamp(5rem,14vh,8rem)] lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-8 lg:px-12">
           {/* order: 모바일만 마스코트(1) → 카피(2) → 스크롤 안내(3) / md~ 는 카피→마스코트 */}
           <div className="order-2 flex w-full min-w-0 max-w-xl flex-col items-start text-left sm:max-w-2xl md:order-1 lg:order-1 lg:flex-1">
             <RevealBlock show={heroRevealed} className="mb-3 w-full md:mb-4">
-              <h1 className="text-[1.6rem] font-extrabold leading-[1.35] tracking-tight text-white sm:text-3xl md:text-4xl md:leading-tight lg:text-[2.75rem]">
+              <h1 className="text-[1.9rem] font-extrabold leading-[1.25] tracking-tight text-slate-900 sm:text-[2.2rem] md:text-5xl md:leading-tight lg:text-[3.5rem]">
                 {HOME_HERO_TITLE_LINES.map((line, i) => (
                   <Fragment key={i}>
                     {i > 0 && <br />}
                     {Array.isArray(line) ? (
                       <>
                         {line[0]}
-                        <span className="bg-gradient-to-r from-violet-300 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                        <span className="text-[#3db4dd]">
                           {line[1]}
                         </span>
                         {line[2]}
                       </>
-                    ) : i === 0 ? (
-                      <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-emerald-300 bg-clip-text text-transparent">
-                        {line}
-                      </span>
                     ) : (
                       line
                     )}
@@ -322,7 +323,10 @@ function HomePage() {
               </h1>
             </RevealBlock>
             <RevealBlock show={heroRevealed} delayClass="delay-[160ms]" className="mb-5 w-full max-w-xl md:mb-8">
-              <p className="text-[0.9375rem] leading-relaxed text-teal-50/95 md:text-base">{HOME_HERO_SUBTITLE}</p>
+              <p className="text-base font-semibold leading-relaxed text-[#0f5762] md:text-[1.25rem]">
+                복잡한 여행 준비, 이제는 <span className="font-extrabold text-amber-500">메이트</span>가
+                도와드릴게요
+              </p>
             </RevealBlock>
             <RevealBlock
               show={heroRevealed}
@@ -332,7 +336,7 @@ function HomePage() {
               <button
                 type="button"
                 onClick={() => navigate('/trips/new/destination')}
-                className="w-full max-w-sm self-start rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-teal-900/35 transition hover:from-cyan-400 hover:to-teal-500 md:w-auto md:max-w-none md:px-8"
+                className="w-full max-w-sm self-start rounded-xl bg-gradient-to-r from-amber-300 to-amber-400 px-6 py-3.5 text-center text-sm font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 md:w-auto md:max-w-none md:px-8"
               >
                 여행 준비 시작하기
               </button>
@@ -343,11 +347,11 @@ function HomePage() {
             delayClass="delay-[400ms]"
             className="order-1 flex w-full min-w-0 shrink-0 justify-center md:order-2 lg:order-2 lg:w-auto lg:max-w-[min(42vw,400px)] lg:flex-none lg:justify-center"
           >
-            <div className="mx-auto w-full max-w-[220px] md:max-w-[300px] lg:flex lg:w-full lg:max-w-none lg:justify-center">
+            <div className="mx-auto w-full max-w-[300px] md:max-w-[420px] lg:flex lg:w-full lg:max-w-[520px] lg:justify-center">
               <img
                 src={homeHeroMascotUrl}
                 alt="CHECKMATE 마스코트 — 여행 가방과 카메라를 든 체스 기사 캐릭터"
-                className="mx-auto block h-auto w-full object-contain object-center drop-shadow-[0_12px_40px_rgba(15,23,42,0.35)] lg:max-w-full lg:object-bottom"
+                className="mx-auto block h-auto w-full object-contain object-center drop-shadow-[0_10px_24px_rgba(15,23,42,0.25)] lg:max-w-full lg:object-bottom"
                 loading="eager"
                 decoding="async"
               />
@@ -355,7 +359,7 @@ function HomePage() {
           </RevealBlock>
           {/* 다음 섹션 스크롤 유도 — lg 에서는 한 줄 전체(basis-full)로 아래에 배치 */}
           <div
-            className="order-3 flex w-full basis-full flex-col items-center pt-2 md:pt-5 lg:pt-6"
+            className="order-3 flex w-full basis-full flex-col items-center pt-12 md:pt-20 lg:pt-24"
             aria-hidden
           >
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500 md:text-[11px]">
@@ -373,130 +377,182 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 피처 — 3열 카드 */}
+      {/* 피처 — 시안 구조: 상단 카피 + 좌 말풍선 3개 + 우 마스코트 */}
       <section
         id={LANDING_SECTION_IDS.features}
-        className={`${SNAP_SLIDE} bg-white py-12 md:py-16`}
+        className={`${SNAP_SLIDE} relative overflow-hidden bg-transparent py-12 md:py-16`}
         aria-labelledby="landing-features-title"
       >
+        <div
+          className="pointer-events-none absolute -left-24 -top-16 h-[36vw] w-[36vw] max-h-[300px] max-w-[300px] rounded-full bg-cyan-300/40 blur-3xl md:-left-20 md:-top-20"
+          aria-hidden
+        />
         <div ref={featuresRef} className="mx-auto max-w-6xl px-5 md:px-6">
-          <RevealBlock show={featuresRevealed} className="mb-3 text-center">
-            <span className="inline-flex rounded-full bg-gradient-to-r from-teal-100 to-cyan-100 px-4 py-1.5 text-[11px] font-bold tracking-wide text-teal-900 shadow-sm shadow-teal-900/5">
-              {HOME_FEATURE_KICKER}
-            </span>
-          </RevealBlock>
-          <RevealBlock show={featuresRevealed} delayClass="delay-[180ms]">
+          <RevealBlock show={featuresRevealed}>
             <h2
               id="landing-features-title"
-              className="mx-auto mb-12 max-w-3xl text-center text-2xl font-extrabold leading-snug text-gray-900 md:mb-16 md:text-3xl md:leading-tight"
+              className="mx-auto mb-12 max-w-4xl text-center text-[1.65rem] font-extrabold leading-tight text-[#04384a] md:mb-14 md:text-[3.25rem]"
             >
-              <span className="block">{HOME_FEATURE_HEADING.line1}</span>
-              <span className="block">{HOME_FEATURE_HEADING.line2}</span>
+              <span className="block">조건만 입력하면,</span>
+              <span className="block">
+                메이트가 <span className="text-amber-500">자동 생성</span>해드려요!
+              </span>
             </h2>
           </RevealBlock>
-          <div className="grid gap-6 md:grid-cols-3 md:gap-8 md:items-start">
-            {HOME_FEATURE_CARDS.map((card, index) => {
-              const staggerY =
-                index === 0
-                  ? 'md:-translate-y-3 motion-reduce:md:translate-y-0'
-                  : index === 1
-                    ? 'md:translate-y-12 motion-reduce:md:translate-y-0'
-                    : 'md:translate-y-4 motion-reduce:md:translate-y-0'
-              return (
-                <RevealBlock
-                  key={card.id}
-                  show={featuresRevealed}
-                  delayClass={FEATURE_CARD_REVEAL_DELAY_CLASS[index] ?? 'delay-0'}
-                >
-                  <article
-                    className={`rounded-2xl border border-teal-100/70 bg-white p-6 shadow-md shadow-teal-900/[0.06] ring-1 ring-teal-900/[0.04] transition duration-300 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/10 ${staggerY}`}
-                  >
-                    <FeatureIcon type={card.icon} accent={card.accent} />
-                    <h3 className="mt-4 text-lg font-bold text-gray-900">{card.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-gray-600">{card.description}</p>
-                  </article>
-                </RevealBlock>
-              )
-            })}
+          <div className="grid items-center gap-8 md:grid-cols-[1.35fr_1fr] md:gap-10">
+            <div className="relative flex w-full max-w-[640px] flex-col gap-3 md:ml-4 md:gap-4">
+              <RevealBlock
+                show={featuresRevealed}
+                delayClass={FEATURE_CARD_REVEAL_DELAY_CLASS[0]}
+                className="relative z-[3] flex w-full justify-start pr-10 md:pr-12"
+              >
+                <FeatureSpeechBubble text="어디로 떠날 예정이세요?" tone="light" tail="left" />
+              </RevealBlock>
+
+              <RevealBlock
+                show={featuresRevealed}
+                delayClass={FEATURE_CARD_REVEAL_DELAY_CLASS[1]}
+                className="relative z-[2] -mt-1 flex w-full justify-end pl-10 md:-mt-2 md:pl-12"
+              >
+                <FeatureSpeechBubble text="누구와 함께하세요?" tone="teal" tail="right" />
+              </RevealBlock>
+
+              <RevealBlock
+                show={featuresRevealed}
+                delayClass={FEATURE_CARD_REVEAL_DELAY_CLASS[2]}
+                className="relative z-[1] -mt-1 flex w-full justify-start pr-10 md:-mt-2 md:pr-12"
+              >
+                <FeatureSpeechBubble text="여행 스타일은 어떠세요?" tone="light" tail="left" />
+              </RevealBlock>
+            </div>
+
+            <RevealBlock show={featuresRevealed} delayClass="delay-[480ms]" className="flex justify-center md:justify-end">
+              <img
+                src={featureMascotQuestionUrl}
+                alt="질문표시와 함께 놀란 메이트 마스코트"
+                className="h-auto w-full max-w-[320px] object-contain md:max-w-[360px]"
+                loading="lazy"
+                decoding="async"
+              />
+            </RevealBlock>
+          </div>
+
+          <RevealBlock show={featuresRevealed} delayClass="delay-[620ms]">
+            <p className="mx-auto mt-8 max-w-4xl text-center text-[1.05rem] font-extrabold leading-snug text-[#083a4a] md:mt-10 md:text-[1.7rem]">
+              <span className="md:hidden">
+                간단한 조건 입력만으로 메이트가 필요한 준비물과 주의사항을
+                <br />
+                한 번에 정리해서 <span className="text-amber-500">체크리스트</span>로 제공해드려요!
+              </span>
+              <span className="hidden md:inline">
+                간단한 조건 입력만으로 메이트가 필요한 준비물과 주의사항을
+                <br />
+                한 번에 정리해서 <span className="text-amber-500">체크리스트</span>로 제공해드려요!
+              </span>
+            </p>
+          </RevealBlock>
+        </div>
+      </section>
+
+      {/* 프로세스 — 예시 기반 3카드 구조 */}
+      <section
+        id={LANDING_SECTION_IDS.how}
+        className={`${SNAP_SLIDE} bg-transparent py-12 md:py-16`}
+        aria-labelledby="landing-how-title"
+      >
+        <div ref={processRef} className="mx-auto max-w-6xl px-5 md:px-6">
+          <RevealBlock show={processRevealed}>
+            <h2
+              id="landing-how-title"
+              className="text-center text-[2.2rem] font-extrabold leading-tight text-[#083a4a] md:text-[3.2rem]"
+            >
+              어떻게 이용할까요?
+            </h2>
+            <p className="mt-2 text-center text-base font-extrabold text-[#0d4b5b] md:text-[1.25rem]">
+              복잡한 단계 없이 <span className="text-amber-500">저장</span> -&gt;{' '}
+              <span className="text-amber-500">확인</span> -&gt; <span className="text-amber-500">체크</span>만
+              기억하세요!
+            </p>
+          </RevealBlock>
+
+          <div className="mt-10 grid gap-6 md:mt-12 md:grid-cols-3 md:gap-7">
+            {HOME_QUICK_FLOW_CARDS.map((card, index) => (
+              <RevealBlock
+                key={card.id}
+                show={processRevealed}
+                delayClass={FEATURE_CARD_REVEAL_DELAY_CLASS[index]}
+              >
+                <article className="flex h-full min-h-[318px] flex-col items-center rounded-3xl border border-slate-300/60 bg-slate-50 px-6 py-7 text-center shadow-[0_14px_30px_rgba(13,58,76,0.18)]">
+                  <div className="flex h-[130px] w-[130px] items-center justify-center rounded-[2rem] bg-[#f3ebce]">
+                    <img
+                      src={card.imageSrc}
+                      alt={card.imageAlt}
+                      className="h-[112px] w-[112px] object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <p className="mt-8 text-[1.45rem] font-extrabold leading-tight text-[#113e4b] md:text-[1.3rem]">
+                    <span className="block">{card.topLine}</span>
+                    <span className="block">{card.bottomLine}</span>
+                  </p>
+                </article>
+              </RevealBlock>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 프로세스 — 연한 회색 배경, 2단 */}
-      <section
-        id={LANDING_SECTION_IDS.how}
-        className={`${SNAP_SLIDE} border-t border-teal-100/40 bg-gradient-to-br from-slate-50 via-teal-50/40 to-cyan-50/30 py-12 md:py-16`}
-        aria-labelledby="landing-how-title"
-      >
-        <div
-          ref={processRef}
-          className="mx-auto grid max-w-6xl items-center gap-12 px-5 md:grid-cols-2 md:gap-16 md:px-6"
-        >
-          <RevealBlock show={processRevealed}>
-            <div>
-              <h2
-                id="landing-how-title"
-                className="text-2xl font-extrabold leading-snug text-gray-900 md:text-3xl"
+      {/* CTA — 시안 기반 장면형 섹션 */}
+      <section className={`${SNAP_SLIDE} bg-transparent py-0`}>
+        <div ref={ctaRef} className="w-full">
+          <div className="relative w-full overflow-hidden bg-transparent pb-0 pt-6 md:pt-8">
+            <RevealBlock show={ctaRevealed} className="relative z-20 -mt-4 mx-auto w-fit px-4 text-center md:-mt-8 md:px-0 md:text-center">
+              <p
+                className="text-[2rem] font-extrabold leading-[1.14] text-[#083a4a] md:text-[3.75rem]"
+                style={{ fontFamily: "'SeoulNotice', system-ui, sans-serif" }}
               >
-                {HOME_PROCESS_HEADING}
-              </h2>
-              <ol className="mt-8 space-y-6">
-                {HOME_PROCESS_STEPS.map((step, i) => (
-                  <li key={step.title} className="flex gap-4">
-                    <span
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-sm font-black text-white shadow-md shadow-teal-700/25"
-                      aria-hidden
-                    >
-                      {i + 1}
-                    </span>
-                    <div>
-                      <p className="font-bold text-gray-900">{step.title}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-gray-600">{step.description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </RevealBlock>
-          <RevealBlock show={processRevealed} delayClass="delay-[260ms]" className="flex justify-center md:justify-end">
-            <ProcessMockup />
-          </RevealBlock>
-        </div>
-      </section>
-
-      {/* CTA 배너 */}
-      <section className={`${SNAP_SLIDE} py-10 md:py-12`}>
-        <div ref={ctaRef} className="mx-auto max-w-6xl px-5 md:px-6">
-          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 via-teal-600 to-cyan-600 shadow-xl shadow-teal-900/25 md:flex md:min-h-[280px]">
-            <RevealBlock show={ctaRevealed} className="flex flex-1 flex-col justify-center px-6 py-10 md:px-12 md:py-12">
-              <h2 className="text-xl font-extrabold leading-snug text-white md:text-2xl">
-                <span className="block">{HOME_CTA.title.line1}</span>
-                <span className="block">{HOME_CTA.title.line2}</span>
-              </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-teal-50/95">{HOME_CTA.subtitle}</p>
-              <button
-                type="button"
-                onClick={() => navigate(HOME_CTA.buttonTo)}
-                className="mt-8 inline-flex w-fit items-center gap-2 rounded-xl bg-amber-400 px-6 py-3.5 text-sm font-bold text-teal-950 shadow-md shadow-teal-900/20 transition hover:bg-amber-300"
-              >
-                {HOME_CTA.buttonLabel}
-                <span aria-hidden>→</span>
-              </button>
+                이제 <img src={ctaWordMateUrl} alt="MATE" className="mx-1 inline-block h-[0.9em] w-auto align-[-0.08em] md:mx-2" />
+                와 함께
+                <br />
+                <img src={ctaWordCheckUrl} alt="CHECK" className="mr-1 inline-block h-[0.9em] w-auto align-[-0.08em] md:mr-2" />
+                하러 가볼까요?
+              </p>
             </RevealBlock>
+
             <RevealBlock
               show={ctaRevealed}
-              delayClass="delay-[240ms]"
-              className="relative min-h-[200px] w-full md:w-[42%] md:min-h-0"
+              delayClass="delay-[200ms]"
+              className="relative mt-5 h-[220px] md:mt-8 md:h-[360px]"
             >
+              <div
+                className="pointer-events-none absolute bottom-8 left-1/2 h-[118px] w-full -translate-x-1/2 md:bottom-12 md:h-[182px]"
+                style={{
+                  clipPath: 'polygon(35% 38%, 65% 38%, 100% 100%, 0 100%)',
+                  backgroundColor: '#69dcff',
+                  backgroundImage: `
+                    linear-gradient(180deg, rgba(255,255,255,0.97) 0% 22%, transparent 22% 42%, rgba(255,255,255,0.97) 42% 64%, transparent 64% 82%, rgba(255,255,255,0.97) 82% 100%),
+                    repeating-conic-gradient(from 89deg at 58% 35%, rgba(255,255,255,0.97) 0deg 4.9deg, transparent 4.9deg 9.8deg),
+                    linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.06) 35%, rgba(255,255,255,0) 60%)
+                  `,
+                  backgroundSize: '100% 100%, 100% 100%, 100% 100%',
+                  backgroundPosition: '0 0, 0 0, 0 0',
+                  backgroundRepeat: 'no-repeat',
+                  boxShadow: 'inset 0 9px 12px rgba(8,58,74,0.1)',
+                }}
+                aria-hidden
+              />
               <img
-                src={HOME_CTA_SIDE_IMAGE}
-                alt=""
-                className="h-full w-full object-cover"
+                src={ctaMascotLuggageUrl}
+                alt="여행 가방을 든 메이트 캐릭터"
+                className="absolute bottom-12 left-9 z-10 h-[142px] w-auto md:bottom-16 md:left-36 md:h-[290px]"
                 loading="lazy"
               />
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-teal-700/88 to-transparent md:bg-gradient-to-l"
-                aria-hidden
+              <img
+                src={ctaFlagPawnUrl}
+                alt="깃발을 든 작은 메이트 캐릭터"
+                className="absolute bottom-25 right-27 z-10 h-[92px] w-auto md:bottom-38.5 md:right-95.5 md:h-[172px]"
+                loading="lazy"
               />
             </RevealBlock>
           </div>
@@ -506,10 +562,10 @@ function HomePage() {
       {/* 캐치프레이즈 + 푸터: tail 그룹(내부는 스냅 없음 → 푸터로 자연 스크롤) */}
       <div className={SNAP_TAIL_GROUP}>
       <section
-        className="snap-none relative isolate flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t border-teal-200/50 bg-gradient-to-br from-teal-50 via-cyan-50/90 to-amber-50/80 py-14 md:py-20"
+        className="snap-none relative isolate flex min-h-[100dvh] flex-col justify-center overflow-hidden bg-transparent py-14 md:py-20"
       >
         <div
-          className="pointer-events-none absolute -left-20 top-6 h-52 w-52 rounded-full bg-teal-300/50 blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-44 w-44 -translate-x-full -translate-y-1/2 rounded-full bg-teal-300/38 blur-3xl md:ml-[-30rem]"
           aria-hidden
         />
         <div
@@ -525,7 +581,7 @@ function HomePage() {
           aria-hidden
         />
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.45]"
+          className="pointer-events-none absolute inset-0 opacity-[0.2]"
           style={{
             backgroundImage: `radial-gradient(circle at 18% 22%, rgba(45, 212, 191, 0.14) 0%, transparent 45%),
               radial-gradient(circle at 88% 72%, rgba(6, 182, 212, 0.12) 0%, transparent 42%),
@@ -534,7 +590,7 @@ function HomePage() {
           aria-hidden
         />
         <div
-          className="pointer-events-none absolute inset-0 bg-[length:22px_22px] opacity-[0.2]"
+          className="pointer-events-none absolute inset-0 bg-[length:22px_22px] opacity-[0.08]"
           style={{
             backgroundImage:
               'radial-gradient(circle at center, rgba(13, 148, 136, 0.12) 1.5px, transparent 1.6px)',
@@ -562,7 +618,7 @@ function HomePage() {
         </div>
       </section>
 
-      <footer className="snap-none border-t border-teal-100/60 bg-[#f4fdfa] py-12 md:py-16">
+      <footer className="snap-none bg-transparent py-12 md:py-16">
         <div className="mx-auto max-w-6xl px-5 md:px-6">
           <div className="flex flex-col gap-10 md:flex-row md:justify-between md:gap-12">
             <div className="max-w-xs">
