@@ -37,21 +37,48 @@ const PLACEHOLDER_TRIP_ID = '1'
 
 /** 목록은 항상 기내 → 위탁 두 블록으로만 나눔(카드 상단 수하물 탭 없음) */
 const SEARCH_BAGGAGE_SECTION_ORDER = [BAGGAGE_CARRY_ON, BAGGAGE_CHECKED]
+const SEARCH_CATEGORY_ORDER = ['supplies', 'prebooking', 'predeparture']
+const SEARCH_CATEGORY_LABEL = {
+  supplies: '준비물',
+  prebooking: '사전 예약/신청',
+  predeparture: '출국 전 확인사항',
+}
 
 /** 현재 풀 안에서 항목 유형(AI·준비물…)별 그룹 — 보관함 상세와 같이 수하물 블록 안에서 재사용 */
 function buildSubcategoryGroups(itemsPool) {
-  const order = CATEGORIES.filter((c) => c.value !== 'all').map((c) => c.value)
-  const sectionOrder = ['ai_recommend', ...order.filter((v) => v !== 'ai_recommend')]
-  return sectionOrder
+  return SEARCH_CATEGORY_ORDER
     .map((value) => {
-      const cat = CATEGORIES.find((c) => c.value === value)
-      if (!cat) return null
       const items = itemsPool
         .filter((i) => i.category === value)
-        .sort((a, b) => a.title.localeCompare(b.title, 'ko'))
-      return { categoryValue: value, categoryLabel: cat.label, items }
+        .sort(sortItemsForDisplay)
+      return { categoryValue: value, categoryLabel: SEARCH_CATEGORY_LABEL[value] ?? '준비물', items }
     })
     .filter((g) => g && g.items.length > 0)
+}
+
+function normalizeItemCategory(item) {
+  const isAiRecommended =
+    item.category === 'ai_recommend' || item.prepType === 'ai_recommend' || item.source === 'llm'
+  if (!isAiRecommended) return { ...item, isAiRecommended: false }
+  if (item.category !== 'ai_recommend') return { ...item, isAiRecommended: true }
+  const prepType = String(item.prepType ?? '').trim()
+  const subCategory = String(item.subCategory ?? '').trim()
+  let category = 'supplies'
+  if (prepType === 'pre_booking' || subCategory === 'booking') category = 'prebooking'
+  else if (prepType === 'pre_departure_check' || subCategory === 'pre_departure') category = 'predeparture'
+  return {
+    ...item,
+    category,
+    categoryLabel: SEARCH_CATEGORY_LABEL[category],
+    isAiRecommended: true,
+  }
+}
+
+function sortItemsForDisplay(a, b) {
+  const aAi = Boolean(a?.isAiRecommended)
+  const bAi = Boolean(b?.isAiRecommended)
+  if (aAi !== bAi) return aAi ? -1 : 1
+  return String(a?.title ?? '').localeCompare(String(b?.title ?? ''), 'ko')
 }
 
 const trackEvent = (eventName, properties = {}) => {
@@ -282,8 +309,18 @@ function TripSearchInner({ tripId }) {
   }
 
   /** 현재 렌더링 기준이 되는 데이터 소스: API 성공 시 실데이터, 아니면 목데이터 */
-  const sourceItems = loadState.fromApi ? apiItems : MOCK_ITEMS
-  const tabCategories = loadState.fromApi ? getTabCategories() : CATEGORIES
+  const sourceItemsRaw = loadState.fromApi ? apiItems : MOCK_ITEMS
+  const sourceItems = useMemo(() => sourceItemsRaw.map(normalizeItemCategory), [sourceItemsRaw])
+  const tabCategories = useMemo(
+    () => (loadState.fromApi ? getTabCategories() : CATEGORIES).filter((c) => c.value !== 'ai_recommend'),
+    [loadState.fromApi],
+  )
+
+  useEffect(() => {
+    if (!tabCategories.some((c) => c.value === selectedCategory)) {
+      setSelectedCategory('all')
+    }
+  }, [tabCategories, selectedCategory])
 
   const toggleItemSelect = (item) => {
     const id = String(item.id)
@@ -492,7 +529,9 @@ function TripSearchInner({ tripId }) {
   const handleModalBack = () => setLeaveModalOpen(false)
 
   const totalItemCount = sourceItems.length
-  const aiRecommendCount = sourceItems.filter((i) => i.category === 'ai_recommend').length
+  const aiRecommendCount = sourceItemsRaw.filter(
+    (i) => i.category === 'ai_recommend' || i.prepType === 'ai_recommend' || i.source === 'llm',
+  ).length
 
   /** 수하물 구간별 → 항목 유형별 그룹(목록에서는 기내/위탁 블록만 유지) */
   const groupedItemsByBaggage = useMemo(() => {
@@ -511,7 +550,7 @@ function TripSearchInner({ tripId }) {
       bagTitle: BAGGAGE_SECTION_LABEL[bagKey],
       items: sourceItems
         .filter((i) => resolveBaggageSection(i) === bagKey && i.category === selectedCategory)
-        .sort((a, b) => a.title.localeCompare(b.title, 'ko')),
+        .sort(sortItemsForDisplay),
     })).filter((s) => s.items.length > 0)
   }, [selectedCategory, sourceItems])
 
@@ -609,7 +648,8 @@ function TripSearchInner({ tripId }) {
 
   return (
     <div className="min-h-screen" style={pageBackgroundStyle}>
-      <div className="mx-auto flex max-w-6xl items-center px-4 pt-4 md:pt-8">
+      {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·뒤로가기 왼선 일치 */}
+      <div className="mx-auto flex w-full max-w-7xl items-center px-3 pt-4 md:px-6 md:pt-8 lg:px-8">
         {mergeToArchive ? (
           <button
             type="button"
@@ -625,7 +665,8 @@ function TripSearchInner({ tripId }) {
         )}
       </div>
 
-      <div className="mx-auto max-w-3xl px-5 pb-36 pt-5 md:px-4 md:pb-28 md:pt-6">
+      <div className="mx-auto w-full max-w-7xl px-3 pb-36 pt-5 md:px-6 md:pb-28 md:pt-6 lg:px-8">
+        <div className="mx-auto w-full max-w-3xl">
         <header className="mb-6">
           <h1 className="text-2xl font-extrabold leading-snug tracking-tight text-gray-900 md:text-3xl">
             {pageMainTitle}
@@ -816,6 +857,7 @@ function TripSearchInner({ tripId }) {
                               <SearchResultItem
                                 key={item.id}
                                 item={item}
+                                aiRecommended={Boolean(item.isAiRecommended)}
                                 selected={selectedForSave.has(String(item.id))}
                                 inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
                                 onToggle={() => toggleItemSelect(item)}
@@ -862,6 +904,7 @@ function TripSearchInner({ tripId }) {
                             <SearchResultItem
                               key={item.id}
                               item={item}
+                              aiRecommended={Boolean(item.isAiRecommended)}
                               selected={selectedForSave.has(String(item.id))}
                               inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
                               onToggle={() => toggleItemSelect(item)}
@@ -876,25 +919,28 @@ function TripSearchInner({ tripId }) {
             </>
           )}
         </section>
+        </div>
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 py-3 md:bottom-0 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto flex max-w-3xl gap-3">
-          <button
-            type="button"
-            onClick={openHomeConfirmModal}
-            className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
-          >
-            {mergeToArchive ? '뒤로가기' : '홈으로'}
-          </button>
-          <button
-            type="button"
-            onClick={openSaveConfirmModal}
-            disabled={selectedForSave.size === 0}
-            className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
-          >
-            {mergeToArchive ? '추가' : '저장'}
-          </button>
+      <div className="fixed bottom-16 left-0 right-0 z-40 bg-transparent py-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))] md:bottom-0">
+        <div className="mx-auto w-full max-w-7xl px-3 md:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-3xl gap-3">
+            <button
+              type="button"
+              onClick={openHomeConfirmModal}
+              className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
+            >
+              {mergeToArchive ? '뒤로가기' : '홈으로'}
+            </button>
+            <button
+              type="button"
+              onClick={openSaveConfirmModal}
+              disabled={selectedForSave.size === 0}
+              className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
+            >
+              {mergeToArchive ? '추가' : '저장'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -986,7 +1032,7 @@ function TripSearchInner({ tripId }) {
   )
 }
 
-function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, className = '' }) {
+function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, aiRecommended = false, className = '' }) {
   const subtitleText = item.description || item.detail || ''
 
   if (inArchiveAlready) {
@@ -1014,7 +1060,16 @@ function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, 
           <div className="min-w-0 flex-1">
             <p className="flex flex-wrap items-center gap-2">
               <span className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</span>
-              <span className="rounded-full bg-amber-200/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+              {aiRecommended ? (
+                <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-800">
+                  AI 추천
+                </span>
+              ) : null}
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                  aiRecommended ? 'bg-violet-200/90 text-violet-950' : 'bg-amber-200/90 text-amber-950'
+                }`}
+              >
                 담김
               </span>
             </p>
@@ -1028,10 +1083,18 @@ function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, 
   }
 
   const btnShell = selected
-    ? 'w-full cursor-pointer rounded-2xl border-2 border-amber-400 bg-amber-200/95 p-4 text-left shadow-sm ring-1 ring-amber-300/70 transition-all duration-200'
-    : 'w-full cursor-pointer rounded-2xl border-2 border-gray-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:bg-gray-50'
+    ? aiRecommended
+      ? 'w-full cursor-pointer rounded-2xl border-2 border-violet-400 bg-violet-100/95 p-4 text-left shadow-sm ring-1 ring-violet-300/70 transition-all duration-200'
+      : 'w-full cursor-pointer rounded-2xl border-2 border-amber-400 bg-amber-200/95 p-4 text-left shadow-sm ring-1 ring-amber-300/70 transition-all duration-200'
+    : aiRecommended
+      ? 'w-full cursor-pointer rounded-2xl border-2 border-violet-100 bg-violet-50/50 p-4 text-left shadow-sm transition-all duration-200 hover:bg-violet-50'
+      : 'w-full cursor-pointer rounded-2xl border-2 border-gray-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:bg-gray-50'
 
-  const checkShell = selected ? 'border-amber-600 bg-amber-600' : 'border-gray-300 bg-white'
+  const checkShell = selected
+    ? aiRecommended
+      ? 'border-violet-600 bg-violet-600'
+      : 'border-amber-600 bg-amber-600'
+    : 'border-gray-300 bg-white'
 
   return (
     <button type="button" onClick={onToggle} aria-pressed={selected} className={`${btnShell} ${className}`.trim()}>
@@ -1053,7 +1116,14 @@ function SearchResultItem({ item, selected, onToggle, inArchiveAlready = false, 
           ) : null}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
+          <p className="flex flex-wrap items-center gap-2 text-[15px] font-extrabold leading-snug text-gray-900">
+            <span>{item.title}</span>
+            {aiRecommended ? (
+              <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-800">
+                AI 추천
+              </span>
+            ) : null}
+          </p>
           {subtitleText ? (
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{subtitleText}</p>
           ) : null}

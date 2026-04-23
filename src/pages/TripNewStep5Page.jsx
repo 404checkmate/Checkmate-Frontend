@@ -193,8 +193,8 @@ export default function TripNewStep5Page() {
     >
       {/* ── 데스크톱: 웹 레퍼런스 — 좌 동행·에디토리얼 / 우 스타일 그리드 ── */}
       <div className="hidden md:flex flex-col min-h-screen">
-        {/* TripNewStep4PageContent와 동일 — 상단 풀폭 행 + 좌측 정렬 이전으로 */}
-        <div className="shrink-0 px-8 pt-8 lg:px-12 lg:pt-10">
+        {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·이전으로·STEP 왼선 일치 */}
+        <div className="shrink-0 mx-auto w-full max-w-7xl px-3 pt-8 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
           <TripNewFlowDesktopPrevBar
             align="start"
             to="/trips/new/step4"
@@ -202,7 +202,7 @@ export default function TripNewStep5Page() {
             ariaLabel="방문 지역 단계로 돌아가기"
           />
         </div>
-        <div className="max-w-[1320px] mx-auto w-full px-12 pb-4 pt-2">
+        <div className="mx-auto w-full max-w-7xl px-3 pb-4 pt-2 md:px-6 lg:px-8">
           <StepHeader
             currentStep={STEP5_CONFIG.currentStep}
             totalSteps={STEP5_CONFIG.totalSteps}
@@ -213,10 +213,10 @@ export default function TripNewStep5Page() {
           />
         </div>
 
-        <div className="max-w-[1320px] mx-auto w-full px-12 pb-16 flex gap-8 flex-1 items-stretch">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 items-stretch gap-8 px-3 pb-16 md:px-6 lg:px-8">
           {/* 좌측 패널: 흰 박스(동행인) + 하단 배너(분리) */}
-          <div className="flex-1 min-w-0 flex flex-col gap-6">
-            <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm min-h-0">
+          <div className="flex-1 min-w-0 flex flex-col gap-0">
+            <div className="min-w-0 shrink-0 min-h-[590px] rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
               <SectionLabel num={1} label="동행인 선택" />
               <p className="text-sm text-gray-500 mb-5">누구와 함께 여행하시나요?</p>
               <div className="flex-1 min-h-0">
@@ -243,6 +243,7 @@ export default function TripNewStep5Page() {
               </div>
             </div>
 
+            {/*
             <div className="relative h-[188px] overflow-hidden rounded-2xl border border-slate-300/40 shadow-md">
               <img
                 src="/airplane-sky.png"
@@ -260,15 +261,18 @@ export default function TripNewStep5Page() {
                 </p>
               </div>
             </div>
+            */}
+            {/* 배너 숨김 상태에서도 우측 컬럼(버튼 영역)과 동일 높이를 유지하기 위한 슬롯 */}
+            <div className="min-h-[188px]" aria-hidden />
           </div>
 
           {/* 우측 패널: 흰 박스(여행 스타일) + 하단 버튼(분리) */}
           <div className="flex-1 min-w-0 flex flex-col gap-6">
-            <div className="flex-1 min-w-0 flex flex-col rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm min-h-0">
+            <div className="min-w-0 shrink-0 min-h-[590px] rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
               <SectionLabel num={2} label="여행 스타일" />
               <p className="text-sm text-gray-500 mb-5">어떤 여행을 계획하고 있나요? (복수 선택 가능)</p>
 
-              <div className="grid w-full flex-1 grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
+              <div className="grid w-full grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
                 {TRAVEL_STYLES.map((s) => (
                   <button
                     key={s.id}
@@ -287,7 +291,7 @@ export default function TripNewStep5Page() {
               </div>
             </div>
 
-            <div className="flex min-h-[188px] flex-col justify-end gap-3">
+            <div className="mt-1 flex flex-col gap-3">
               {submitError ? (
                 <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-950">
                   {submitError}
@@ -369,6 +373,7 @@ export default function TripNewStep5Page() {
             ))}
           </div>
 
+          {/*
           <div className="relative mt-8 overflow-hidden rounded-2xl border border-slate-300/40 shadow-md">
             <img
               src="/airplane-sky.png"
@@ -386,6 +391,7 @@ export default function TripNewStep5Page() {
               </p>
             </div>
           </div>
+          */}
         </div>
 
         <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col gap-2 bg-transparent px-5 pb-3 pt-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">

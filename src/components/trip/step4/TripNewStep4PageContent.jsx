@@ -143,7 +143,8 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
   return (
     <div className="min-h-screen" style={TRIP_FLOW_PAGE_BG_STYLE}>
       <div className="hidden min-h-screen flex-col md:flex">
-        <div className="shrink-0 px-8 pt-8 lg:px-12 lg:pt-10">
+        {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·이전으로 왼선 일치 */}
+        <div className="shrink-0 mx-auto w-full max-w-7xl px-3 pt-8 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
           <TripNewFlowDesktopPrevBar
             align="start"
             to="/trips/new/destination"
@@ -151,7 +152,7 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
             ariaLabel="목적지·날짜 선택으로 돌아가기"
           />
         </div>
-        <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-8 lg:px-12 lg:py-10">
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 items-center justify-center px-3 py-8 md:px-6 md:py-8 lg:px-8 lg:py-10">
           <div className="scrollbar-hide w-full max-w-xl overflow-y-auto">
             <StepHeader
               currentStep={STEP4_CONFIG.currentStep}

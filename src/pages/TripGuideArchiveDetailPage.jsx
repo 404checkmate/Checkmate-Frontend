@@ -59,7 +59,8 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
 
   return (
     <div className="min-h-screen" style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}>
-      <div className="mx-auto flex max-w-6xl items-center px-4 pt-4 md:pt-8">
+      {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·뒤로가기 왼선 일치 */}
+      <div className="mx-auto flex w-full max-w-7xl items-center px-3 pt-4 md:px-6 md:pt-8 lg:px-8">
         <button
           type="button"
           onClick={() => navigate(`/trips/${tripId}/guide-archive`)}

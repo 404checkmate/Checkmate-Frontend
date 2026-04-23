@@ -6,8 +6,7 @@ import processCardSaveUrl from '@/assets/home-process-card-save.png'
 import processCardOpenUrl from '@/assets/home-process-card-open.png'
 import processCardCheckUrl from '@/assets/home-process-card-check.png'
 import ctaSceneUrl from '@/assets/home-cta-scene.png'
-import ctaWordMateUrl from '@/assets/home-cta-word-mate.png'
-import ctaWordCheckUrl from '@/assets/home-cta-word-check.png'
+import ctaTitleCombinedUrl from '@/assets/home-cta-title-combined.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import { useRevealOnScrollOnce } from '@/hooks/useRevealOnScrollOnce'
 import {
@@ -73,7 +72,7 @@ const HOME_QUICK_FLOW_CARDS = [
       <>
         필요한 준비 항목을 찾아
         <br />
-        <span className="text-amber-500">저장</span>합니다
+        <span className="text-sky-500">저장</span>합니다
       </>
     ),
   },
@@ -93,10 +92,10 @@ const HOME_QUICK_FLOW_CARDS = [
         <span className="md:hidden">
           필요한 항목을
           <br />
-          <span className="text-amber-500">추가, 수정</span>합니다
+          <span className="text-sky-500">추가, 수정</span>합니다
         </span>
         <span className="hidden md:inline">
-          필요한 항목을 <span className="text-amber-500">추가, 수정</span>합니다
+          필요한 항목을 <span className="text-sky-500">추가, 수정</span>합니다
         </span>
       </>
     ),
@@ -108,7 +107,7 @@ const HOME_QUICK_FLOW_CARDS = [
     topLine: '체크리스트에서',
     bottomLine: (
       <>
-        하나씩 준비하면서 <span className="text-amber-500">체크</span>하며
+        하나씩 준비하면서 <span className="text-sky-500">체크</span>하며
         <br />
         출발 전까지 마무리합니다
       </>
@@ -480,12 +479,14 @@ function HomePage() {
               <span className="md:hidden">
                 복잡한 단계 없이
                 <br />
-                <span className="text-amber-500">저장</span> -&gt; <span className="text-amber-500">확인</span>{' '}
-                -&gt; <span className="text-amber-500">체크</span>만 기억하세요!
+                <span className="text-amber-500">저장</span> <span className="text-amber-500">-&gt;</span>{' '}
+                <span className="text-amber-500">확인</span> <span className="text-amber-500">-&gt;</span>{' '}
+                <span className="text-amber-500">체크</span>만 기억하세요!
               </span>
               <span className="hidden md:inline">
-                복잡한 단계 없이 <span className="text-amber-500">저장</span> -&gt;{' '}
-                <span className="text-amber-500">확인</span> -&gt; <span className="text-amber-500">체크</span>만
+                복잡한 단계 없이 <span className="text-amber-500">저장</span>{' '}
+                <span className="text-amber-500">-&gt;</span> <span className="text-amber-500">확인</span>{' '}
+                <span className="text-amber-500">-&gt;</span> <span className="text-amber-500">체크</span>만
                 기억하세요!
               </span>
             </p>
@@ -524,22 +525,33 @@ function HomePage() {
         <div ref={ctaRef} className="w-full">
           <div className="relative w-full overflow-hidden bg-transparent pb-0 pt-6 md:pt-8">
             <RevealBlock show={ctaRevealed} className="relative z-20 -mt-4 mx-auto w-fit px-4 text-center md:-mt-8 md:px-0 md:text-center">
-              <p
-                className="text-[2rem] font-extrabold leading-[1.14] text-[#083a4a] md:text-[3.75rem]"
-                style={{ fontFamily: "'SeoulNotice', system-ui, sans-serif" }}
-              >
-                이제 <img src={ctaWordMateUrl} alt="MATE" className="mx-1 inline-block h-[0.9em] w-auto align-[-0.08em] md:mx-2" />
-                와 함께
-                <br />
-                <img src={ctaWordCheckUrl} alt="CHECK" className="mr-1 inline-block h-[0.9em] w-auto align-[-0.08em] md:mr-2" />
-                하러 가볼까요?
-              </p>
+              <img
+                src={ctaTitleCombinedUrl}
+                alt="이제 MATE와 함께 CHECK 하러 가볼까요?"
+                className="mx-auto block h-auto w-full max-w-[336px] object-contain md:max-w-[432px] lg:max-w-[492px]"
+                loading="lazy"
+                decoding="async"
+              />
             </RevealBlock>
 
             <RevealBlock
               show={ctaRevealed}
+              delayClass="delay-[320ms]"
+              className="relative z-20 mt-0.5 mb-2 flex justify-center px-4 md:mt-1 md:mb-3"
+            >
+              <button
+                type="button"
+                onClick={() => navigate('/trips/new/destination')}
+                className="inline-flex items-center gap-1.5 rounded-full border border-teal-200/90 bg-white/85 px-4 py-2 text-sm font-extrabold text-[#0d4b5b] shadow-sm shadow-teal-900/5 backdrop-blur-[1px] transition-all hover:-translate-y-[1px] hover:bg-teal-50/95 hover:text-[#083a4a] hover:shadow-md md:px-5 md:py-2.5 md:text-base"
+              >
+                여행 준비 시작하기
+                <span aria-hidden className="text-[0.95em] leading-none text-amber-500">→</span>
+              </button>
+            </RevealBlock>
+            <RevealBlock
+              show={ctaRevealed}
               delayClass="delay-[200ms]"
-              className="relative mt-5 flex justify-center md:mt-8"
+              className="relative mt-3 flex justify-center md:mt-5"
             >
               <img
                 src={ctaSceneUrl}
