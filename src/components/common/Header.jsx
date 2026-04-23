@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
 import { clearClientSessionForLogout, isMockWebSessionLoggedIn } from '@/utils/onboardingGate'
@@ -37,11 +38,14 @@ function Header() {
       else closeMobileMenu()
     }
     document.addEventListener('keydown', onKeyDown)
-    const prev = document.body.style.overflow
+    const prevBodyOverflow = document.body.style.overflow
+    const prevHtmlOverflow = document.documentElement.style.overflow
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = prev
+      document.body.style.overflow = prevBodyOverflow
+      document.documentElement.style.overflow = prevHtmlOverflow
     }
   }, [mobileMenuOpen, logoutConfirmOpen, closeMobileMenu])
 
@@ -64,6 +68,46 @@ function Header() {
   /** 데스크톱 전용 분기 — 백엔드 연동 시 isMockWebSessionLoggedIn 대신 세션 훅으로 교체 */
   const isWebLoggedIn = isMockWebSessionLoggedIn()
   const { pathname } = location
+  const logoutConfirmModal =
+    logoutConfirmOpen && typeof document !== 'undefined'
+      ? createPortal(
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="로그아웃 확인 닫기"
+              onClick={() => setLogoutConfirmOpen(false)}
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={logoutDialogTitleId}
+              className="relative z-[1] w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-5 py-5 shadow-xl"
+            >
+              <p id={logoutDialogTitleId} className="text-center text-base font-semibold text-gray-900">
+                로그아웃하시겠습니까?
+              </p>
+              <div className="mt-6 flex gap-2">
+                <button
+                  type="button"
+                  className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                  onClick={() => setLogoutConfirmOpen(false)}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+                  onClick={handleConfirmLogout}
+                >
+                  로그아웃
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null
 
   return (
     <header className="relative w-full border-b border-gray-100 bg-white pt-[env(safe-area-inset-top,0px)]">
@@ -217,42 +261,7 @@ function Header() {
         </div>
       </div>
 
-      {logoutConfirmOpen ? (
-        <div className="fixed inset-0 z-[80]">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            aria-label="로그아웃 확인 닫기"
-            onClick={() => setLogoutConfirmOpen(false)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={logoutDialogTitleId}
-            className="absolute left-1/2 top-1/2 w-[min(calc(100vw-2rem),20rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-gray-100 bg-white px-5 py-5 shadow-xl"
-          >
-            <p id={logoutDialogTitleId} className="text-center text-base font-semibold text-gray-900">
-              로그아웃하시겠습니까?
-            </p>
-            <div className="mt-6 flex gap-2">
-              <button
-                type="button"
-                className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-                onClick={() => setLogoutConfirmOpen(false)}
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
-                onClick={handleConfirmLogout}
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {logoutConfirmModal}
     </header>
   )
 }
