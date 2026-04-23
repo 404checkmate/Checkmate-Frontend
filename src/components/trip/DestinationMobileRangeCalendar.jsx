@@ -444,10 +444,7 @@ export default function DestinationMobileRangeCalendar({
   useEffect(() => {
     if (!startDate) {
       setViewMonthKey(minMonthKey)
-      return
     }
-    const s = parseYmd(startDate)
-    if (s) setViewMonthKey(monthKey(s.getFullYear(), s.getMonth()))
   }, [startDate, minMonthKey])
 
   /** 오늘(minDate)이 바뀌면(자정 등) 과거 달 화면에 머물지 않도록 */
