@@ -9,6 +9,7 @@ import ctaMascotLuggageUrl from '@/assets/home-cta-mascot-luggage.png'
 import ctaFlagPawnUrl from '@/assets/home-cta-flag-pawn.png'
 import ctaWordMateUrl from '@/assets/home-cta-word-mate.png'
 import ctaWordCheckUrl from '@/assets/home-cta-word-check.png'
+import ctaFloorCheckerboardUrl from '@/assets/home-cta-floor-checkerboard.png'
 import BrandLogo from '@/components/common/BrandLogo'
 import { useRevealOnScrollOnce } from '@/hooks/useRevealOnScrollOnce'
 import {
@@ -543,22 +544,18 @@ function HomePage() {
               className="relative mt-5 h-[220px] md:mt-8 md:h-[360px]"
             >
               <div
-                className="pointer-events-none absolute bottom-8 left-1/2 h-[118px] w-full -translate-x-1/2 md:bottom-12 md:h-[182px]"
-                style={{
-                  clipPath: 'polygon(35% 38%, 65% 38%, 100% 100%, 0 100%)',
-                  backgroundColor: '#69dcff',
-                  backgroundImage: `
-                    linear-gradient(180deg, rgba(255,255,255,0.97) 0% 22%, transparent 22% 42%, rgba(255,255,255,0.97) 42% 64%, transparent 64% 82%, rgba(255,255,255,0.97) 82% 100%),
-                    repeating-conic-gradient(from 89deg at 58% 35%, rgba(255,255,255,0.97) 0deg 4.9deg, transparent 4.9deg 9.8deg),
-                    linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.06) 35%, rgba(255,255,255,0) 60%)
-                  `,
-                  backgroundSize: '100% 100%, 100% 100%, 100% 100%',
-                  backgroundPosition: '0 0, 0 0, 0 0',
-                  backgroundRepeat: 'no-repeat',
-                  boxShadow: 'inset 0 9px 12px rgba(8,58,74,0.1)',
-                }}
+                className="pointer-events-none absolute bottom-8 left-1/2 h-[118px] w-full -translate-x-1/2 overflow-hidden md:bottom-12 md:h-[182px]"
+                style={{ clipPath: 'polygon(35% 38%, 65% 38%, 100% 100%, 0 100%)' }}
                 aria-hidden
-              />
+              >
+                <img
+                  src={ctaFloorCheckerboardUrl}
+                  alt=""
+                  className="h-full w-full object-contain object-bottom object-center"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
               <img
                 src={ctaMascotLuggageUrl}
                 alt="여행 가방을 든 메이트 캐릭터"
