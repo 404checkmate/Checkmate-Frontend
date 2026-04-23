@@ -1,0 +1,114 @@
+# Required GitHub Secrets
+# ─────────────────────────────────────────────────────────────────────────────
+# EC2_HOST             EC2 Public DNS 또는 Elastic IP
+#                      예) ec2-13-xx.ap-northeast-2.compute.amazonaws.com
+#
+# EC2_USER             SSH 사용자명 (보통 ubuntu)
+#
+# EC2_SSH_KEY          배포용 PEM 프라이빗 키 전체 내용
+#                      -----BEGIN OPENSSH PRIVATE KEY-----
+#                      ...
+#                      -----END OPENSSH PRIVATE KEY-----
+#
+# PROD_DOMAIN          헬스체크용 도메인 (프로토콜 제외)
+#                      예) checkmate.example.com
+#
+# VITE_API_BASE_URL    프론트 빌드 시 주입. 같은 도메인이면 /api,
+#                      분리 도메인이면 https://api.checkmate.example.com/api
+#
+# VITE_SUPABASE_URL    Supabase 프로젝트 URL
+#                      예) https://xxxxxxxxxxxx.supabase.co
+#
+# VITE_SUPABASE_ANON_KEY
+#                      Supabase anon 공개 키 (sb_publishable_...)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Deploy Frontend to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend-prod
+  cancel-in-progress: false
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # 1. 빌드
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (vite build → dist/)
+        run: npm run build
+        env:
+          VITE_API_BASE_URL:      ${{ secrets.VITE_API_BASE_URL }}
+          VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 2. EC2 배포
+  # deploy.sh 는 백엔드 워크플로우가 EC2에 동기화한 것을 재사용.
+  # 백엔드가 최소 1회 배포된 이후부터 독립 실행 가능.
+  # ──────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: _deploy/frontend
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync frontend artifact
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            _deploy/frontend/ \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/checkmate/_incoming/frontend/
+
+      - name: Run deploy script on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            "bash /home/${{ secrets.EC2_USER }}/checkmate/scripts/deploy.sh --frontend=true"
+
+      - name: Health check
+        run: |
+          echo "Waiting for server to be ready..."
+          sleep 5
+          curl --fail --silent --max-time 15 \
+            "https://${{ secrets.PROD_DOMAIN }}/" \
+            && echo "Health check passed" \
+            || (echo "Health check failed" && exit 1)
