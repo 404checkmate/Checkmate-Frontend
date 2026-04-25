@@ -1,12 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback, useRef } from 'react'
-import { useParams, useLocation, Link, useSearchParams } from 'react-router-dom'
+import { useParams, useLocation, Link } from 'react-router-dom'
 import { loadGuideArchive, removeGuideArchiveEntriesByIds } from '@/utils/guideArchiveStorage'
 import { loadSavedItems } from '@/utils/savedTripItems'
-import {
-  hasGuideArchiveDesignDemos,
-  seedGuideArchiveDesignDemos,
-  toggleGuideArchiveDesignDemos,
-} from '@/mocks/guideArchiveDesignDemos'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
 import { loadEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
@@ -92,13 +87,8 @@ const GA_FILTER_SHEET_CLOSE_FALLBACK_MS = 480
 /** 열림 키프레임 `animationend` 미발생 시 `filterEnterAnimActive` 해제 */
 const GA_FILTER_SHEET_OPEN_FALLBACK_MS = 450
 
-function isDemoDesignEntry(entry) {
-  return String(entry.id).startsWith('demo-design-')
-}
-
 function TripGuideArchiveInner({ tripId }) {
   const location = useLocation()
-  const [searchParams, setSearchParams] = useSearchParams()
   const [entries, setEntries] = useState(() => loadGuideArchive(tripId))
   const [savedItems, setSavedItems] = useState(() => loadSavedItems(tripId))
   /** 기본: 시작 전. 같은 탭 재클릭으로 선택 해제되지 않음. */
@@ -195,25 +185,6 @@ function TripGuideArchiveInner({ tripId }) {
   useEffect(() => {
     refreshFromStorage()
   }, [tripId, location.key, refreshFromStorage])
-
-  /** URL: ?demo=1 로 접속 시 예시 자동 삽입(이미 예시만 있으면 갱신하지 않음) */
-  useEffect(() => {
-    if (searchParams.get('demo') !== '1') return
-    if (!hasGuideArchiveDesignDemos(tripId)) {
-      seedGuideArchiveDesignDemos(tripId)
-    }
-    refreshFromStorage()
-    const next = new URLSearchParams(searchParams)
-    next.delete('demo')
-    setSearchParams(next, { replace: true })
-  }, [tripId, searchParams, setSearchParams, refreshFromStorage])
-
-  const demosActive = entries.some((e) => String(e.id).startsWith('demo-design-'))
-
-  const handleToggleDesignDemos = () => {
-    toggleGuideArchiveDesignDemos(tripId)
-    refreshFromStorage()
-  }
 
   const entriesWithMeta = useMemo(() => {
     return entries.map((entry) => {
@@ -351,17 +322,6 @@ function TripGuideArchiveInner({ tripId }) {
         </Link>
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-900/90">MY COLLECTIONS</p>
         <h1 className="mt-2 text-2xl font-extrabold leading-tight text-[#0a3d3d]">나의 체크리스트</h1>
-        <button
-          type="button"
-          onClick={handleToggleDesignDemos}
-          className={`mt-3 w-full rounded-xl border py-2.5 text-xs font-bold shadow-sm transition-colors ${
-            demosActive
-              ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-              : 'border-teal-200 bg-teal-50 text-teal-900 hover:bg-teal-100'
-          }`}
-        >
-          {demosActive ? '예시 닫기 (원래 목록)' : '예시 불러오기 (0% · 50% · 100%)'}
-        </button>
       </div>
 
       {/* ——— 웹: 헤더 ——— */}
@@ -374,19 +334,7 @@ function TripGuideArchiveInner({ tripId }) {
               계획 중인 모험과 소중한 추억이 담긴 모든 체크리스트를 한곳에서 관리하세요.
             </p>
           </div>
-          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={handleToggleDesignDemos}
-              className={`rounded-xl border px-4 py-2.5 text-sm font-bold shadow-sm transition-colors ${
-                demosActive
-                  ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                  : 'border-teal-200 bg-teal-50 text-teal-900 hover:bg-teal-100'
-              }`}
-            >
-              {demosActive ? '예시 닫기 (원래 목록)' : '예시 불러오기 (0% · 50% · 100%)'}
-            </button>
-          </div>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center" />
         </div>
       </div>
 
@@ -583,7 +531,6 @@ function TripGuideArchiveInner({ tripId }) {
             {filtered.map(({ entry, progress, statusLabel }, index) => {
               const title = buildGuideArchiveListTitle(entry)
               const dateLine = buildGuideArchiveDateLine(entry)
-              const isDemo = isDemoDesignEntry(entry)
               const isSelected = selectedEntryIds.includes(String(entry.id))
               const mobileTint = index % 2 === 0 ? 'bg-sky-100/90' : 'bg-emerald-50/95'
               const badgeClass =
@@ -595,23 +542,12 @@ function TripGuideArchiveInner({ tripId }) {
 
               const shellClass = `block w-full overflow-hidden md:rounded-xl md:border md:border-slate-100 md:bg-white md:p-0 md:shadow-sm ${mobileTint} rounded-3xl md:bg-white ${
                 deleteMode && isSelected ? 'ring-2 ring-teal-500 ring-offset-2' : ''
-              } ${
-                isDemo
-                  ? deleteMode
-                    ? 'cursor-pointer'
-                    : 'cursor-default'
-                  : deleteMode
-                    ? 'cursor-pointer'
-                    : 'transition-shadow md:hover:border-sky-200 md:hover:shadow-md'
-              }`
+              } ${deleteMode ? 'cursor-pointer' : 'transition-shadow md:hover:border-sky-200 md:hover:shadow-md'}`
 
               const cardInner = (
                 <>
                   {/* 모바일 카드 */}
                   <div className="p-5 text-[#0a3d3d] md:hidden">
-                    {isDemo ? (
-                      <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">UI 예시 · 클릭 불가</p>
-                    ) : null}
                     <p className="text-lg font-bold leading-snug">{title}</p>
                     <div className="mt-3 flex items-start gap-2 text-sm font-medium text-teal-900/75">
                       <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0 opacity-80" />
@@ -629,9 +565,6 @@ function TripGuideArchiveInner({ tripId }) {
                   {/* 웹 카드 */}
                   <div className="hidden gap-6 px-6 py-5 md:flex md:items-center">
                     <div className="min-w-0 flex-1">
-                      {isDemo ? (
-                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">UI 예시 · 클릭 불가</p>
-                      ) : null}
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="truncate text-lg font-extrabold text-slate-900">{title}</p>
                         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${badgeClass}`}>{statusLabel}</span>
@@ -647,7 +580,7 @@ function TripGuideArchiveInner({ tripId }) {
                       <GuideArchiveProgressBar value={progress} />
                     </div>
 
-                    {!isDemo && !deleteMode ? (
+                    {!deleteMode ? (
                       <div className="flex shrink-0 text-slate-400 transition-colors group-hover:text-sky-600">
                         <ChevronRightIcon />
                       </div>
@@ -659,11 +592,7 @@ function TripGuideArchiveInner({ tripId }) {
               )
 
               const cardBlock =
-                isDemo && !deleteMode ? (
-                  <div className={shellClass} role="note" aria-label="UI 예시 카드입니다. 상세 화면으로 이동하지 않습니다.">
-                    {cardInner}
-                  </div>
-                ) : deleteMode ? (
+                deleteMode ? (
                   <div
                     role="button"
                     tabIndex={0}
