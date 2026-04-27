@@ -50,21 +50,12 @@ import {
 } from '@/utils/guideArchiveChecklistReorder'
 import GuideArchiveSectionDndList from '@/components/guide/GuideArchiveSectionDndList'
 import { GuideArchiveChecklistDragPreview } from '@/components/guide/GuideArchiveSortableChecklistItem'
-
-/** 카테고리별 선택 — 1차: 준비물 유형 vs 수하물 유형(보기 기준) */
-const VIEW_BASIS_SUPPLIES = 'supplies'
-const VIEW_BASIS_BAGGAGE = 'baggage'
-
-const GUIDE_VIEW_BASIS_OPTIONS = [
-  { value: VIEW_BASIS_SUPPLIES, label: '준비물 유형' },
-  { value: VIEW_BASIS_BAGGAGE, label: '수하물 유형' },
-]
-
-const GUIDE_BAGGAGE_TYPE_TABS = [
-  { value: 'all', label: '전체' },
-  { value: BAGGAGE_CARRY_ON, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CARRY_ON] },
-  { value: BAGGAGE_CHECKED, label: BAGGAGE_SECTION_LABEL[BAGGAGE_CHECKED] },
-]
+import GuideChecklistCategoryFilter, {
+  VIEW_BASIS_SUPPLIES,
+  VIEW_BASIS_BAGGAGE,
+} from '@/components/guide/GuideChecklistCategoryFilter'
+import GuideChecklistSectionEditModal from '@/components/guide/GuideChecklistSectionEditModal'
+import GuideChecklistDirectAddModal from '@/components/guide/GuideChecklistDirectAddModal'
 const GUIDE_SUPPLIES_SUBSECTION_ORDER = [
   'essentials',
   'clothing',
@@ -92,9 +83,6 @@ const GUIDE_SUPPLIES_ID_PREFIX_TO_SUBSECTION = {
   ele: 'electronics',
   act: 'travel_goods',
 }
-
-/** 가이드 보관함 항목 유형 탭 — 탐색의 `CATEGORIES` 중 AI 전용 탭 제외(AI 추천은 백엔드에서 일반 카테고리로 귀속). */
-const GUIDE_ARCHIVE_SUPPLIES_CATEGORY_TABS = CATEGORIES.filter((c) => c.value !== 'ai_recommend')
 
 function filterGroupedByItemCategory(grouped, filterItemCategory) {
   if (filterItemCategory === 'all') return grouped
@@ -1025,97 +1013,14 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
         <GuideArchiveProgressBar value={progress} />
       </div>
 
-      <section
-        className="mb-8 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] md:p-5"
-        aria-label="카테고리 필터"
-      >
-        <h2 className="mb-3.5 text-lg font-extrabold tracking-tight text-gray-900">카테고리별 선택</h2>
-
-        <p id="guide-checklist-view-basis-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-          보기 기준
-        </p>
-        <div
-          className="mb-5 inline-flex w-auto max-w-full rounded-2xl border-2 border-slate-200/90 bg-slate-100/80 p-1 shadow-inner"
-          role="tablist"
-          aria-label="보기 기준"
-          aria-labelledby="guide-checklist-view-basis-label"
-        >
-          {GUIDE_VIEW_BASIS_OPTIONS.map((opt) => {
-            const selected = viewBasis === opt.value
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => setViewBasisAndReset(opt.value)}
-                className={`min-h-9 min-w-[92px] rounded-lg px-2 py-1.5 text-center text-xs font-bold transition-all ${
-                  selected
-                    ? 'bg-white text-teal-900 shadow-sm ring-1 ring-slate-200/80'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                {opt.label}
-              </button>
-            )
-          })}
-        </div>
-
-        <p id="guide-checklist-subcategory-label" className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-          {viewBasis === VIEW_BASIS_SUPPLIES ? '항목 유형' : '수하물 구간'}
-        </p>
-        {viewBasis === VIEW_BASIS_SUPPLIES ? (
-          <div
-            className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            role="tablist"
-            aria-labelledby="guide-checklist-subcategory-label"
-          >
-            {GUIDE_ARCHIVE_SUPPLIES_CATEGORY_TABS.map((cat) => {
-              const selected = suppliesCategory === cat.value
-              const tabClass = selected
-                ? 'border-2 border-sky-600 bg-sky-600 text-white shadow-md shadow-sky-900/15'
-                : 'border-2 border-sky-100 bg-slate-50/80 text-slate-600 shadow-sm hover:border-sky-200 hover:bg-sky-50'
-              return (
-                <button
-                  key={cat.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => setSuppliesCategory(cat.value)}
-                  className={`inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors ${tabClass}`}
-                >
-                  {cat.label}
-                </button>
-              )
-            })}
-          </div>
-        ) : (
-          <div
-            className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
-            role="tablist"
-            aria-labelledby="guide-checklist-subcategory-label"
-          >
-            {GUIDE_BAGGAGE_TYPE_TABS.map((tab) => {
-              const selected = baggageSection === tab.value
-              const tabClass = selected
-                ? 'border-2 border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-900/15'
-                : 'border-2 border-teal-100 bg-teal-50/80 text-teal-900 shadow-sm hover:border-teal-300 hover:bg-teal-100/80'
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => setBaggageSection(tab.value)}
-                  className={`inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors ${tabClass}`}
-                >
-                  {tab.label}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </section>
+      <GuideChecklistCategoryFilter
+        viewBasis={viewBasis}
+        onViewBasisChange={setViewBasisAndReset}
+        suppliesCategory={suppliesCategory}
+        onSuppliesCategoryChange={setSuppliesCategory}
+        baggageSection={baggageSection}
+        onBaggageSectionChange={setBaggageSection}
+      />
 
       <div className="mb-4 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
         <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
@@ -1389,190 +1294,22 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       </DndContext>
       </div>
 
-      {sectionEditModalOpen && sectionEditDraft ? (
-        <div
-          className="fixed inset-0 z-[110] flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
-          role="presentation"
-          onClick={cancelSectionEditor}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="guide-archive-section-edit-title"
-            className="max-h-[min(90dvh,720px)] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:max-h-[85vh] sm:rounded-2xl sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              id="guide-archive-section-edit-title"
-              className="mb-4 text-lg font-extrabold text-[#0a3d3d]"
-            >
-              {sectionEditDraft.rows.length === 1 ? '항목 수정' : '섹션 수정'}
-            </h2>
-            <div className="mb-4">
-              <p id="guide-archive-section-name-label" className="mb-1 text-xs font-bold text-gray-600">
-                {sectionEditDraft.rows.length === 1 ? '항목 유형(카테고리)' : '섹션 이름'}
-              </p>
-              <p
-                aria-labelledby="guide-archive-section-name-label"
-                className="rounded-xl border border-gray-100 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-gray-900"
-              >
-                {sectionEditDraft.categoryLabel || '—'}
-              </p>
-            </div>
-            <div className="space-y-4">
-              {sectionEditDraft.rows.map((row, rowIdx) => (
-                <div
-                  key={String(row.id)}
-                  className="rounded-xl border border-gray-100 bg-slate-50/80 p-3 shadow-sm"
-                >
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
-                    항목 {rowIdx + 1}
-                  </p>
-                  <label className="mb-2 block">
-                    <span className="mb-0.5 block text-xs font-semibold text-gray-600">제목</span>
-                    <input
-                      type="text"
-                      value={row.title}
-                      onChange={(e) =>
-                        setSectionEditDraft((d) => {
-                          if (!d) return d
-                          const rows = d.rows.map((r, i) =>
-                            i === rowIdx ? { ...r, title: e.target.value } : r,
-                          )
-                          return { ...d, rows }
-                        })
-                      }
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                    />
-                  </label>
-                  <label className="mb-2 block">
-                    <span className="mb-0.5 block text-xs font-semibold text-gray-600">설명</span>
-                    <textarea
-                      value={row.description}
-                      onChange={(e) =>
-                        setSectionEditDraft((d) => {
-                          if (!d) return d
-                          const rows = d.rows.map((r, i) =>
-                            i === rowIdx ? { ...r, description: e.target.value } : r,
-                          )
-                          return { ...d, rows }
-                        })
-                      }
-                      rows={2}
-                      className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-0.5 block text-xs font-semibold text-gray-600">추가 메모</span>
-                    <textarea
-                      value={row.detail}
-                      onChange={(e) =>
-                        setSectionEditDraft((d) => {
-                          if (!d) return d
-                          const rows = d.rows.map((r, i) =>
-                            i === rowIdx ? { ...r, detail: e.target.value } : r,
-                          )
-                          return { ...d, rows }
-                        })
-                      }
-                      rows={2}
-                      className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                    />
-                  </label>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={saveSectionEdit}
-                className="min-h-12 rounded-xl bg-sky-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-sky-700 sm:min-h-0 sm:px-5"
-              >
-                {sectionEditDraft.rows.length === 1 ? '저장' : '이 섹션 저장'}
-              </button>
-              <button
-                type="button"
-                onClick={cancelSectionEditor}
-                className="min-h-12 rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50 sm:min-h-0 sm:px-5"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <GuideChecklistSectionEditModal
+        open={sectionEditModalOpen}
+        draft={sectionEditDraft}
+        onDraftChange={setSectionEditDraft}
+        onSave={saveSectionEdit}
+        onClose={cancelSectionEditor}
+      />
 
-      {directAddModalOpen ? (
-        <div
-          className="fixed inset-0 z-[110] flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
-          role="presentation"
-          onClick={cancelDirectAdd}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="guide-archive-direct-add-title"
-            className="max-h-[min(90dvh,640px)] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:max-h-[85vh] sm:rounded-2xl sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              id="guide-archive-direct-add-title"
-              className="mb-4 text-lg font-extrabold text-[#0a3d3d]"
-            >
-              직접 추가
-            </h2>
-            <p className="mb-4 text-sm text-gray-600">
-              제목은 필수입니다. 항목은 <strong className="font-semibold text-gray-800">기내 반입</strong>으로
-              저장되며, 체크리스트 본문 맨 아래 「{GUIDE_USER_DIRECT_SECTION_LABEL}」 블록(구역 제목과 같은 스타일)에
-              붙습니다.
-            </p>
-            <label className="mb-3 block">
-              <span className="mb-1 block text-xs font-semibold text-gray-600">제목 (필수)</span>
-              <input
-                type="text"
-                value={directAddDraft.title}
-                onChange={(e) => setDirectAddDraft((d) => ({ ...d, title: e.target.value }))}
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                placeholder="예: 보조배터리"
-              />
-            </label>
-            <label className="mb-3 block">
-              <span className="mb-1 block text-xs font-semibold text-gray-600">설명</span>
-              <textarea
-                value={directAddDraft.description}
-                onChange={(e) => setDirectAddDraft((d) => ({ ...d, description: e.target.value }))}
-                rows={2}
-                className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-              />
-            </label>
-            <label className="mb-6 block">
-              <span className="mb-1 block text-xs font-semibold text-gray-600">추가 메모</span>
-              <textarea
-                value={directAddDraft.detail}
-                onChange={(e) => setDirectAddDraft((d) => ({ ...d, detail: e.target.value }))}
-                rows={2}
-                className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-              />
-            </label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={submitDirectAdd}
-                className="min-h-12 rounded-xl bg-teal-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-teal-700 sm:min-h-0 sm:px-5"
-              >
-                추가
-              </button>
-              <button
-                type="button"
-                onClick={cancelDirectAdd}
-                className="min-h-12 rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50 sm:min-h-0 sm:px-5"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <GuideChecklistDirectAddModal
+        open={directAddModalOpen}
+        draft={directAddDraft}
+        onDraftChange={setDirectAddDraft}
+        onSubmit={submitDirectAdd}
+        onClose={cancelDirectAdd}
+        sectionLabel={GUIDE_USER_DIRECT_SECTION_LABEL}
+      />
 
       {bottomBar}
     </>
