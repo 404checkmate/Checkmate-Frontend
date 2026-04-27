@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import {
   STEP5_CONFIG,
   STEP5_ICON_PATHS,
@@ -77,7 +77,7 @@ function SectionLabel({ num, label }) {
   )
 }
 
-export default function TripNewStep5Page() {
+function TripNewStep5PageContent() {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -435,4 +435,12 @@ export default function TripNewStep5Page() {
       </div>
     </div>
   )
+}
+
+export default function TripNewStep5Page() {
+  const location = useLocation()
+  if (!location.state?.step4) {
+    return <Navigate to="/trips/new/destination" replace />
+  }
+  return <TripNewStep5PageContent />
 }

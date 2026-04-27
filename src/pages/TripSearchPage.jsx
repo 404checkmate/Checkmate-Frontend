@@ -10,7 +10,7 @@ import {
 import { adaptGeneratedChecklist, getTabCategories } from '@/utils/checklistAdapter'
 import { saveItemsForTrip, loadSavedItems } from '@/utils/savedTripItems'
 import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
-import { appendGuideArchiveEntry, getGuideArchiveEntry, patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
+import { appendGuideArchiveEntry, getGuideArchiveEntry, loadGuideArchive, patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
@@ -493,6 +493,22 @@ function TripSearchInner({ tripId }) {
       return
     }
 
+    // 완전히 동일한 항목 조합의 archive entry가 이미 존재하면 중복 생성 차단
+    const selectedIdSet = new Set(itemsToSave.map((i) => String(i.id)))
+    const isDuplicateEntry = loadGuideArchive(tripId).some((archive) => {
+      const archiveIds = new Set((archive.items ?? []).map((i) => String(i.id)))
+      return (
+        archiveIds.size === selectedIdSet.size &&
+        [...selectedIdSet].every((id) => archiveIds.has(id))
+      )
+    })
+
+    if (isDuplicateEntry) {
+      closeSaveConfirmModal()
+      navigate(`/trips/${tripId}/guide-archive`)
+      return
+    }
+
     // 서버 측 is_selected 플래그도 병행 갱신 (fire-and-forget, localStorage 가 진실값).
     markItemsSelectedOnServer(itemsToSave)
 
@@ -885,6 +901,7 @@ function TripSearchInner({ tripId }) {
                                   aiRecommended={Boolean(item.isAiRecommended)}
                                   selected={selectedForSave.has(String(item.id))}
                                   inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+
                                   onToggle={() => toggleItemSelect(item)}
                                 />
                               ))}
