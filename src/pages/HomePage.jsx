@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import homeHeroMascotUrl from '@/assets/home-hero-mascot-camera.png'
 import featureMascotQuestionUrl from '@/assets/home-feature-mascot-question.png'
@@ -118,7 +118,7 @@ const HOME_QUICK_FLOW_CARDS = [
 /** 홈 푸터 전용: 클릭·포커스는 되지만 라우팅 등 동작 없음 */
 function noopFooterAction() {}
 
-function LegalFooterLinks({ className = '', nonInteractive = false }) {
+function LegalFooterLinks({ className = '', nonInteractive = false, onPlaceholderAction }) {
   if (nonInteractive) {
     return (
       <nav className={className} aria-label="법적 안내">
@@ -127,7 +127,7 @@ function LegalFooterLinks({ className = '', nonInteractive = false }) {
             {idx > 0 && <span className="text-gray-200 select-none" aria-hidden>|</span>}
             <button
               type="button"
-              onClick={noopFooterAction}
+              onClick={onPlaceholderAction ?? noopFooterAction}
               className="cursor-pointer border-0 bg-transparent p-0 text-inherit text-gray-500 underline-offset-2 transition-colors hover:text-gray-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
             >
               {link.label}
@@ -142,7 +142,14 @@ function LegalFooterLinks({ className = '', nonInteractive = false }) {
       {FOOTER_BOTTOM_LINKS.map((link, idx) => (
         <span key={link.label} className="inline-flex items-center gap-x-2">
           {idx > 0 && <span className="text-gray-200 select-none" aria-hidden>|</span>}
-          <a href={link.href} className="transition-colors hover:text-gray-600">
+          <a
+            href={link.href}
+            onClick={(e) => {
+              e.preventDefault()
+              ;(onPlaceholderAction ?? noopFooterAction)()
+            }}
+            className="transition-colors hover:text-gray-600"
+          >
             {link.label}
           </a>
         </span>
@@ -244,6 +251,8 @@ function FeatureSpeechBubble({ text, tone = 'light', tail = 'left' }) {
 
 function HomePage() {
   const navigate = useNavigate()
+  const noticeToastTimerRef = useRef(null)
+  const [noticeToastVisible, setNoticeToastVisible] = useState(false)
   const [heroRevealed, setHeroRevealed] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -289,6 +298,25 @@ function HomePage() {
       if (raf2) cancelAnimationFrame(raf2)
     }
   }, [])
+
+  useEffect(() => {
+    return () => {
+      if (noticeToastTimerRef.current) {
+        window.clearTimeout(noticeToastTimerRef.current)
+      }
+    }
+  }, [])
+
+  const showNoticePreparingToast = () => {
+    if (noticeToastTimerRef.current) {
+      window.clearTimeout(noticeToastTimerRef.current)
+    }
+    setNoticeToastVisible(true)
+    noticeToastTimerRef.current = window.setTimeout(() => {
+      setNoticeToastVisible(false)
+      noticeToastTimerRef.current = null
+    }, 3000)
+  }
 
   return (
     <div className="relative" style={HOME_PAGE_BG_STYLE}>
@@ -633,14 +661,14 @@ function HomePage() {
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                 <button
                   type="button"
-                  onClick={noopFooterAction}
+                  onClick={showNoticePreparingToast}
                   className="cursor-pointer border-0 bg-transparent p-0 text-gray-500 transition-colors hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
                 >
                   홈
                 </button>
                 <button
                   type="button"
-                  onClick={noopFooterAction}
+                  onClick={showNoticePreparingToast}
                   className="cursor-pointer border-0 bg-transparent p-0 text-gray-500 transition-colors hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
                 >
                   공지·소식
@@ -658,7 +686,7 @@ function HomePage() {
                       <li key={link}>
                         <button
                           type="button"
-                          onClick={noopFooterAction}
+                          onClick={showNoticePreparingToast}
                           className="w-full cursor-pointer border-0 bg-transparent p-0 text-left text-sm text-gray-600 transition-colors hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
                         >
                           {link}
@@ -700,6 +728,7 @@ function HomePage() {
             </div>
             <LegalFooterLinks
               nonInteractive
+              onPlaceholderAction={showNoticePreparingToast}
               className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-xs text-gray-500"
             />
           </div>
@@ -709,6 +738,16 @@ function HomePage() {
         </div>
       </footer>
       </div>
+
+      {noticeToastVisible ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 z-[90] -translate-x-1/2 rounded-full bg-gray-900/90 px-4 py-2 text-sm font-semibold text-white shadow-lg"
+        >
+          준비중입니다
+        </div>
+      ) : null}
 
       <HomeScrollToTopFab />
     </div>
