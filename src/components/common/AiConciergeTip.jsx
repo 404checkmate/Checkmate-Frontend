@@ -2,9 +2,28 @@
  * AiConciergeTip — AI 팁 공용 컴포넌트 (제목: 꿀 Tip!)
  *
  * Props:
- *   description  {string}  팁 설명 (HTML 허용)
- *   className      {string}  추가 클래스
+ *   description  {string}  팁 설명 (<strong> / <br> 태그만 허용)
+ *   className    {string}  추가 클래스
  */
+
+/**
+ * description 문자열에서 <strong>과 <br> 만 React 엘리먼트로 변환한다.
+ * 그 외 태그는 모두 텍스트로 이스케이프되어 XSS를 방지한다.
+ */
+function SafeDescription({ text }) {
+  if (!text) return null
+  const parts = text.split(/(<strong>[\s\S]*?<\/strong>|<br\s*\/?>)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/)
+        if (strongMatch) return <strong key={i}>{strongMatch[1]}</strong>
+        if (/^<br\s*\/?>$/.test(part)) return <br key={i} />
+        return part
+      })}
+    </>
+  )
+}
 export const AI_CONCIERGE_TIP_ICON_SRC = '/ai-concierge-tip-icon.png'
 
 /** AI 팁용 캐리어 일러스트 (데스크톱 카드·모바일 팁 카드 공통) */
@@ -62,10 +81,9 @@ export default function AiConciergeTip({ description, className = '' }) {
         <h4 className="mb-1">
           <AiConciergeTipHeading variant="onDark" />
         </h4>
-        <p
-          className="text-sm leading-relaxed text-teal-200"
-          dangerouslySetInnerHTML={{ __html: description }}
-        />
+        <p className="text-sm leading-relaxed text-teal-200">
+          <SafeDescription text={description} />
+        </p>
       </div>
     </div>
   )

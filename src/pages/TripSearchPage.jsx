@@ -4,10 +4,11 @@ import { CATEGORIES, MOCK_ITEMS, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
 import {
   generateChecklist,
   generateChecklistFromContext,
+  listChecklistCandidates,
   selectChecklistItem,
 } from '@/api/checklists'
 import { adaptGeneratedChecklist, getTabCategories } from '@/utils/checklistAdapter'
-import { saveItemForTrip, loadSavedItems } from '@/utils/savedTripItems'
+import { saveItemsForTrip, loadSavedItems } from '@/utils/savedTripItems'
 import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
 import { appendGuideArchiveEntry, getGuideArchiveEntry, patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
@@ -19,6 +20,7 @@ import {
 } from '@/utils/tripMintPageBackground'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 import aiSparklesImg from '@/assets/ai-sparkles.png'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 /**
  * 새 여행 플로우(step5 → /trips/1/loading → /trips/1/search) 에서 쓰는 자리표시자 tripId.
@@ -123,9 +125,6 @@ function buildSuppliesSubsections(items) {
   }).filter((section) => section.items.length > 0)
 }
 
-const trackEvent = (eventName, properties = {}) => {
-  console.debug('[Event]', eventName, properties)
-}
 
 /** YYYY-MM-DD → 두 날짜 사이 일수 (최소 1) */
 function diffDaysInclusive(startStr, endStr) {
@@ -305,7 +304,22 @@ function TripSearchInner({ tripId }) {
         }
       }
 
-      // [정상 경로] 실제 DB trip 이 있을 때: tripId 엔드포인트 시도 → 실패 시 context 로 재시도.
+      // [정상 경로] 실제 DB trip 이 있을 때: 이미 생성된 후보 풀 → generate → context 순으로 시도.
+      // candidates 엔드포인트가 200을 주면 재생성(LLM 호출) 없이 캐시된 결과를 사용한다.
+      try {
+        const cachedData = await listChecklistCandidates(tripId)
+        applyAdapted(cachedData, 'db-cached')
+        return
+      } catch (candidateErr) {
+        if (candidateErr?.response?.status !== 404) {
+          console.warn(
+            '[TripSearchPage] listCandidates 실패, generate로 폴백:',
+            candidateErr?.message ?? candidateErr,
+          )
+        }
+        // 404 = 아직 생성 안됨, 다른 오류도 generate로 폴백
+      }
+
       try {
         const data = await generateChecklist(tripId)
         applyAdapted(data, 'trip')
@@ -442,14 +456,9 @@ function TripSearchInner({ tripId }) {
       }
       saveEntryChecklistChecks(tripId, archiveEntryId, mergedChecks)
 
-      additions.forEach((item) => {
-        if (savedIds.has(String(item.id))) return
-        saveItemForTrip(tripId, {
-          id: item.id,
-          category: item.category,
-          title: item.title,
-          subtitle: item.detail || item.description || '',
-        })
+      const newAdditions = additions.filter((i) => !savedIds.has(String(i.id)))
+      saveItemsForTrip(tripId, newAdditions)
+      newAdditions.forEach((item) => {
         trackEvent('save_complete', {
           trip_id: tripId,
           item_id: item.id,
@@ -487,14 +496,9 @@ function TripSearchInner({ tripId }) {
     // 서버 측 is_selected 플래그도 병행 갱신 (fire-and-forget, localStorage 가 진실값).
     markItemsSelectedOnServer(itemsToSave)
 
-    itemsToSave.forEach((item) => {
-      if (savedIds.has(String(item.id))) return
-      saveItemForTrip(tripId, {
-        id: item.id,
-        category: item.category,
-        title: item.title,
-        subtitle: item.detail || item.description || '',
-      })
+    const newItems = itemsToSave.filter((i) => !savedIds.has(String(i.id)))
+    saveItemsForTrip(tripId, newItems)
+    newItems.forEach((item) => {
       trackEvent('save_complete', {
         trip_id: tripId,
         item_id: item.id,

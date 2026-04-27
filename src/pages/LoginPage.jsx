@@ -4,6 +4,7 @@ import loginCheckmateBrandUrl from '@/assets/login-checkmate-brand.png'
 import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
 import { startGoogleLogin, startKakaoLogin } from '@/api/auth'
 import { isSupabaseConfigured } from '@/lib/supabase'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 /**
  * UI 보관용 플래그 — 이메일 로그인·비밀번호 찾기·회원가입 링크를 다시 켤 때 true로 변경.
@@ -54,6 +55,7 @@ function LoginPage() {
     async (provider) => {
       if (socialPending) return
       setSocialError('')
+      trackEvent('login_started', { provider })
 
       // Google/Kakao: Supabase 필요. 미설정이면 기존 플레이스홀더 동작(이동)으로 폴백.
       if (!isSupabaseConfigured()) {

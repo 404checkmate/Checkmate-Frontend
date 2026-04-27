@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useLocation, Link } from 'react-router-dom'
-import { loadGuideArchive, removeGuideArchiveEntriesByIds } from '@/utils/guideArchiveStorage'
+import { loadGuideArchive, removeGuideArchiveEntriesByIds, syncGuideArchivesFromServer } from '@/utils/guideArchiveStorage'
+import { trackEvent } from '@/utils/analyticsTracker'
 import { loadSavedItems } from '@/utils/savedTripItems'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
@@ -186,6 +187,15 @@ function TripGuideArchiveInner({ tripId }) {
     refreshFromStorage()
   }, [tripId, location.key, refreshFromStorage])
 
+  useEffect(() => {
+    trackEvent('guide_archive_list_opened', { trip_id: tripId })
+  }, [tripId])
+
+  // 마운트 시 서버에서 최신 목록을 가져와 localStorage와 동기화
+  useEffect(() => {
+    syncGuideArchivesFromServer(tripId).then(setEntries)
+  }, [tripId])
+
   const entriesWithMeta = useMemo(() => {
     return entries.map((entry) => {
       const progress = computeProgressPercent(entry, savedItems, tripId)
@@ -227,6 +237,7 @@ function TripGuideArchiveInner({ tripId }) {
   const handleDeleteSelected = () => {
     if (selectedEntryIds.length === 0) return
     if (!window.confirm(`선택한 ${selectedEntryIds.length}개 항목을 삭제할까요? 되돌릴 수 없습니다.`)) return
+    trackEvent('guide_archive_entries_deleted', { trip_id: tripId, count: selectedEntryIds.length })
     removeGuideArchiveEntriesByIds(tripId, selectedEntryIds)
     exitDeleteMode()
     refreshFromStorage()

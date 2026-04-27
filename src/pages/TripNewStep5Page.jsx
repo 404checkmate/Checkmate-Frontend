@@ -21,6 +21,7 @@ import { listCompanionTypes, listTravelStyles } from '@/api/master'
 import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
 import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage'
 import { createTrip } from '@/api/trips'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 /** placeholder 로 써오던 하드코딩 tripId — Trip 생성 실패 시 graceful fallback 용 */
 const PLACEHOLDER_TRIP_ID = '1'
@@ -155,6 +156,7 @@ export default function TripNewStep5Page() {
         createdTripId = rawId != null ? String(rawId) : null
         if (createdTripId) {
           saveActiveTripId(createdTripId)
+          trackEvent('trip_creation_completed', { trip_id: createdTripId })
         }
       } catch (err) {
         const message =

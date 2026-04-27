@@ -2,8 +2,10 @@
  * 탐색(TripSearchPage)에서 저장한 필수품을 localStorage에 보관하고
  * 가이드 보관함 체크리스트와 동기화할 때 사용합니다.
  */
+import { upsertChecklistItems } from '@/api/checklists'
 
 const STORAGE_PREFIX = 'travel_fe_trip_saved_items_v1_'
+const PLACEHOLDER_TRIP_ID = '1'
 
 /**
  * @param {string|number} tripId
@@ -113,6 +115,45 @@ export function mergeWithInitialChecklist(tripId, initialItems) {
 
 export function countSavedItems(tripId) {
   return loadSavedItems(tripId).length
+}
+
+/**
+ * 여러 항목을 한 번에 localStorage에 저장하고, 실제 DB trip이면 서버에도 upsert.
+ * localStorage가 진실값(source of truth)이며 서버 호출은 fire-and-forget.
+ * @param {string|number} tripId
+ * @param {Array} items - adaptGeneratedChecklist 결과 항목 (subCategory, prepType, baggageType, source 포함)
+ */
+export function saveItemsForTrip(tripId, items) {
+  if (!items || items.length === 0) return
+
+  items.forEach((item) => {
+    saveItemForTrip(tripId, {
+      id: item.id,
+      category: item.category,
+      title: item.title,
+      subtitle: item.detail || item.description || '',
+    })
+  })
+
+  if (String(tripId) === PLACEHOLDER_TRIP_ID) return
+
+  const upsertPayload = items
+    .filter((i) => i.subCategory && i.prepType && i.baggageType && i.source && i.title)
+    .map((i, idx) => ({
+      title: i.title,
+      description: i.description || undefined,
+      categoryCode: i.subCategory,
+      prepType: i.prepType,
+      baggageType: i.baggageType,
+      source: i.source === 'template' || i.source === 'llm' ? i.source : 'user_added',
+      orderIndex: idx,
+    }))
+
+  if (upsertPayload.length === 0) return
+
+  upsertChecklistItems(tripId, upsertPayload).catch((err) => {
+    if (import.meta.env.DEV) console.warn('[savedTripItems] upsert failed', err?.message ?? err)
+  })
 }
 
 /** 저장 목록 전체를 덮어씁니다. (예시 시드 등 특수 용도) */

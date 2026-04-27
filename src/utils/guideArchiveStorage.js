@@ -7,8 +7,15 @@
  * - country, destination: 국가명 · 대표 도시(또는 지역 한 줄)
  * - countryCode, iata: 공항/국가 코드 (검색·날씨 API 매핑용)
  */
+import {
+  listGuideArchives as apiListGuideArchives,
+  createGuideArchive as apiCreateGuideArchive,
+  updateGuideArchive as apiUpdateGuideArchive,
+  deleteGuideArchive as apiDeleteGuideArchive,
+} from '@/api/guideArchives'
 
 const STORAGE_PREFIX = 'travel_fe_guide_archive_v1_'
+const PLACEHOLDER_TRIP_ID = '1'
 
 /**
  * @typedef {Object} GuideArchiveEntry
@@ -86,7 +93,17 @@ export function patchGuideArchiveEntry(tripId, entryId, partial) {
   const next = [...list]
   next[idx] = { ...next[idx], ...partial }
   saveGuideArchiveList(tripId, next)
-  return next[idx]
+
+  // Server sync: PATCH fire-and-forget (only if serverId is known)
+  const updated = next[idx]
+  if (String(tripId) !== PLACEHOLDER_TRIP_ID && updated.serverId) {
+    apiUpdateGuideArchive(updated.serverId, { snapshot: updated })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] PATCH failed', err?.message ?? err)
+      })
+  }
+
+  return updated
 }
 
 /** 해당 여행의 가이드 보관함 목록을 모두 삭제합니다. */
@@ -133,6 +150,24 @@ export function appendGuideArchiveEntry(tripId, snapshot) {
   } catch (e) {
     console.warn('[guideArchiveStorage] save failed', e)
   }
+
+  // Server sync: POST fire-and-forget; on success store serverId back into localStorage
+  if (String(tripId) !== PLACEHOLDER_TRIP_ID) {
+    apiCreateGuideArchive(tripId, { name: entry.pageTitle ?? '보관함 항목', snapshot: entry })
+      .then((serverArchive) => {
+        const current = loadGuideArchive(tripId)
+        const idx = current.findIndex((e) => String(e.id) === String(entry.id))
+        if (idx >= 0) {
+          const updated = [...current]
+          updated[idx] = { ...updated[idx], serverId: serverArchive.id }
+          saveGuideArchiveList(tripId, updated)
+        }
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] POST failed', err?.message ?? err)
+      })
+  }
+
   return next
 }
 
@@ -150,6 +185,52 @@ export function saveGuideArchiveList(tripId, entries) {
 export function removeGuideArchiveEntriesByIds(tripId, entryIds) {
   if (tripId == null || !Array.isArray(entryIds) || entryIds.length === 0) return
   const drop = new Set(entryIds.map((id) => String(id)))
-  const next = loadGuideArchive(tripId).filter((e) => !drop.has(String(e.id)))
-  saveGuideArchiveList(tripId, next)
+  const all = loadGuideArchive(tripId)
+
+  // Collect serverIds before removing from localStorage
+  const serverIdsToDelete = all
+    .filter((e) => drop.has(String(e.id)) && e.serverId)
+    .map((e) => e.serverId)
+
+  saveGuideArchiveList(tripId, all.filter((e) => !drop.has(String(e.id))))
+
+  // Server sync: DELETE fire-and-forget
+  if (String(tripId) !== PLACEHOLDER_TRIP_ID) {
+    serverIdsToDelete.forEach((serverId) => {
+      apiDeleteGuideArchive(serverId).catch((err) => {
+        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] DELETE failed', err?.message ?? err)
+      })
+    })
+  }
+}
+
+/**
+ * 서버에서 가이드 보관함 목록을 가져와 localStorage와 동기화한다.
+ * 서버 응답이 성공하면 서버 데이터를 localStorage에 반영하고 반환.
+ * 실패하면(오프라인 등) localStorage 데이터를 fallback으로 반환.
+ * @param {string|number} tripId
+ * @returns {Promise<GuideArchiveEntry[]>}
+ */
+export async function syncGuideArchivesFromServer(tripId) {
+  if (String(tripId) === PLACEHOLDER_TRIP_ID) return loadGuideArchive(tripId)
+  try {
+    const archives = await apiListGuideArchives(tripId)
+    const entries = archives.map((archive) => {
+      const snap = typeof archive.snapshot === 'object' && archive.snapshot !== null
+        ? archive.snapshot
+        : {}
+      return {
+        ...snap,
+        serverId: archive.id,
+        id: snap.id ?? archive.id,
+      }
+    })
+    saveGuideArchiveList(tripId, entries)
+    return entries
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn('[guideArchiveStorage] syncFromServer failed, using localStorage:', err?.message ?? err)
+    }
+    return loadGuideArchive(tripId)
+  }
 }

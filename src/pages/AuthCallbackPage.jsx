@@ -9,6 +9,7 @@ import {
   hasAcceptedLegalConsent,
   hasCompletedOnboarding,
 } from '@/utils/onboardingGate'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 /**
  * /auth/callback — Google/Kakao 소셜 로그인(Supabase Auth) 콜백 처리.
@@ -75,6 +76,7 @@ export default function AuthCallbackPage() {
       }
 
       const next = resolveNext(sub)
+      trackEvent('login_completed', { provider })
       navigate(next, { replace: true })
     })()
 
