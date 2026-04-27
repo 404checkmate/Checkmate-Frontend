@@ -174,12 +174,6 @@ function Header() {
               >
                 로그인
               </Link>
-              <Link
-                to="/trips/new/destination"
-                className="hidden rounded-lg bg-gradient-to-r from-cyan-500 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-teal-900/20 transition hover:from-cyan-400 hover:to-teal-500 md:inline-flex"
-              >
-                시작하기
-              </Link>
             </>
           )}
 
@@ -191,12 +185,6 @@ function Header() {
                 className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-bold text-gray-800"
               >
                 로그인
-              </Link>
-              <Link
-                to="/trips/new/destination"
-                className="rounded-lg bg-gradient-to-r from-cyan-500 to-teal-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-teal-900/15"
-              >
-                시작
               </Link>
             </div>
           ) : (

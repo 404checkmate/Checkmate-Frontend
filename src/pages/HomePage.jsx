@@ -1,5 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
+import { isMockWebSessionLoggedIn } from '@/utils/onboardingGate'
 import homeHeroMascotUrl from '@/assets/home-hero-mascot-camera.png'
 import featureMascotQuestionUrl from '@/assets/home-feature-mascot-question.png'
 import processCardSaveUrl from '@/assets/home-process-card-save.png'
@@ -253,6 +255,15 @@ function HomePage() {
   const navigate = useNavigate()
   const noticeToastTimerRef = useRef(null)
   const [noticeToastVisible, setNoticeToastVisible] = useState(false)
+  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
+
+  const handleStartTrip = () => {
+    if (isMockWebSessionLoggedIn()) {
+      navigate('/trips/new/destination')
+    } else {
+      setLoginRequiredOpen(true)
+    }
+  }
   const [heroRevealed, setHeroRevealed] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -368,7 +379,7 @@ function HomePage() {
             >
               <button
                 type="button"
-                onClick={() => navigate('/trips/new/destination')}
+                onClick={handleStartTrip}
                 className="w-full max-w-sm self-start rounded-xl bg-gradient-to-r from-amber-300 to-amber-400 px-6 py-3.5 text-center text-sm font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 md:w-auto md:max-w-none md:px-8"
               >
                 여행 준비 시작하기
@@ -569,7 +580,7 @@ function HomePage() {
             >
               <button
                 type="button"
-                onClick={() => navigate('/trips/new/destination')}
+                onClick={handleStartTrip}
                 className="inline-flex items-center gap-1.5 rounded-full border border-teal-200/90 bg-white/85 px-4 py-2 text-sm font-extrabold text-[#0d4b5b] shadow-sm shadow-teal-900/5 backdrop-blur-[1px] transition-all hover:-translate-y-[1px] hover:bg-teal-50/95 hover:text-[#083a4a] hover:shadow-md md:px-5 md:py-2.5 md:text-base"
               >
                 여행 준비 시작하기
@@ -738,6 +749,51 @@ function HomePage() {
         </div>
       </footer>
       </div>
+
+      {loginRequiredOpen && typeof document !== 'undefined'
+        ? createPortal(
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+              <button
+                type="button"
+                className="absolute inset-0 bg-black/40"
+                aria-label="닫기"
+                onClick={() => setLoginRequiredOpen(false)}
+              />
+              <div
+                role="dialog"
+                aria-modal="true"
+                className="relative z-[1] w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-6 py-6 shadow-xl"
+              >
+                <p className="text-center text-base font-semibold text-gray-900">
+                  로그인이 필요한 서비스입니다
+                </p>
+                <p className="mt-1.5 text-center text-sm text-gray-500">
+                  로그인 후 이용해 주세요.
+                </p>
+                <div className="mt-6 flex gap-2">
+                  <button
+                    type="button"
+                    className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                    onClick={() => setLoginRequiredOpen(false)}
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="button"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 py-2.5 text-sm font-semibold text-white transition-colors hover:from-cyan-400 hover:to-teal-500"
+                    onClick={() => {
+                      setLoginRequiredOpen(false)
+                      navigate('/login')
+                    }}
+                  >
+                    확인
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {noticeToastVisible ? (
         <div
