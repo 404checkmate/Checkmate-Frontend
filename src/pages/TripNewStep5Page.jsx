@@ -101,7 +101,10 @@ function TripNewStep5PageContent() {
           })
         )
         setTravelStyles(
-          apiStyles.map((s) => ({ id: s.code, label: s.labelKo, iconSrc: s.iconPath }))
+          apiStyles.map((s) => {
+            const mock = TRAVEL_STYLES.find((m) => m.id === s.code)
+            return { id: s.code, label: s.labelKo, iconSrc: mock?.iconSrc }
+          })
         )
       })
       .catch(() => {})
