@@ -119,10 +119,6 @@ function DestinationDateForm({
   endDate,
   today,
   onRangeChange,
-  scheduleMode,
-  onScheduleModeChange,
-  flexibilityDays,
-  onFlexibilityDaysChange,
   allCountries,
 }) {
   const hasQuery = countryQuery.trim().length > 0
@@ -210,10 +206,6 @@ function DestinationDateForm({
           minDateYmd={today}
           disabled={!selectedCountry}
           onChangeRange={onRangeChange}
-          scheduleMode={scheduleMode}
-          onScheduleModeChange={onScheduleModeChange}
-          flexibilityDays={flexibilityDays}
-          onFlexibilityDaysChange={onFlexibilityDaysChange}
         />
       </div>
     </div>
@@ -270,8 +262,6 @@ export default function TripNewDestinationPage() {
   const [arrivalQuery, setArrivalQuery] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  const [dateScheduleMode, setDateScheduleMode] = useState('fixed')
-  const [dateFlexibilityDays, setDateFlexibilityDays] = useState(0)
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
 
   useEffect(() => {
@@ -322,8 +312,7 @@ export default function TripNewDestinationPage() {
     if (!selectedCountry) {
       setStartDate('')
       setEndDate('')
-      setDateScheduleMode('fixed')
-      setDateFlexibilityDays(0)
+
     }
   }, [selectedCountry])
 
@@ -468,8 +457,6 @@ export default function TripNewDestinationPage() {
       fromDestinationPage: true,
       tripStartDate: startDate,
       tripEndDate: endDate,
-      tripScheduleMode: dateScheduleMode,
-      tripDateFlexibilityDays: dateFlexibilityDays,
     }
     saveStep4NavigationState(navState)
     saveActiveTripPlan({
@@ -481,8 +468,6 @@ export default function TripNewDestinationPage() {
       },
       tripStartDate: startDate,
       tripEndDate: endDate,
-      tripScheduleMode: dateScheduleMode,
-      tripDateFlexibilityDays: dateFlexibilityDays,
     })
     navigate('/trips/new/step4', { state: navState })
   }
@@ -510,10 +495,6 @@ export default function TripNewDestinationPage() {
     endDate,
     today,
     onRangeChange: handleMobileRangeChange,
-    scheduleMode: dateScheduleMode,
-    onScheduleModeChange: setDateScheduleMode,
-    flexibilityDays: dateFlexibilityDays,
-    onFlexibilityDaysChange: setDateFlexibilityDays,
     allCountries: countryOptions,
   }
 
@@ -627,10 +608,6 @@ export default function TripNewDestinationPage() {
               minDateYmd={today}
               disabled={!selectedCountry}
               onChangeRange={handleMobileRangeChange}
-              scheduleMode={dateScheduleMode}
-              onScheduleModeChange={setDateScheduleMode}
-              flexibilityDays={dateFlexibilityDays}
-              onFlexibilityDaysChange={setDateFlexibilityDays}
             />
           </div>
         </div>
