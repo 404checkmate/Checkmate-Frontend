@@ -12,7 +12,7 @@ function AiRecommendedBadge() {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50/90 px-2 py-0.5 text-[10px] font-bold leading-none tracking-wide text-violet-800">
       <img src={aiSparklesImg} alt="" aria-hidden className="h-3.5 w-3.5 object-contain" />
-      AI 추천
+      MATE추천
     </span>
   )
 }
@@ -47,6 +47,11 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
           className="pointer-events-none h-5 w-5 shrink-0 rounded border-gray-300 accent-amber-600"
         />
         <span className="min-w-0 flex-1">
+          {isAiOrigin ? (
+            <span className="mb-1 block sm:hidden">
+              <AiRecommendedBadge />
+            </span>
+          ) : null}
           <span className="flex items-start justify-between gap-2">
             <span
               className={`block text-sm font-extrabold ${
@@ -57,7 +62,11 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
             >
               {item.title}
             </span>
-            {isAiOrigin ? <AiRecommendedBadge /> : null}
+            {isAiOrigin ? (
+              <span className="hidden sm:inline-flex">
+                <AiRecommendedBadge />
+              </span>
+            ) : null}
           </span>
           {item.description ? (
             <span
@@ -198,6 +207,11 @@ export default function GuideArchiveSortableChecklistItem({
             className="relative z-10 h-5 w-5 shrink-0 cursor-pointer rounded border-gray-300 accent-amber-600"
           />
           <div className="min-w-0 flex-1 py-1.5">
+            {isAiOrigin ? (
+              <span className="mb-1 block sm:hidden">
+                <AiRecommendedBadge />
+              </span>
+            ) : null}
             <span className="flex items-start justify-between gap-2">
               <span
                 className={`block text-sm font-extrabold ${
@@ -208,7 +222,11 @@ export default function GuideArchiveSortableChecklistItem({
               >
                 {item.title}
               </span>
-              {isAiOrigin ? <AiRecommendedBadge /> : null}
+              {isAiOrigin ? (
+                <span className="hidden sm:inline-flex">
+                  <AiRecommendedBadge />
+                </span>
+              ) : null}
             </span>
             {item.description ? (
               <span

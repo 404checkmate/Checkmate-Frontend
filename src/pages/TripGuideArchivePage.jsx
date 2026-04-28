@@ -164,7 +164,7 @@ function TripGuideArchiveInner({ tripId }) {
         />
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:pb-16">
+      <div className="mx-auto max-w-5xl px-4 pt-6 pb-24 md:px-8 md:pb-16">
         {!entries.length ? (
           <div className="rounded-3xl border border-dashed border-teal-200/60 bg-white/60 px-6 py-16 text-center md:rounded-2xl md:border-slate-200">
             <p className="mb-4 text-sm text-slate-600">아직 저장된 체크리스트가 없습니다.</p>

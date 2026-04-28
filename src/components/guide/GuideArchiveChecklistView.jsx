@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   DndContext,
   DragOverlay,
@@ -56,6 +56,7 @@ import GuideChecklistCategoryFilter, {
 } from '@/components/guide/GuideChecklistCategoryFilter'
 import GuideChecklistSectionEditModal from '@/components/guide/GuideChecklistSectionEditModal'
 import GuideChecklistDirectAddModal from '@/components/guide/GuideChecklistDirectAddModal'
+import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 const GUIDE_SUPPLIES_SUBSECTION_ORDER = [
   'essentials',
   'clothing',
@@ -139,6 +140,8 @@ const GUIDE_ARCHIVE_DROP_ANIMATION = {
  */
 export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMutated }) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false)
   const [sectionEditModalOpen, setSectionEditModalOpen] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
@@ -907,7 +910,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
 
   const bottomBar = (
     <div
-      className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 py-3 md:bottom-0 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
+      className="fixed bottom-16 left-0 right-0 z-40 bg-transparent px-5 py-3 md:bottom-0 transition-[bottom] duration-300 ease-out [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
+      style={!navBarVisible ? { bottom: 0 } : undefined}
     >
       <div className="mx-auto flex max-w-3xl gap-3">
         <button
@@ -1000,7 +1004,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
         </p>
       </header>
 
-      <div className="sticky top-0 z-20 -mx-5 mb-6 border-b border-slate-100/90 bg-white px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:rounded-xl md:border md:border-slate-100 md:bg-white md:px-5 md:py-4 md:shadow-sm">
+      <div className="mb-6 rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm">
         <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
           <span>
             준비 진행도{' '}
