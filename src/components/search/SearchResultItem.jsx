@@ -37,22 +37,27 @@ export default function SearchResultItem({
             <CheckIcon className={archivedCheckIconClass} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="flex flex-wrap items-center gap-2">
-              <span className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</span>
-              {aiRecommended ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
-                  <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
-                  MATE 추천
+            {aiRecommended ? (
+              <>
+                <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
+                    <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
+                    MATE 추천
+                  </span>
+                  <span className="rounded-full bg-violet-200/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-950">
+                    담김
+                  </span>
+                </div>
+                <p className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
+              </>
+            ) : (
+              <p className="flex flex-wrap items-center gap-2">
+                <span className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</span>
+                <span className="rounded-full bg-amber-200/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                  담김
                 </span>
-              ) : null}
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  aiRecommended ? 'bg-violet-200/90 text-violet-950' : 'bg-amber-200/90 text-amber-950'
-                }`}
-              >
-                담김
-              </span>
-            </p>
+              </p>
+            )}
             {subtitleText ? (
               <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{subtitleText}</p>
             ) : null}
@@ -84,15 +89,15 @@ export default function SearchResultItem({
           {selected ? <CheckIcon className="h-3 w-3 text-white" /> : null}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="flex flex-wrap items-center gap-2 text-[15px] font-extrabold leading-snug text-gray-900">
-            <span>{item.title}</span>
-            {aiRecommended ? (
+          {aiRecommended ? (
+            <div className="mb-1">
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
                 <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
                 MATE 추천
               </span>
-            ) : null}
-          </p>
+            </div>
+          ) : null}
+          <p className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
           {subtitleText ? (
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{subtitleText}</p>
           ) : null}

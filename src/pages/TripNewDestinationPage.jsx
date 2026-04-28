@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 import {
   STEP_DESTINATION_CONFIG,
   COUNTRY_ARRIVAL_OPTIONS,
@@ -214,6 +215,8 @@ function DestinationDateForm({
 
 export default function TripNewDestinationPage() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
   const [today, setToday] = useState(getLocalDateYYYYMMDD)
   const comboRef = useRef(null)
 
@@ -613,7 +616,10 @@ export default function TripNewDestinationPage() {
         </div>
 
         {/* 날짜 선택 완료 시: 예시 이미지처럼 노란 CTA 바로 위에 떠 있는 요약 캡슐 */}
-        <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col items-stretch px-4 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
+        <div
+          className="fixed bottom-16 left-0 right-0 z-40 flex flex-col items-stretch px-4 transition-[bottom] duration-300 ease-out [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
+          style={!navBarVisible ? { bottom: 0 } : undefined}
+        >
           {selectedCountry && startDate && endDate && (
             <div
               className="mb-2 flex justify-center px-1"

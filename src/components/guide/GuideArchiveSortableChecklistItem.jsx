@@ -2,6 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GUIDE_ARCHIVE_LEGACY_AI_CATEGORY } from '@/utils/guideArchiveChecklistReorder'
 import aiSparklesImg from '@/assets/ai-sparkles.png'
+import AiSparkleMaskIcon from '@/components/search/AiSparkleMaskIcon'
 
 const SORTABLE_TRANSITION = {
   duration: 260,
@@ -48,8 +49,9 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
         />
         <span className="min-w-0 flex-1">
           {isAiOrigin ? (
-            <span className="mb-1 block sm:hidden">
-              <AiRecommendedBadge />
+            <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800 sm:hidden">
+              <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
+              MATE추천
             </span>
           ) : null}
           <span className="flex items-start justify-between gap-2">

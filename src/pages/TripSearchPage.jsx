@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, Link, useLocation } from 'react-router-dom'
+import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 import { CATEGORIES, MOCK_ITEMS, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
 import {
   generateChecklist,
@@ -42,6 +43,8 @@ const PLACEHOLDER_TRIP_ID = '1'
 
 function TripSearchInner({ tripId }) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
   const [searchParams] = useSearchParams()
   const archiveEntryIdRaw = searchParams.get('archiveEntry')
   const archiveEntryId =
@@ -453,7 +456,7 @@ function TripSearchInner({ tripId }) {
             totalItemCount={totalItemCount}
           />
 
-          <div className="sticky top-0 z-20 -mx-5 mb-6 border-b border-slate-100/90 bg-white px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:rounded-xl md:border md:border-slate-100 md:bg-white md:px-5 md:py-4 md:shadow-sm">
+          <div className="mb-6 rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm">
             <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
               <span>
                 {mergeToArchive ? '추가 선택' : '선택한 항목'}{' '}
@@ -509,7 +512,10 @@ function TripSearchInner({ tripId }) {
         </div>
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 z-40 bg-transparent py-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))] md:bottom-0">
+      <div
+        className="fixed bottom-16 left-0 right-0 z-40 bg-transparent py-3 transition-[bottom] duration-300 ease-out [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))] md:bottom-0"
+        style={!navBarVisible ? { bottom: 0 } : undefined}
+      >
         <div className="mx-auto w-full max-w-7xl px-3 md:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-3xl gap-3">
             <button

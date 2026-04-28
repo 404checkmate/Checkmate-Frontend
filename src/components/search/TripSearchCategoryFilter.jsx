@@ -16,7 +16,7 @@ export default function TripSearchCategoryFilter({
         항목 유형
       </p>
       <div
-        className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin"
+        className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide"
         role="tablist"
         aria-labelledby="search-subcategory-label"
       >
