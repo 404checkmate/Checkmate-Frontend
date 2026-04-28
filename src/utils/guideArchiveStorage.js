@@ -15,7 +15,6 @@ import {
 } from '@/api/guideArchives'
 
 const STORAGE_PREFIX = 'travel_fe_guide_archive_v1_'
-const PLACEHOLDER_TRIP_ID = '1'
 
 /**
  * @typedef {Object} GuideArchiveEntry
@@ -96,7 +95,7 @@ export function patchGuideArchiveEntry(tripId, entryId, partial) {
 
   // Server sync: PATCH fire-and-forget (only if serverId is known)
   const updated = next[idx]
-  if (String(tripId) !== PLACEHOLDER_TRIP_ID && updated.serverId) {
+  if (updated.serverId) {
     apiUpdateGuideArchive(updated.serverId, { snapshot: updated })
       .catch((err) => {
         if (import.meta.env.DEV) console.warn('[guideArchiveStorage] PATCH failed', err?.message ?? err)
@@ -152,21 +151,19 @@ export function appendGuideArchiveEntry(tripId, snapshot) {
   }
 
   // Server sync: POST fire-and-forget; on success store serverId back into localStorage
-  if (String(tripId) !== PLACEHOLDER_TRIP_ID) {
-    apiCreateGuideArchive(tripId, { name: entry.pageTitle ?? '보관함 항목', snapshot: entry })
-      .then((serverArchive) => {
-        const current = loadGuideArchive(tripId)
-        const idx = current.findIndex((e) => String(e.id) === String(entry.id))
-        if (idx >= 0) {
-          const updated = [...current]
-          updated[idx] = { ...updated[idx], serverId: serverArchive.id }
-          saveGuideArchiveList(tripId, updated)
-        }
-      })
-      .catch((err) => {
-        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] POST failed', err?.message ?? err)
-      })
-  }
+  apiCreateGuideArchive(tripId, { name: entry.pageTitle ?? '보관함 항목', snapshot: entry })
+    .then((serverArchive) => {
+      const current = loadGuideArchive(tripId)
+      const idx = current.findIndex((e) => String(e.id) === String(entry.id))
+      if (idx >= 0) {
+        const updated = [...current]
+        updated[idx] = { ...updated[idx], serverId: serverArchive.id }
+        saveGuideArchiveList(tripId, updated)
+      }
+    })
+    .catch((err) => {
+      if (import.meta.env.DEV) console.warn('[guideArchiveStorage] POST failed', err?.message ?? err)
+    })
 
   return next
 }
@@ -195,13 +192,11 @@ export function removeGuideArchiveEntriesByIds(tripId, entryIds) {
   saveGuideArchiveList(tripId, all.filter((e) => !drop.has(String(e.id))))
 
   // Server sync: DELETE fire-and-forget
-  if (String(tripId) !== PLACEHOLDER_TRIP_ID) {
-    serverIdsToDelete.forEach((serverId) => {
-      apiDeleteGuideArchive(serverId).catch((err) => {
-        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] DELETE failed', err?.message ?? err)
-      })
+  serverIdsToDelete.forEach((serverId) => {
+    apiDeleteGuideArchive(serverId).catch((err) => {
+      if (import.meta.env.DEV) console.warn('[guideArchiveStorage] DELETE failed', err?.message ?? err)
     })
-  }
+  })
 }
 
 /**
@@ -212,7 +207,6 @@ export function removeGuideArchiveEntriesByIds(tripId, entryIds) {
  * @returns {Promise<GuideArchiveEntry[]>}
  */
 export async function syncGuideArchivesFromServer(tripId) {
-  if (String(tripId) === PLACEHOLDER_TRIP_ID) return loadGuideArchive(tripId)
   try {
     const archives = await apiListGuideArchives(tripId)
     const entries = archives.map((archive) => {
