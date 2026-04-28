@@ -43,7 +43,7 @@ const BOTTOM_NAV_ITEMS = [
   },
   {
     label: '체크리스트',
-    path: '/trips/1/guide-archive',
+    path: '/guide-archives',
     match: (p) => p.includes('/guide-archive'),
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -57,6 +57,7 @@ const BOTTOM_NAV_ITEMS = [
 function RootLayout() {
   const location = useLocation()
   const { pathname } = location
+
   const hideHeaderOnMobile = shouldHideGlobalHeaderOnMobile(pathname)
   const padMainMobile = shouldPadMainForMobileBottomNav(pathname)
   const hideMobileBottomNav = shouldHideMobileBottomNav(pathname)

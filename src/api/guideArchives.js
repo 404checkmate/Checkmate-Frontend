@@ -31,3 +31,8 @@ export async function deleteGuideArchive(archiveId) {
   const res = await apiClient.delete(`/guide-archives/${archiveId}`)
   return res.data
 }
+
+export async function fetchMyGuideArchives() {
+  const res = await apiClient.get('/guide-archives/mine')
+  return res.data
+}

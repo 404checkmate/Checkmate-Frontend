@@ -12,7 +12,7 @@ import {
   HERO_IMAGE,
   AI_TIP,
 } from '@/mocks/tripNewStep3Data'
-import { fetchFlightInfo } from '@/mocks/flightMockData'
+import { fetchFlightInfo } from '@/mocks/flightMockData' // 보관용 페이지 — 실 항공편 API 미연동, 목데이터 유지
 import StepHeader from '@/components/common/StepHeader'
 import {
   TripNewFlowDesktopPrevBar,

@@ -34,13 +34,6 @@ import TripSearchSaveModal from '@/components/search/TripSearchSaveModal'
 import TripSearchLeaveModal from '@/components/search/TripSearchLeaveModal'
 import { trackEvent } from '@/utils/analyticsTracker'
 
-/**
- * 새 여행 플로우(step5 → /trips/1/loading → /trips/1/search) 에서 쓰는 자리표시자 tripId.
- * 이 경우에는 DB 에 Trip 레코드가 아직 없으므로 `/checklists/generate/:tripId` 는 항상 404 가 된다.
- * 프론트에서 먼저 감지해 `generate-from-context` 로 바로 가면 백엔드 `Trip 1 not found` WARN 이 사라진다.
- */
-const PLACEHOLDER_TRIP_ID = '1'
-
 function TripSearchInner({ tripId }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -116,20 +109,6 @@ function TripSearchInner({ tripId }) {
     ;(async () => {
       const plan = loadActiveTripPlan()
       const contextInput = buildContextInputFromPlan(plan)
-      const isPlaceholderTrip = String(tripId) === PLACEHOLDER_TRIP_ID
-
-      if (isPlaceholderTrip && contextInput) {
-        try {
-          const data = await generateChecklistFromContext(contextInput)
-          applyAdapted(data, 'context')
-          return
-        } catch (err) {
-          if (cancelled) return
-          console.warn('[TripSearchPage] generateFromContext (fast path) 실패, 목데이터로 폴백:', err?.message ?? err)
-          applyFallback(err?.response?.data?.message || err?.message)
-          return
-        }
-      }
 
       try {
         const cachedData = await listChecklistCandidates(tripId)
