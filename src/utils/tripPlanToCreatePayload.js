@@ -16,6 +16,7 @@ const DEFAULT_BOOKING_STATUS = 'not_booked'
 
 // 백엔드 `seed.ts` 와 동기화되어야 하는 companion 코드 화이트리스트.
 // Step5 UI 의 `withPet` 만 서버 `pets` 로 리네이밍한다.
+// API 응답 기반 렌더링 시 id 가 DB code 인 `pets` 로 세팅되므로 양쪽 모두 등록.
 const COMPANION_ALIAS = {
   alone: 'alone',
   couple: 'couple',
@@ -23,6 +24,7 @@ const COMPANION_ALIAS = {
   friends: 'friends',
   parents: 'parents',
   withPet: 'pets',
+  pets: 'pets',
 }
 
 // 서버가 아는 travel style 코드.
@@ -79,7 +81,7 @@ function toCompanions(companionId, hasPet) {
   if (!companionId) return []
   const code = COMPANION_ALIAS[companionId] ?? null
   if (!code) return []
-  return [{ companionCode: code, hasPet: Boolean(hasPet || companionId === 'withPet') }]
+  return [{ companionCode: code, hasPet: Boolean(hasPet || companionId === 'withPet' || companionId === 'pets') }]
 }
 
 /**
