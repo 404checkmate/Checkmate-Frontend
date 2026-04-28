@@ -23,7 +23,7 @@ export const TRIP_SEARCH_CONTEXT = {
   title: '맞춤 여행 체크리스트',
   destination: '다낭 · 호이안 · 바나힐 일대',
   country: '베트남',
-  tripWindowLabel: '5월 18일 ~ 5월 24일 (예시)',
+  tripWindowLabel: '5월 18일 ~ 5월 24일',
   weatherSummary:
     '5월은 우기에 접어들어 소나기·국지성 호우가 잦고 습도가 높습니다. 한낮 자외선이 강하고, 산악 지역은 안개·바람이 식을 수 있어 겹쳐 입기를 권장합니다.',
   temperatureRange: '약 26–34°C',
