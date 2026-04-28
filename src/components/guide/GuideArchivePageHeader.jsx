@@ -10,14 +10,14 @@ export default function GuideArchivePageHeader() {
         >
           ← 내 여행으로
         </Link>
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-900/90">MY COLLECTIONS</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-900/90">MY ARCHIVE</p>
         <h1 className="mt-2 text-2xl font-extrabold leading-tight text-[#0a3d3d]">나의 체크리스트</h1>
       </div>
 
       <div className="mx-auto hidden max-w-5xl px-8 pb-2 pt-10 md:block">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-700">YOUR ARCHIVE</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-700">MY ARCHIVE</p>
             <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl">
               나의 체크리스트
             </h1>
