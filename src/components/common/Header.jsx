@@ -49,9 +49,9 @@ function Header() {
     }
   }, [mobileMenuOpen, logoutConfirmOpen, closeMobileMenu])
 
-  const handleConfirmLogout = useCallback(() => {
+  const handleConfirmLogout = useCallback(async () => {
     setLogoutConfirmOpen(false)
-    clearClientSessionForLogout()
+    await clearClientSessionForLogout()
     /** 웹(md+): 현재 페이지 유지, 헤더만 비로그인 UI로 전환. 모바일: 로그인 페이지로 이동 */
     const isDesktop =
       typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches

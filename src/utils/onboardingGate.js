@@ -18,6 +18,9 @@
  * - 이 모듈의 localStorage/sessionStorage 키는 제거해도 됩니다.
  */
 
+import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase'
+import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
+
 const NS = 'checkmate'
 
 /**
@@ -32,19 +35,31 @@ const mockSubKey = (provider) => `${NS}:mock_oauth_sub:${String(provider).toLowe
 export const SESSION_LAST_SOCIAL_PROVIDER = `${NS}:last_social_provider`
 
 /**
- * 로그아웃 시 클라이언트 **세션만** 정리합니다.
+ * 로그아웃 시 클라이언트 세션을 완전히 정리합니다.
  *
- * - 제거: `sessionStorage`의 마지막 소셜 프로바이더(모의 로그인 직후 분기용).
- * - 유지: `localStorage`의 약관 동의·온보딩 완료 집합, 프로바이더별 mock OAuth `sub`.
+ * - 제거: sessionStorage 소셜 프로바이더, Supabase 세션, localStorage 액세스 토큰 폴백.
+ * - 유지: localStorage의 약관 동의·온보딩 완료 집합, 프로바이더별 mock OAuth sub.
  *   → 같은 기기에서 재로그인 시 약관/프로필 단계를 건너뛰고 홈으로 가는 동작의 전제입니다.
- *
- * 실연동 시: refresh/access 토큰 삭제·`signOut`·쿠키 무효화 등을 여기(또는 호출부)에 추가하고,
- * **계정 단위 플래그는 서버가 권위**를 가지므로 클라이언트에서 임의로 지우지 않습니다.
  */
-export function clearClientSessionForLogout() {
+export async function clearClientSessionForLogout() {
   if (typeof window === 'undefined') return
   try {
     sessionStorage.removeItem(SESSION_LAST_SOCIAL_PROVIDER)
+  } catch {
+    /* ignore */
+  }
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseClient()
+    if (supabase) {
+      try {
+        await supabase.auth.signOut()
+      } catch {
+        /* ignore — 네트워크 오류 등 signOut 실패 시에도 로컬 토큰은 제거 */
+      }
+    }
+  }
+  try {
+    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
   } catch {
     /* ignore */
   }
