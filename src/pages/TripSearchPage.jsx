@@ -53,6 +53,8 @@ function TripSearchInner({ tripId }) {
   const [archiveEntryStatus, setArchiveEntryStatus] = useState(archiveEntryId ? 'loading' : 'idle')
 
   const [tripDateLabel, setTripDateLabel] = useState('')
+  const [tripCompanions, setTripCompanions] = useState([])
+  const [tripStyles, setTripStyles] = useState([])
 
   useEffect(() => {
     let cancelled = false
@@ -63,6 +65,16 @@ function TripSearchInner({ tripId }) {
           const start = String(trip.tripStart).slice(0, 10)
           const end = String(trip.tripEnd).slice(0, 10)
           setTripDateLabel(buildTripWindowLabelFromRange(start, end))
+        }
+        if (trip?.companions?.length > 0) {
+          setTripCompanions(
+            trip.companions.map((c) => c.companionType?.labelKo).filter(Boolean)
+          )
+        }
+        if (trip?.travelStyles?.length > 0) {
+          setTripStyles(
+            trip.travelStyles.map((s) => s.travelStyle?.labelKo).filter(Boolean)
+          )
         }
       })
       .catch(() => {})
@@ -533,6 +545,8 @@ function TripSearchInner({ tripId }) {
             mergeToArchive={mergeToArchive}
             pageMainTitle={pageMainTitle}
             headerDateLine={headerDateLine}
+            companions={tripCompanions}
+            travelStyles={tripStyles}
             headerDescription={headerDescription}
             archiveTargetMissing={archiveTargetMissing}
             loadState={loadState}
