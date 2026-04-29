@@ -11,7 +11,11 @@ import {
 import { adaptGeneratedChecklist, getTabCategories } from '@/utils/checklistAdapter'
 import { saveItemsForTrip, loadSavedItems } from '@/utils/savedTripItems'
 import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
-import { appendGuideArchiveEntry, getGuideArchiveEntry, loadGuideArchive, patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
+import {
+  fetchTripGuideArchives,
+  createGuideArchive,
+  updateGuideArchive,
+} from '@/api/guideArchives'
 import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
@@ -34,13 +38,6 @@ import TripSearchSaveModal from '@/components/search/TripSearchSaveModal'
 import TripSearchLeaveModal from '@/components/search/TripSearchLeaveModal'
 import { trackEvent } from '@/utils/analyticsTracker'
 
-/**
- * 새 여행 플로우(step5 → /trips/1/loading → /trips/1/search) 에서 쓰는 자리표시자 tripId.
- * 이 경우에는 DB 에 Trip 레코드가 아직 없으므로 `/checklists/generate/:tripId` 는 항상 404 가 된다.
- * 프론트에서 먼저 감지해 `generate-from-context` 로 바로 가면 백엔드 `Trip 1 not found` WARN 이 사라진다.
- */
-const PLACEHOLDER_TRIP_ID = '1'
-
 function TripSearchInner({ tripId }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -50,12 +47,41 @@ function TripSearchInner({ tripId }) {
   const archiveEntryId =
     archiveEntryIdRaw && String(archiveEntryIdRaw).trim() ? String(archiveEntryIdRaw).trim() : null
 
-  const archiveEntry = useMemo(
-    () => (archiveEntryId ? getGuideArchiveEntry(tripId, archiveEntryId) : null),
-    [tripId, archiveEntryId],
-  )
+  const [archiveEntry, setArchiveEntry] = useState(null)
+  /** archiveEntryId 가 있을 때 한해서 'loading' → 'ready' | 'missing' | 'error'. 그 외엔 'idle'. */
+  const [archiveEntryStatus, setArchiveEntryStatus] = useState(archiveEntryId ? 'loading' : 'idle')
+
+  useEffect(() => {
+    if (!archiveEntryId) {
+      setArchiveEntry(null)
+      setArchiveEntryStatus('idle')
+      return undefined
+    }
+    let cancelled = false
+    setArchiveEntryStatus('loading')
+    ;(async () => {
+      try {
+        const list = await fetchTripGuideArchives(tripId)
+        if (cancelled) return
+        const found = list.find((e) => String(e.id) === String(archiveEntryId)) ?? null
+        setArchiveEntry(found)
+        setArchiveEntryStatus(found ? 'ready' : 'missing')
+      } catch (err) {
+        if (cancelled) return
+        setArchiveEntry(null)
+        setArchiveEntryStatus('error')
+        if (import.meta.env.DEV) {
+          console.warn('[TripSearchPage] archiveEntry 조회 실패:', err?.message ?? err)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [tripId, archiveEntryId])
+
   const mergeToArchive = Boolean(archiveEntryId && archiveEntry)
-  const archiveTargetMissing = Boolean(archiveEntryId && !archiveEntry)
+  const archiveTargetMissing = Boolean(archiveEntryId && archiveEntryStatus === 'missing')
 
   const pageMainTitle = mergeToArchive ? '여행 필수품 추가' : TRIP_SEARCH_CONTEXT.title
   const categoryCardHeading = mergeToArchive ? '카테고리별 추가 선택' : '카테고리별 선택'
@@ -70,6 +96,8 @@ function TripSearchInner({ tripId }) {
   const [selectedForSave, setSelectedForSave] = useState(() => new Set())
   const [leaveModalOpen, setLeaveModalOpen] = useState(false)
   const [saveConfirmModalOpen, setSaveConfirmModalOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [loadState, setLoadState] = useState({ status: 'loading', fromApi: false })
   const [apiItems, setApiItems] = useState([])
   const [apiSummary, setApiSummary] = useState(null)
@@ -116,20 +144,6 @@ function TripSearchInner({ tripId }) {
     ;(async () => {
       const plan = loadActiveTripPlan()
       const contextInput = buildContextInputFromPlan(plan)
-      const isPlaceholderTrip = String(tripId) === PLACEHOLDER_TRIP_ID
-
-      if (isPlaceholderTrip && contextInput) {
-        try {
-          const data = await generateChecklistFromContext(contextInput)
-          applyAdapted(data, 'context')
-          return
-        } catch (err) {
-          if (cancelled) return
-          console.warn('[TripSearchPage] generateFromContext (fast path) 실패, 목데이터로 폴백:', err?.message ?? err)
-          applyFallback(err?.response?.data?.message || err?.message)
-          return
-        }
-      }
 
       try {
         const cachedData = await listChecklistCandidates(tripId)
@@ -302,117 +316,166 @@ function TripSearchInner({ tripId }) {
     })
   }
 
-  const closeSaveConfirmModal = () => setSaveConfirmModalOpen(false)
+  const closeSaveConfirmModal = () => {
+    if (saving) return
+    setSaveConfirmModalOpen(false)
+    setSaveError('')
+  }
 
-  const handleConfirmSaveAndGoArchive = () => {
+  const handleConfirmSaveAndGoArchive = async () => {
+    if (saving) return
     const itemsToSave = sourceItems.filter((i) => selectedForSave.has(String(i.id)))
-    if (itemsToSave.length === 0) { closeSaveConfirmModal(); return }
+    if (itemsToSave.length === 0) {
+      setSaveConfirmModalOpen(false)
+      setSaveError('')
+      return
+    }
 
-    if (mergeToArchive) {
-      const existing = archiveEntry.items ?? []
-      const existingIds = new Set(existing.map((i) => String(i.id)))
-      const selectedSources = itemsToSave.filter((i) => !existingIds.has(String(i.id)))
-      const additions = selectedSources.map(mapMockItemToArchiveItem)
-      if (additions.length === 0) { closeSaveConfirmModal(); return }
+    setSaving(true)
+    setSaveError('')
 
-      markItemsSelectedOnServer(selectedSources)
-      patchGuideArchiveEntry(tripId, archiveEntryId, { items: [...existing, ...additions] })
+    try {
+      if (mergeToArchive) {
+        const existing = archiveEntry.items ?? []
+        const existingIds = new Set(existing.map((i) => String(i.id)))
+        const selectedSources = itemsToSave.filter((i) => !existingIds.has(String(i.id)))
+        const additions = selectedSources.map(mapMockItemToArchiveItem)
+        if (additions.length === 0) {
+          setSaveConfirmModalOpen(false)
+          setSaving(false)
+          return
+        }
 
-      const prevChecks = loadEntryChecklistChecks(tripId, archiveEntryId)
-      const mergedChecks = { ...prevChecks }
-      for (const it of additions) mergedChecks[String(it.id)] = false
-      saveEntryChecklistChecks(tripId, archiveEntryId, mergedChecks)
+        markItemsSelectedOnServer(selectedSources)
 
-      const newAdditions = additions.filter((i) => !savedIds.has(String(i.id)))
-      saveItemsForTrip(tripId, newAdditions)
-      newAdditions.forEach((item) => {
+        // archiveEntry 의 server snapshot 을 통째로 보내야 백엔드가 다른 필드를 보존 (snapshot 은 PUT 의미).
+        const baseSnap = Object.fromEntries(
+          Object.entries(archiveEntry).filter(
+            ([k]) => !['id', 'serverId', 'archivedAt', 'updatedAt'].includes(k),
+          ),
+        )
+        await updateGuideArchive(archiveEntryId, {
+          snapshot: { ...baseSnap, items: [...existing, ...additions] },
+        })
+
+        const prevChecks = loadEntryChecklistChecks(tripId, archiveEntryId)
+        const mergedChecks = { ...prevChecks }
+        for (const it of additions) mergedChecks[String(it.id)] = false
+        saveEntryChecklistChecks(tripId, archiveEntryId, mergedChecks)
+
+        const newAdditions = additions.filter((i) => !savedIds.has(String(i.id)))
+        saveItemsForTrip(tripId, newAdditions)
+        newAdditions.forEach((item) => {
+          trackEvent('save_complete', {
+            trip_id: tripId, item_id: item.id, item_category: item.category,
+            mode: 'guide_archive_merge', archive_entry_id: archiveEntryId,
+            elapsed_ms: searchStartRef.current ? Date.now() - searchStartRef.current : null,
+          })
+        })
+        setSavedIds((prev) => {
+          const next = new Set(prev)
+          additions.forEach((i) => next.add(String(i.id)))
+          return next
+        })
+        trackEvent('save_confirm_navigate_guide_archive_merge', {
+          trip_id: tripId, archive_entry_id: archiveEntryId, added_count: additions.length,
+        })
+        window.dispatchEvent(new CustomEvent('guide-archive-checklist-saved', {
+          detail: { tripId: String(tripId), entryId: String(archiveEntryId), progress: undefined },
+        }))
+        setSaving(false)
+        setSaveConfirmModalOpen(false)
+        setSelectedForSave(new Set())
+        navigate(`/trips/${tripId}/guide-archive/${archiveEntryId}`)
+        return
+      }
+
+      // 비-merge: 새 entry 생성 전, server 에서 동일 id 집합 archive 가 있는지 검사.
+      const selectedIdSet = new Set(itemsToSave.map((i) => String(i.id)))
+      const existingArchives = await fetchTripGuideArchives(tripId)
+      const isDuplicateEntry = existingArchives.some((archive) => {
+        const archiveIds = new Set((archive.items ?? []).map((i) => String(i.id)))
+        return (
+          archiveIds.size === selectedIdSet.size &&
+          [...selectedIdSet].every((id) => archiveIds.has(id))
+        )
+      })
+      if (isDuplicateEntry) {
+        setSaving(false)
+        setSaveConfirmModalOpen(false)
+        navigate(`/trips/${tripId}/guide-archive`)
+        return
+      }
+
+      markItemsSelectedOnServer(itemsToSave)
+
+      const newItems = itemsToSave.filter((i) => !savedIds.has(String(i.id)))
+      saveItemsForTrip(tripId, newItems)
+      newItems.forEach((item) => {
         trackEvent('save_complete', {
           trip_id: tripId, item_id: item.id, item_category: item.category,
-          mode: 'guide_archive_merge', archive_entry_id: archiveEntryId,
           elapsed_ms: searchStartRef.current ? Date.now() - searchStartRef.current : null,
         })
       })
       setSavedIds((prev) => {
         const next = new Set(prev)
-        additions.forEach((i) => next.add(String(i.id)))
+        itemsToSave.forEach((i) => next.add(String(i.id)))
         return next
       })
-      trackEvent('save_confirm_navigate_guide_archive_merge', {
-        trip_id: tripId, archive_entry_id: archiveEntryId, added_count: additions.length,
-      })
-      window.dispatchEvent(new CustomEvent('guide-archive-checklist-saved', {
-        detail: { tripId: String(tripId), entryId: String(archiveEntryId), progress: undefined },
-      }))
-      closeSaveConfirmModal()
-      setSelectedForSave(new Set())
-      navigate(`/trips/${tripId}/guide-archive/${archiveEntryId}`)
-      return
-    }
 
-    const selectedIdSet = new Set(itemsToSave.map((i) => String(i.id)))
-    const isDuplicateEntry = loadGuideArchive(tripId).some((archive) => {
-      const archiveIds = new Set((archive.items ?? []).map((i) => String(i.id)))
-      return (
-        archiveIds.size === selectedIdSet.size &&
-        [...selectedIdSet].every((id) => archiveIds.has(id))
-      )
-    })
-    if (isDuplicateEntry) {
-      closeSaveConfirmModal()
+      const plan = loadActiveTripPlan()
+      const dest = plan?.destination
+      const ts = plan?.tripStartDate
+      const te = plan?.tripEndDate
+      const fromDestination = Boolean(dest && ts && te)
+
+      const snapshot = {
+        pageTitle: fromDestination ? `${dest.country} · ${dest.city} 여행 준비` : TRIP_SEARCH_CONTEXT.title,
+        pageSubtitle: '',
+        destination: fromDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
+        country: fromDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
+        tripWindowLabel: fromDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
+        tripStartDate: fromDestination ? ts : '',
+        tripEndDate: fromDestination ? te : '',
+        countryCode: fromDestination ? dest.countryCode : '',
+        iata: fromDestination ? dest.iata : '',
+        weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
+        temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
+        rainChance: TRIP_SEARCH_CONTEXT.rainChance,
+        environmentTags: TRIP_SEARCH_CONTEXT.environmentTags.map((t) => ({ ...t })),
+        phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
+        items: itemsToSave.map(mapMockItemToArchiveItem),
+        dailySummaries: [],
+        dailyGuidesFull: [],
+      }
+      const created = await createGuideArchive(tripId, {
+        name: snapshot.pageTitle,
+        snapshot,
+      })
+
+      // server 가 부여한 id 로 entry 체크 상태(localStorage 별도 파일) 시드.
+      if (created?.id) {
+        const checksInit = Object.fromEntries(
+          (snapshot.items ?? []).map((it) => [String(it.id), false]),
+        )
+        saveEntryChecklistChecks(tripId, created.id, checksInit)
+      }
+
+      trackEvent('save_confirm_navigate_guide_archive', { trip_id: tripId, item_count: itemsToSave.length })
+      setSaving(false)
+      setSaveConfirmModalOpen(false)
       navigate(`/trips/${tripId}/guide-archive`)
-      return
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        '저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+      setSaveError(msg)
+      setSaving(false)
+      if (import.meta.env.DEV) {
+        console.warn('[TripSearchPage] save 실패', err)
+      }
     }
-
-    markItemsSelectedOnServer(itemsToSave)
-
-    const newItems = itemsToSave.filter((i) => !savedIds.has(String(i.id)))
-    saveItemsForTrip(tripId, newItems)
-    newItems.forEach((item) => {
-      trackEvent('save_complete', {
-        trip_id: tripId, item_id: item.id, item_category: item.category,
-        elapsed_ms: searchStartRef.current ? Date.now() - searchStartRef.current : null,
-      })
-    })
-    setSavedIds((prev) => {
-      const next = new Set(prev)
-      itemsToSave.forEach((i) => next.add(String(i.id)))
-      return next
-    })
-
-    const plan = loadActiveTripPlan()
-    const dest = plan?.destination
-    const ts = plan?.tripStartDate
-    const te = plan?.tripEndDate
-    const fromDestination = Boolean(dest && ts && te)
-
-    const nextArchiveList = appendGuideArchiveEntry(tripId, {
-      pageTitle: fromDestination ? `${dest.country} · ${dest.city} 여행 준비` : TRIP_SEARCH_CONTEXT.title,
-      pageSubtitle: '',
-      destination: fromDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
-      country: fromDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
-      tripWindowLabel: fromDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
-      tripStartDate: fromDestination ? ts : '',
-      tripEndDate: fromDestination ? te : '',
-      countryCode: fromDestination ? dest.countryCode : '',
-      iata: fromDestination ? dest.iata : '',
-      weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
-      temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
-      rainChance: TRIP_SEARCH_CONTEXT.rainChance,
-      environmentTags: TRIP_SEARCH_CONTEXT.environmentTags.map((t) => ({ ...t })),
-      phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
-      items: itemsToSave.map(mapMockItemToArchiveItem),
-      dailySummaries: [],
-      dailyGuidesFull: [],
-    })
-    const newArchiveEntry = nextArchiveList[0]
-    if (newArchiveEntry?.id) {
-      const checksInit = Object.fromEntries((newArchiveEntry.items ?? []).map((it) => [String(it.id), false]))
-      saveEntryChecklistChecks(tripId, newArchiveEntry.id, checksInit)
-    }
-
-    trackEvent('save_confirm_navigate_guide_archive', { trip_id: tripId, item_count: itemsToSave.length })
-    closeSaveConfirmModal()
-    navigate(`/trips/${tripId}/guide-archive`)
   }
 
   const handleLeaveWithoutSave = () => {
@@ -542,6 +605,8 @@ function TripSearchInner({ tripId }) {
         onConfirm={handleConfirmSaveAndGoArchive}
         onClose={closeSaveConfirmModal}
         mergeToArchive={mergeToArchive}
+        saving={saving}
+        error={saveError}
       />
       <TripSearchLeaveModal
         open={leaveModalOpen}

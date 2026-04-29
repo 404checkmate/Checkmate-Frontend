@@ -26,23 +26,23 @@ apiClient.interceptors.request.use(async (config) => {
   if (token) {
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${token}`
+  } else if (import.meta.env.DEV) {
+    console.warn(
+      `[apiClient] no access_token resolved → request to ${config.url} will go without Authorization`,
+    )
   }
   return config
 })
 
+// 401 응답이 와도 localStorage 토큰을 자동 삭제하지 않는다.
+// 과거에는 `removeItem(AUTH_TOKEN_STORAGE_KEY)` 가 들어 있었는데,
+// (a) 비로그인 상태에서 보호된 라우트에 한 번 진입하면 401 → 폴백 영구 wipe,
+// (b) 백엔드 일시 장애로 401 이 떨어져도 사용자는 "갑자기 로그아웃" 되고 supabase 세션도
+//     hydration 레이스로 잠깐 비면 토큰 자체가 사라지는 사고가 잦았다.
+// 명시적인 로그아웃은 `auth.signOut()` 이 처리하므로 인터셉터에서는 토큰을 건드리지 않는다.
 apiClient.interceptors.response.use(
   (res) => res,
-  (err) => {
-    if (err?.response?.status === 401) {
-      try {
-        localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
-        localStorage.removeItem(AUTH_PROVIDER_STORAGE_KEY)
-      } catch {
-        /* quota/access issues: ignore */
-      }
-    }
-    return Promise.reject(err)
-  },
+  (err) => Promise.reject(err),
 )
 
 export async function resolveAccessToken() {
@@ -51,9 +51,21 @@ export async function resolveAccessToken() {
     try {
       const { data } = await supabase.auth.getSession()
       const token = data?.session?.access_token
-      if (token) return token
+      if (token) {
+        // 매 요청마다 최신 supabase 토큰을 localStorage 백업과 동기화한다.
+        // - supabase 가 자동 갱신(refresh)한 경우에도 폴백 값이 같이 따라오도록.
+        // - 다음 페이지 로드에서 supabase hydration 레이스가 있어도 폴백이 즉시 응답.
+        try {
+          if (localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) !== token) {
+            localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token)
+          }
+        } catch {
+          /* storage 접근 실패: ignore */
+        }
+        return token
+      }
     } catch {
-      /* fall through */
+      /* fall through to localStorage */
     }
   }
   try {

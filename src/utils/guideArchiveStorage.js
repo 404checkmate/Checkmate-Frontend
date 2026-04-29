@@ -1,236 +1,141 @@
 /**
- * 여행 검색(/trips/:id/search)에서 「저장」 시 스냅샷을 쌓아
- * 가이드 보관함(/trips/:id/guide-archive) 목록에서 조회합니다.
+ * 가이드 보관함 — 서버 단일 소스 wrapper.
  *
- * 백엔드 연동 시 권장 스냅샷 필드 (목적지 페이지 `/trips/new/destination` 와 동일 의미):
- * - tripStartDate, tripEndDate: YYYY-MM-DD
- * - country, destination: 국가명 · 대표 도시(또는 지역 한 줄)
- * - countryCode, iata: 공항/국가 코드 (검색·날씨 API 매핑용)
+ * 이 파일은 과거 localStorage(`travel_fe_guide_archive_v1_<tripId>`) 기반이었으나,
+ * 다중 기기 동기화 / MyGuideArchivesPage 와의 ID 공간 통일을 위해 전면적으로 서버 API
+ * (`/api/trips/:tripId/guide-archives`, `/api/guide-archives/:id`) 단일 소스로 전환됨.
+ *
+ * 변경 사항:
+ *   - 모든 함수가 비동기(Promise) 가 됨.
+ *   - 함수 시그니처는 기존 호출부 호환을 위해 유지 (tripId, entryId, partial …).
+ *   - localStorage 읽기/쓰기 코드는 전부 제거.
+ *
+ * 별도 파일인 `guideArchiveEntryChecklistStorage.js` (per-entry 체크 진행률) 는
+ * 이번 마이그레이션 범위 밖이므로 그대로 유지.
  */
 import {
   listGuideArchives as apiListGuideArchives,
   createGuideArchive as apiCreateGuideArchive,
   updateGuideArchive as apiUpdateGuideArchive,
   deleteGuideArchive as apiDeleteGuideArchive,
+  fetchTripGuideArchives as apiFetchTripGuideArchives,
+  toEntryShape,
 } from '@/api/guideArchives'
-
-const STORAGE_PREFIX = 'travel_fe_guide_archive_v1_'
-const PLACEHOLDER_TRIP_ID = '1'
 
 /**
  * @typedef {Object} GuideArchiveEntry
- * @property {string} id
- * @property {string} savedAt - ISO
+ * @property {string} id           - server BigInt id (stringified)
+ * @property {string} serverId     - id 와 동일. 레거시 호환을 위해 둘 다 노출.
+ * @property {string} archivedAt   - ISO
  * @property {string} pageTitle
  * @property {string} destination
  * @property {string} country
  * @property {string} tripWindowLabel
  * @property {string} weatherSummary
- * @property {Array<{
- *   id: string,
- *   category: string,
- *   categoryLabel: string,
- *   title: string,
- *   description?: string,
- *   detail?: string,
- *   baggageType?: 'carry_on'|'checked',
- *   serverId?: string|null,
- *   source?: string,
- *   prepType?: string,
- *   subCategory?: string,
- *   subCategoryLabel?: string,
- *   refinedCategory?: string,
- *   refinedSubCategory?: string,
- *   refineConfidence?: number,
- *   refinedByModel?: string,
- *   refinedAt?: string
- * }>} items
- * @property {Array<{ id: string, dateLabel: string, region: string, weatherLine: string }>} dailySummaries
- * @property {string} [pageSubtitle]
- * @property {string} [temperatureRange]
- * @property {string} [rainChance]
- * @property {Array<{ id: string, label: string, detail: string }>} [environmentTags]
- * @property {Array<{ phase: string, text: string }>} [phaseHints]
- * @property {Array<{ id: string, dateLabel: string, region: string, weatherLine: string, environment: string[], essentials: string[], cautions: string[] }>} [dailyGuidesFull]
+ * @property {Array<{ id: string, category: string, title: string, ... }>} items
+ * ... (snapshot 의 나머지 필드들 — 자유 형식)
  */
 
 /**
+ * 한 trip 의 보관함 entry 목록을 서버에서 가져온다.
  * @param {string|number} tripId
- * @returns {GuideArchiveEntry[]}
+ * @returns {Promise<GuideArchiveEntry[]>}
  */
-export function loadGuideArchive(tripId) {
+export async function loadGuideArchive(tripId) {
   if (tripId == null) return []
-  try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + String(tripId))
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+  return apiFetchTripGuideArchives(tripId)
 }
 
 /**
- * @param {string|number} tripId
- * @param {string} entryId
- */
-export function getGuideArchiveEntry(tripId, entryId) {
-  if (tripId == null || entryId == null) return null
-  return loadGuideArchive(tripId).find((e) => String(e.id) === String(entryId)) ?? null
-}
-
-/**
- * 기존 엔트리에 필드 병합 (체크리스트 저장 시 진행률 스냅샷 등)
+ * 한 entry 단건 조회. server id 기반.
  * @param {string|number} tripId
  * @param {string|number} entryId
- * @param {Record<string, unknown>} partial
+ * @returns {Promise<GuideArchiveEntry|null>}
  */
-export function patchGuideArchiveEntry(tripId, entryId, partial) {
+export async function getGuideArchiveEntry(tripId, entryId) {
   if (tripId == null || entryId == null) return null
-  const list = loadGuideArchive(tripId)
-  const idx = list.findIndex((e) => String(e.id) === String(entryId))
-  if (idx < 0) return null
-  const next = [...list]
-  next[idx] = { ...next[idx], ...partial }
-  saveGuideArchiveList(tripId, next)
-
-  // Server sync: PATCH fire-and-forget (only if serverId is known)
-  const updated = next[idx]
-  if (String(tripId) !== PLACEHOLDER_TRIP_ID && updated.serverId) {
-    apiUpdateGuideArchive(updated.serverId, { snapshot: updated })
-      .catch((err) => {
-        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] PATCH failed', err?.message ?? err)
-      })
-  }
-
-  return updated
-}
-
-/** 해당 여행의 가이드 보관함 목록을 모두 삭제합니다. */
-export function clearGuideArchive(tripId) {
-  if (tripId == null) return
-  try {
-    localStorage.removeItem(STORAGE_PREFIX + String(tripId))
-  } catch (e) {
-    console.warn('[guideArchiveStorage] clear failed', e)
-  }
+  const list = await apiFetchTripGuideArchives(tripId)
+  return list.find((e) => String(e.id) === String(entryId)) ?? null
 }
 
 /**
+ * 새 entry 를 서버에 생성하고 entry 형태로 반환.
+ * `snapshot` 은 객체 통째로 서버에 저장되며, 이후 read 시 그대로 풀려 entry 의 베이스가 된다.
  * @param {string|number} tripId
- * @param {Omit<GuideArchiveEntry, 'id'|'savedAt'> & { id?: string, savedAt?: string }} snapshot
- * @returns {GuideArchiveEntry[]}
+ * @param {Object} snapshot
+ * @returns {Promise<GuideArchiveEntry>}
  */
-export function appendGuideArchiveEntry(tripId, snapshot) {
-  const prev = loadGuideArchive(tripId)
-  const entry = {
-    id: snapshot.id ?? `ga-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-    savedAt: snapshot.savedAt ?? new Date().toISOString(),
-    pageTitle: snapshot.pageTitle,
-    pageSubtitle: snapshot.pageSubtitle ?? '',
-    destination: snapshot.destination,
-    country: snapshot.country,
-    tripWindowLabel: snapshot.tripWindowLabel,
-    weatherSummary: snapshot.weatherSummary,
-    temperatureRange: snapshot.temperatureRange ?? '',
-    rainChance: snapshot.rainChance ?? '',
-    environmentTags: Array.isArray(snapshot.environmentTags) ? snapshot.environmentTags : [],
-    phaseHints: Array.isArray(snapshot.phaseHints) ? snapshot.phaseHints : [],
-    items: Array.isArray(snapshot.items) ? snapshot.items : [],
-    dailySummaries: Array.isArray(snapshot.dailySummaries) ? snapshot.dailySummaries : [],
-    dailyGuidesFull: Array.isArray(snapshot.dailyGuidesFull) ? snapshot.dailyGuidesFull : [],
-    tripStartDate: snapshot.tripStartDate ?? '',
-    tripEndDate: snapshot.tripEndDate ?? '',
-    countryCode: snapshot.countryCode ?? '',
-    iata: snapshot.iata ?? '',
-  }
-  const next = [entry, ...prev]
-  try {
-    localStorage.setItem(STORAGE_PREFIX + String(tripId), JSON.stringify(next))
-  } catch (e) {
-    console.warn('[guideArchiveStorage] save failed', e)
-  }
-
-  // Server sync: POST fire-and-forget; on success store serverId back into localStorage
-  if (String(tripId) !== PLACEHOLDER_TRIP_ID) {
-    apiCreateGuideArchive(tripId, { name: entry.pageTitle ?? '보관함 항목', snapshot: entry })
-      .then((serverArchive) => {
-        const current = loadGuideArchive(tripId)
-        const idx = current.findIndex((e) => String(e.id) === String(entry.id))
-        if (idx >= 0) {
-          const updated = [...current]
-          updated[idx] = { ...updated[idx], serverId: serverArchive.id }
-          saveGuideArchiveList(tripId, updated)
-        }
-      })
-      .catch((err) => {
-        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] POST failed', err?.message ?? err)
-      })
-  }
-
-  return next
+export async function appendGuideArchiveEntry(tripId, snapshot) {
+  if (tripId == null) throw new Error('tripId required')
+  const name = snapshot?.pageTitle ?? snapshot?.name ?? '보관함 항목'
+  const archive = await apiCreateGuideArchive(tripId, { name, snapshot })
+  return toEntryShape(archive)
 }
 
-/** 목록 전체를 덮어씁니다. (예시 시드 등 특수 용도) */
-export function saveGuideArchiveList(tripId, entries) {
-  if (tripId == null) return
+/**
+ * entry 의 일부 필드를 갱신. server snapshot 은 객체 전체가 교체되므로
+ * 내부적으로 GET 으로 현재 snapshot 을 가져와 partial 을 머지한 뒤 PATCH.
+ * 호출부는 기존처럼 `(tripId, entryId, partial)` 로 호출하면 됨 — fire-and-forget 가능.
+ *
+ * @param {string|number} _tripId  - 시그니처 호환용. 실제로는 사용하지 않음.
+ * @param {string|number} entryId
+ * @param {Object} partial
+ * @returns {Promise<GuideArchiveEntry|null>}
+ */
+export async function patchGuideArchiveEntry(_tripId, entryId, partial) {
+  if (entryId == null || !partial || typeof partial !== 'object') return null
+  // 현재 snapshot 을 받아와 partial 을 머지 (server 는 snapshot 을 통째로 교체).
+  const list = _tripId != null ? await apiFetchTripGuideArchives(_tripId) : []
+  const current = list.find((e) => String(e.id) === String(entryId)) ?? null
+  const baseSnap = current
+    ? Object.fromEntries(
+        Object.entries(current).filter(([k]) => !['id', 'serverId', 'archivedAt', 'updatedAt'].includes(k)),
+      )
+    : {}
+  const nextSnap = { ...baseSnap, ...partial }
   try {
-    localStorage.setItem(STORAGE_PREFIX + String(tripId), JSON.stringify(entries))
-  } catch (e) {
-    console.warn('[guideArchiveStorage] saveGuideArchiveList failed', e)
-  }
-}
-
-/** 지정한 id의 스냅샷만 제거합니다. */
-export function removeGuideArchiveEntriesByIds(tripId, entryIds) {
-  if (tripId == null || !Array.isArray(entryIds) || entryIds.length === 0) return
-  const drop = new Set(entryIds.map((id) => String(id)))
-  const all = loadGuideArchive(tripId)
-
-  // Collect serverIds before removing from localStorage
-  const serverIdsToDelete = all
-    .filter((e) => drop.has(String(e.id)) && e.serverId)
-    .map((e) => e.serverId)
-
-  saveGuideArchiveList(tripId, all.filter((e) => !drop.has(String(e.id))))
-
-  // Server sync: DELETE fire-and-forget
-  if (String(tripId) !== PLACEHOLDER_TRIP_ID) {
-    serverIdsToDelete.forEach((serverId) => {
-      apiDeleteGuideArchive(serverId).catch((err) => {
-        if (import.meta.env.DEV) console.warn('[guideArchiveStorage] DELETE failed', err?.message ?? err)
-      })
-    })
+    const updated = await apiUpdateGuideArchive(entryId, { snapshot: nextSnap })
+    return toEntryShape(updated)
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn('[guideArchiveStorage] patchGuideArchiveEntry 실패', err?.message ?? err)
+    }
+    return null
   }
 }
 
 /**
- * 서버에서 가이드 보관함 목록을 가져와 localStorage와 동기화한다.
- * 서버 응답이 성공하면 서버 데이터를 localStorage에 반영하고 반환.
- * 실패하면(오프라인 등) localStorage 데이터를 fallback으로 반환.
+ * 여러 entry 를 일괄 삭제.
+ * @param {string|number} _tripId
+ * @param {Array<string|number>} entryIds
+ */
+export async function removeGuideArchiveEntriesByIds(_tripId, entryIds) {
+  if (!Array.isArray(entryIds) || entryIds.length === 0) return
+  await Promise.all(
+    entryIds.map((id) =>
+      apiDeleteGuideArchive(id).catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn('[guideArchiveStorage] delete 실패', err?.message ?? err)
+        }
+      }),
+    ),
+  )
+}
+
+/**
+ * 과거 호환용 — 단순히 server fetch 와 동일.
+ * (호출부에서 sync 후 set 하는 패턴을 유지하기 위해 시그니처만 보존)
  * @param {string|number} tripId
  * @returns {Promise<GuideArchiveEntry[]>}
  */
 export async function syncGuideArchivesFromServer(tripId) {
-  if (String(tripId) === PLACEHOLDER_TRIP_ID) return loadGuideArchive(tripId)
-  try {
-    const archives = await apiListGuideArchives(tripId)
-    const entries = archives.map((archive) => {
-      const snap = typeof archive.snapshot === 'object' && archive.snapshot !== null
-        ? archive.snapshot
-        : {}
-      return {
-        ...snap,
-        serverId: archive.id,
-        id: snap.id ?? archive.id,
-      }
-    })
-    saveGuideArchiveList(tripId, entries)
-    return entries
-  } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn('[guideArchiveStorage] syncFromServer failed, using localStorage:', err?.message ?? err)
-    }
-    return loadGuideArchive(tripId)
-  }
+  return loadGuideArchive(tripId)
 }
+
+/** 사용처가 사라졌으나 import 호환을 위해 no-op 으로 유지. */
+export function saveGuideArchiveList() {
+  /* no-op (server 단일 소스로 전환됨) */
+}
+
+// 직접 export (디버그/테스트 편의용).
+export { apiListGuideArchives, apiCreateGuideArchive, apiUpdateGuideArchive, apiDeleteGuideArchive }

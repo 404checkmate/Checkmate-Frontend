@@ -5,7 +5,6 @@
 import { upsertChecklistItems } from '@/api/checklists'
 
 const STORAGE_PREFIX = 'travel_fe_trip_saved_items_v1_'
-const PLACEHOLDER_TRIP_ID = '1'
 
 /**
  * @param {string|number} tripId
@@ -134,8 +133,6 @@ export function saveItemsForTrip(tripId, items) {
       subtitle: item.detail || item.description || '',
     })
   })
-
-  if (String(tripId) === PLACEHOLDER_TRIP_ID) return
 
   const upsertPayload = items
     .filter((i) => i.subCategory && i.prepType && i.baggageType && i.source && i.title)

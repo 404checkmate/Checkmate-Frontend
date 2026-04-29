@@ -28,8 +28,11 @@ export function getSupabaseClient() {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true, // /auth/callback 에서 해시를 자동 파싱
-      flowType: 'implicit',
+      detectSessionInUrl: true, // /auth/callback 에서 code/해시를 자동 처리
+      // PKCE: refresh_token 을 발급하므로 access_token(≈1h) 만료 후에도 자동 갱신 가능.
+      // (구 'implicit' 은 refresh_token 미발급 → 세션이 1시간 뒤 자체 소멸하면서
+      //  apiClient 가 토큰을 못 붙여 401 'Missing Bearer token' 으로 떨어지는 사고가 잦았다.)
+      flowType: 'pkce',
     },
   })
   return _client

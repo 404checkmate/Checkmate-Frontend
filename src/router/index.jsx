@@ -18,6 +18,7 @@ const TripLoadingPage = lazy(() => import('@/pages/TripLoadingPage'))
 const TripSearchPage = lazy(() => import('@/pages/TripSearchPage'))
 const TripGuideArchivePage = lazy(() => import('@/pages/TripGuideArchivePage'))
 const TripGuideArchiveDetailPage = lazy(() => import('@/pages/TripGuideArchiveDetailPage'))
+const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const MyPage = lazy(() => import('@/pages/MyPage'))
 const ErrorPage = lazy(() => import('@/pages/ErrorPage'))
@@ -84,6 +85,7 @@ const AppRoutes = () => {
         { path: '/trips/new/step4',     element: withSuspense(<TripNewStep4Page />) },
         { path: '/trips/new/step5',     element: withSuspense(<TripNewStep5Page />) },
         { path: '/trips/:id/search',                  element: withSuspense(<TripSearchPage />) },
+        { path: '/guide-archives',                    element: withSuspense(<MyGuideArchivesPage />) },
         { path: '/trips/:id/guide-archive/:entryId',  element: withSuspense(<TripGuideArchiveDetailPage />) },
         { path: '/trips/:id/guide-archive',           element: withSuspense(<TripGuideArchivePage />) },
         { path: '/404',                 element: withSuspense(<NotFoundPage />) },

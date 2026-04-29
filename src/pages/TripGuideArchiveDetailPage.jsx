@@ -1,29 +1,95 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useMemo, useState } from 'react'
-import { getGuideArchiveEntry } from '@/utils/guideArchiveStorage'
+import { useEffect, useState } from 'react'
+import { fetchTripGuideArchives } from '@/api/guideArchives'
 import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
 import { TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE } from '@/utils/tripMintPageBackground'
 
 /**
  * 라우트: /trips/:id/guide-archive/:entryId
- * - 목록(TripGuideArchivePage)에서 저장된 여행 스냅샷을 누르면 진입
- * - 검색에서 담은 필수품(entry.items)을 이 화면에서 하나씩 체크하며 준비 (상태는 entry 단위로 분리 저장)
+ * - 목록(TripGuideArchivePage) 또는 MyGuideArchivesPage 의 카드에서 진입.
+ * - entryId 는 서버 GuideArchive.id (BigInt 문자열).
+ * - 서버에서 한 trip 의 보관함을 통째로 받아 entryId 매칭으로 단건을 골라낸다.
+ *   (서버에 단건 GET 엔드포인트가 없어 listByTrip 결과에서 find 로 처리.)
  */
 
 function TripGuideArchiveDetailInner({ tripId, entryId }) {
   const navigate = useNavigate()
-  /** 상세에서 준비물 삭제(patch) 후 목록을 스토리지에서 다시 읽기 위해 */
+  const [entry, setEntry] = useState(null)
+  /** 'loading' | 'ready' | 'not_found' | 'error' */
+  const [status, setStatus] = useState('loading')
+  const [errorMessage, setErrorMessage] = useState('')
+  /** 상세에서 mutate(삭제·저장) 후 다시 읽기 위한 트리거 */
   const [archiveRevision, setArchiveRevision] = useState(0)
-  const entry = useMemo(
-    () => getGuideArchiveEntry(tripId, entryId),
-    [tripId, entryId, archiveRevision],
-  )
-  const entryForView = useMemo(() => {
-    if (!entry) return entry
-    return entry
-  }, [entry])
 
-  if (!entryForView) {
+  useEffect(() => {
+    let cancelled = false
+    setStatus('loading')
+    setErrorMessage('')
+    ;(async () => {
+      try {
+        const list = await fetchTripGuideArchives(tripId)
+        if (cancelled) return
+        const found = list.find((e) => String(e.id) === String(entryId)) ?? null
+        if (!found) {
+          setEntry(null)
+          setStatus('not_found')
+          return
+        }
+        setEntry(found)
+        setStatus('ready')
+      } catch (err) {
+        if (cancelled) return
+        setEntry(null)
+        setStatus('error')
+        setErrorMessage(err?.response?.data?.message || err?.message || '알 수 없는 오류')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [tripId, entryId, archiveRevision])
+
+  if (status === 'loading') {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center px-4"
+        style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}
+      >
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" aria-hidden />
+        <p className="mt-4 text-sm font-semibold text-gray-700">체크리스트를 불러오는 중…</p>
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center px-4"
+        style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}
+      >
+        <p className="text-gray-700 font-medium mb-2">체크리스트를 불러오지 못했어요.</p>
+        <p className="text-sm text-gray-500 mb-6 text-center">{errorMessage || '잠시 후 다시 시도해 주세요.'}</p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setArchiveRevision((n) => n + 1)}
+            className="rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold px-6 py-3"
+          >
+            다시 시도
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(`/trips/${tripId}/guide-archive`)}
+            className="rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-bold px-6 py-3"
+          >
+            리스트 보관함으로
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'not_found' || !entry) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-4"
@@ -44,7 +110,6 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
 
   return (
     <div className="min-h-screen" style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}>
-      {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·뒤로가기 왼선 일치 */}
       <div className="mx-auto flex w-full max-w-7xl items-center px-3 pt-4 md:px-6 md:pt-8 lg:px-8">
         <button
           type="button"
@@ -56,7 +121,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
       </div>
       <GuideArchiveChecklistView
         tripId={tripId}
-        entry={entryForView}
+        entry={entry}
         onArchiveMutated={() => setArchiveRevision((n) => n + 1)}
       />
     </div>

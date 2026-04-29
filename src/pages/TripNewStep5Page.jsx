@@ -23,9 +23,6 @@ import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
 
-/** placeholder 로 써오던 하드코딩 tripId — Trip 생성 실패 시 graceful fallback 용 */
-const PLACEHOLDER_TRIP_ID = '1'
-
 function SvgIcon({ name, className = 'w-6 h-6' }) {
   const composite = STEP5_ICON_COMPOSITE[name]
   if (composite) {
@@ -166,21 +163,21 @@ function TripNewStep5PageContent() {
           err?.response?.data?.message ||
           err?.message ||
           '여행 계획을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.'
-        console.warn('[TripNewStep5Page] createTrip 실패, placeholder 플로우로 fallback:', message)
-        setSubmitError(
-          '여행 계획 저장 중 문제가 발생해 임시로 진행합니다. 계속 문제가 되면 새로고침 후 다시 시도해 주세요.',
-        )
+        console.warn('[TripNewStep5Page] createTrip 실패:', message)
+        setSubmitError('여행 계획 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.')
         clearActiveTripId()
+        return
       } finally {
         setSubmitting(false)
       }
     } else {
-      // payload 구성 실패 (목적지/기간/동행/스타일 미비) → 기존 placeholder 플로우.
+      // payload 구성 실패 (목적지/기간/동행/스타일 미비)
       clearActiveTripId()
+      setSubmitError('여행 정보를 모두 입력한 뒤 다시 시도해 주세요.')
+      return
     }
 
-    const targetTripId = createdTripId ?? PLACEHOLDER_TRIP_ID
-    navigate(`/trips/${targetTripId}/loading`, {
+    navigate(`/trips/${createdTripId}/loading`, {
       state: {
         ...(location.state ?? {}),
         step5: step5State,
