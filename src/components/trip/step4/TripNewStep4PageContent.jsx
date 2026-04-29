@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { STEP4_CONFIG, fetchTripDatesForStep4 } from '@/mocks/tripNewStep4Data'
+import { listCities } from '@/api/master'
 import { loadStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { arrayMove } from '@/utils/tripStep4Helpers'
 import StepHeader from '@/components/common/StepHeader'
@@ -35,6 +36,9 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
   const [tripDatesLoading, setTripDatesLoading] = useState(true)
   const [tripDatesError, setTripDatesError] = useState(null)
 
+  /** 도시 자동완성용 — 마운트 시 1회 fetch */
+  const [cities, setCities] = useState([])
+
   /** 입력 초안 / 확인 시 목록에 추가(선택) → Step5 otherStopsNote로 합쳐 전달 */
   const [placeDraft, setPlaceDraft] = useState('')
   const [selectedPlaces, setSelectedPlaces] = useState([])
@@ -59,6 +63,12 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
 
   const clearAllPlaces = useCallback(() => {
     setSelectedPlaces([])
+  }, [])
+
+  useEffect(() => {
+    listCities({ onlyServed: true })
+      .then(setCities)
+      .catch(() => {})
   }, [])
 
   const arrivalKey = `${arrival?.iata ?? ''}-${arrival?.city ?? ''}-${arrival?.country ?? ''}`
@@ -181,6 +191,8 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
                 value={placeDraft}
                 onChange={setPlaceDraft}
                 onConfirm={confirmPlace}
+                cities={cities}
+                countryCode={arrival?.countryCode ?? ''}
               />
               <Step4NonVnSelectedPlacesList
                 items={selectedPlaces}
@@ -234,6 +246,8 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
               value={placeDraft}
               onChange={setPlaceDraft}
               onConfirm={confirmPlace}
+              cities={cities}
+              countryCode={arrival?.countryCode ?? ''}
             />
             <Step4NonVnSelectedPlacesList
               items={selectedPlaces}
