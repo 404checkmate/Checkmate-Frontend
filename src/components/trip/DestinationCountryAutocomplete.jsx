@@ -58,13 +58,14 @@ export default function DestinationCountryAutocomplete({
             onFocus={onCountryFocus}
             placeholder={placeholder}
             readOnly={countryInputReadOnly}
+            onClick={countryInputReadOnly ? onChangeCountryRequest : undefined}
             autoComplete="off"
             aria-autocomplete="list"
             aria-expanded={isPanelOpen}
             aria-controls={panelId}
             className={`min-w-0 flex-1 bg-transparent py-3.5 pl-12 pr-2 text-sm text-gray-800 outline-none placeholder:text-gray-400 ${
               isPanelOpen ? 'rounded-t-2xl' : 'rounded-2xl'
-            } ${countryInputReadOnly ? 'cursor-default bg-sky-50/40' : ''}`}
+            } ${countryInputReadOnly ? 'cursor-pointer bg-sky-50/40' : ''}`}
           />
           {countryInputReadOnly && onChangeCountryRequest && (
             <button

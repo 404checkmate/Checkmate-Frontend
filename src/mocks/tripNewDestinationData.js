@@ -35,11 +35,11 @@ export const DESTINATION_ICON_PATHS = {
  */
 /** 빠른 선택(추천) 칩 — 모바일·데스크톱 공용, 표시 라벨 → `COUNTRY_ARRIVAL_OPTIONS`의 `name`과 매칭 */
 export const MOBILE_QUICK_DESTINATION_CHIPS = [
-  { label: '파리', countryName: '프랑스' },
-  { label: '도쿄', countryName: '일본' },
-  { label: '방콕', countryName: '태국' },
-  { label: '뉴욕', countryName: '미국' },
-  { label: '제주도', countryName: '대한민국' },
+  { label: '일본', countryName: '일본' },
+  { label: '중국', countryName: '중국' },
+  { label: '미국', countryName: '미국' },
+  { label: '베트남', countryName: '베트남' },
+  { label: '대만', countryName: '대만' },
 ]
 
 /**

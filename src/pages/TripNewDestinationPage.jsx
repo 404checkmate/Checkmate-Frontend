@@ -54,11 +54,13 @@ function buildCountryArrivalOptions(countries, cities) {
       city: primaryCity?.nameKo ?? mockEntry?.city ?? '',
       country: country.nameKo,
       countryCode: country.code,
-      arrivals: countryCities.map((c) => ({
-        city: c.nameKo,
-        iata: c.iataCode,
-        aliases: mockEntry?.arrivals?.find((a) => a.iata === c.iataCode)?.aliases ?? [],
-      })),
+      arrivals: countryCities.length > 0
+        ? countryCities.map((c) => ({
+            city: c.nameKo,
+            iata: c.iataCode,
+            aliases: mockEntry?.arrivals?.find((a) => a.iata === c.iataCode)?.aliases ?? [],
+          }))
+        : (mockEntry?.arrivals ?? []),
     }
   })
 }
