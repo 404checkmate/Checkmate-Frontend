@@ -123,7 +123,7 @@ export const HOME_CTA = {
   subtitle:
     '여행 준비할 때 골라 담은 목록이 모이는 보관함이에요. 리스트를 열고 항목을 체크하며 출발 전 준비를 마무리하고, 계획 중인 여행과 지난 일정을 한곳에서 관리해 보세요.',
   buttonLabel: '나의 체크리스트로',
-  buttonTo: '/trips/1/guide-archive',
+  buttonTo: '/guide-archives',
 }
 
 /** 랜딩 하단 캐치프레이즈 — 1행 카피 + 2행은 로고 + afterLogo (줄바꿈) */

@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { label: '여행 준비', path: '/trips/new/destination', match: (p) => p.startsWith('/trips/new') },
   {
     label: '체크리스트',
-    path: '/trips/1/guide-archive',
+    path: '/guide-archives',
     match: (p) => p.includes('/guide-archive'),
   },
 ]
