@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { generateChecklist } from '@/api/checklists'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import {
@@ -42,35 +43,46 @@ function TripLoadingPage() {
 
   const v = LOADING_VARIANTS[variantIndex]
 
-  /* 진행률 자동 증가: ~5초 완료 */
+  /* progress 애니메이션 + generateChecklist 병렬 실행 — 둘 다 완료 시 이동 */
   useEffect(() => {
-    const timer = setInterval(() => {
+    if (!id) {
+      navigate('/trips/new/destination', { replace: true })
+      return
+    }
+
+    let progressDone = false
+    let generateDone = false
+
+    const tryNavigate = () => {
+      if (progressDone && generateDone) {
+        navigate(`/trips/${id}/search`)
+      }
+    }
+
+    const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer)
-          return 100
+        const next = prev + (prev < 70 ? 1.2 : 0.7)
+        if (next >= 100) {
+          clearInterval(interval)
+          setProgress(100)
+          setTimeout(() => {
+            progressDone = true
+            tryNavigate()
+          }, 600)
         }
-        /* 구간별 속도 조정: 후반부 살짝 느리게 */
-        const step = prev < 60 ? 1.2 : 0.7
-        return Math.min(prev + step, 100)
+        return Math.min(next, 100)
       })
     }, 50)
-    return () => clearInterval(timer)
-  }, [])
 
-  /* 진행 완료 후 이동 */
-  useEffect(() => {
-    if (progress >= 100) {
-      const t = setTimeout(() => {
-        if (!id) {
-          navigate('/trips/new/destination', { replace: true })
-          return
-        }
-        navigate(`/trips/${id}/search`)
-      }, 600)
-      return () => clearTimeout(t)
-    }
-  }, [progress, id, navigate])
+    generateChecklist(id)
+      .catch(() => {})
+      .finally(() => {
+        generateDone = true
+        tryNavigate()
+      })
+
+    return () => clearInterval(interval)
+  }, [id, navigate])
 
   const pct = Math.round(progress)
 

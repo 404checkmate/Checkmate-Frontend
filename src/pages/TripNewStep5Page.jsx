@@ -24,7 +24,8 @@ import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { savePendingTripSubmit } from '@/utils/pendingTripSubmit'
-import { resolveAccessToken } from '@/api/client'
+import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
+import { getSupabaseClient } from '@/lib/supabase'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
   const composite = STEP5_ICON_COMPOSITE[name]
@@ -151,8 +152,15 @@ function TripNewStep5PageContent() {
   const handleCreatePlan = async () => {
     if (!canSubmit) return
 
-    const token = await resolveAccessToken()
-    if (!token) {
+    const supabase = getSupabaseClient()
+    let isLoggedIn = false
+    if (supabase) {
+      const { data } = await supabase.auth.getSession()
+      isLoggedIn = !!data?.session?.access_token
+    } else {
+      isLoggedIn = !!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+    }
+    if (!isLoggedIn) {
       setLoginGateOpen(true)
       return
     }
