@@ -126,7 +126,7 @@ function TripNewStep5PageContent() {
     const existingPlan = loadActiveTripPlan()
     const companionLabel = companions.find((c) => c.id === companionId)?.label ?? null
     const travelStyleLabels = travelStyles.filter((s) => styleIds.includes(s.id)).map((s) => s.label)
-    const hasPet = companionId === 'withPet'
+    const hasPet = companionId === 'pets' || companionId === 'withPet'
     const nextPlan = existingPlan?.destination
       ? {
           ...existingPlan,

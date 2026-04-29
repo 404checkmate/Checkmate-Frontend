@@ -84,7 +84,7 @@ export const COMPANIONS = [
     icon: 'child',
   },
   {
-    id: 'withPet',
+    id: 'pets',
     label: '반려동물과',
     description: '펫 프렌들리 동선으로 함께',
     icon: 'pet',
