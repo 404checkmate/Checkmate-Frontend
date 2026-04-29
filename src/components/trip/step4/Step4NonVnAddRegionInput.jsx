@@ -11,20 +11,27 @@ export default function Step4NonVnAddRegionInput({
 }) {
   const inputRef = useRef(null)
   const comboRef = useRef(null)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const submit = () => {
     const t = value.trim()
     if (t.length < 1) return
     onConfirm(t)
-    setDropdownOpen(false)
+    setIsFocused(false)
     inputRef.current?.blur()
   }
 
-  /** 같은 국가 최상단 + 이름/IATA 필터 + 최대 10개 */
+  /**
+   * 빈 입력: 같은 국가 도시만 최대 10개
+   * 입력 있음: nameKo / IATA 필터 후 같은 국가 상단 정렬, 최대 10개
+   */
   const suggestions = useMemo(() => {
     const q = value.trim()
-    if (!q) return []
+    if (!q) {
+      return cities
+        .filter((c) => c.country?.code === countryCode)
+        .slice(0, 10)
+    }
     const matched = cities.filter(
       (c) =>
         c.nameKo.includes(q) ||
@@ -36,11 +43,11 @@ export default function Step4NonVnAddRegionInput({
   }, [value, cities, countryCode])
 
   const sameCount = suggestions.filter((c) => c.country?.code === countryCode).length
-  const isOpen = dropdownOpen && suggestions.length > 0
+  const isOpen = isFocused && suggestions.length > 0
 
   useEffect(() => {
     function handlePointerDown(e) {
-      if (!comboRef.current?.contains(e.target)) setDropdownOpen(false)
+      if (!comboRef.current?.contains(e.target)) setIsFocused(false)
     }
     document.addEventListener('mousedown', handlePointerDown)
     return () => document.removeEventListener('mousedown', handlePointerDown)
@@ -58,11 +65,10 @@ export default function Step4NonVnAddRegionInput({
           ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => {
-            onChange(e.target.value)
-            setDropdownOpen(true)
-          }}
-          onFocus={() => setDropdownOpen(true)}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onMouseEnter={() => setIsFocused(true)}
           onKeyDown={(e) => {
             if (e.key !== 'Enter') return
             if (e.nativeEvent.isComposing) return
@@ -104,7 +110,7 @@ export default function Step4NonVnAddRegionInput({
                 onMouseDown={(e) => {
                   e.preventDefault()
                   onConfirm(city.nameKo)
-                  setDropdownOpen(false)
+                  setIsFocused(false)
                 }}
                 className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gray-800 transition hover:bg-sky-50"
               >
@@ -130,7 +136,7 @@ export default function Step4NonVnAddRegionInput({
                 onMouseDown={(e) => {
                   e.preventDefault()
                   onConfirm(city.nameKo)
-                  setDropdownOpen(false)
+                  setIsFocused(false)
                 }}
                 className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gray-800 transition hover:bg-sky-50"
               >
