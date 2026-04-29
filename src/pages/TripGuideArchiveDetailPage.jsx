@@ -76,7 +76,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
           </button>
           <button
             type="button"
-            onClick={() => navigate(`/trips/${tripId}/guide-archive`)}
+            onClick={() => navigate('/guide-archives')}
             className="rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-bold px-6 py-3"
           >
             리스트 보관함으로
@@ -96,7 +96,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
         <p className="text-sm text-gray-500 mb-6 text-center">목록에서 삭제되었거나 다른 기기에서만 저장된 경우일 수 있습니다.</p>
         <button
           type="button"
-          onClick={() => navigate(`/trips/${tripId}/guide-archive`)}
+          onClick={() => navigate('/guide-archives')}
           className="rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold px-6 py-3"
         >
           리스트 보관함으로
@@ -110,7 +110,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
       <div className="mx-auto flex w-full max-w-7xl items-center px-3 pt-4 md:px-6 md:pt-8 lg:px-8">
         <button
           type="button"
-          onClick={() => navigate(`/trips/${tripId}/guide-archive`)}
+          onClick={() => navigate('/guide-archives')}
           className="text-sm font-medium text-teal-700 hover:text-teal-900"
         >
           ← 나의 체크리스트로

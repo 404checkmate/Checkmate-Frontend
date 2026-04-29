@@ -44,7 +44,7 @@ function formatDateRange(start, end) {
 
 function ArchiveCard({ archive, deleteMode, isSelected, onToggleSelect, isHighlighted }) {
   const statusLabel = STATUS_LABEL[archive.checklistStatus] ?? archive.checklistStatus
-  const progress = archive.completionRate ?? 0
+  const progress = archive.snapshot?.checklistProgressPercent ?? archive.completionRate ?? 0
   const dateLine = formatDateRange(archive.trip?.tripStart, archive.trip?.tripEnd)
 
   const cardContent = (
