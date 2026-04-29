@@ -1,15 +1,16 @@
-export default function TripSearchSaveModal({ open, onConfirm, onClose, mergeToArchive }) {
+export default function TripSearchSaveModal({ open, onConfirm, onClose, mergeToArchive, saving = false, error = '' }) {
   if (!open) return null
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4"
       role="presentation"
-      onClick={onClose}
+      onClick={saving ? undefined : onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="save-checklist-modal-title"
+        aria-busy={saving ? 'true' : 'false'}
         className={`relative w-full rounded-2xl bg-white p-6 shadow-xl ${mergeToArchive ? 'max-w-md' : 'max-w-sm'}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -27,18 +28,28 @@ export default function TripSearchSaveModal({ open, onConfirm, onClose, mergeToA
             </>
           )}
         </h2>
+        {error ? (
+          <p
+            role="alert"
+            className="mb-4 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-center text-xs font-medium text-red-700"
+          >
+            {error}
+          </p>
+        ) : null}
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
           <button
             type="button"
             onClick={onConfirm}
-            className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md"
+            disabled={saving}
+            className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
           >
-            확인
+            {saving ? '저장 중…' : '확인'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50"
+            disabled={saving}
+            className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             닫기
           </button>

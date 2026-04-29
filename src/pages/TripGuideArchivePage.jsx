@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useLocation, Link } from 'react-router-dom'
-import { loadGuideArchive, removeGuideArchiveEntriesByIds, syncGuideArchivesFromServer } from '@/utils/guideArchiveStorage'
+import { fetchTripGuideArchives } from '@/api/guideArchives'
+import { removeGuideArchiveEntriesByIds } from '@/utils/guideArchiveStorage'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { loadSavedItems } from '@/utils/savedTripItems'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
@@ -37,20 +38,24 @@ function getProgressStatusLabel(progress) {
 
 function TripGuideArchiveInner({ tripId }) {
   const location = useLocation()
-  const [entries, setEntries] = useState(() => loadGuideArchive(tripId))
+  const [entries, setEntries] = useState([])
+  /** 'loading' | 'ready' | 'error' */
+  const [loadStatus, setLoadStatus] = useState('loading')
+  const [loadError, setLoadError] = useState('')
   const [savedItems, setSavedItems] = useState(() => loadSavedItems(tripId))
   const [filterTab, setFilterTab] = useState('draft')
   const [deleteMode, setDeleteMode] = useState(false)
   const [selectedEntryIds, setSelectedEntryIds] = useState([])
   const [checklistRevision, setChecklistRevision] = useState(0)
+  const [reloadTick, setReloadTick] = useState(0)
 
   const filterSheet = useGuideArchiveFilterSheet()
 
   const activeFilterLabel = FILTER_TABS.find((t) => t.id === filterTab)?.label ?? '필터'
 
   const refreshFromStorage = useCallback(() => {
-    setEntries(loadGuideArchive(tripId))
     setSavedItems(loadSavedItems(tripId))
+    setReloadTick((n) => n + 1)
   }, [tripId])
 
   useEffect(() => {
@@ -60,16 +65,30 @@ function TripGuideArchiveInner({ tripId }) {
   }, [])
 
   useEffect(() => {
-    refreshFromStorage()
-  }, [tripId, location.key, refreshFromStorage])
-
-  useEffect(() => {
     trackEvent('guide_archive_list_opened', { trip_id: tripId })
   }, [tripId])
 
   useEffect(() => {
-    syncGuideArchivesFromServer(tripId).then(setEntries)
-  }, [tripId])
+    let cancelled = false
+    setLoadStatus('loading')
+    setLoadError('')
+    ;(async () => {
+      try {
+        const list = await fetchTripGuideArchives(tripId)
+        if (cancelled) return
+        setEntries(list)
+        setLoadStatus('ready')
+      } catch (err) {
+        if (cancelled) return
+        setEntries([])
+        setLoadStatus('error')
+        setLoadError(err?.response?.data?.message || err?.message || '알 수 없는 오류')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [tripId, location.key, reloadTick])
 
   useEffect(() => {
     if (entries.length === 0) {
@@ -117,11 +136,11 @@ function TripGuideArchiveInner({ tripId }) {
     setSelectedEntryIds([])
   }
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedEntryIds.length === 0) return
     if (!window.confirm(`선택한 ${selectedEntryIds.length}개 항목을 삭제할까요? 되돌릴 수 없습니다.`)) return
     trackEvent('guide_archive_entries_deleted', { trip_id: tripId, count: selectedEntryIds.length })
-    removeGuideArchiveEntriesByIds(tripId, selectedEntryIds)
+    await removeGuideArchiveEntriesByIds(tripId, selectedEntryIds)
     exitDeleteMode()
     refreshFromStorage()
   }
@@ -165,7 +184,26 @@ function TripGuideArchiveInner({ tripId }) {
       </div>
 
       <div className="mx-auto max-w-5xl px-4 pt-6 pb-24 md:px-8 md:pb-16">
-        {!entries.length ? (
+        {loadStatus === 'loading' ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white/80 px-6 py-16 text-center md:rounded-2xl">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" aria-hidden />
+            <p className="mt-4 text-sm font-semibold text-gray-700">체크리스트를 불러오는 중…</p>
+          </div>
+        ) : loadStatus === 'error' ? (
+          <div className="rounded-3xl border border-red-100 bg-white px-6 py-12 text-center shadow-sm md:rounded-2xl">
+            <p className="mb-4 text-sm font-semibold text-red-500">체크리스트를 불러오지 못했습니다.</p>
+            {loadError ? (
+              <p className="mb-4 text-xs text-gray-500">{loadError}</p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setReloadTick((n) => n + 1)}
+              className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-teal-800"
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : !entries.length ? (
           <div className="rounded-3xl border border-dashed border-teal-200/60 bg-white/60 px-6 py-16 text-center md:rounded-2xl md:border-slate-200">
             <p className="mb-4 text-sm text-slate-600">아직 저장된 체크리스트가 없습니다.</p>
             <Link
