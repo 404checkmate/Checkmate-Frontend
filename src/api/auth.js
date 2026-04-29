@@ -74,8 +74,12 @@ export async function consumeAuthCallback() {
   }
 
   // `detectSessionInUrl` 파싱 race 대응: 이미 세션이 있으면 즉시, 없으면 SIGNED_IN 이벤트를 잠시 대기.
+  // - implicit: `#access_token=...`
+  // - pkce:     `?code=...` (query string) — supabase 가 비동기로 토큰 교환을 수행하므로 timeout 을 넉넉히.
+  const search = typeof window !== 'undefined' ? window.location.search : ''
+  const hasPkceCode = /[?&]code=/.test(search)
   const hasCallbackHash = Boolean(
-    hashParams.access_token || hashParams.refresh_token || hashParams.code,
+    hashParams.access_token || hashParams.refresh_token || hashParams.code || hasPkceCode,
   )
   const session = await waitForSession(supabase, {
     timeoutMs: hasCallbackHash ? 5000 : 500,
