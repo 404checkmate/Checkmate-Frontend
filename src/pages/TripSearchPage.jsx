@@ -60,7 +60,9 @@ function TripSearchInner({ tripId }) {
       .then((trip) => {
         if (cancelled) return
         if (trip?.tripStart && trip?.tripEnd) {
-          setTripDateLabel(buildTripWindowLabelFromRange(trip.tripStart, trip.tripEnd))
+          const start = String(trip.tripStart).slice(0, 10)
+          const end = String(trip.tripEnd).slice(0, 10)
+          setTripDateLabel(buildTripWindowLabelFromRange(start, end))
         }
       })
       .catch(() => {})
