@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams, Link, useLocation } from 'react-router-dom'
 import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
-import { CATEGORIES, MOCK_ITEMS, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
+import { CATEGORIES, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
 import { getTrip } from '@/api/trips'
 import {
   generateChecklist,
@@ -178,8 +178,11 @@ function TripSearchInner({ tripId }) {
 
       try {
         const cachedData = await listChecklistCandidates(tripId)
-        applyAdapted(cachedData, 'db-cached')
-        return
+        if (cachedData?.items?.length > 0) {
+          applyAdapted(cachedData, 'db-cached')
+          return
+        }
+        // items 없는 빈 Checklist(lazy 생성 잔재) → generate 경로로 fall-through
       } catch (candidateErr) {
         if (candidateErr?.response?.status !== 404) {
           console.warn('[TripSearchPage] listCandidates 실패, generate로 폴백:', candidateErr?.message ?? candidateErr)
@@ -216,7 +219,7 @@ function TripSearchInner({ tripId }) {
     return () => { cancelled = true }
   }, [tripId, retryTick])
 
-  const sourceItemsRaw = loadState.fromApi ? apiItems : (loadState.status === 'fallback' ? [] : MOCK_ITEMS)
+  const sourceItemsRaw = loadState.fromApi ? apiItems : []
   const sourceItems = useMemo(() => sourceItemsRaw.map(normalizeItemCategory), [sourceItemsRaw])
   const tabCategories = useMemo(
     () => (loadState.fromApi ? getTabCategories() : CATEGORIES).filter((c) => c.value !== 'ai_recommend'),
@@ -555,7 +558,13 @@ function TripSearchInner({ tripId }) {
             totalItemCount={totalItemCount}
           />
 
-          {loadState.status === 'fallback' ? (
+          {loadState.status === 'loading' ? (
+            <div className="mt-6 flex flex-col gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-16 rounded-2xl bg-gray-100 animate-pulse" />
+              ))}
+            </div>
+          ) : loadState.status === 'fallback' ? (
             <div className="mt-6 rounded-3xl border border-red-100 bg-white px-6 py-12 text-center shadow-sm">
               <p className="mb-2 text-sm font-semibold text-red-500">체크리스트를 불러오지 못했습니다.</p>
               {loadState.errorMessage ? (
