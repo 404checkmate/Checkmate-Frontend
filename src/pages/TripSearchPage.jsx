@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams, Link, useLocation } from 'react-router-dom'
 import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 import { CATEGORIES, MOCK_ITEMS, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
+import { getTrip } from '@/api/trips'
 import {
   generateChecklist,
   generateChecklistFromContext,
@@ -50,6 +51,21 @@ function TripSearchInner({ tripId }) {
   const [archiveEntry, setArchiveEntry] = useState(null)
   /** archiveEntryId 가 있을 때 한해서 'loading' → 'ready' | 'missing' | 'error'. 그 외엔 'idle'. */
   const [archiveEntryStatus, setArchiveEntryStatus] = useState(archiveEntryId ? 'loading' : 'idle')
+
+  const [tripDateLabel, setTripDateLabel] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    getTrip(tripId)
+      .then((trip) => {
+        if (cancelled) return
+        if (trip?.tripStart && trip?.tripEnd) {
+          setTripDateLabel(buildTripWindowLabelFromRange(trip.tripStart, trip.tripEnd))
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [tripId])
 
   useEffect(() => {
     if (!archiveEntryId) {
@@ -229,7 +245,7 @@ function TripSearchInner({ tripId }) {
   const headerDateLine =
     mergeToArchive && archiveEntry
       ? buildGuideArchiveDateLine(archiveEntry)
-      : TRIP_SEARCH_CONTEXT.tripWindowLabel
+      : tripDateLabel || TRIP_SEARCH_CONTEXT.tripWindowLabel
   const headerDescription =
     mergeToArchive && archiveEntry
       ? `「${buildGuideArchiveListTitle(archiveEntry)}」에 담을 준비물을 고르세요.`
