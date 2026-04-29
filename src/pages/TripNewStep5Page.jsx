@@ -261,6 +261,7 @@ function TripNewStep5PageContent() {
   }
 
   return (
+    <>
     <div
       className="min-h-screen"
       style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)' }}
@@ -557,6 +558,7 @@ function TripNewStep5PageContent() {
           document.body,
         )
       : null}
+    </>
   )
 }
 
