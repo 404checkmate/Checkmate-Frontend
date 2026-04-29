@@ -405,24 +405,26 @@ function TripSearchInner({ tripId }) {
         setSaving(false)
         setSaveConfirmModalOpen(false)
         setSelectedForSave(new Set())
-        navigate(`/trips/${tripId}/guide-archive/${archiveEntryId}`)
+        sessionStorage.setItem('lastSavedArchiveId', String(archiveEntryId))
+        navigate('/guide-archives')
         return
       }
 
       // 비-merge: 새 entry 생성 전, server 에서 동일 id 집합 archive 가 있는지 검사.
       const selectedIdSet = new Set(itemsToSave.map((i) => String(i.id)))
       const existingArchives = await fetchTripGuideArchives(tripId)
-      const isDuplicateEntry = existingArchives.some((archive) => {
+      const duplicateEntry = existingArchives.find((archive) => {
         const archiveIds = new Set((archive.items ?? []).map((i) => String(i.id)))
         return (
           archiveIds.size === selectedIdSet.size &&
           [...selectedIdSet].every((id) => archiveIds.has(id))
         )
       })
-      if (isDuplicateEntry) {
+      if (duplicateEntry) {
         setSaving(false)
         setSaveConfirmModalOpen(false)
-        navigate(`/trips/${tripId}/guide-archive`)
+        sessionStorage.setItem('lastSavedArchiveId', String(duplicateEntry.id))
+        navigate('/guide-archives')
         return
       }
 
@@ -483,7 +485,8 @@ function TripSearchInner({ tripId }) {
       trackEvent('save_confirm_navigate_guide_archive', { trip_id: tripId, item_count: itemsToSave.length })
       setSaving(false)
       setSaveConfirmModalOpen(false)
-      navigate(`/trips/${tripId}/guide-archive`)
+      if (created?.id) sessionStorage.setItem('lastSavedArchiveId', String(created.id))
+      navigate('/guide-archives')
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -500,7 +503,7 @@ function TripSearchInner({ tripId }) {
   const handleLeaveWithoutSave = () => {
     setLeaveModalOpen(false)
     if (mergeToArchive && archiveEntryId) {
-      navigate(`/trips/${tripId}/guide-archive/${archiveEntryId}`)
+      navigate('/guide-archives')
       return
     }
     navigate('/')
