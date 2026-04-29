@@ -117,6 +117,7 @@ function TripSearchInner({ tripId }) {
   const [loadState, setLoadState] = useState({ status: 'loading', fromApi: false })
   const [apiItems, setApiItems] = useState([])
   const [apiSummary, setApiSummary] = useState(null)
+  const [retryTick, setRetryTick] = useState(0)
 
   useEffect(() => {
     const t = Date.now()
@@ -199,9 +200,9 @@ function TripSearchInner({ tripId }) {
     })()
 
     return () => { cancelled = true }
-  }, [tripId])
+  }, [tripId, retryTick])
 
-  const sourceItemsRaw = loadState.fromApi ? apiItems : MOCK_ITEMS
+  const sourceItemsRaw = loadState.fromApi ? apiItems : (loadState.status === 'fallback' ? [] : MOCK_ITEMS)
   const sourceItems = useMemo(() => sourceItemsRaw.map(normalizeItemCategory), [sourceItemsRaw])
   const tabCategories = useMemo(
     () => (loadState.fromApi ? getTabCategories() : CATEGORIES).filter((c) => c.value !== 'ai_recommend'),
@@ -245,7 +246,7 @@ function TripSearchInner({ tripId }) {
   const headerDateLine =
     mergeToArchive && archiveEntry
       ? buildGuideArchiveDateLine(archiveEntry)
-      : tripDateLabel || TRIP_SEARCH_CONTEXT.tripWindowLabel
+      : tripDateLabel || ''
   const headerDescription =
     mergeToArchive && archiveEntry
       ? `「${buildGuideArchiveListTitle(archiveEntry)}」에 담을 준비물을 고르세요.`
@@ -535,59 +536,77 @@ function TripSearchInner({ tripId }) {
             totalItemCount={totalItemCount}
           />
 
-          <div className="mb-6 rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm">
-            <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
-              <span>
-                {mergeToArchive ? '추가 선택' : '선택한 항목'}{' '}
-                <span className="tabular-nums text-slate-800">{selectedForSave.size}</span>
-                {' / '}
-                <span className="tabular-nums text-slate-800">{totalItemCount}</span>
-              </span>
-              <span className="tabular-nums text-slate-800">{selectionProgressPercent}%</span>
+          {loadState.status === 'fallback' ? (
+            <div className="mt-6 rounded-3xl border border-red-100 bg-white px-6 py-12 text-center shadow-sm">
+              <p className="mb-2 text-sm font-semibold text-red-500">체크리스트를 불러오지 못했습니다.</p>
+              {loadState.errorMessage ? (
+                <p className="mb-6 text-xs text-gray-500">{loadState.errorMessage}</p>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setRetryTick((n) => n + 1)}
+                className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-teal-800"
+              >
+                다시 시도
+              </button>
             </div>
-            <GuideArchiveProgressBar value={selectionProgressPercent} />
-          </div>
+          ) : (
+            <>
+              <div className="mb-6 rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm">
+                <div className="mb-1.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+                  <span>
+                    {mergeToArchive ? '추가 선택' : '선택한 항목'}{' '}
+                    <span className="tabular-nums text-slate-800">{selectedForSave.size}</span>
+                    {' / '}
+                    <span className="tabular-nums text-slate-800">{totalItemCount}</span>
+                  </span>
+                  <span className="tabular-nums text-slate-800">{selectionProgressPercent}%</span>
+                </div>
+                <GuideArchiveProgressBar value={selectionProgressPercent} />
+              </div>
 
-          <TripSearchCategoryFilter
-            categoryCardHeading={categoryCardHeading}
-            tabCategories={tabCategories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={handleCategoryChange}
-          />
+              <TripSearchCategoryFilter
+                categoryCardHeading={categoryCardHeading}
+                tabCategories={tabCategories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={handleCategoryChange}
+              />
 
-          <div className="mb-6 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
-            <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
-              <span className="text-slate-700">
-                {selectedCategory === 'all'
-                  ? '전체 유형'
-                  : tabCategories.find((c) => c.value === selectedCategory)?.label}
-              </span>
-              <span className="ml-1.5 tabular-nums text-gray-900">{visibleItemCount}</span>개
-            </p>
-            <button
-              type="button"
-              onClick={handleSelectAllInView}
-              disabled={selectableItemsInView.length === 0}
-              className="shrink-0 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50 disabled:pointer-events-none disabled:opacity-40"
-            >
-              {allSelectableInViewSelected ? '전체 해제' : '전체 선택'}
-              <span className="ml-1 font-semibold text-sky-600 tabular-nums">({selectableItemsInView.length})</span>
-            </button>
-          </div>
+              <div className="mb-6 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
+                <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
+                  <span className="text-slate-700">
+                    {selectedCategory === 'all'
+                      ? '전체 유형'
+                      : tabCategories.find((c) => c.value === selectedCategory)?.label}
+                  </span>
+                  <span className="ml-1.5 tabular-nums text-gray-900">{visibleItemCount}</span>개
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSelectAllInView}
+                  disabled={selectableItemsInView.length === 0}
+                  className="shrink-0 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50 disabled:pointer-events-none disabled:opacity-40"
+                >
+                  {allSelectableInViewSelected ? '전체 해제' : '전체 선택'}
+                  <span className="ml-1 font-semibold text-sky-600 tabular-nums">({selectableItemsInView.length})</span>
+                </button>
+              </div>
 
-          <section aria-label="준비물 목록">
-            <TripSearchItemsList
-              loadState={loadState}
-              selectedCategory={selectedCategory}
-              groupedItemsByCategory={groupedItemsByCategory}
-              singleCategoryItems={singleCategoryItems}
-              selectedForSave={selectedForSave}
-              existingArchiveItemIds={existingArchiveItemIds}
-              onToggleSelectAllInGroup={handleToggleSelectAllInGroup}
-              onToggleItem={toggleItemSelect}
-              tabCategories={tabCategories}
-            />
-          </section>
+              <section aria-label="준비물 목록">
+                <TripSearchItemsList
+                  loadState={loadState}
+                  selectedCategory={selectedCategory}
+                  groupedItemsByCategory={groupedItemsByCategory}
+                  singleCategoryItems={singleCategoryItems}
+                  selectedForSave={selectedForSave}
+                  existingArchiveItemIds={existingArchiveItemIds}
+                  onToggleSelectAllInGroup={handleToggleSelectAllInGroup}
+                  onToggleItem={toggleItemSelect}
+                  tabCategories={tabCategories}
+                />
+              </section>
+            </>
+          )}
         </div>
       </div>
 

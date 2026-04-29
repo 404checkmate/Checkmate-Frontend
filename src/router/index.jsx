@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useRoutes, Navigate } from 'react-router-dom'
+import ProtectedRoute from '@/components/ProtectedRoute'
 
 const RootLayout = lazy(() => import('@/layouts/RootLayout'))
 const HomePage = lazy(() => import('@/pages/HomePage'))
@@ -74,26 +75,26 @@ const AppRoutes = () => {
               : <Navigate to="/" replace />,
         },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
-        { path: '/mypage',              element: withSuspense(<MyPage />) },
+        { path: '/mypage',              element: <ProtectedRoute>{withSuspense(<MyPage />)}</ProtectedRoute> },
         { path: '/trips/new',           element: <Navigate to="/trips/new/destination" replace /> },
         /** 보관: 예전 예매 분기 UI — 직접 URL로만 진입. 활성 플로우는 destination부터 */
         { path: '/trips/new/step2',     element: withSuspense(<TripNewStep2Page />) },
-        { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },
+        { path: '/trips/new/destination', element: <ProtectedRoute>{withSuspense(<TripNewDestinationPage />)}</ProtectedRoute> },
         /** 보관: 항공편 입력 UI — 직접 URL로만 진입 */
         { path: '/trips/new/step3',     element: withSuspense(<TripNewStep3Page />) },
         /** Step4: 이 경로는 TripNewStep4Page 단 하나만 사용 (중복 라우트 없음) */
-        { path: '/trips/new/step4',     element: withSuspense(<TripNewStep4Page />) },
-        { path: '/trips/new/step5',     element: withSuspense(<TripNewStep5Page />) },
-        { path: '/trips/:id/search',                  element: withSuspense(<TripSearchPage />) },
-        { path: '/guide-archives',                    element: withSuspense(<MyGuideArchivesPage />) },
-        { path: '/trips/:id/guide-archive/:entryId',  element: withSuspense(<TripGuideArchiveDetailPage />) },
-        { path: '/trips/:id/guide-archive',           element: withSuspense(<TripGuideArchivePage />) },
+        { path: '/trips/new/step4',     element: <ProtectedRoute>{withSuspense(<TripNewStep4Page />)}</ProtectedRoute> },
+        { path: '/trips/new/step5',     element: <ProtectedRoute>{withSuspense(<TripNewStep5Page />)}</ProtectedRoute> },
+        { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
+        { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
+        { path: '/trips/:id/guide-archive/:entryId',  element: <ProtectedRoute>{withSuspense(<TripGuideArchiveDetailPage />)}</ProtectedRoute> },
+        { path: '/trips/:id/guide-archive',           element: <ProtectedRoute>{withSuspense(<TripGuideArchivePage />)}</ProtectedRoute> },
         { path: '/404',                 element: withSuspense(<NotFoundPage />) },
       ],
     },
 
     // 로딩 페이지 - Header/Footer 없는 독립 풀스크린 (RootLayout 미적용)
-    { path: '/trips/:id/loading', element: withSuspense(<TripLoadingPage />) },
+    { path: '/trips/:id/loading', element: <ProtectedRoute>{withSuspense(<TripLoadingPage />)}</ProtectedRoute> },
 
     // Fallback - 정의되지 않은 URL → 404 페이지로 이동
     {

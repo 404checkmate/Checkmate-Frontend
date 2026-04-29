@@ -61,7 +61,13 @@ function TripLoadingPage() {
   /* 진행 완료 후 이동 */
   useEffect(() => {
     if (progress >= 100) {
-      const t = setTimeout(() => navigate(`/trips/${id ?? 1}/search`), 600)
+      const t = setTimeout(() => {
+        if (!id) {
+          navigate('/trips/new/destination', { replace: true })
+          return
+        }
+        navigate(`/trips/${id}/search`)
+      }, 600)
       return () => clearTimeout(t)
     }
   }, [progress, id, navigate])

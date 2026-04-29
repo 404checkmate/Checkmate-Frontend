@@ -4,8 +4,9 @@ import { apiClient } from '@/api/client'
  * Guide Archive (여행별 "저장한 가이드") API.
  *
  * 라우트:
- *   GET    /api/trips/:tripId/guide-archives
- *   POST   /api/trips/:tripId/guide-archives        Body: { name, snapshot }
+ *   GET    /api/guide-archives/:archiveId            단건 조회
+ *   GET    /api/trips/:tripId/guide-archives         trip 별 목록
+ *   POST   /api/trips/:tripId/guide-archives         Body: { name, snapshot }
  *   PATCH  /api/guide-archives/:archiveId            Body: { name?, snapshot? }
  *   DELETE /api/guide-archives/:archiveId
  */
@@ -35,6 +36,11 @@ export async function deleteGuideArchive(archiveId) {
 export async function fetchMyGuideArchives() {
   const res = await apiClient.get('/guide-archives/mine')
   return res.data
+}
+
+export async function fetchGuideArchive(archiveId) {
+  const res = await apiClient.get(`/guide-archives/${archiveId}`)
+  return toEntryShape(res.data)
 }
 
 /**

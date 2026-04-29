@@ -1,6 +1,6 @@
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchTripGuideArchives } from '@/api/guideArchives'
+import { fetchGuideArchive } from '@/api/guideArchives'
 import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
 import { TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE } from '@/utils/tripMintPageBackground'
 
@@ -8,8 +8,7 @@ import { TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE } from '@/utils/tripMintPageBa
  * 라우트: /trips/:id/guide-archive/:entryId
  * - 목록(TripGuideArchivePage) 또는 MyGuideArchivesPage 의 카드에서 진입.
  * - entryId 는 서버 GuideArchive.id (BigInt 문자열).
- * - 서버에서 한 trip 의 보관함을 통째로 받아 entryId 매칭으로 단건을 골라낸다.
- *   (서버에 단건 GET 엔드포인트가 없어 listByTrip 결과에서 find 로 처리.)
+ * - GET /guide-archives/:archiveId 단건 엔드포인트로 직접 조회.
  */
 
 function TripGuideArchiveDetailInner({ tripId, entryId }) {
@@ -27,27 +26,25 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
     setErrorMessage('')
     ;(async () => {
       try {
-        const list = await fetchTripGuideArchives(tripId)
+        const found = await fetchGuideArchive(entryId)
         if (cancelled) return
-        const found = list.find((e) => String(e.id) === String(entryId)) ?? null
-        if (!found) {
-          setEntry(null)
-          setStatus('not_found')
-          return
-        }
         setEntry(found)
         setStatus('ready')
       } catch (err) {
         if (cancelled) return
         setEntry(null)
-        setStatus('error')
-        setErrorMessage(err?.response?.data?.message || err?.message || '알 수 없는 오류')
+        if (err?.response?.status === 404) {
+          setStatus('not_found')
+        } else {
+          setStatus('error')
+          setErrorMessage(err?.response?.data?.message || err?.message || '알 수 없는 오류')
+        }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [tripId, entryId, archiveRevision])
+  }, [entryId, archiveRevision])
 
   if (status === 'loading') {
     return (
@@ -131,5 +128,6 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
 export default function TripGuideArchiveDetailPage() {
   const { id, entryId } = useParams()
   const location = useLocation()
+  if (!entryId) return <Navigate to="/guide-archives" replace />
   return <TripGuideArchiveDetailInner key={`${id}-${entryId}-${location.key}`} tripId={id} entryId={entryId} />
 }
