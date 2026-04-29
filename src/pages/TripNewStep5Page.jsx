@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import {
   STEP5_CONFIG,
@@ -22,6 +22,8 @@ import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
 import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage'
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { savePendingTripSubmit } from '@/utils/pendingTripSubmit'
+import { resolveAccessToken } from '@/api/client'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
   const composite = STEP5_ICON_COMPOSITE[name]
@@ -77,6 +79,7 @@ function SectionLabel({ num, label }) {
 function TripNewStep5PageContent() {
   const navigate = useNavigate()
   const location = useLocation()
+  const restored = location.state?.step5Restored ?? null
 
   const [companionId, setCompanionId] = useState(null)
   const [styleIds, setStyleIds] = useState([])
@@ -86,6 +89,7 @@ function TripNewStep5PageContent() {
   const [companions, setCompanions] = useState([])
   const [travelStyles, setTravelStyles] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const autoSubmitFiredRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -126,8 +130,38 @@ function TripNewStep5PageContent() {
     [companionId, styleIds, submitting, isLoading],
   )
 
+  // 로그인 후 복원: pending에서 저장된 선택값을 마운트 시 1회 복원
+  useEffect(() => {
+    if (!restored) return
+    if (restored.companionId) setCompanionId(restored.companionId)
+    if (restored.styleIds?.length > 0) setStyleIds(restored.styleIds)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 복원 후 자동 제출: canSubmit이 true가 되는 시점(마스터 데이터 로드 완료)에 1회 실행
+  useEffect(() => {
+    if (!restored || autoSubmitFiredRef.current) return
+    if (!canSubmit) return
+    autoSubmitFiredRef.current = true
+    const t = setTimeout(() => handleCreatePlan(), 300)
+    return () => clearTimeout(t)
+  }, [canSubmit]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleCreatePlan = async () => {
     if (!canSubmit) return
+
+    const token = await resolveAccessToken()
+    if (!token) {
+      savePendingTripSubmit({
+        companionId,
+        styleIds,
+        locationState: location.state,
+      })
+      navigate('/login', {
+        state: { from: location, pendingTripSubmit: true },
+      })
+      return
+    }
+
     setSubmitError('')
 
     // 백엔드 맞춤 체크리스트 호출(/checklists/generate-from-context) fallback 경로 및

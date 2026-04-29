@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import loginCheckmateBrandUrl from '@/assets/login-checkmate-brand.png'
 import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
 import { startGoogleLogin, startKakaoLogin } from '@/api/auth'
@@ -35,6 +35,8 @@ function isEmailShape(value) {
  */
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const hasPending = location.state?.pendingTripSubmit === true
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [forgotOpen, setForgotOpen] = useState(false)
@@ -287,6 +289,12 @@ function LoginPage() {
               </div>
             </div>
             ) : null}
+
+            {hasPending && (
+              <div className="mb-4 rounded-xl bg-teal-50 px-4 py-3 text-sm text-teal-700">
+                로그인하면 입력하신 여행 정보로 바로 체크리스트를 생성해드려요 ✈️
+              </div>
+            )}
 
             <div className="mt-10 flex flex-col gap-3 md:mt-12">
               <button

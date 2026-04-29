@@ -10,6 +10,7 @@ import {
   hasCompletedOnboarding,
 } from '@/utils/onboardingGate'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { loadPendingTripSubmit, clearPendingTripSubmit } from '@/utils/pendingTripSubmit'
 
 /**
  * /auth/callback — Google/Kakao 소셜 로그인(Supabase Auth) 콜백 처리.
@@ -75,8 +76,25 @@ export default function AuthCallbackPage() {
         /* storage access issues: 무시 */
       }
 
-      const next = resolveNext(sub)
       trackEvent('login_completed', { provider })
+
+      const pending = loadPendingTripSubmit()
+      if (pending) {
+        clearPendingTripSubmit()
+        navigate('/trips/new/step5', {
+          replace: true,
+          state: {
+            ...pending.locationState,
+            step5Restored: {
+              companionId: pending.companionId,
+              styleIds: pending.styleIds,
+            },
+          },
+        })
+        return
+      }
+
+      const next = resolveNext(sub)
       navigate(next, { replace: true })
     })()
 
