@@ -66,8 +66,8 @@ function Header() {
   }, [closeMobileMenu])
 
   /** 데스크톱 전용 분기 — 백엔드 연동 시 isMockWebSessionLoggedIn 대신 세션 훅으로 교체 */
-  const isWebLoggedIn = isMockWebSessionLoggedIn()
   const { pathname } = location
+  const isWebLoggedIn = isMockWebSessionLoggedIn() && pathname !== '/auth/consent'
   const logoutConfirmModal =
     logoutConfirmOpen && typeof document !== 'undefined'
       ? createPortal(
