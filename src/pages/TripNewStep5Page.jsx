@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import {
   STEP5_CONFIG,
@@ -23,7 +22,6 @@ import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
 import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage'
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
-import { savePendingTripSubmit } from '@/utils/pendingTripSubmit'
 import { resolveAccessToken } from '@/api/client'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
@@ -90,7 +88,6 @@ function TripNewStep5PageContent() {
   const [companions, setCompanions] = useState([])
   const [travelStyles, setTravelStyles] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [loginGateOpen, setLoginGateOpen] = useState(false)
   const autoSubmitFiredRef = useRef(false)
 
   useEffect(() => {
@@ -171,9 +168,12 @@ function TripNewStep5PageContent() {
 
     const step5State = { companionId, travelStyleIds: styleIds }
 
+    // 비로그인이면 서버 저장 없이 guest 경로로 바로 이동
     const token = await resolveAccessToken()
     if (!token) {
-      setLoginGateOpen(true)
+      navigate('/trips/guest/loading', {
+        state: { ...(location.state ?? {}), step5: step5State },
+      })
       return
     }
 
@@ -225,18 +225,6 @@ function TripNewStep5PageContent() {
         step5: step5State,
         createdTripId,
       },
-    })
-  }
-
-  const handleLoginRedirect = () => {
-    savePendingTripSubmit({
-      companionId,
-      styleIds,
-      locationState: location.state,
-    })
-    setLoginGateOpen(false)
-    navigate('/login', {
-      state: { from: location, pendingTripSubmit: true },
     })
   }
 
@@ -522,46 +510,6 @@ function TripNewStep5PageContent() {
       </div>
     </div>
 
-    {loginGateOpen && typeof document !== 'undefined'
-      ? createPortal(
-          <div
-            className="fixed inset-0 z-[120] flex items-center justify-center p-4"
-            onClick={() => setLoginGateOpen(false)}
-          >
-            <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
-            <div
-              role="dialog"
-              aria-modal="true"
-              className="relative z-[1] mx-4 w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-6 py-6 shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="mb-1.5 text-center text-base font-semibold text-gray-900">
-                로그인이 필요한 서비스입니다
-              </h2>
-              <p className="mb-6 text-center text-sm text-gray-500">
-                로그인 후 맞춤 체크리스트를 생성해드려요 ✈️
-              </p>
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 py-2.5 text-sm font-semibold text-white transition-colors hover:from-cyan-400 hover:to-teal-500"
-                  onClick={handleLoginRedirect}
-                >
-                  로그인 또는 회원가입 하러가기
-                </button>
-                <button
-                  type="button"
-                  className="w-full rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                  onClick={() => setLoginGateOpen(false)}
-                >
-                  취소
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )
-      : null}
     </>
   )
 }
