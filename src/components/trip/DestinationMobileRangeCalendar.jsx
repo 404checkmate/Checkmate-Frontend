@@ -132,7 +132,7 @@ function MonthCal({
           <div key={ri} className="grid grid-cols-7 gap-0.5">
             {row.map((day, ci) => {
               if (day == null) {
-                return <div key={`e-${ci}`} className="aspect-square min-h-[1.85rem] sm:min-h-[2.1rem]" />
+                return <div key={`e-${ci}`} className="min-h-[1.85rem] sm:min-h-[2.1rem]" />
               }
               const dis = isDisabledDay(day)
               const selStart = isStart(day)

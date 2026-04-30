@@ -65,7 +65,7 @@ export default function TripSearchPageHeader({
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600 md:text-sm">
           <span className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 font-semibold text-violet-800">
             <AiSparkleMaskIcon selected={false} className="h-3.5 w-3.5" />
-            AI 맞춤 추천 <span className="tabular-nums">{aiRecommendCount}</span>개
+            MATE 추천 <span className="tabular-nums">{aiRecommendCount}</span>개
           </span>
           <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 font-semibold text-cyan-800">
             카테고리 필수품 <span className="ml-1 tabular-nums">{Math.max(0, totalItemCount - aiRecommendCount)}</span>개
