@@ -7,7 +7,7 @@ import {
   generateChecklist,
   generateChecklistFromContext,
   listChecklistCandidates,
-  selectChecklistItem,
+  upsertChecklistItems,
 } from '@/api/checklists'
 import { adaptGeneratedChecklist, getTabCategories } from '@/utils/checklistAdapter'
 import { saveItemsForTrip, loadSavedItems } from '@/utils/savedTripItems'
@@ -338,15 +338,23 @@ function TripSearchInner({ tripId }) {
   }
 
   const markItemsSelectedOnServer = (items) => {
-    const ids = items.map((i) => i.serverId).filter((id) => id && String(id).trim())
-    if (ids.length === 0) return
-    ids.forEach((serverId) => {
-      selectChecklistItem(serverId).catch((err) => {
-        console.warn(
-          `[TripSearchPage] selectChecklistItem(${serverId}) 실패 — localStorage 저장은 완료:`,
-          err?.response?.data?.message || err?.message || err,
-        )
-      })
+    const payload = items
+      .filter((i) => i.title)
+      .map((item, idx) => ({
+        title: item.title,
+        ...(item.description ? { description: item.description } : {}),
+        categoryCode: item.subCategory || 'ai_recommend',
+        prepType: item.prepType || 'item',
+        baggageType: item.baggageType || 'none',
+        source: item.source || 'template',
+        orderIndex: idx,
+      }))
+    if (payload.length === 0) return
+    upsertChecklistItems(tripId, payload).catch((err) => {
+      console.warn(
+        '[TripSearchPage] upsertChecklistItems 실패 — localStorage 저장은 완료:',
+        err?.response?.data?.message || err?.message || err,
+      )
     })
   }
 
