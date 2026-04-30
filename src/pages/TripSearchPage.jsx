@@ -847,7 +847,8 @@ function TripSearchInner({ tripId }) {
 function TripSearchPage() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
-  return <TripSearchInner key={`${id}-${searchParams.toString()}`} tripId={id} />
+  const tripId = id ?? 'guest'
+  return <TripSearchInner key={`${tripId}-${searchParams.toString()}`} tripId={tripId} />
 }
 
 export default TripSearchPage
