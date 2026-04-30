@@ -782,8 +782,8 @@ function TripSearchInner({ tripId }) {
                 onCategoryChange={handleCategoryChange}
               />
 
-              <div className="mb-6 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
-                <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
+              <div className="mb-[14px] flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-2">
+                <p className="min-w-0 flex-1 text-base font-extrabold text-gray-700 md:text-lg">
                   <span className="text-slate-700">
                     {selectedCategory === 'all'
                       ? '전체 유형'

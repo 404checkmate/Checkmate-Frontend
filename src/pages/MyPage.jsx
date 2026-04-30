@@ -70,30 +70,20 @@ function MyPage() {
 
   return (
     <div className="flex min-h-full w-full flex-1 flex-col" style={PAGE_BG}>
-      {/* 모바일 */}
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 pb-28 pt-6 md:hidden">
+      <div className="w-full max-w-lg px-5 pt-6 md:px-8 md:pt-12">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">My page</p>
-        <h1 className="mb-4 text-2xl font-extrabold text-gray-900">마이페이지</h1>
-        <AuthStatusCard
-          state={state}
-          session={session}
-          signingOut={signingOut}
-          onSignOut={handleSignOut}
-          onGoLogin={() => navigate('/login')}
-        />
+        <h1 className="mb-4 text-2xl font-extrabold text-gray-900 md:mb-6 md:text-3xl">마이페이지</h1>
       </div>
-
-      {/* 데스크톱 */}
-      <div className="mx-auto hidden w-full max-w-5xl flex-1 flex-col px-8 py-12 md:block">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-600">My page</p>
-        <h1 className="mb-6 text-3xl font-extrabold text-gray-900">마이페이지</h1>
-        <AuthStatusCard
-          state={state}
-          session={session}
-          signingOut={signingOut}
-          onSignOut={handleSignOut}
-          onGoLogin={() => navigate('/login')}
-        />
+      <div className="flex flex-1 items-center justify-center px-5 pb-12 md:px-8">
+        <div className="w-full max-w-lg">
+          <AuthStatusCard
+            state={state}
+            session={session}
+            signingOut={signingOut}
+            onSignOut={handleSignOut}
+            onGoLogin={() => navigate('/login')}
+          />
+        </div>
       </div>
     </div>
   )
@@ -179,7 +169,6 @@ function AuthStatusCard({ state, session, signingOut, onSignOut, onGoLogin }) {
     ''
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ''
   const sub = user?.id || ''
-  const expiresAt = session?.expires_at ? new Date(session.expires_at * 1000) : null
 
   return (
     <section
@@ -204,13 +193,8 @@ function AuthStatusCard({ state, session, signingOut, onSignOut, onGoLogin }) {
       </div>
 
       <dl className="mt-5 grid grid-cols-1 gap-3 rounded-xl bg-gray-50/80 p-4 text-xs md:text-sm">
-        <InfoRow label="사용자 ID (sub)" value={sub ? shortenSub(sub) : '—'} title={sub} />
-        <InfoRow label="프로바이더" value={provider ?? '—'} />
-        <InfoRow
-          label="세션 만료"
-          value={expiresAt ? formatDateTime(expiresAt) : '—'}
-          hint={expiresAt ? formatRelative(expiresAt) : ''}
-        />
+        <InfoRow label="사용자 ID" value={sub ? shortenSub(sub) : '—'} title={sub} />
+        <InfoRow label="소셜 계정" value={provider ?? '—'} />
       </dl>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -323,30 +307,5 @@ function shortenSub(sub) {
   return `${sub.slice(0, 6)}…${sub.slice(-4)}`
 }
 
-function formatDateTime(d) {
-  try {
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(d)
-  } catch {
-    return d.toISOString()
-  }
-}
-
-function formatRelative(target) {
-  const diffMs = target.getTime() - Date.now()
-  const abs = Math.abs(diffMs)
-  const mins = Math.round(abs / 60000)
-  if (mins < 1) return diffMs >= 0 ? '곧 만료' : '만료됨'
-  if (mins < 60) return diffMs >= 0 ? `${mins}분 후` : `${mins}분 전`
-  const hours = Math.round(mins / 60)
-  if (hours < 24) return diffMs >= 0 ? `${hours}시간 후` : `${hours}시간 전`
-  const days = Math.round(hours / 24)
-  return diffMs >= 0 ? `${days}일 후` : `${days}일 전`
-}
 
 export default MyPage
