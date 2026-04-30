@@ -151,8 +151,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const [deleteItemConfirm, setDeleteItemConfirm] = useState(null)
   const [directAddDraft, setDirectAddDraft] = useState({
     title: '',
-    description: '',
-    detail: '',
+    memo: '',
+    prepType: '',
+    baggageType: 'carry_on',
   })
   /** 보기 기준: 준비물 유형(항목 카테고리 탭) vs 수하물 유형(기내/위탁 탭) */
   const [viewBasis, setViewBasis] = useState(VIEW_BASIS_SUPPLIES)
@@ -303,8 +304,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     setDirectAddModalOpen(false)
     setDirectAddDraft({
       title: '',
-      description: '',
-      detail: '',
+      memo: '',
+      prepType: '',
+      baggageType: 'carry_on',
     })
   }, [])
 
@@ -491,8 +493,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const openDirectAddModal = useCallback(() => {
     setDirectAddDraft({
       title: '',
-      description: '',
-      detail: '',
+      memo: '',
+      prepType: '',
+      baggageType: 'carry_on',
     })
     setDirectAddModalOpen(true)
   }, [])
@@ -501,8 +504,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     setDirectAddModalOpen(false)
     setDirectAddDraft({
       title: '',
-      description: '',
-      detail: '',
+      memo: '',
+      prepType: '',
+      baggageType: 'carry_on',
     })
   }, [])
 
@@ -512,17 +516,21 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       window.alert('제목을 입력해 주세요.')
       return
     }
-    const description = (directAddDraft.description ?? '').trim()
-    const detail = (directAddDraft.detail ?? '').trim()
+    if (!directAddDraft.prepType) {
+      window.alert('준비물 유형을 선택해주세요.')
+      return
+    }
+    const memo = (directAddDraft.memo ?? '').trim()
+    const baggageType = directAddDraft.prepType === 'item' ? directAddDraft.baggageType : 'none'
     const id = `ga-direct-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
     const newItem = {
       id,
       category: GUIDE_USER_DIRECT_CATEGORY,
       categoryLabel: GUIDE_USER_DIRECT_SECTION_LABEL,
       title,
-      description,
-      detail,
-      baggageType: BAGGAGE_CARRY_ON,
+      memo,
+      prepType: directAddDraft.prepType,
+      baggageType,
     }
     const newItems = [...items, newItem]
     const idStr = String(id)
@@ -536,20 +544,19 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       checklistProgressPercent: progressN,
       checklistSavedAt: new Date().toISOString(),
     })
-    const subtitle =
-      [detail, description].filter(Boolean).join(' — ') || title
     saveItemForTrip(tripId, {
       id,
       category: GUIDE_USER_DIRECT_SECTION_LABEL,
       title,
-      subtitle,
+      subtitle: memo || title,
     })
     setChecks(nextChecks)
     setDirectAddModalOpen(false)
     setDirectAddDraft({
       title: '',
-      description: '',
-      detail: '',
+      memo: '',
+      prepType: '',
+      baggageType: 'carry_on',
     })
     onArchiveMutated?.()
   }, [directAddDraft, items, checks, tripId, entry.id, onArchiveMutated])

@@ -25,11 +25,13 @@ export default function GuideChecklistDirectAddModal({
           직접 추가
         </h2>
         <p className="mb-4 text-sm text-gray-600">
-          제목은 필수입니다. 항목은 <strong className="font-semibold text-gray-800">기내 반입</strong>으로
-          저장되며, 체크리스트 본문 맨 아래 「{sectionLabel}」 블록에 붙습니다.
+          제목과 준비물 유형은 필수입니다. 항목은 체크리스트 본문 맨 아래 「{sectionLabel}」 블록에 붙습니다.
         </p>
+
         <label className="mb-3 block">
-          <span className="mb-1 block text-xs font-semibold text-gray-600">제목 (필수)</span>
+          <span className="mb-1 block text-xs font-semibold text-gray-600">
+            제목 <span className="text-red-500">*</span>
+          </span>
           <input
             type="text"
             value={draft.title}
@@ -38,24 +40,47 @@ export default function GuideChecklistDirectAddModal({
             placeholder="예: 보조배터리"
           />
         </label>
-        <label className="mb-3 block">
-          <span className="mb-1 block text-xs font-semibold text-gray-600">설명</span>
-          <textarea
-            value={draft.description}
-            onChange={(e) => onDraftChange((d) => ({ ...d, description: e.target.value }))}
-            rows={2}
-            className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-          />
-        </label>
+
+        <div className="mb-3">
+          <label className="mb-1 block text-xs font-semibold text-gray-600">
+            준비물 유형 <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={draft.prepType}
+            onChange={(e) => onDraftChange((d) => ({ ...d, prepType: e.target.value }))}
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900"
+          >
+            <option value="">선택해주세요</option>
+            <option value="item">준비물</option>
+            <option value="pre_booking">사전 예약/신청</option>
+            <option value="pre_departure_check">출국 전 확인사항</option>
+          </select>
+        </div>
+
+        {draft.prepType === 'item' && (
+          <div className="mb-3">
+            <label className="mb-1 block text-xs font-semibold text-gray-600">수하물 구분</label>
+            <select
+              value={draft.baggageType}
+              onChange={(e) => onDraftChange((d) => ({ ...d, baggageType: e.target.value }))}
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900"
+            >
+              <option value="carry_on">기내 반입</option>
+              <option value="checked">위탁 수하물</option>
+            </select>
+          </div>
+        )}
+
         <label className="mb-6 block">
           <span className="mb-1 block text-xs font-semibold text-gray-600">추가 메모</span>
           <textarea
-            value={draft.detail}
-            onChange={(e) => onDraftChange((d) => ({ ...d, detail: e.target.value }))}
+            value={draft.memo}
+            onChange={(e) => onDraftChange((d) => ({ ...d, memo: e.target.value }))}
             rows={2}
             className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
           />
         </label>
+
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
           <button
             type="button"
