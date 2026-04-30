@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
@@ -187,6 +188,7 @@ export default function MyGuideArchivesPage() {
   const [filterTab, setFilterTab] = useState('not_started')
   const [deleteMode, setDeleteMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState([])
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
   const lastSavedId = sessionStorage.getItem('lastSavedArchiveId')
 
@@ -245,15 +247,20 @@ export default function MyGuideArchivesPage() {
     setSelectedIds([])
   }
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selectedIds.length === 0) return
-    if (!window.confirm(`선택한 ${selectedIds.length}개 항목을 삭제할까요? 되돌릴 수 없습니다.`)) return
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    setDeleteConfirmOpen(false)
     await Promise.all(selectedIds.map((id) => deleteGuideArchive(id)))
     exitDeleteMode()
     load()
   }
 
   return (
+    <>
     <div className="min-h-screen" style={PAGE_BG}>
       <div className="mx-auto max-w-5xl px-4 pb-24 pt-6 md:px-8 md:pb-16 md:pt-10">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">
@@ -401,5 +408,44 @@ export default function MyGuideArchivesPage() {
         )}
       </div>
     </div>
+
+    {deleteConfirmOpen && typeof document !== 'undefined' && createPortal(
+      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        <button
+          type="button"
+          className="absolute inset-0 bg-black/40"
+          aria-label="삭제 확인 닫기"
+          onClick={() => setDeleteConfirmOpen(false)}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="relative z-[1] w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-5 py-5 shadow-xl"
+        >
+          <p className="text-center text-base font-semibold text-gray-900">
+            선택한 {selectedIds.length}개 항목을 삭제할까요?
+          </p>
+          <p className="mt-1 text-center text-sm text-gray-500">되돌릴 수 없습니다.</p>
+          <div className="mt-6 flex gap-2">
+            <button
+              type="button"
+              className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+              onClick={() => setDeleteConfirmOpen(false)}
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+              onClick={confirmDelete}
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    )}
+    </>
   )
 }
