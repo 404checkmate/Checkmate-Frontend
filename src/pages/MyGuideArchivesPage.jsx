@@ -231,8 +231,8 @@ export default function MyGuideArchivesPage() {
   )
 
   const allSelected = useMemo(
-    () => archives.length > 0 && archives.every((a) => selectedIds.includes(String(a.id))),
-    [archives, selectedIds],
+    () => filtered.length > 0 && filtered.every((a) => selectedIds.includes(String(a.id))),
+    [filtered, selectedIds],
   )
 
   const toggleSelect = (archiveId) => {
@@ -242,8 +242,8 @@ export default function MyGuideArchivesPage() {
 
   const handleSelectAll = () => {
     setSelectedIds((prev) => {
-      const allIds = archives.map((a) => String(a.id))
-      return allIds.every((id) => prev.includes(id)) ? [] : allIds
+      const filteredIds = filtered.map((a) => String(a.id))
+      return filteredIds.every((id) => prev.includes(id)) ? [] : filteredIds
     })
   }
 
@@ -285,7 +285,7 @@ export default function MyGuideArchivesPage() {
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setFilterTab(tab.id)}
+                  onClick={() => { setFilterTab(tab.id); setSelectedIds([]) }}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors md:px-6 md:py-2.5 ${
                     active
                       ? 'bg-sky-100 text-sky-950 shadow-sm'
