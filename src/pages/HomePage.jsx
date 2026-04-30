@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { isMockWebSessionLoggedIn } from '@/utils/onboardingGate'
 import { useRevealOnScrollOnce } from '@/hooks/useRevealOnScrollOnce'
 import HomeHeroSection from '@/components/home/HomeHeroSection'
 import HomeFeatureSection from '@/components/home/HomeFeatureSection'
@@ -27,7 +25,6 @@ function HomePage() {
   const navigate = useNavigate()
   const noticeToastTimerRef = useRef(null)
   const [noticeToastVisible, setNoticeToastVisible] = useState(false)
-  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
   const [heroRevealed, setHeroRevealed] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -81,11 +78,7 @@ function HomePage() {
   }, [])
 
   const handleStartTrip = () => {
-    if (isMockWebSessionLoggedIn()) {
-      navigate('/trips/new/destination')
-    } else {
-      setLoginRequiredOpen(true)
-    }
+    navigate('/trips/new/destination')
   }
 
   const showNoticePreparingToast = () => {
@@ -113,51 +106,6 @@ function HomePage() {
         />
         <HomeFooter showNoticePreparingToast={showNoticePreparingToast} />
       </div>
-
-      {loginRequiredOpen && typeof document !== 'undefined'
-        ? createPortal(
-            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-              <button
-                type="button"
-                className="absolute inset-0 bg-black/40"
-                aria-label="닫기"
-                onClick={() => setLoginRequiredOpen(false)}
-              />
-              <div
-                role="dialog"
-                aria-modal="true"
-                className="relative z-[1] w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-6 py-6 shadow-xl"
-              >
-                <p className="text-center text-base font-semibold text-gray-900">
-                  로그인이 필요한 서비스입니다
-                </p>
-                <p className="mt-1.5 text-center text-sm text-gray-500">
-                  로그인 후 이용해 주세요.
-                </p>
-                <div className="mt-6 flex gap-2">
-                  <button
-                    type="button"
-                    className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-                    onClick={() => setLoginRequiredOpen(false)}
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="button"
-                    className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 py-2.5 text-sm font-semibold text-white transition-colors hover:from-cyan-400 hover:to-teal-500"
-                    onClick={() => {
-                      setLoginRequiredOpen(false)
-                      navigate('/login')
-                    }}
-                  >
-                    확인
-                  </button>
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
 
       {noticeToastVisible ? (
         <div

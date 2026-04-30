@@ -45,7 +45,7 @@ function formatDateRange(start, end) {
 
 function ArchiveCard({ archive, deleteMode, isSelected, onToggleSelect, isHighlighted }) {
   const statusLabel = STATUS_LABEL[archive.checklistStatus] ?? archive.checklistStatus
-  const progress = archive.completionRate ?? 0
+  const progress = archive.snapshot?.checklistProgressPercent ?? archive.completionRate ?? 0
   const dateLine = formatDateRange(archive.trip?.tripStart, archive.trip?.tripEnd)
 
   const cardContent = (
@@ -221,7 +221,14 @@ export default function MyGuideArchivesPage() {
   }, [archives, lastSavedId])
 
   const filtered = useMemo(
-    () => sortedArchives.filter((a) => a.checklistStatus === filterTab),
+    () =>
+      sortedArchives.filter((a) => {
+        const progress = a.snapshot?.checklistProgressPercent ?? a.completionRate ?? 0
+        if (filterTab === 'not_started') return progress === 0
+        if (filterTab === 'preparing') return progress > 0 && progress < 100
+        if (filterTab === 'completed') return progress >= 100
+        return false
+      }),
     [sortedArchives, filterTab],
   )
 

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import {
   STEP5_CONFIG,
@@ -22,6 +23,9 @@ import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
 import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage'
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { savePendingTripSubmit } from '@/utils/pendingTripSubmit'
+import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
+import { getSupabaseClient } from '@/lib/supabase'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
   const composite = STEP5_ICON_COMPOSITE[name]
@@ -77,17 +81,22 @@ function SectionLabel({ num, label }) {
 function TripNewStep5PageContent() {
   const navigate = useNavigate()
   const location = useLocation()
+  const restored = location.state?.step5Restored ?? null
 
   const [companionId, setCompanionId] = useState(null)
   const [styleIds, setStyleIds] = useState([])
   /** Trip 생성 POST 진행 상태 — 버튼 중복 클릭 방지 + 인라인 에러 표시용 */
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [companions, setCompanions] = useState(COMPANIONS)
-  const [travelStyles, setTravelStyles] = useState(TRAVEL_STYLES)
+  const [companions, setCompanions] = useState([])
+  const [travelStyles, setTravelStyles] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loginGateOpen, setLoginGateOpen] = useState(false)
+  const autoSubmitFiredRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
+    setIsLoading(true)
     Promise.all([listCompanionTypes(), listTravelStyles()])
       .then(([apiCompanions, apiStyles]) => {
         if (cancelled) return
@@ -104,7 +113,14 @@ function TripNewStep5PageContent() {
           })
         )
       })
-      .catch(() => {})
+      .catch(() => {
+        if (cancelled) return
+        setCompanions(COMPANIONS)
+        setTravelStyles(TRAVEL_STYLES)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
     return () => { cancelled = true }
   }, [])
 
@@ -113,12 +129,42 @@ function TripNewStep5PageContent() {
   }, [])
 
   const canSubmit = useMemo(
-    () => Boolean(companionId) && styleIds.length > 0 && !submitting,
-    [companionId, styleIds, submitting],
+    () => Boolean(companionId) && styleIds.length > 0 && !submitting && !isLoading,
+    [companionId, styleIds, submitting, isLoading],
   )
+
+  // 로그인 후 복원: pending에서 저장된 선택값을 마운트 시 1회 복원
+  useEffect(() => {
+    if (!restored) return
+    if (restored.companionId) setCompanionId(restored.companionId)
+    if (restored.styleIds?.length > 0) setStyleIds(restored.styleIds)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 복원 후 자동 제출: canSubmit이 true가 되는 시점(마스터 데이터 로드 완료)에 1회 실행
+  useEffect(() => {
+    if (!restored || autoSubmitFiredRef.current) return
+    if (!canSubmit) return
+    autoSubmitFiredRef.current = true
+    const t = setTimeout(() => handleCreatePlan(), 300)
+    return () => clearTimeout(t)
+  }, [canSubmit]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCreatePlan = async () => {
     if (!canSubmit) return
+
+    const supabase = getSupabaseClient()
+    let isLoggedIn = false
+    if (supabase) {
+      const { data } = await supabase.auth.getSession()
+      isLoggedIn = !!data?.session?.access_token
+    } else {
+      isLoggedIn = !!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+    }
+    if (!isLoggedIn) {
+      setLoginGateOpen(true)
+      return
+    }
+
     setSubmitError('')
 
     // 백엔드 맞춤 체크리스트 호출(/checklists/generate-from-context) fallback 경로 및
@@ -186,6 +232,18 @@ function TripNewStep5PageContent() {
     })
   }
 
+  const handleLoginRedirect = () => {
+    savePendingTripSubmit({
+      companionId,
+      styleIds,
+      locationState: location.state,
+    })
+    setLoginGateOpen(false)
+    navigate('/login', {
+      state: { from: location, pendingTripSubmit: true },
+    })
+  }
+
   const companionCardClass = (id) => {
     const on = companionId === id
     return [
@@ -211,6 +269,7 @@ function TripNewStep5PageContent() {
   }
 
   return (
+    <>
     <div
       className="min-h-screen"
       style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)' }}
@@ -244,26 +303,34 @@ function TripNewStep5PageContent() {
               <SectionLabel num={1} label="동행인 선택" />
               <p className="text-sm text-gray-500 mb-5">누구와 함께 여행하시나요?</p>
               <div className="flex-1 min-h-0">
-                <div className="grid grid-cols-2 gap-3 auto-rows-fr">
-                  {companions.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setCompanionId(c.id)}
-                      className={companionCardClass(c.id)}
-                    >
-                      <div
-                        className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                          companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white/80 text-teal-700'
-                        }`}
+                {isLoading ? (
+                  <div className="grid grid-cols-2 gap-3 auto-rows-fr">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-28 rounded-2xl bg-gray-100 animate-pulse" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 auto-rows-fr">
+                    {companions.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setCompanionId(c.id)}
+                        className={companionCardClass(c.id)}
                       >
-                        <SvgIcon name={c.icon} className="w-6 h-6" />
-                      </div>
-                      <span className="font-extrabold text-base leading-tight">{c.label}</span>
-                      <span className="text-xs text-gray-600 leading-snug">{c.description}</span>
-                    </button>
-                  ))}
-                </div>
+                        <div
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+                            companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white/80 text-teal-700'
+                          }`}
+                        >
+                          <SvgIcon name={c.icon} className="w-6 h-6" />
+                        </div>
+                        <span className="font-extrabold text-base leading-tight">{c.label}</span>
+                        <span className="text-xs text-gray-600 leading-snug">{c.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -296,23 +363,31 @@ function TripNewStep5PageContent() {
               <SectionLabel num={2} label="여행 스타일" />
               <p className="text-sm text-gray-500 mb-5">어떤 여행을 계획하고 있나요? (복수 선택 가능)</p>
 
-              <div className="grid w-full grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
-                {travelStyles.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => toggleStyle(s.id)}
-                    className={styleCardClass(s.id)}
-                  >
-                    <TravelStyleIcon
-                      src={s.iconSrc}
-                      selected={styleIds.includes(s.id)}
-                      className="h-9 w-9 md:h-11 md:w-11"
-                    />
-                    <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
-                  </button>
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="grid w-full grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse md:h-28" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid w-full grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
+                  {travelStyles.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => toggleStyle(s.id)}
+                      className={styleCardClass(s.id)}
+                    >
+                      <TravelStyleIcon
+                        src={s.iconSrc}
+                        selected={styleIds.includes(s.id)}
+                        className="h-9 w-9 md:h-11 md:w-11"
+                      />
+                      <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-1 flex flex-col gap-3">
@@ -358,44 +433,60 @@ function TripNewStep5PageContent() {
 
           <SectionLabel num={1} label="동행인 선택" />
           <p className="text-sm text-gray-500 mb-4">누구와 함께 여행하시나요?</p>
-          <div className="grid grid-cols-2 gap-3 mb-8">
-            {companions.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setCompanionId(c.id)}
-                className={companionCardClass(c.id)}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto ${
-                    companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white text-teal-700'
-                  }`}
+          {isLoading ? (
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-28 rounded-2xl bg-gray-100 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {companions.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setCompanionId(c.id)}
+                  className={companionCardClass(c.id)}
                 >
-                  <SvgIcon name={c.icon} className="w-5 h-5" />
-                </div>
-                <span className="font-extrabold text-sm leading-tight text-center">{c.label}</span>
-              </button>
-            ))}
-          </div>
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto ${
+                      companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white text-teal-700'
+                    }`}
+                  >
+                    <SvgIcon name={c.icon} className="w-5 h-5" />
+                  </div>
+                  <span className="font-extrabold text-sm leading-tight text-center">{c.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <SectionLabel num={2} label="여행 스타일" />
-          <div className="grid grid-cols-2 gap-3 min-h-[420px] auto-rows-fr">
-            {travelStyles.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => toggleStyle(s.id)}
-                className={styleCardClass(s.id)}
-              >
-                <TravelStyleIcon
-                  src={s.iconSrc}
-                  selected={styleIds.includes(s.id)}
-                  className="h-9 w-9"
-                />
-                <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
-              </button>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-2 gap-3 min-h-[420px] auto-rows-fr">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 min-h-[420px] auto-rows-fr">
+              {travelStyles.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => toggleStyle(s.id)}
+                  className={styleCardClass(s.id)}
+                >
+                  <TravelStyleIcon
+                    src={s.iconSrc}
+                    selected={styleIds.includes(s.id)}
+                    className="h-9 w-9"
+                  />
+                  <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/*
           <div className="relative mt-8 overflow-hidden rounded-2xl border border-slate-300/40 shadow-md">
@@ -434,6 +525,48 @@ function TripNewStep5PageContent() {
         </div>
       </div>
     </div>
+
+    {loginGateOpen && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[120] flex items-center justify-center p-4"
+            onClick={() => setLoginGateOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="relative z-[1] mx-4 w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-6 py-6 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="mb-1.5 text-center text-base font-semibold text-gray-900">
+                로그인이 필요한 서비스입니다
+              </h2>
+              <p className="mb-6 text-center text-sm text-gray-500">
+                로그인 후 맞춤 체크리스트를 생성해드려요 ✈️
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 py-2.5 text-sm font-semibold text-white transition-colors hover:from-cyan-400 hover:to-teal-500"
+                  onClick={handleLoginRedirect}
+                >
+                  로그인 또는 회원가입 하러가기
+                </button>
+                <button
+                  type="button"
+                  className="w-full rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  onClick={() => setLoginGateOpen(false)}
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null}
+    </>
   )
 }
 

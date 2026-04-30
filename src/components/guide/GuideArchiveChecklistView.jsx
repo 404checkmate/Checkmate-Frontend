@@ -691,7 +691,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       }),
     )
     setSaveConfirmOpen(false)
-    navigate(`/trips/${tripId}/guide-archive`)
+    navigate('/guide-archives')
   }, [tripId, entry.id, items, checks, progress, navigate])
 
   const handleBack = useCallback(() => {

@@ -4,6 +4,8 @@ export default function TripSearchPageHeader({
   mergeToArchive,
   pageMainTitle,
   headerDateLine,
+  companions = [],
+  travelStyles = [],
   headerDescription,
   archiveTargetMissing,
   loadState,
@@ -23,6 +25,28 @@ export default function TripSearchPageHeader({
         />
         {headerDateLine}
       </p>
+
+      {(companions.length > 0 || travelStyles.length > 0) && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {companions.map((label) => (
+            <span
+              key={label}
+              className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-600/20"
+            >
+              {label}
+            </span>
+          ))}
+          {travelStyles.map((label) => (
+            <span
+              key={label}
+              className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
+
       <p className="mt-4 text-sm leading-relaxed text-gray-600">{headerDescription}</p>
 
       {archiveTargetMissing ? (
