@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   DndContext,
@@ -147,6 +148,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
   const [editingSection, setEditingSection] = useState(null)
   const [sectionEditDraft, setSectionEditDraft] = useState(null)
   const [directAddModalOpen, setDirectAddModalOpen] = useState(false)
+  const [deleteItemConfirm, setDeleteItemConfirm] = useState(null)
   const [directAddDraft, setDirectAddDraft] = useState({
     title: '',
     description: '',
@@ -614,18 +616,22 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
 
   const confirmDeleteSingleItem = useCallback(
     (item) => {
-      const title = (item.title ?? '').trim() || '이 항목'
-      if (!window.confirm(`「${title}」을(를) 이 체크리스트에서 삭제할까요? 되돌릴 수 없습니다.`)) return
-      const id = String(item.id)
-      const newItems = items.filter((it) => String(it.id) !== id)
-      const nextChecks = {}
-      for (const it of newItems) {
-        nextChecks[String(it.id)] = Boolean(checks[String(it.id)])
-      }
-      persistItemsAndChecks(newItems, nextChecks)
+      setDeleteItemConfirm(item)
     },
-    [items, checks, persistItemsAndChecks],
+    [],
   )
+
+  const doDeleteSingleItem = useCallback(() => {
+    if (!deleteItemConfirm) return
+    const id = String(deleteItemConfirm.id)
+    const newItems = items.filter((it) => String(it.id) !== id)
+    const nextChecks = {}
+    for (const it of newItems) {
+      nextChecks[String(it.id)] = Boolean(checks[String(it.id)])
+    }
+    persistItemsAndChecks(newItems, nextChecks)
+    setDeleteItemConfirm(null)
+  }, [deleteItemConfirm, items, checks, persistItemsAndChecks])
 
   const saveSectionEdit = useCallback(() => {
     if (!editingSection || !sectionEditDraft) return
@@ -1316,6 +1322,44 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
       />
 
       {bottomBar}
+
+      {deleteItemConfirm != null && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            aria-label="삭제 확인 닫기"
+            onClick={() => setDeleteItemConfirm(null)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="relative z-[1] w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-5 py-5 shadow-xl"
+          >
+            <p className="text-center text-base font-semibold text-gray-900">
+              「{(deleteItemConfirm.title ?? '').trim() || '이 항목'}」을(를) 삭제할까요?
+            </p>
+            <p className="mt-1 text-center text-sm text-gray-500">되돌릴 수 없습니다.</p>
+            <div className="mt-6 flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                onClick={() => setDeleteItemConfirm(null)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+                onClick={doDeleteSingleItem}
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </>
   )
 }

@@ -37,17 +37,24 @@ export default function ProtectedRoute({ children }) {
     }
 
     let cancelled = false
+    let resolved = false
+
     ;(async () => {
       try {
         const { data } = await supabase.auth.getSession()
         if (cancelled) return
+        resolved = true
         setStatus(data?.session?.access_token ? 'authenticated' : 'unauthenticated')
       } catch {
-        if (!cancelled) setStatus('unauthenticated')
+        if (!cancelled) {
+          resolved = true
+          setStatus('unauthenticated')
+        }
       }
     })()
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!resolved) return
       setStatus(session?.access_token ? 'authenticated' : 'unauthenticated')
     })
 
