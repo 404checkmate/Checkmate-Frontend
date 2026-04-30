@@ -186,8 +186,62 @@ function TripSearchInner({ tripId }) {
         const rawId = created?.id ?? created?.tripId
         const realId = rawId != null ? String(rawId) : null
         if (!realId) return
+
+        const selectedItems = pending.selectedItems ?? []
         clearPendingGuestSearch()
         saveActiveTripId(realId)
+
+        if (selectedItems.length > 0) {
+          const upsertPayload = selectedItems
+            .filter((i) => i.title)
+            .map((item, idx) => ({
+              title: item.title,
+              ...(item.description ? { description: item.description } : {}),
+              categoryCode: item.subCategory || 'ai_recommend',
+              prepType: item.prepType || 'item',
+              baggageType: item.baggageType || 'none',
+              source: item.source || 'template',
+              orderIndex: idx,
+            }))
+          if (upsertPayload.length > 0) {
+            await upsertChecklistItems(realId, upsertPayload).catch(() => {})
+          }
+
+          const dest = plan?.destination
+          const ts = plan?.tripStartDate
+          const te = plan?.tripEndDate
+          const fromDestination = Boolean(dest && ts && te)
+          const snapshot = {
+            pageTitle: fromDestination ? `${dest.country} · ${dest.city} 여행 준비` : TRIP_SEARCH_CONTEXT.title,
+            pageSubtitle: '',
+            destination: fromDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
+            country: fromDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
+            tripWindowLabel: fromDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
+            tripStartDate: fromDestination ? ts : '',
+            tripEndDate: fromDestination ? te : '',
+            countryCode: fromDestination ? dest.countryCode : '',
+            iata: fromDestination ? dest.iata : '',
+            weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
+            temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
+            rainChance: TRIP_SEARCH_CONTEXT.rainChance,
+            environmentTags: TRIP_SEARCH_CONTEXT.environmentTags.map((t) => ({ ...t })),
+            phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
+            items: selectedItems.map(mapMockItemToArchiveItem),
+            dailySummaries: [],
+            dailyGuidesFull: [],
+          }
+          const archiveCreated = await createGuideArchive(realId, {
+            name: snapshot.pageTitle,
+            snapshot,
+          })
+          if (guestTripCancelledRef.current) return
+          if (archiveCreated?.id) {
+            sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
+          }
+          navigate('/guide-archives', { replace: true })
+          return
+        }
+
         navigate(`/trips/${realId}/search`, { replace: true })
       } catch (err) {
         if (guestTripCancelledRef.current) return
@@ -634,7 +688,11 @@ function TripSearchInner({ tripId }) {
     setLoginGateOpen(false)
     const step5 = location.state?.step5
     if (step5?.companionId && step5?.travelStyleIds?.length > 0) {
-      savePendingGuestSearch({ companionId: step5.companionId, travelStyleIds: step5.travelStyleIds })
+      savePendingGuestSearch({
+        companionId: step5.companionId,
+        travelStyleIds: step5.travelStyleIds,
+        selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
+      })
     }
     navigate('/login', { state: { from: location } })
   }

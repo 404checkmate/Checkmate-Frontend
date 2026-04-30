@@ -85,6 +85,7 @@ const AppRoutes = () => {
         /** Step4: 이 경로는 TripNewStep4Page 단 하나만 사용 (중복 라우트 없음) */
         { path: '/trips/new/step4',     element: withSuspense(<TripNewStep4Page />) },
         { path: '/trips/new/step5',     element: withSuspense(<TripNewStep5Page />) },
+        { path: '/trips/guest/loading',               element: withSuspense(<TripLoadingPage />) },
         { path: '/trips/guest/search',                element: withSuspense(<TripSearchPage />) },
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },

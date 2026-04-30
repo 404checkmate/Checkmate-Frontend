@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { generateChecklist } from '@/api/checklists'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
@@ -32,6 +32,7 @@ function SvgIcon({ name, className = 'w-5 h-5 text-white' }) {
 function TripLoadingPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [progress, setProgress] = useState(0)
 
   /** 이 페이지 방문당 1회만 고정 (진행률과 무관하게 문구 변경 없음) */
@@ -48,6 +49,24 @@ function TripLoadingPage() {
     if (!id) {
       navigate('/trips/new/destination', { replace: true })
       return
+    }
+
+    // guest 흐름: generateChecklist 호출 없이 애니메이션만 완료 후 이동
+    if (id === 'guest') {
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          const next = prev + (prev < 70 ? 1.2 : 0.7)
+          if (next >= 100) {
+            clearInterval(interval)
+            setProgress(100)
+            setTimeout(() => {
+              navigate('/trips/guest/search', { state: location.state, replace: true })
+            }, 600)
+          }
+          return Math.min(next, 100)
+        })
+      }, 50)
+      return () => clearInterval(interval)
     }
 
     let progressDone = false
@@ -82,7 +101,7 @@ function TripLoadingPage() {
       })
 
     return () => clearInterval(interval)
-  }, [id, navigate])
+  }, [id, navigate, location.state])
 
   const pct = Math.round(progress)
 

@@ -179,7 +179,7 @@ function TripNewStep5PageContent() {
       isLoggedIn = !!data?.session?.access_token
     }
     if (!isLoggedIn) {
-      navigate('/trips/guest/search', {
+      navigate('/trips/guest/loading', {
         state: { ...(location.state ?? {}), step5: step5State },
       })
       return
