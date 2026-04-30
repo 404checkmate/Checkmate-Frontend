@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { fetchGuideArchive } from '@/api/guideArchives'
+import { getTrip } from '@/api/trips'
 import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
 import { TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE } from '@/utils/tripMintPageBackground'
 
@@ -19,6 +20,25 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
   const [errorMessage, setErrorMessage] = useState('')
   /** 상세에서 mutate(삭제·저장) 후 다시 읽기 위한 트리거 */
   const [archiveRevision, setArchiveRevision] = useState(0)
+  const [tripCompanions, setTripCompanions] = useState([])
+  const [tripStyles, setTripStyles] = useState([])
+
+  useEffect(() => {
+    if (!tripId) return
+    let cancelled = false
+    getTrip(tripId)
+      .then((trip) => {
+        if (cancelled) return
+        if (trip?.companions?.length > 0) {
+          setTripCompanions(trip.companions.map((c) => c.companionType?.labelKo).filter(Boolean))
+        }
+        if (trip?.travelStyles?.length > 0) {
+          setTripStyles(trip.travelStyles.map((s) => s.travelStyle?.labelKo).filter(Boolean))
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [tripId])
 
   useEffect(() => {
     let cancelled = false
@@ -119,6 +139,8 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
       <GuideArchiveChecklistView
         tripId={tripId}
         entry={entry}
+        companions={tripCompanions}
+        travelStyles={tripStyles}
         onArchiveMutated={() => setArchiveRevision((n) => n + 1)}
       />
     </div>

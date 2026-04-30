@@ -139,7 +139,7 @@ const GUIDE_ARCHIVE_DROP_ANIMATION = {
  * **AI 추천**: AI 전용 탭·섹션 제목은 없고, `category === ai_recommend` 인 항목은 **준비물(supplies)** 등 실제 탭과 같은 블록에 섞이되 **보라 톤 카드**로 구분하고 **같은 소섹션(기내/위탁) 목록 상단**에 둡니다. 백엔드는 동일 필드로 내려주면 됩니다.
  * `onArchiveMutated`: 삭제·저장 후 부모가 스토리지에서 entry를 다시 읽을 때 호출합니다.
  */
-export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMutated }) {
+export default function GuideArchiveChecklistView({ tripId, entry, companions = [], travelStyles = [], onArchiveMutated }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
@@ -1005,6 +1005,26 @@ export default function GuideArchiveChecklistView({ tripId, entry, onArchiveMuta
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-teal-600 md:h-2.5 md:w-2.5" aria-hidden />
           {dateLine}
         </p>
+        {(companions.length > 0 || travelStyles.length > 0) && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {companions.map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-600/20"
+              >
+                {label}
+              </span>
+            ))}
+            {travelStyles.map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
         <p className="mt-4 text-sm leading-relaxed text-gray-600">
           저장한 체크리스트를 확인하고 빠짐없이 준비해보세요
         </p>

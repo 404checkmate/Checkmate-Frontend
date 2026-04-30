@@ -25,7 +25,9 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
   const id = String(item.id)
   const on = Boolean(checks[id])
   const showCheckedStyle = on
-  const isAiOrigin = (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY
+  const isAiOrigin =
+    (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ||
+    item?.prepType === 'ai_recommend'
 
   const cardToneClass = on
     ? 'border-amber-400 bg-amber-200/95 shadow-sm ring-1 ring-amber-300/70'
@@ -146,7 +148,9 @@ export default function GuideArchiveSortableChecklistItem({
   const on = Boolean(checks[id])
   const showCheckedStyle = on
   const isAi = actionVariant === 'ai'
-  const isAiOrigin = (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY
+  const isAiOrigin =
+    (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ||
+    item?.prepType === 'ai_recommend'
 
   const dragHandleProps =
     !sortableDisabled ? { ...listeners, ...attributes } : {}
