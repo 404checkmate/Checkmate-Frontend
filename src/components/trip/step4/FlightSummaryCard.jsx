@@ -4,10 +4,6 @@ import Step4SvgIcon from '@/components/trip/step4/Step4SvgIcon'
 export default function FlightSummaryCard({ arrival, tripWindow, tripDatesLoading, tripDatesError }) {
   return (
     <div className="relative overflow-hidden rounded-[22px] border border-gray-100 bg-white p-5 shadow-[0_12px_40px_-12px_rgba(15,118,110,0.15)]">
-      <div
-        className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-teal-50/80"
-        aria-hidden
-      />
       <div className="relative flex items-start gap-4">
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-50 shadow-inner">
           <Step4SvgIcon name="airplane" className="h-6 w-6 text-teal-600" />
