@@ -2,7 +2,8 @@ import { useCallback, useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
-import { clearClientSessionForLogout, isMockWebSessionLoggedIn } from '@/utils/onboardingGate'
+import { clearClientSessionForLogout } from '@/utils/onboardingGate'
+import { useAuth } from '@/hooks/useAuth'
 import defaultProfileImg from '@/assets/default-profile.png'
 
 const NAV_ITEMS = [
@@ -65,9 +66,9 @@ function Header() {
     setLogoutConfirmOpen(true)
   }, [closeMobileMenu])
 
-  /** 데스크톱 전용 분기 — 백엔드 연동 시 isMockWebSessionLoggedIn 대신 세션 훅으로 교체 */
+  const { isLoggedIn } = useAuth()
   const { pathname } = location
-  const isWebLoggedIn = isMockWebSessionLoggedIn() && pathname !== '/auth/consent'
+  const isWebLoggedIn = isLoggedIn && pathname !== '/auth/consent'
   const logoutConfirmModal =
     logoutConfirmOpen && typeof document !== 'undefined'
       ? createPortal(
