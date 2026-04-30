@@ -14,12 +14,6 @@ const STATUS_TABS = [
   { id: 'completed', label: '완료' },
 ]
 
-const STATUS_LABEL = {
-  not_started: '시작 전',
-  preparing: '준비 중',
-  completed: '완료',
-}
-
 function formatDate(isoOrDate) {
   if (!isoOrDate) return ''
   const s = String(isoOrDate).slice(0, 10)
@@ -44,7 +38,6 @@ function formatDateRange(start, end) {
 }
 
 function ArchiveCard({ archive, deleteMode, isSelected, onToggleSelect, isHighlighted }) {
-  const statusLabel = STATUS_LABEL[archive.checklistStatus] ?? archive.checklistStatus
   const progress = archive.snapshot?.checklistProgressPercent ?? archive.completionRate ?? 0
   const dateLine = formatDateRange(archive.trip?.tripStart, archive.trip?.tripEnd)
 
@@ -77,17 +70,6 @@ function ArchiveCard({ archive, deleteMode, isSelected, onToggleSelect, isHighli
               mate 추천
             </span>
           )}
-          <span
-            className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-              progress >= 100
-                ? 'bg-teal-700 text-white'
-                : progress <= 0
-                  ? 'bg-slate-200 text-slate-800 ring-1 ring-slate-300/80'
-                  : 'bg-sky-100 text-sky-800 ring-1 ring-sky-200/80'
-            }`}
-          >
-            {statusLabel}
-          </span>
         </div>
       </div>
 
