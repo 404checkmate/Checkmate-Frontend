@@ -26,6 +26,7 @@ export async function ingestEvents(events) {
     await apiClient.post('/analytics/events', events)
     return { ok: true }
   } catch (err) {
+    if (err?.response?.status === 401) return { ok: false, error: 'unauthorized' }
     if (import.meta.env.DEV) {
       console.warn('[analytics] ingest failed', err?.message ?? err)
     }

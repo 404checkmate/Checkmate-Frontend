@@ -1,4 +1,5 @@
 import { ingestEvents } from '@/api/analytics'
+import { resolveAccessToken } from '@/api/client'
 import { getMe } from '@/api/auth'
 
 const SESSION_ID_KEY = 'cm_analytics_sid'
@@ -82,6 +83,8 @@ let flushTimer = null
 
 async function flush() {
   if (!queue.length) return
+  const token = await resolveAccessToken()
+  if (!token) return
   const batch = queue.splice(0)
   const userId = await resolveUserId()
   if (!userId) return

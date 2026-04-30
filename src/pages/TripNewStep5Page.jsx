@@ -24,7 +24,7 @@ import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { savePendingTripSubmit } from '@/utils/pendingTripSubmit'
-import { getSupabaseClient } from '@/lib/supabase'
+import { resolveAccessToken } from '@/api/client'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
   const composite = STEP5_ICON_COMPOSITE[name]
@@ -171,17 +171,9 @@ function TripNewStep5PageContent() {
 
     const step5State = { companionId, travelStyleIds: styleIds }
 
-    // 비로그인이면 서버 저장 없이 guest 경로로 바로 이동
-    const supabase = getSupabaseClient()
-    let isLoggedIn = false
-    if (supabase) {
-      const { data } = await supabase.auth.getSession()
-      isLoggedIn = !!data?.session?.access_token
-    }
-    if (!isLoggedIn) {
-      navigate('/trips/guest/loading', {
-        state: { ...(location.state ?? {}), step5: step5State },
-      })
+    const token = await resolveAccessToken()
+    if (!token) {
+      setLoginGateOpen(true)
       return
     }
 
@@ -223,6 +215,10 @@ function TripNewStep5PageContent() {
       return
     }
 
+    if (!createdTripId) {
+      navigate('/guide-archives', { replace: true })
+      return
+    }
     navigate(`/trips/${createdTripId}/loading`, {
       state: {
         ...(location.state ?? {}),
