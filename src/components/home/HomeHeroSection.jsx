@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import homeHeroMascotUrl from '@/assets/home-hero-mascot-camera.png'
+import homeHeroMascotUrl from '@/assets/ChatGPT_Image_2026_4_30_04_12_33-Photoroom.png'
 import { HOME_HERO_TITLE_LINES } from '@/mocks/homeData'
 import RevealBlock from './RevealBlock'
 import { SNAP_SLIDE } from './constants'

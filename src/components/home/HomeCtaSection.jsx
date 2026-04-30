@@ -1,4 +1,4 @@
-import ctaSceneUrl from '@/assets/home-cta-below-text-scene.png'
+import ctaSceneUrl from '@/assets/0f249867d538bc1717.png'
 import ctaTitleCombinedUrl from '@/assets/home-cta-title-combined.png'
 import RevealBlock from './RevealBlock'
 import { SNAP_SLIDE } from './constants'
@@ -10,7 +10,7 @@ export default function HomeCtaSection({ ctaRef, ctaRevealed, onStartTrip }) {
         <div className="relative w-full overflow-hidden bg-transparent pb-0 pt-6 md:pt-8">
           <RevealBlock
             show={ctaRevealed}
-            className="relative z-20 -mt-4 mx-auto w-fit px-4 text-center md:-mt-8 md:px-0 md:text-center"
+            className="relative z-20 mt-4 mx-auto w-fit px-4 text-center md:mt-2 md:px-0 md:text-center"
           >
             <img
               src={ctaTitleCombinedUrl}
@@ -39,12 +39,12 @@ export default function HomeCtaSection({ ctaRef, ctaRevealed, onStartTrip }) {
           <RevealBlock
             show={ctaRevealed}
             delayClass="delay-[200ms]"
-            className="relative mt-3 flex justify-center md:mt-5"
+            className="relative -mt-2 flex justify-center md:-mt-4"
           >
             <img
               src={ctaSceneUrl}
               alt="여행 가방을 든 메이트와 깃발을 든 작은 메이트가 체스판 위에 서 있는 장면"
-              className="mx-auto block h-auto w-full max-w-[560px] object-contain md:max-w-[960px] lg:max-w-[1120px]"
+              className="mx-auto block h-auto w-full max-w-[720px] object-contain md:max-w-[1100px] lg:max-w-[1300px]"
               loading="lazy"
               decoding="async"
             />

@@ -1,4 +1,4 @@
-import featureMascotQuestionUrl from '@/assets/home-feature-mascot-question.png'
+import featureMascotQuestionUrl from '@/assets/ChatGPT_Image_2026_4_30_02_46_20_2.png'
 import { LANDING_SECTION_IDS } from '@/mocks/homeData'
 import RevealBlock from './RevealBlock'
 import FeatureSpeechBubble from './FeatureSpeechBubble'
