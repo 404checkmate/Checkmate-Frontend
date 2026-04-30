@@ -11,6 +11,7 @@ import {
 } from '@/utils/onboardingGate'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { loadPendingTripSubmit, clearPendingTripSubmit } from '@/utils/pendingTripSubmit'
+import { loadPendingGuestSearch } from '@/utils/pendingGuestSearch'
 
 /**
  * /auth/callback — Google/Kakao 소셜 로그인(Supabase Auth) 콜백 처리.
@@ -91,6 +92,12 @@ export default function AuthCallbackPage() {
             },
           },
         })
+        return
+      }
+
+      const pendingGuest = loadPendingGuestSearch()
+      if (pendingGuest) {
+        navigate('/trips/guest/search', { replace: true })
         return
       }
 

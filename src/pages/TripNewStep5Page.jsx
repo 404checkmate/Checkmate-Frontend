@@ -24,7 +24,6 @@ import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage
 import { createTrip } from '@/api/trips'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { savePendingTripSubmit } from '@/utils/pendingTripSubmit'
-import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
 import { getSupabaseClient } from '@/lib/supabase'
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
@@ -152,19 +151,6 @@ function TripNewStep5PageContent() {
   const handleCreatePlan = async () => {
     if (!canSubmit) return
 
-    const supabase = getSupabaseClient()
-    let isLoggedIn = false
-    if (supabase) {
-      const { data } = await supabase.auth.getSession()
-      isLoggedIn = !!data?.session?.access_token
-    } else {
-      isLoggedIn = !!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
-    }
-    if (!isLoggedIn) {
-      setLoginGateOpen(true)
-      return
-    }
-
     setSubmitError('')
 
     // 백엔드 맞춤 체크리스트 호출(/checklists/generate-from-context) fallback 경로 및
@@ -185,7 +171,21 @@ function TripNewStep5PageContent() {
 
     const step5State = { companionId, travelStyleIds: styleIds }
 
-    // 실제 Trip 영속화 시도. 실패해도 기존 context 기반 플로우로 이어지도록 graceful fallback.
+    // 비로그인이면 서버 저장 없이 guest 경로로 바로 이동
+    const supabase = getSupabaseClient()
+    let isLoggedIn = false
+    if (supabase) {
+      const { data } = await supabase.auth.getSession()
+      isLoggedIn = !!data?.session?.access_token
+    }
+    if (!isLoggedIn) {
+      navigate('/trips/guest/search', {
+        state: { ...(location.state ?? {}), step5: step5State },
+      })
+      return
+    }
+
+    // 로그인 상태: 기존 createTrip 영속화 흐름
     const payload = buildCreateTripPayload(nextPlan ?? existingPlan, {
       companionId,
       hasPet,

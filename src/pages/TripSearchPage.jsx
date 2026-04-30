@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useParams, useSearchParams, Link, useLocation } from 'react-router-dom'
+
 import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
 import { CATEGORIES, TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
-import { getTrip } from '@/api/trips'
+import { getTrip, createTrip } from '@/api/trips'
 import {
   generateChecklist,
   generateChecklistFromContext,
@@ -38,11 +40,16 @@ import TripSearchItemsList from '@/components/search/TripSearchItemsList'
 import TripSearchSaveModal from '@/components/search/TripSearchSaveModal'
 import TripSearchLeaveModal from '@/components/search/TripSearchLeaveModal'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { getSupabaseClient } from '@/lib/supabase'
+import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
+import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
+import { saveActiveTripId } from '@/utils/activeTripIdStorage'
+import { savePendingGuestSearch, loadPendingGuestSearch, clearPendingGuestSearch } from '@/utils/pendingGuestSearch'
 
 function TripSearchInner({ tripId }) {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
-  const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
+  const location = useLocation()
+  const navBarVisible = useMobileScrollChromeVisibility(true, location.pathname)
   const [searchParams] = useSearchParams()
   const archiveEntryIdRaw = searchParams.get('archiveEntry')
   const archiveEntryId =
@@ -57,6 +64,15 @@ function TripSearchInner({ tripId }) {
   const [tripStyles, setTripStyles] = useState([])
 
   useEffect(() => {
+    if (tripId === 'guest') {
+      const plan = loadActiveTripPlan()
+      if (plan?.tripStartDate && plan?.tripEndDate) {
+        setTripDateLabel(buildTripWindowLabelFromRange(plan.tripStartDate, plan.tripEndDate))
+      }
+      if (plan?.companion) setTripCompanions([plan.companion])
+      if (plan?.travelStyles?.length > 0) setTripStyles(plan.travelStyles)
+      return
+    }
     let cancelled = false
     getTrip(tripId)
       .then((trip) => {
@@ -120,18 +136,70 @@ function TripSearchInner({ tripId }) {
     [mergeToArchive, archiveEntry],
   )
 
+  const guestTripRanRef = useRef(false)
+  const guestTripCancelledRef = useRef(false)
   const searchStartRef = useRef(0)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [savedIds, setSavedIds] = useState(() => new Set(loadSavedItems(tripId).map((x) => String(x.id))))
   const [selectedForSave, setSelectedForSave] = useState(() => new Set())
   const [leaveModalOpen, setLeaveModalOpen] = useState(false)
   const [saveConfirmModalOpen, setSaveConfirmModalOpen] = useState(false)
+  const [loginGateOpen, setLoginGateOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [loadState, setLoadState] = useState({ status: 'loading', fromApi: false })
   const [apiItems, setApiItems] = useState([])
   const [apiSummary, setApiSummary] = useState(null)
   const [retryTick, setRetryTick] = useState(0)
+
+  // guest 모드 + 로그인 상태: 실제 trip 생성 후 replace 이동
+  useEffect(() => {
+    if (tripId !== 'guest') return
+    guestTripCancelledRef.current = false
+    if (guestTripRanRef.current) return
+    guestTripRanRef.current = true
+    ;(async () => {
+      const supabase = getSupabaseClient()
+      if (!supabase) return
+      const { data } = await supabase.auth.getSession()
+      if (!data?.session?.access_token) return
+      if (guestTripCancelledRef.current) return
+
+      const pending = loadPendingGuestSearch()
+      if (!pending?.companionId || !pending?.travelStyleIds?.length) return
+
+      const plan = loadActiveTripPlan()
+      const hasPet = pending.companionId === 'pets' || pending.companionId === 'withPet'
+      const payload = buildCreateTripPayload(plan, {
+        companionId: pending.companionId,
+        hasPet,
+        travelStyleIds: pending.travelStyleIds,
+      })
+      if (!payload) {
+        setLoadState({ status: 'fallback', fromApi: false, errorMessage: '여행 정보가 부족합니다. 처음부터 다시 시도해 주세요.' })
+        return
+      }
+
+      try {
+        const created = await createTrip(payload)
+        if (guestTripCancelledRef.current) return
+        const rawId = created?.id ?? created?.tripId
+        const realId = rawId != null ? String(rawId) : null
+        if (!realId) return
+        clearPendingGuestSearch()
+        saveActiveTripId(realId)
+        navigate(`/trips/${realId}/search`, { replace: true })
+      } catch (err) {
+        if (guestTripCancelledRef.current) return
+        setLoadState({
+          status: 'fallback',
+          fromApi: false,
+          errorMessage: err?.response?.data?.message || err?.message || '여행 계획 저장에 실패했습니다. 다시 시도해 주세요.',
+        })
+      }
+    })()
+    return () => { guestTripCancelledRef.current = true }
+  }, [tripId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const t = Date.now()
@@ -175,6 +243,23 @@ function TripSearchInner({ tripId }) {
     ;(async () => {
       const plan = loadActiveTripPlan()
       const contextInput = buildContextInputFromPlan(plan)
+
+      // guest 모드: 서버 API 없이 로컬 플랜으로 context 생성 경로 직행
+      if (tripId === 'guest') {
+        if (contextInput) {
+          try {
+            const data = await generateChecklistFromContext(contextInput)
+            applyAdapted(data, 'context')
+          } catch (err) {
+            if (cancelled) return
+            console.warn('[TripSearchPage] guest generateFromContext 실패:', err?.message ?? err)
+            applyFallback(err?.response?.data?.message || err?.message)
+          }
+        } else {
+          applyFallback('여행 정보가 없습니다. 처음부터 다시 시작해 주세요.')
+        }
+        return
+      }
 
       try {
         const cachedData = await listChecklistCandidates(tripId)
@@ -523,6 +608,37 @@ function TripSearchInner({ tripId }) {
     }
   }
 
+  const handleSaveButtonClick = async () => {
+    if (selectedForSave.size === 0) return
+    // guest 모드: 세션 체크 없이 무조건 로그인 유도
+    if (tripId === 'guest') {
+      setLoginGateOpen(true)
+      return
+    }
+    const supabase = getSupabaseClient()
+    let isLoggedIn = false
+    if (supabase) {
+      const { data } = await supabase.auth.getSession()
+      isLoggedIn = !!data?.session?.access_token
+    } else {
+      isLoggedIn = !!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+    }
+    if (!isLoggedIn) {
+      setLoginGateOpen(true)
+      return
+    }
+    setSaveConfirmModalOpen(true)
+  }
+
+  const handleLoginRedirect = () => {
+    setLoginGateOpen(false)
+    const step5 = location.state?.step5
+    if (step5?.companionId && step5?.travelStyleIds?.length > 0) {
+      savePendingGuestSearch({ companionId: step5.companionId, travelStyleIds: step5.travelStyleIds })
+    }
+    navigate('/login', { state: { from: location } })
+  }
+
   const handleLeaveWithoutSave = () => {
     setLeaveModalOpen(false)
     if (mergeToArchive && archiveEntryId) {
@@ -661,7 +777,7 @@ function TripSearchInner({ tripId }) {
             </button>
             <button
               type="button"
-              onClick={() => { if (selectedForSave.size > 0) setSaveConfirmModalOpen(true) }}
+              onClick={handleSaveButtonClick}
               disabled={selectedForSave.size === 0}
               className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
             >
@@ -684,6 +800,46 @@ function TripSearchInner({ tripId }) {
         onLeave={handleLeaveWithoutSave}
         onClose={() => setLeaveModalOpen(false)}
       />
+      {loginGateOpen && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[120] flex items-center justify-center p-4"
+              onClick={() => setLoginGateOpen(false)}
+            >
+              <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+              <div
+                role="dialog"
+                aria-modal="true"
+                className="relative z-[1] mx-4 w-full max-w-sm rounded-2xl border border-gray-100 bg-white px-6 py-6 shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="mb-1.5 text-center text-base font-semibold text-gray-900">
+                  로그인이 필요한 서비스입니다
+                </h2>
+                <p className="mb-6 text-center text-sm text-gray-500">
+                  로그인 후 체크리스트를 저장할 수 있어요 ✈️
+                </p>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 py-2.5 text-sm font-semibold text-white transition-colors hover:from-cyan-400 hover:to-teal-500"
+                    onClick={handleLoginRedirect}
+                  >
+                    로그인 또는 회원가입 하러가기
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                    onClick={() => setLoginGateOpen(false)}
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
