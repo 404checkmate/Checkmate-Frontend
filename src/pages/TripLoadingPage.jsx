@@ -44,15 +44,18 @@ function TripLoadingPage() {
 
   const v = LOADING_VARIANTS[variantIndex]
 
+  // /trips/guest/loading 은 static 라우트라 useParams().id === undefined
+  const isGuest = location.pathname === '/trips/guest/loading'
+
   /* progress 애니메이션 + generateChecklist 병렬 실행 — 둘 다 완료 시 이동 */
   useEffect(() => {
-    if (!id) {
+    if (!id && !isGuest) {
       navigate('/trips/new/destination', { replace: true })
       return
     }
 
     // guest 흐름: generateChecklist 호출 없이 애니메이션만 완료 후 이동
-    if (id === 'guest') {
+    if (isGuest) {
       const interval = setInterval(() => {
         setProgress((prev) => {
           const next = prev + (prev < 70 ? 1.2 : 0.7)
@@ -101,7 +104,7 @@ function TripLoadingPage() {
       })
 
     return () => clearInterval(interval)
-  }, [id, navigate, location.state])
+  }, [id, isGuest, navigate, location.state])
 
   const pct = Math.round(progress)
 
