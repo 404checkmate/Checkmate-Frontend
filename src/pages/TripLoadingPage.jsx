@@ -34,6 +34,7 @@ function TripLoadingPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [progress, setProgress] = useState(0)
+  const [generateError, setGenerateError] = useState(false)
 
   /** 이 페이지 방문당 1회만 고정 (진행률과 무관하게 문구 변경 없음) */
   const variantIndex = useMemo(
@@ -97,7 +98,10 @@ function TripLoadingPage() {
     }, 50)
 
     generateChecklist(id)
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[TripLoadingPage] generateChecklist 실패:', err)
+        setGenerateError(true)
+      })
       .finally(() => {
         generateDone = true
         tryNavigate()
@@ -213,6 +217,20 @@ function TripLoadingPage() {
             <span className="text-sm font-extrabold text-cyan-500">{pct}%</span>
           </div>
         </div>
+
+        {/* 체크리스트 생성 실패 알림 — 진행은 막지 않음 (finally로 tryNavigate 실행) */}
+        {generateError && (
+          <div className="w-full mb-4 rounded-2xl border border-red-100 bg-white/90 px-5 py-3 text-center text-sm text-red-500 shadow-sm">
+            체크리스트 생성에 실패했습니다.
+            <button
+              type="button"
+              onClick={() => navigate(`/trips/${id}/search`)}
+              className="ml-2 underline underline-offset-2"
+            >
+              계속 진행
+            </button>
+          </div>
+        )}
 
         {/* TIP 영역 */}
         {/* 데스크탑: 황색 pill */}
