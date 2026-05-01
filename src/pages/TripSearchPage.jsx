@@ -93,7 +93,10 @@ function TripSearchInner({ tripId }) {
           )
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[TripSearchPage] getTrip 실패:', err)
+        // tripDateLabel, tripCompanions, tripStyles는 초기 빈 값 유지
+      })
     return () => { cancelled = true }
   }, [tripId])
 
@@ -204,7 +207,9 @@ function TripSearchInner({ tripId }) {
               orderIndex: idx,
             }))
           if (upsertPayload.length > 0) {
-            await upsertChecklistItems(realId, upsertPayload).catch(() => {})
+            await upsertChecklistItems(realId, upsertPayload).catch((err) => {
+              console.error('[TripSearchPage] upsertChecklistItems 실패:', err)
+            })
           }
 
           const dest = plan?.destination
