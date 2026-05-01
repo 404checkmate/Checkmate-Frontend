@@ -52,16 +52,6 @@ export async function resolveAccessToken() {
       const { data } = await supabase.auth.getSession()
       const token = data?.session?.access_token
       if (token) {
-        // 매 요청마다 최신 supabase 토큰을 localStorage 백업과 동기화한다.
-        // - supabase 가 자동 갱신(refresh)한 경우에도 폴백 값이 같이 따라오도록.
-        // - 다음 페이지 로드에서 supabase hydration 레이스가 있어도 폴백이 즉시 응답.
-        try {
-          if (localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) !== token) {
-            localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token)
-          }
-        } catch {
-          /* storage 접근 실패: ignore */
-        }
         return token
       }
     } catch {

@@ -96,7 +96,11 @@ export async function consumeAuthCallback() {
         ? 'google'
         : null
   try {
-    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.access_token)
+    // Supabase 설정 환경에서는 세션을 Supabase가 자체 관리하므로 별도 저장 불필요.
+    // Supabase 미설정 환경(개발·테스트용 폴백)에서만 localStorage에 보존한다.
+    if (!isSupabaseConfigured()) {
+      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.access_token)
+    }
     if (provider) localStorage.setItem(AUTH_PROVIDER_STORAGE_KEY, provider)
   } catch {
     /* ignore */
