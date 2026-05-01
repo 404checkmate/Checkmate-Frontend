@@ -25,6 +25,7 @@ import { formatKoreanDateRangeLine, formatTripNightsDaysLabel } from '@/utils/tr
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { clearActiveTripId } from '@/utils/activeTripIdStorage'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 /** `<input type="date" min>` 용 — 브라우저 로컬 달력과 맞추기 위해 UTC가 아닌 로컬 날짜 사용 */
 function getLocalDateYYYYMMDD() {
@@ -463,6 +464,7 @@ export default function TripNewDestinationPage() {
       tripStartDate: startDate,
       tripEndDate: endDate,
     }
+    trackEvent('step_complete', { step: 'destination', destination: navState.destination?.city })
     saveStep4NavigationState(navState)
     saveActiveTripPlan({
       destination: {

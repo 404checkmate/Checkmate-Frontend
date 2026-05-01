@@ -18,6 +18,7 @@ import {
   setSavedItemChecked,
 } from '@/utils/savedTripItems'
 import { patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
+import { trackEvent } from '@/utils/analyticsTracker'
 import { deselectChecklistItem, reclassifyGuideArchiveItems } from '@/api/checklists'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
 import { CATEGORIES } from '@/mocks/searchData'
@@ -487,8 +488,10 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
 
   const handleToggle = useCallback((itemId) => {
     const id = String(itemId)
+    const checkedAfter = !checks[id]
     setChecks((prev) => ({ ...prev, [id]: !prev[id] }))
-  }, [])
+    trackEvent('item_checked', { item_id: itemId, checked_after: checkedAfter, trip_id: tripId })
+  }, [checks, tripId])
 
   const openDirectAddModal = useCallback(() => {
     setDirectAddDraft({

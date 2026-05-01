@@ -13,6 +13,7 @@ const FLUSH_BATCH_SIZE = 5
  * are logged to console only and never sent to the backend.
  */
 const EVENT_TYPE_MAP = {
+  // 기존 매핑
   search_start: 'search',
   search_items_loaded: 'search',
   search_item_toggle_select: 'detail_check',
@@ -26,6 +27,16 @@ const EVENT_TYPE_MAP = {
   save_confirm_navigate_guide_archive_merge: 'save',
   guide_archive_list_opened: 'saved_list_open',
   guide_archive_entries_deleted: 'edit_del',
+  // console-only → DB 저장 전환
+  login_started: 'login',
+  login_completed: 'login',
+  trip_creation_completed: 'trip_created',
+  // 신규 이벤트
+  page_view: 'page_view',
+  cta_click: 'cta_click',
+  step_complete: 'step_complete',
+  item_checked: 'item_checked',
+  session_start: 'session_start',
 }
 
 let resolvedUserId = null

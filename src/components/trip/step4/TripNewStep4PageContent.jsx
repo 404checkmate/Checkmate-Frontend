@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { STEP4_CONFIG, fetchTripDatesForStep4 } from '@/mocks/tripNewStep4Data'
 import { COUNTRY_ARRIVAL_OPTIONS, getArrivalsForCountry } from '@/mocks/tripNewDestinationData'
 import { loadStep4NavigationState } from '@/utils/tripFlowDraftStorage'
+import { trackEvent } from '@/utils/analyticsTracker'
 import { arrayMove } from '@/utils/tripStep4Helpers'
 import StepHeader from '@/components/common/StepHeader'
 import {
@@ -118,6 +119,7 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
 
   const handleNext = () => {
     if (!canProceed) return
+    trackEvent('step_complete', { step: 'dates', duration_days: tripWindow?.totalDays })
     navigate('/trips/new/step5', {
       state: {
         ...mergedNavState,

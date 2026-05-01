@@ -129,6 +129,10 @@ function TripNewStep5PageContent() {
     [companionId, styleIds, submitting, isLoading],
   )
 
+  useEffect(() => {
+    trackEvent('step_complete', { step: 'companion_style_view' })
+  }, [])
+
   // 로그인 후 복원: pending에서 저장된 선택값을 마운트 시 1회 복원
   useEffect(() => {
     if (!restored) return
@@ -148,6 +152,7 @@ function TripNewStep5PageContent() {
   const handleCreatePlan = async () => {
     if (!canSubmit) return
 
+    trackEvent('cta_click', { button: 'create_plan', step: 'step5' })
     setSubmitError('')
 
     // 백엔드 맞춤 체크리스트 호출(/checklists/generate-from-context) fallback 경로 및

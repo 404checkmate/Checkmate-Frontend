@@ -9,6 +9,7 @@ import HomeCatchphraseSection from '@/components/home/HomeCatchphraseSection'
 import HomeFooter from '@/components/home/HomeFooter'
 import HomeScrollToTopFab from '@/components/home/HomeScrollToTopFab'
 import { SNAP_TAIL_GROUP } from '@/components/home/constants'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 const HOME_SCROLL_SNAP_HTML_CLASS = 'home-page-scroll-snap'
 
@@ -77,7 +78,12 @@ function HomePage() {
     }
   }, [])
 
+  useEffect(() => {
+    trackEvent('page_view', { page: 'home' })
+  }, [])
+
   const handleStartTrip = () => {
+    trackEvent('cta_click', { button: 'start_trip', page: 'home' })
     navigate('/trips/new/destination')
   }
 

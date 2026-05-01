@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 const PAGE_BG = {
   background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)',
@@ -183,6 +184,18 @@ export default function MyGuideArchivesPage() {
       })
       .catch(() => setStatus('error'))
   }
+
+  useEffect(() => {
+    const SESSION_START_KEY = 'cm_session_start_fired'
+    try {
+      if (!sessionStorage.getItem(SESSION_START_KEY)) {
+        const lastVisit = localStorage.getItem('checkmate:last_visit')
+        trackEvent('session_start', { is_returning: !!lastVisit })
+        sessionStorage.setItem(SESSION_START_KEY, '1')
+        localStorage.setItem('checkmate:last_visit', String(Date.now()))
+      }
+    } catch {}
+  }, [])
 
   useEffect(() => {
     load()
