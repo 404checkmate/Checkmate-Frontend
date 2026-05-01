@@ -70,9 +70,6 @@ export default function TripSearchPageHeader({
           <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 font-semibold text-cyan-800">
             카테고리 필수품 <span className="ml-1 tabular-nums">{Math.max(0, totalItemCount - aiRecommendCount)}</span>개
           </span>
-          {apiSummary.model ? (
-            <span className="text-[11px] text-slate-400 md:text-xs">모델 {apiSummary.model}</span>
-          ) : null}
         </div>
       ) : null}
     </header>
