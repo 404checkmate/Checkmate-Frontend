@@ -11,7 +11,7 @@ import {
 } from '@/utils/onboardingGate'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { loadPendingTripSubmit, clearPendingTripSubmit } from '@/utils/pendingTripSubmit'
-import { loadPendingGuestSearch, clearPendingGuestSearch } from '@/utils/pendingGuestSearch'
+import { loadPendingGuestSearch } from '@/utils/pendingGuestSearch'
 
 /**
  * /auth/callback — Google/Kakao 소셜 로그인(Supabase Auth) 콜백 처리.
@@ -97,8 +97,8 @@ export default function AuthCallbackPage() {
 
       const pendingGuest = loadPendingGuestSearch()
       if (pendingGuest) {
-        clearPendingGuestSearch()
-        navigate('/guide-archives', { replace: true })
+        // clearPendingGuestSearch는 TripSearchPage.jsx 게스트 효과에서 trip 생성 성공 후 실행
+        navigate('/trips/guest/search', { replace: true })
         return
       }
 

@@ -691,11 +691,11 @@ function TripSearchInner({ tripId }) {
 
   const handleLoginRedirect = () => {
     setLoginGateOpen(false)
-    const step5 = location.state?.step5
-    if (step5?.companionId && step5?.travelStyleIds?.length > 0) {
+    if (tripId === 'guest') {
+      const step5 = location.state?.step5
       savePendingGuestSearch({
-        companionId: step5.companionId,
-        travelStyleIds: step5.travelStyleIds,
+        companionId: step5?.companionId ?? null,
+        travelStyleIds: step5?.travelStyleIds ?? [],
         selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
       })
     }
