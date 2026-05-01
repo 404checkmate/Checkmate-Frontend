@@ -880,7 +880,7 @@ function TripSearchInner({ tripId }) {
                   로그인이 필요한 서비스입니다
                 </h2>
                 <p className="mb-6 text-center text-sm text-gray-500">
-                  로그인 후 체크리스트를 저장할 수 있어요 ✈️
+                  로그인 후 체크리스트를 저장할 수 있어요
                 </p>
                 <div className="flex flex-col gap-2">
                   <button
