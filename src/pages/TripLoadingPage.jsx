@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { generateChecklist } from '@/api/checklists'
+import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import {
@@ -78,6 +79,7 @@ function TripLoadingPage() {
 
     const tryNavigate = () => {
       if (progressDone && generateDone) {
+        trackEvent('travel_fixed', { trip_id: id })
         navigate(`/trips/${id}/search`)
       }
     }

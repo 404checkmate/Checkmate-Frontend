@@ -269,6 +269,9 @@ function TripSearchInner({ tripId }) {
       merge_to_archive: mergeToArchive,
       archive_entry_id: archiveEntryId ?? undefined,
     })
+    if (archiveEntryId) {
+      trackEvent('backflow_trigger', { from: 'confirm_loop', trip_id: tripId })
+    }
   }, [tripId, mergeToArchive, archiveEntryId])
 
   useEffect(() => {

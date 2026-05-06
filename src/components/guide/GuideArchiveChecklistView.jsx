@@ -561,6 +561,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       prepType: '',
       baggageType: 'carry_on',
     })
+    trackEvent('edit_add', { trip_id: tripId, category: GUIDE_USER_DIRECT_CATEGORY })
     onArchiveMutated?.()
   }, [directAddDraft, items, checks, tripId, entry.id, onArchiveMutated])
 
@@ -640,8 +641,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       nextChecks[String(it.id)] = Boolean(checks[String(it.id)])
     }
     persistItemsAndChecks(newItems, nextChecks)
+    trackEvent('edit_del', { trip_id: tripId, count: 1 })
     setDeleteItemConfirm(null)
-  }, [deleteItemConfirm, items, checks, persistItemsAndChecks])
+  }, [deleteItemConfirm, items, checks, persistItemsAndChecks, tripId])
 
   const saveSectionEdit = useCallback(() => {
     if (!editingSection || !sectionEditDraft) return
@@ -680,6 +682,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       })
     }
     setLocalItems(newItems)
+    trackEvent('edit_text', { item_id: sectionEditDraft.rows[0]?.id, trip_id: tripId })
     setSectionEditModalOpen(false)
     setEditingSection(null)
     setSectionEditDraft(null)
@@ -899,11 +902,15 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
 
   const handleGuideArchiveDragEndWithOverlay = useCallback(
     (event) => {
+      const { active, over } = event
+      if (!dndLocked && over && String(active.id) !== String(over.id)) {
+        trackEvent('edit_reorder', { trip_id: tripId })
+      }
       handleGuideArchiveDragEnd(event)
       setActiveDragId(null)
       setActiveDragRect(null)
     },
-    [handleGuideArchiveDragEnd],
+    [dndLocked, handleGuideArchiveDragEnd, tripId],
   )
 
   useEffect(() => {

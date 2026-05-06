@@ -1,5 +1,4 @@
 import { ingestEvents } from '@/api/analytics'
-import { resolveAccessToken } from '@/api/client'
 import { getMe } from '@/api/auth'
 
 const SESSION_ID_KEY = 'cm_analytics_sid'
@@ -35,8 +34,17 @@ const EVENT_TYPE_MAP = {
   page_view: 'page_view',
   cta_click: 'cta_click',
   step_complete: 'step_complete',
-  item_checked: 'item_checked',
+  item_checked: 'prepare_action',
   session_start: 'session_start',
+  // Edit 세부 타입
+  edit_text: 'edit_text',
+  edit_add: 'edit_add',
+  edit_del: 'edit_del',
+  edit_reorder: 'edit_reorder',
+  // Backflow (confirm loop → store loop)
+  backflow_trigger: 're_search',
+  // Store Loop 진입 신호
+  travel_fixed: 'trip_created',
 }
 
 let resolvedUserId = null
@@ -94,14 +102,11 @@ let flushTimer = null
 
 async function flush() {
   if (!queue.length) return
-  const token = await resolveAccessToken()
-  if (!token) return
   const batch = queue.splice(0)
   const userId = await resolveUserId()
-  if (!userId) return
   const sessionId = getSessionId()
   const events = batch.map((item) => ({
-    userId,
+    ...(userId != null && { userId }),
     sessionId,
     eventType: item.eventType,
     ...(item.tripId != null && { tripId: item.tripId }),
