@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
@@ -23,6 +23,7 @@ function Header() {
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
   const menuId = useId()
   const logoutDialogTitleId = useId()
+  const menuRef = useRef(null)
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), [])
 
@@ -39,16 +40,32 @@ function Header() {
       else closeMobileMenu()
     }
     document.addEventListener('keydown', onKeyDown)
-    const prevBodyOverflow = document.body.style.overflow
-    const prevHtmlOverflow = document.documentElement.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
+    let prevBodyOverflow, prevHtmlOverflow
+    if (logoutConfirmOpen) {
+      prevBodyOverflow = document.body.style.overflow
+      prevHtmlOverflow = document.documentElement.style.overflow
+      document.body.style.overflow = 'hidden'
+      document.documentElement.style.overflow = 'hidden'
+    }
     return () => {
       document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = prevBodyOverflow
-      document.documentElement.style.overflow = prevHtmlOverflow
+      if (logoutConfirmOpen) {
+        document.body.style.overflow = prevBodyOverflow
+        document.documentElement.style.overflow = prevHtmlOverflow
+      }
     }
   }, [mobileMenuOpen, logoutConfirmOpen, closeMobileMenu])
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const onClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        closeMobileMenu()
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [mobileMenuOpen, closeMobileMenu])
 
   const handleConfirmLogout = useCallback(async () => {
     await clearClientSessionForLogout()
@@ -189,7 +206,7 @@ function Header() {
               </Link>
             </div>
           ) : (
-            <div className="relative md:hidden">
+            <div ref={menuRef} className="relative md:hidden">
               <button
                 type="button"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
@@ -211,18 +228,11 @@ function Header() {
               </button>
 
               {mobileMenuOpen ? (
-                <>
-                  <button
-                    type="button"
-                    className="fixed inset-0 z-[60] bg-black/30"
-                    aria-label="메뉴 닫기"
-                    onClick={closeMobileMenu}
-                  />
-                  <div
-                    id={menuId}
-                    className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
-                    role="menu"
-                  >
+                <div
+                  id={menuId}
+                  className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
+                  role="menu"
+                >
                     <button
                       type="button"
                       role="menuitem"
@@ -243,7 +253,6 @@ function Header() {
                       로그아웃
                     </button>
                   </div>
-                </>
               ) : null}
             </div>
           )}
