@@ -143,7 +143,7 @@ export default function TripNewStep4PageContent({ arrival, mergedNavState }) {
         선택하신 취항지(입국 도시) 근처에 더 여행할 지역이 있으면 일정 순서대로 적어 주세요.
       </span>
       <span className="mt-2.5 block text-base font-semibold leading-snug text-teal-900 sm:text-[15px]">
-        없으면 그대로 다음 단계로 넘어가도 돼요.
+        없으시면 다음 단계로 바로 넘어가도 돼요!
       </span>
     </>
   )
