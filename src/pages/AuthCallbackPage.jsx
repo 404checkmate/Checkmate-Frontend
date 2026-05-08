@@ -10,6 +10,7 @@ import {
   hasCompletedOnboarding,
 } from '@/utils/onboardingGate'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { ga4Event } from '@/utils/ga4'
 import { loadPendingTripSubmit, clearPendingTripSubmit } from '@/utils/pendingTripSubmit'
 import { loadPendingGuestSearch } from '@/utils/pendingGuestSearch'
 
@@ -78,6 +79,7 @@ export default function AuthCallbackPage() {
       }
 
       trackEvent('login_completed', { provider })
+      ga4Event('login', { method: provider })
 
       const pending = loadPendingTripSubmit()
       if (pending) {
