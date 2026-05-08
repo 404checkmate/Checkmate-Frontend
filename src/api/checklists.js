@@ -50,7 +50,7 @@ export async function getGenerateStatus(tripId) {
 }
 
 export async function generateChecklistFromContext(ctx) {
-  const res = await apiClient.post('/checklists/generate-from-context', ctx)
+  const res = await apiClient.post('/checklists/generate-from-context', ctx, { timeout: 35000 })
   return res.data
 }
 
