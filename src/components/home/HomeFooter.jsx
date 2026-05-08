@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
 import {
   FOOTER_BOTTOM_LINKS,
@@ -47,16 +48,22 @@ function LegalFooterLinks({ className = '', nonInteractive = false, onPlaceholde
       {FOOTER_BOTTOM_LINKS.map((link, idx) => (
         <span key={link.label} className="inline-flex items-center gap-x-2">
           {idx > 0 && <span className="text-gray-200 select-none" aria-hidden>|</span>}
-          <a
-            href={link.href}
-            onClick={(e) => {
-              e.preventDefault()
-              ;(onPlaceholderAction ?? noopFooterAction)()
-            }}
-            className="transition-colors hover:text-gray-600"
-          >
-            {link.label}
-          </a>
+          {link.href && link.href !== '#' ? (
+            <Link
+              to={link.href}
+              className="transition-colors hover:text-gray-600"
+            >
+              {link.label}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={onPlaceholderAction ?? noopFooterAction}
+              className="cursor-pointer border-0 bg-transparent p-0 text-inherit transition-colors hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
+            >
+              {link.label}
+            </button>
+          )}
         </span>
       ))}
     </nav>
@@ -140,7 +147,6 @@ export default function HomeFooter({ showNoticePreparingToast }) {
             )}
           </div>
           <LegalFooterLinks
-            nonInteractive
             onPlaceholderAction={showNoticePreparingToast}
             className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-xs text-gray-500"
           />

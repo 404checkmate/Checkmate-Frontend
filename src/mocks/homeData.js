@@ -7,8 +7,8 @@ import homeHeroOceanSunsetUrl from '@/assets/home-hero-ocean-sunset.png'
 
 export const FOOTER_BOTTOM_LINKS = [
   { label: '문의하기', href: '#' },
-  { label: '개인정보 처리방침', href: '#' },
-  { label: '서비스 이용약관', href: '#' },
+  { label: '개인정보 처리방침', href: '/privacy' },
+  { label: '서비스 이용약관', href: '/terms' },
 ]
 
 export const FOOTER_SECTIONS = [
