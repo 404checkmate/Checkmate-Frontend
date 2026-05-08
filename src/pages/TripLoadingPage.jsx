@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { generateChecklist } from '@/api/checklists'
+import { generateChecklist, getGenerateStatus } from '@/api/checklists'
 import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
@@ -99,15 +99,35 @@ function TripLoadingPage() {
       })
     }, 50)
 
-    generateChecklist(id)
-      .catch((err) => {
-        console.error('[TripLoadingPage] generateChecklist 실패:', err)
-        setGenerateError(true)
-      })
-      .finally(() => {
-        generateDone = true
-        tryNavigate()
-      })
+    generateChecklist(id).catch((err) => {
+      console.error('[TripLoadingPage] generate 킥오프 실패:', err)
+      setGenerateError(true)
+    })
+
+    const pollStatus = async () => {
+      const MAX_WAIT = 30000
+      const INTERVAL = 2000
+      const startTime = Date.now()
+
+      while (Date.now() - startTime < MAX_WAIT) {
+        try {
+          const res = await getGenerateStatus(id)
+          if (res.status === 'completed') {
+            generateDone = true
+            tryNavigate()
+            return
+          }
+        } catch {
+          // polling 에러 무시 — 타임아웃까지 계속 시도
+        }
+        await new Promise(r => setTimeout(r, INTERVAL))
+      }
+      // 30초 초과 시 TripSearchPage에서 재시도 가능하도록 그냥 이동
+      generateDone = true
+      tryNavigate()
+    }
+
+    pollStatus()
 
     return () => clearInterval(interval)
   }, [id, isGuest, navigate, location.state])

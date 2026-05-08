@@ -25,7 +25,7 @@ import { apiClient } from '@/api/client'
  *   }
  */
 export async function generateChecklist(tripId) {
-  const res = await apiClient.post(`/checklists/generate/${tripId}`)
+  const res = await apiClient.post(`/checklists/generate/${tripId}`, {}, { timeout: 35000 })
   return res.data
 }
 
@@ -44,6 +44,11 @@ export async function generateChecklist(tripId) {
  *   purposes?: string[]
  * }} ctx
  */
+export async function getGenerateStatus(tripId) {
+  const res = await apiClient.get(`/checklists/generate/${tripId}/status`)
+  return res.data
+}
+
 export async function generateChecklistFromContext(ctx) {
   const res = await apiClient.post('/checklists/generate-from-context', ctx)
   return res.data
