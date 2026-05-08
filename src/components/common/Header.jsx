@@ -206,7 +206,7 @@ function Header() {
               </Link>
             </div>
           ) : (
-            <div className="relative md:hidden">
+            <div ref={menuRef} className="relative md:hidden">
               <button
                 type="button"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
@@ -229,7 +229,6 @@ function Header() {
 
               {mobileMenuOpen ? (
                 <div
-                  ref={menuRef}
                   id={menuId}
                   className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
                   role="menu"
