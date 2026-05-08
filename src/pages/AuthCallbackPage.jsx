@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
-import { consumeAuthCallback } from '@/api/auth'
+import { consumeAuthCallback, getMe } from '@/api/auth'
 import {
   AUTH_CONSENT_PATH,
   FEATURE_PROFILE_ONBOARDING_ENABLED,
   SESSION_LAST_SOCIAL_PROVIDER,
   hasAcceptedLegalConsent,
   hasCompletedOnboarding,
+  markLegalConsentAccepted,
 } from '@/utils/onboardingGate'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { ga4Event, ga4SetUserId } from '@/utils/ga4'
@@ -104,6 +105,13 @@ export default function AuthCallbackPage() {
         // clearPendingGuestSearch는 TripSearchPage.jsx 게스트 효과에서 trip 생성 성공 후 실행
         navigate('/trips/guest/search', { replace: true })
         return
+      }
+
+      // DB에서 동의 여부 확인 후 localStorage 동기화.
+      // 실패 시 .catch(() => null) — 기존 localStorage 방식으로 자동 fallback.
+      const me = await getMe().catch(() => null)
+      if (me?.profile?.legalConsentAcceptedAt && sub) {
+        markLegalConsentAccepted(sub)
       }
 
       const next = resolveNext(sub)
