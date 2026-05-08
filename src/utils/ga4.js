@@ -6,3 +6,7 @@ function gtag(...args) {
 export function ga4Event(eventName, params = {}) {
   gtag('event', eventName, params)
 }
+
+export function ga4SetUserId(userId) {
+  gtag('set', { user_id: userId })
+}

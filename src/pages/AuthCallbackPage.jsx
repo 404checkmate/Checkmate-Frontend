@@ -10,7 +10,7 @@ import {
   hasCompletedOnboarding,
 } from '@/utils/onboardingGate'
 import { trackEvent } from '@/utils/analyticsTracker'
-import { ga4Event } from '@/utils/ga4'
+import { ga4Event, ga4SetUserId } from '@/utils/ga4'
 import { loadPendingTripSubmit, clearPendingTripSubmit } from '@/utils/pendingTripSubmit'
 import { loadPendingGuestSearch } from '@/utils/pendingGuestSearch'
 
@@ -78,8 +78,10 @@ export default function AuthCallbackPage() {
         /* storage access issues: 무시 */
       }
 
+      if (sub) ga4SetUserId(sub)
+      const isNewUser = !sub || !hasAcceptedLegalConsent(sub)
       trackEvent('login_completed', { provider })
-      ga4Event('login', { method: provider })
+      ga4Event(isNewUser ? 'sign_up' : 'login', { method: provider })
 
       const pending = loadPendingTripSubmit()
       if (pending) {
