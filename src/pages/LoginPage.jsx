@@ -6,6 +6,12 @@ import { startGoogleLogin, startKakaoLogin } from '@/api/auth'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { trackEvent } from '@/utils/analyticsTracker'
 
+const isInAppBrowser = () => {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /NAVER|KAKAOTALK|Instagram|FB_IAB|FBAN|FBIOS|Line|Twitter|Snapchat/i.test(ua)
+}
+
 /**
  * UI 보관용 플래그 — 이메일 로그인·비밀번호 찾기·회원가입 링크를 다시 켤 때 true로 변경.
  * (코드 삭제 없이 숨김 처리)
@@ -293,6 +299,16 @@ function LoginPage() {
             {hasPending && (
               <div className="mb-4 rounded-xl bg-teal-50 px-4 py-3 text-sm text-teal-700">
                 로그인하면 입력하신 여행 정보로 바로 체크리스트를 생성해드려요 ✈️
+              </div>
+            )}
+
+            {isInAppBrowser() && (
+              <div className="mb-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                <p className="font-semibold">⚠️ 앱 내 브라우저에서는 구글 로그인이 제한될 수 있어요.</p>
+                <p className="mt-1 text-yellow-700">
+                  주소창의 <strong>︙ 메뉴 → 다른 브라우저로 열기</strong> 또는
+                  <strong> Chrome / Safari</strong>에서 접속해주세요.
+                </p>
               </div>
             )}
 

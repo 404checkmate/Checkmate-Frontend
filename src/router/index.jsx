@@ -23,6 +23,8 @@ const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const MyPage = lazy(() => import('@/pages/MyPage'))
 const ErrorPage = lazy(() => import('@/pages/ErrorPage'))
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
+const TermsPage = lazy(() => import('@/pages/TermsPage'))
 import { FEATURE_PROFILE_ONBOARDING_ENABLED } from '@/utils/onboardingGate'
 
 function RouteFallback() {
@@ -97,6 +99,10 @@ const AppRoutes = () => {
 
     // 로딩 페이지 - Header/Footer 없는 독립 풀스크린 (RootLayout 미적용)
     { path: '/trips/:id/loading', element: <ProtectedRoute>{withSuspense(<TripLoadingPage />)}</ProtectedRoute> },
+
+    // 법적 고지 - Header/Footer 없는 단독 페이지 (누구나 접근 가능)
+    { path: '/privacy', element: withSuspense(<PrivacyPage />) },
+    { path: '/terms',   element: withSuspense(<TermsPage />) },
 
     // Fallback - 정의되지 않은 URL → 404 페이지로 이동
     {
