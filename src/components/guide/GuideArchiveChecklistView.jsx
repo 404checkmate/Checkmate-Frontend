@@ -145,6 +145,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const { pathname } = useLocation()
   const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [sectionEditModalOpen, setSectionEditModalOpen] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
   const [sectionEditDraft, setSectionEditDraft] = useState(null)
@@ -689,28 +690,35 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     onArchiveMutated?.()
   }, [editingSection, sectionEditDraft, items, tripId, entry.id, checks, onArchiveMutated])
 
-  const performSave = useCallback(() => {
-    const persisted = {}
-    for (const it of items) {
-      const id = String(it.id)
-      persisted[id] = Boolean(checks[id])
+  const performSave = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const persisted = {}
+      for (const it of items) {
+        const id = String(it.id)
+        persisted[id] = Boolean(checks[id])
+      }
+      saveEntryChecklistChecks(tripId, entry.id, persisted)
+      for (const it of items) {
+        setSavedItemChecked(tripId, String(it.id), Boolean(checks[String(it.id)]))
+      }
+      await patchGuideArchiveEntry(tripId, entry.id, {
+        items,
+        checklistProgressPercent: progress,
+        checklistSavedAt: new Date().toISOString(),
+      })
+      window.dispatchEvent(
+        new CustomEvent('guide-archive-checklist-saved', {
+          detail: { tripId: String(tripId), entryId: String(entry.id), progress },
+        }),
+      )
+      setSaveConfirmOpen(false)
+      navigate('/guide-archives')
+    } catch (err) {
+      console.error('[performSave] 저장 실패:', err)
+    } finally {
+      setIsSaving(false)
     }
-    saveEntryChecklistChecks(tripId, entry.id, persisted)
-    for (const it of items) {
-      setSavedItemChecked(tripId, String(it.id), Boolean(checks[String(it.id)]))
-    }
-    patchGuideArchiveEntry(tripId, entry.id, {
-      items,
-      checklistProgressPercent: progress,
-      checklistSavedAt: new Date().toISOString(),
-    })
-    window.dispatchEvent(
-      new CustomEvent('guide-archive-checklist-saved', {
-        detail: { tripId: String(tripId), entryId: String(entry.id), progress },
-      }),
-    )
-    setSaveConfirmOpen(false)
-    navigate('/guide-archives')
   }, [tripId, entry.id, items, checks, progress, navigate])
 
   const handleBack = useCallback(() => {
@@ -940,14 +948,16 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
         <button
           type="button"
           onClick={handleBack}
-          className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
+          disabled={isSaving}
+          className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
         >
           뒤로가기
         </button>
         <button
           type="button"
           onClick={() => setSaveConfirmOpen(true)}
-          className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
+          disabled={isSaving}
+          className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
         >
           완료
         </button>
@@ -975,14 +985,16 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
           <button
             type="button"
             onClick={performSave}
-            className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md"
+            disabled={isSaving}
+            className="min-h-12 flex-1 rounded-2xl bg-amber-400 py-3 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md disabled:pointer-events-none disabled:opacity-50"
           >
-            확인
+            {isSaving ? '저장 중…' : '확인'}
           </button>
           <button
             type="button"
             onClick={() => setSaveConfirmOpen(false)}
-            className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50"
+            disabled={isSaving}
+            className="min-h-12 flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
           >
             닫기
           </button>
