@@ -146,6 +146,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [tempSaved, setTempSaved] = useState(false)
   const [sectionEditModalOpen, setSectionEditModalOpen] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
   const [sectionEditDraft, setSectionEditDraft] = useState(null)
@@ -728,6 +729,23 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     navigate(-1)
   }, [navigate])
 
+  const handleTempSave = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      await patchGuideArchiveEntry(tripId, entry.id, {
+        items,
+        checklistProgressPercent: progress,
+        checklistSavedAt: new Date().toISOString(),
+      })
+      setTempSaved(true)
+      window.setTimeout(() => setTempSaved(false), 2000)
+    } catch (err) {
+      console.error('[handleTempSave] 저장 실패:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [tripId, entry.id, items, progress])
+
   useEffect(() => {
     if (!saveConfirmOpen) return
     const onKey = (e) => {
@@ -950,11 +968,11 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       <div className="mx-auto flex max-w-3xl gap-3">
         <button
           type="button"
-          onClick={handleBack}
+          onClick={handleTempSave}
           disabled={isSaving}
           className="min-w-0 flex-1 basis-0 rounded-2xl border-2 border-gray-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
         >
-          뒤로가기
+          {isSaving ? '저장 중…' : tempSaved ? '저장됨 ✓' : '임시 저장'}
         </button>
         <button
           type="button"
