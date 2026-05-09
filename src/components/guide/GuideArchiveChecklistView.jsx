@@ -687,8 +687,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     setSectionEditModalOpen(false)
     setEditingSection(null)
     setSectionEditDraft(null)
-    onArchiveMutated?.()
-  }, [editingSection, sectionEditDraft, items, tripId, entry.id, checks, onArchiveMutated])
+  }, [editingSection, sectionEditDraft, items, tripId, entry.id, checks])
 
   const performSave = useCallback(async () => {
     setIsSaving(true)
