@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 
@@ -165,9 +165,10 @@ function SkeletonCard() {
 }
 
 export default function MyGuideArchivesPage() {
+  const location = useLocation()
   const [archives, setArchives] = useState([])
   const [status, setStatus] = useState('loading')
-  const [filterTab, setFilterTab] = useState('not_started')
+  const [filterTab, setFilterTab] = useState(location.state?.activeTab ?? 'not_started')
   const [deleteMode, setDeleteMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState([])
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)

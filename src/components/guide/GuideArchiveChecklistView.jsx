@@ -713,7 +713,11 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
         }),
       )
       setSaveConfirmOpen(false)
-      navigate('/guide-archives')
+      const checklistStatus =
+        progress === 100 ? 'completed'
+        : progress > 0 ? 'preparing'
+        : 'not_started'
+      navigate('/guide-archives', { state: { activeTab: checklistStatus } })
     } catch (err) {
       console.error('[performSave] 저장 실패:', err)
     } finally {
