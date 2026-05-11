@@ -124,6 +124,12 @@ function buildGuideSuppliesSubsections(carry, checked) {
   }).filter((section) => section.items.length > 0)
 }
 
+function resolveDirectAddCategory(prepType) {
+  if (prepType === 'pre_booking') return 'pre_booking'
+  if (prepType === 'pre_departure_check') return 'pre_departure_check'
+  return 'supplies'
+}
+
 const GUIDE_ARCHIVE_DROP_ANIMATION = {
   duration: 280,
   easing: 'cubic-bezier(0.32, 0.72, 0, 1)',
@@ -515,6 +521,26 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     })
   }, [])
 
+  const handleMoveUp = useCallback((itemId) => {
+    setLocalItems((prev) => {
+      const idx = prev.findIndex((it) => String(it.id) === String(itemId))
+      if (idx <= 0) return prev
+      const next = [...prev]
+      ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
+      return next
+    })
+  }, [])
+
+  const handleMoveDown = useCallback((itemId) => {
+    setLocalItems((prev) => {
+      const idx = prev.findIndex((it) => String(it.id) === String(itemId))
+      if (idx < 0 || idx >= prev.length - 1) return prev
+      const next = [...prev]
+      ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
+      return next
+    })
+  }, [])
+
   const submitDirectAdd = useCallback(() => {
     const title = (directAddDraft.title ?? '').trim()
     if (!title) {
@@ -528,16 +554,20 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     const memo = (directAddDraft.memo ?? '').trim()
     const baggageType = directAddDraft.prepType === 'item' ? directAddDraft.baggageType : 'none'
     const id = `ga-direct-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+    const resolvedCategory = resolveDirectAddCategory(directAddDraft.prepType)
+    const resolvedCategoryLabel =
+      CATEGORIES.find((c) => c.value === resolvedCategory)?.label ?? resolvedCategory
     const newItem = {
       id,
-      category: GUIDE_USER_DIRECT_CATEGORY,
-      categoryLabel: GUIDE_USER_DIRECT_SECTION_LABEL,
+      category: resolvedCategory,
+      categoryLabel: resolvedCategoryLabel,
       title,
       memo,
       prepType: directAddDraft.prepType,
       baggageType,
     }
     const newItems = [...items, newItem]
+    setLocalItems(newItems)
     const idStr = String(id)
     const nextChecks = { ...checks, [idStr]: false }
     const totalN = newItems.length
@@ -764,7 +794,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const dndSensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 350, tolerance: 12 },
+      activationConstraint: { delay: 250, tolerance: 8 },
     }),
   )
 
@@ -1204,6 +1234,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
                                   handleToggle={handleToggle}
                                   onEditItem={openSectionEditorForSingleItem}
                                   onDeleteItem={confirmDeleteSingleItem}
+                                  onMoveUp={handleMoveUp}
+                                  onMoveDown={handleMoveDown}
                                   actionVariant="default"
                                 />
                               </div>
@@ -1231,6 +1263,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
                                 handleToggle={handleToggle}
                                 onEditItem={openSectionEditorForSingleItem}
                                 onDeleteItem={confirmDeleteSingleItem}
+                                onMoveUp={handleMoveUp}
+                                onMoveDown={handleMoveDown}
                                 actionVariant="default"
                               />
                             </div>
@@ -1254,6 +1288,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
                                 handleToggle={handleToggle}
                                 onEditItem={openSectionEditorForSingleItem}
                                 onDeleteItem={confirmDeleteSingleItem}
+                                onMoveUp={handleMoveUp}
+                                onMoveDown={handleMoveDown}
                                 actionVariant="default"
                               />
                             </div>
@@ -1309,6 +1345,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
                               handleToggle={handleToggle}
                               onEditItem={openSectionEditorForSingleItem}
                               onDeleteItem={confirmDeleteSingleItem}
+                              onMoveUp={handleMoveUp}
+                              onMoveDown={handleMoveDown}
                               actionVariant="default"
                             />
                           </section>
@@ -1350,6 +1388,8 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
                   handleToggle={handleToggle}
                   onEditItem={openSectionEditorForSingleItem}
                   onDeleteItem={confirmDeleteSingleItem}
+                  onMoveUp={handleMoveUp}
+                  onMoveDown={handleMoveDown}
                 />
               </div>
             </div>

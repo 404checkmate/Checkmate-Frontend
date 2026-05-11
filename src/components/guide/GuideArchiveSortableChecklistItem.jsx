@@ -131,9 +131,12 @@ export default function GuideArchiveSortableChecklistItem({
   handleToggle,
   onEditItem,
   onDeleteItem,
+  onMoveUp,
+  onMoveDown,
   actionVariant = 'default',
 }) {
   const id = String(item.id)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
     disabled: sortableDisabled,
@@ -257,6 +260,30 @@ export default function GuideArchiveSortableChecklistItem({
           </div>
         </label>
 
+        {isMobile && (
+          <div
+            className="flex shrink-0 flex-col items-center justify-center gap-0.5 border-l border-slate-100/90 pl-1 mr-0.5"
+            onPointerDown={stop}
+            onClick={stop}
+          >
+            <button
+              type="button"
+              onClick={() => onMoveUp?.(item.id)}
+              aria-label="위로 이동"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-500"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              onClick={() => onMoveDown?.(item.id)}
+              aria-label="아래로 이동"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-500"
+            >
+              ▼
+            </button>
+          </div>
+        )}
         <div
           className={`flex shrink-0 flex-col items-center justify-center gap-1 border-l pl-1 sm:pl-2 ${actionRailBorder}`}
           onPointerDown={stop}

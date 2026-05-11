@@ -15,6 +15,8 @@ export default function GuideArchiveSectionDndList({
   handleToggle,
   onEditItem,
   onDeleteItem,
+  onMoveUp,
+  onMoveDown,
   actionVariant = 'default',
 }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -47,6 +49,8 @@ export default function GuideArchiveSectionDndList({
             handleToggle={handleToggle}
             onEditItem={onEditItem}
             onDeleteItem={onDeleteItem}
+            onMoveUp={onMoveUp}
+            onMoveDown={onMoveDown}
             actionVariant={actionVariant}
           />
         ))}
