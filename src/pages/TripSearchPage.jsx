@@ -145,6 +145,7 @@ function TripSearchInner({ tripId }) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [savedIds, setSavedIds] = useState(() => new Set(loadSavedItems(tripId).map((x) => String(x.id))))
   const [selectedForSave, setSelectedForSave] = useState(() => new Set())
+  const autoSelectDoneRef = useRef(false)
   const [leaveModalOpen, setLeaveModalOpen] = useState(false)
   const [saveConfirmModalOpen, setSaveConfirmModalOpen] = useState(false)
   const [loginGateOpen, setLoginGateOpen] = useState(false)
@@ -378,6 +379,14 @@ function TripSearchInner({ tripId }) {
       setSelectedCategory('all')
     }
   }, [tabCategories, selectedCategory])
+
+  // 탐색 결과가 처음 로드될 때 모든 항목을 자동 선택
+  useEffect(() => {
+    if (autoSelectDoneRef.current) return
+    if (sourceItems.length === 0) return
+    autoSelectDoneRef.current = true
+    setSelectedForSave(new Set(sourceItems.map((i) => String(i.id))))
+  }, [sourceItems])
 
   const groupedItemsByCategory = useMemo(() => buildSubcategoryGroups(sourceItems), [sourceItems])
 
