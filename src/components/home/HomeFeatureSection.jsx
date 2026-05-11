@@ -71,12 +71,12 @@ export default function HomeFeatureSection({ featuresRef, featuresRevealed }) {
               <br />
               필요한 준비물과 주의사항을
               <br />
-              한 번에 정리해서 <span className="text-amber-500">체크리스트</span>로 제공해드려요!
+              한 번에 정리해서 <span className="text-sky-500">체크리스트</span>로 제공해드려요!
             </span>
             <span className="hidden md:inline">
               간단한 조건 입력만으로 메이트가 필요한 준비물과 주의사항을
               <br />
-              한 번에 정리해서 <span className="text-amber-500">체크리스트</span>로 제공해드려요!
+              한 번에 정리해서 <span className="text-sky-500">체크리스트</span>로 제공해드려요!
             </span>
           </p>
         </RevealBlock>
