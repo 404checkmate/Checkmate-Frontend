@@ -5,12 +5,7 @@ import { resolvePostSocialLoginPath } from '@/utils/onboardingGate'
 import { startGoogleLogin, startKakaoLogin } from '@/api/auth'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { trackEvent } from '@/utils/analyticsTracker'
-
-const isInAppBrowser = () => {
-  if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent
-  return /NAVER|KAKAOTALK|Instagram|FB_IAB|FBAN|FBIOS|Line|Twitter|Snapchat/i.test(ua)
-}
+import { isInAppBrowser, isIOS, isAndroid, openInExternalBrowser } from '@/utils/browserUtils'
 
 /**
  * UI 보관용 플래그 — 이메일 로그인·비밀번호 찾기·회원가입 링크를 다시 켤 때 true로 변경.
@@ -304,11 +299,36 @@ function LoginPage() {
 
             {isInAppBrowser() && (
               <div className="mb-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-                <p className="font-semibold">⚠️ 앱 내 브라우저에서는 구글 로그인이 제한될 수 있어요.</p>
-                <p className="mt-1 text-yellow-700">
-                  주소창의 <strong>︙ 메뉴 → 다른 브라우저로 열기</strong> 또는
-                  <strong> Chrome / Safari</strong>에서 접속해주세요.
+                <p className="font-semibold mb-2">
+                  ⚠️ 원활한 이용을 위해 기본 브라우저에서 열어주세요.
                 </p>
+
+                {isAndroid() ? (
+                  <button
+                    onClick={openInExternalBrowser}
+                    className="w-full rounded-lg bg-yellow-400 py-2 text-sm font-semibold text-white"
+                  >
+                    Chrome으로 열기
+                  </button>
+                ) : isIOS() ? (
+                  <div className="space-y-2">
+                    <p className="text-yellow-700 text-xs">
+                      하단 공유 버튼(
+                      <span className="font-bold">⎋</span>
+                      ) → <strong>Safari로 열기</strong> 를 탭해주세요.
+                    </p>
+                    <button
+                      onClick={openInExternalBrowser}
+                      className="w-full rounded-lg border border-yellow-400 py-2 text-sm font-semibold text-yellow-800"
+                    >
+                      주소 복사하기
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-yellow-700 text-xs">
+                    Chrome 또는 Safari에서 접속해주세요.
+                  </p>
+                )}
               </div>
             )}
 
