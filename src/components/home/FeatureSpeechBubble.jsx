@@ -4,9 +4,9 @@ export default function FeatureSpeechBubble({ text, tone = 'light', tail = 'left
       ? 'border-teal-500/30 bg-gradient-to-r from-teal-300/58 via-cyan-200/52 to-teal-200/56'
       : 'border-slate-300/70 bg-gradient-to-r from-slate-100/76 to-slate-200/74'
   const textClass = tone === 'teal' ? 'text-[#08414f]' : 'text-[#0e3a45]'
-  const bubbleLayoutClass = tone === 'teal' ? 'flex items-center' : 'flex items-center md:block'
-  const textLayoutClass = tone === 'teal' ? 'w-full text-center' : 'w-full text-center md:text-left'
-  const bubblePaddingClass = tone === 'teal' ? 'px-8 md:px-12' : 'px-8 md:px-12 md:pt-7'
+  const bubbleLayoutClass = 'flex items-center'
+  const textLayoutClass = 'w-full text-center'
+  const bubblePaddingClass = 'px-8 md:px-12'
   const tailPositionClass = tail === 'right' ? 'right-10' : 'left-10'
   const tailColorStyle =
     tone === 'teal'
@@ -31,7 +31,7 @@ export default function FeatureSpeechBubble({ text, tone = 'light', tail = 'left
         aria-hidden
       />
       <p
-        className={`text-base font-bold leading-tight md:text-[2rem] ${textClass} ${textLayoutClass}`}
+        className={`text-base font-bold leading-tight md:text-xl lg:text-[2rem] ${textClass} ${textLayoutClass}`}
         style={{ fontFamily: "'SeoulNotice', system-ui, sans-serif" }}
       >
         {text}
