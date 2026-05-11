@@ -107,7 +107,7 @@ export default function HomeFooter({ showNoticePreparingToast }) {
                       <button
                         type="button"
                         onClick={showNoticePreparingToast}
-                        className="w-full cursor-pointer border-0 bg-transparent p-0 text-left text-sm text-gray-600 transition-colors hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
+                        className="w-full cursor-pointer break-words border-0 bg-transparent p-0 text-left text-sm text-gray-600 transition-colors hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
                       >
                         {link}
                       </button>
