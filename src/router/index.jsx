@@ -79,6 +79,10 @@ const AppRoutes = () => {
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <ProtectedRoute>{withSuspense(<MyPage />)}</ProtectedRoute> },
         { path: '/trips/new',           element: <Navigate to="/trips/new/destination" replace /> },
+        // [비로그인 허용] 여행 생성 Wizard
+        // 게스트 사용자도 여행 정보 입력 가능
+        // step5에서 저장 시도 시 loginGate 팝업으로 로그인 유도
+        // pendingTripSubmit으로 상태 보존 후 로그인 완료 시 자동 제출
         /** 보관: 예전 예매 분기 UI — 직접 URL로만 진입. 활성 플로우는 destination부터 */
         { path: '/trips/new/step2',     element: withSuspense(<TripNewStep2Page />) },
         { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },
