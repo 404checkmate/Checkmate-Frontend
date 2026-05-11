@@ -8,7 +8,6 @@ import {
   STEP5_PAGE_SUBTITLE,
   COMPANIONS,
   TRAVEL_STYLES,
-  EDITORIAL_PICK,
 } from '@/mocks/tripNewStep5Data'
 import StepHeader from '@/components/common/StepHeader'
 import {
@@ -80,7 +79,7 @@ function TripNewStep5PageContent() {
   const location = useLocation()
   const restored = location.state?.step5Restored ?? null
 
-  const [companionId, setCompanionId] = useState(null)
+  const [companionIds, setCompanionIds] = useState([])
   const [styleIds, setStyleIds] = useState([])
   /** Trip 생성 POST 진행 상태 — 버튼 중복 클릭 방지 + 인라인 에러 표시용 */
   const [submitting, setSubmitting] = useState(false)
@@ -120,13 +119,21 @@ function TripNewStep5PageContent() {
     return () => { cancelled = true }
   }, [])
 
+  const toggleCompanion = useCallback((id) => {
+    setCompanionIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id)
+      if (prev.length >= 2) return prev
+      return [...prev, id]
+    })
+  }, [])
+
   const toggleStyle = useCallback((id) => {
     setStyleIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
   }, [])
 
   const canSubmit = useMemo(
-    () => Boolean(companionId) && styleIds.length > 0 && !submitting && !isLoading,
-    [companionId, styleIds, submitting, isLoading],
+    () => companionIds.length >= 1 && styleIds.length > 0 && !submitting && !isLoading,
+    [companionIds, styleIds, submitting, isLoading],
   )
 
   useEffect(() => {
@@ -136,7 +143,8 @@ function TripNewStep5PageContent() {
   // 로그인 후 복원: pending에서 저장된 선택값을 마운트 시 1회 복원
   useEffect(() => {
     if (!restored) return
-    if (restored.companionId) setCompanionId(restored.companionId)
+    if (restored.companionIds?.length > 0) setCompanionIds(restored.companionIds)
+    else if (restored.companionId) setCompanionIds([restored.companionId])
     if (restored.styleIds?.length > 0) setStyleIds(restored.styleIds)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -158,9 +166,10 @@ function TripNewStep5PageContent() {
     // 백엔드 맞춤 체크리스트 호출(/checklists/generate-from-context) fallback 경로 및
     // Trip 생성 payload 생성을 위해, 동행·여행 스타일 라벨을 플랜 스토리지에 합쳐 둔다.
     const existingPlan = loadActiveTripPlan()
-    const companionLabel = companions.find((c) => c.id === companionId)?.label ?? null
+    const companionLabels = companions.filter((c) => companionIds.includes(c.id)).map((c) => c.label)
+    const companionLabel = companionLabels.join(', ') || null
     const travelStyleLabels = travelStyles.filter((s) => styleIds.includes(s.id)).map((s) => s.label)
-    const hasPet = companionId === 'pets' || companionId === 'withPet'
+    const hasPet = companionIds.some((id) => id === 'pets' || id === 'withPet')
     const nextPlan = existingPlan?.destination
       ? {
           ...existingPlan,
@@ -171,7 +180,7 @@ function TripNewStep5PageContent() {
       : existingPlan
     if (nextPlan) saveActiveTripPlan(nextPlan)
 
-    const step5State = { companionId, travelStyleIds: styleIds }
+    const step5State = { companionIds, travelStyleIds: styleIds }
 
     // 비로그인이면 서버 저장 없이 guest 경로로 바로 이동
     const token = await resolveAccessToken()
@@ -184,7 +193,7 @@ function TripNewStep5PageContent() {
 
     // 로그인 상태: 기존 createTrip 영속화 흐름
     const payload = buildCreateTripPayload(nextPlan ?? existingPlan, {
-      companionId,
+      companionIds,
       hasPet,
       travelStyleIds: styleIds,
     })
@@ -234,7 +243,7 @@ function TripNewStep5PageContent() {
   }
 
   const companionCardClass = (id) => {
-    const on = companionId === id
+    const on = companionIds.includes(id)
     return [
       'rounded-2xl border-2 p-4 text-left transition-all duration-200 flex flex-col gap-2 min-h-[120px]',
       on
@@ -247,7 +256,7 @@ function TripNewStep5PageContent() {
   const styleCardClass = (id) => {
     const on = styleIds.includes(id)
     const base = [
-      'w-full h-full min-h-[92px] rounded-2xl border-2 p-3.5 sm:p-4 md:p-5 flex flex-col items-center justify-center gap-2 text-center transition-all duration-200 md:min-h-0',
+      'w-full h-full min-h-[92px] rounded-2xl border-2 p-3.5 sm:p-4 md:p-2.5 lg:p-5 flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-200 md:min-h-0',
     ]
     if (on) {
       base.push('border-amber-400 bg-amber-200/95 shadow-md ring-1 ring-amber-300/70 text-gray-900')
@@ -263,9 +272,8 @@ function TripNewStep5PageContent() {
       className="min-h-screen"
       style={{ background: 'linear-gradient(180deg, #E0F7FA 0%, #F0FDFA 45%, #F8FAFC 100%)' }}
     >
-      {/* ── 데스크톱: 웹 레퍼런스 — 좌 동행·에디토리얼 / 우 스타일 그리드 ── */}
+      {/* ── 데스크톱: 두 섹션 동일 높이 ── */}
       <div className="hidden md:flex flex-col min-h-screen">
-        {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·이전으로·STEP 왼선 일치 */}
         <div className="shrink-0 mx-auto w-full max-w-7xl px-3 pt-8 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
           <TripNewFlowDesktopPrevBar
             align="start"
@@ -285,31 +293,33 @@ function TripNewStep5PageContent() {
           />
         </div>
 
-        <div className="mx-auto flex w-full max-w-7xl flex-1 items-stretch gap-8 px-3 pb-16 md:px-6 lg:px-8">
-          {/* 좌측 패널: 흰 박스(동행인) + 하단 배너(분리) */}
-          <div className="flex-1 min-w-0 flex flex-col gap-0">
-            <div className="min-w-0 shrink-0 min-h-[590px] rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
+        {/* flex-col: 위 패널 행 + 아래 버튼 행 */}
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-3 pb-10 md:px-6 lg:px-8">
+          {/* 두 패널을 items-stretch로 묶어 항상 동일 높이 유지 */}
+          <div className="flex items-stretch gap-8 md:h-[520px] lg:h-auto lg:flex-1 lg:min-h-0">
+            {/* 좌측: 동행인 선택 */}
+            <div className="flex flex-1 min-w-0 flex-col overflow-hidden rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
               <SectionLabel num={1} label="동행인 선택" />
-              <p className="text-sm text-gray-500 mb-5">누구와 함께 여행하시나요?</p>
+              <p className="text-sm text-gray-500 mb-5">누구와 함께 여행하시나요? (최대 2개 선택 가능)</p>
               <div className="flex-1 min-h-0">
                 {isLoading ? (
-                  <div className="grid grid-cols-2 gap-3 auto-rows-fr">
+                  <div className="grid grid-cols-2 gap-3">
                     {Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="h-28 rounded-2xl bg-gray-100 animate-pulse" />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3 auto-rows-fr">
+                  <div className="grid h-full grid-cols-2 gap-3 auto-rows-fr">
                     {companions.map((c) => (
                       <button
                         key={c.id}
                         type="button"
-                        onClick={() => setCompanionId(c.id)}
+                        onClick={() => toggleCompanion(c.id)}
                         className={companionCardClass(c.id)}
                       >
                         <div
                           className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                            companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white/80 text-teal-700'
+                            companionIds.includes(c.id) ? 'bg-white/70 text-teal-800' : 'bg-white/80 text-teal-700'
                           }`}
                         >
                           <SvgIcon name={c.icon} className="w-6 h-6" />
@@ -323,43 +333,18 @@ function TripNewStep5PageContent() {
               </div>
             </div>
 
-            {/*
-            <div className="relative h-[188px] overflow-hidden rounded-2xl border border-slate-300/40 shadow-md">
-              <img
-                src="/airplane-sky.png"
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/74 via-sky-800/62 to-amber-300/32" />
-              <div className="relative z-10 px-6 py-5 text-white">
-                <p className="mb-1 text-[10px] font-bold tracking-[0.2em] text-white/80">
-                  {EDITORIAL_PICK.eyebrow}
-                </p>
-                <p className="text-[30px] font-extrabold leading-tight">{EDITORIAL_PICK.title}</p>
-                <p className="mt-2 max-w-sm whitespace-pre-line text-sm text-white/85">
-                  {EDITORIAL_PICK.description}
-                </p>
-              </div>
-            </div>
-            */}
-            {/* 배너 숨김 상태에서도 우측 컬럼(버튼 영역)과 동일 높이를 유지하기 위한 슬롯 */}
-            <div className="min-h-[188px]" aria-hidden />
-          </div>
-
-          {/* 우측 패널: 흰 박스(여행 스타일) + 하단 버튼(분리) */}
-          <div className="flex-1 min-w-0 flex flex-col gap-6">
-            <div className="min-w-0 shrink-0 min-h-[590px] rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
+            {/* 우측: 여행 스타일 */}
+            <div className="flex flex-1 min-w-0 flex-col overflow-hidden rounded-3xl bg-slate-50/80 border border-slate-200/60 px-10 py-8 shadow-sm">
               <SectionLabel num={2} label="여행 스타일" />
               <p className="text-sm text-gray-500 mb-5">어떤 여행을 계획하고 있나요? (복수 선택 가능)</p>
-
               {isLoading ? (
-                <div className="grid w-full grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse md:h-28" />
+                <div className="grid flex-1 w-full grid-cols-3 gap-3 md:gap-4">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div key={i} className="rounded-2xl bg-gray-100 animate-pulse" />
                   ))}
                 </div>
               ) : (
-                <div className="grid w-full grid-cols-3 grid-rows-3 gap-3 min-h-[320px] md:min-h-[400px] md:gap-4">
+                <div className="grid flex-1 w-full grid-cols-3 auto-rows-fr gap-3 md:gap-4">
                   {travelStyles.map((s) => (
                     <button
                       key={s.id}
@@ -370,7 +355,7 @@ function TripNewStep5PageContent() {
                       <TravelStyleIcon
                         src={s.iconSrc}
                         selected={styleIds.includes(s.id)}
-                        className="h-9 w-9 md:h-11 md:w-11"
+                        className="h-9 w-9 lg:h-11 lg:w-11"
                       />
                       <span className="text-xs font-bold leading-tight sm:text-sm">{s.label}</span>
                     </button>
@@ -378,23 +363,24 @@ function TripNewStep5PageContent() {
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="mt-1 flex flex-col gap-3">
-              {submitError ? (
-                <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-950">
-                  {submitError}
-                </p>
-              ) : null}
-              <div className="flex justify-end">
-                <TripFlowNextStepButton
-                  variant="amber"
-                  fullWidth={false}
-                  disabled={!canSubmit}
-                  onClick={handleCreatePlan}
-                >
-                  {submitting ? '여행 계획 저장 중…' : '여행 계획 생성하기'}
-                </TripFlowNextStepButton>
-              </div>
+          {/* 버튼 영역 — 두 패널 아래 공유 */}
+          <div className="flex flex-col gap-3 pb-6">
+            {submitError ? (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-950">
+                {submitError}
+              </p>
+            ) : null}
+            <div className="flex justify-end">
+              <TripFlowNextStepButton
+                variant="amber"
+                fullWidth={false}
+                disabled={!canSubmit}
+                onClick={handleCreatePlan}
+              >
+                {submitting ? '여행 계획 저장 중…' : '여행 계획 생성하기'}
+              </TripFlowNextStepButton>
             </div>
           </div>
         </div>
@@ -421,7 +407,7 @@ function TripNewStep5PageContent() {
           />
 
           <SectionLabel num={1} label="동행인 선택" />
-          <p className="text-sm text-gray-500 mb-4">누구와 함께 여행하시나요?</p>
+          <p className="text-sm text-gray-500 mb-4">누구와 함께 여행하시나요? (최대 2개 선택 가능)</p>
           {isLoading ? (
             <div className="grid grid-cols-2 gap-3 mb-8">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -434,12 +420,12 @@ function TripNewStep5PageContent() {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setCompanionId(c.id)}
+                  onClick={() => toggleCompanion(c.id)}
                   className={companionCardClass(c.id)}
                 >
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto ${
-                      companionId === c.id ? 'bg-white/70 text-teal-800' : 'bg-white text-teal-700'
+                      companionIds.includes(c.id) ? 'bg-white/70 text-teal-800' : 'bg-white text-teal-700'
                     }`}
                   >
                     <SvgIcon name={c.icon} className="w-5 h-5" />

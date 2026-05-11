@@ -43,7 +43,7 @@ const SUPPORTED_TRAVEL_STYLE_CODES = new Set([
 
 /**
  * @typedef {Object} Step5Selections
- * @property {string} companionId   - Step5 동행 UI id
+ * @property {string[]} companionIds  - Step5 동행 UI id 배열 (1~2개)
  * @property {boolean} hasPet        - companionId === 'withPet' 과 별개로, 펫 동반 명시용
  * @property {string[]} travelStyleIds - Step5 여행 스타일 id 배열
  */
@@ -74,14 +74,18 @@ function buildTitle(plan) {
 }
 
 /**
- * companionId (+pet 여부) → 서버용 TripCompanionInput 배열.
- * withPet 을 누른 경우 `pets` 타입 1건 + hasPet=true 로 통일.
+ * companionIds 배열 (+pet 여부) → 서버용 TripCompanionInput 배열.
+ * withPet/pets 를 누른 경우 hasPet=true 로 통일.
  */
-function toCompanions(companionId, hasPet) {
-  if (!companionId) return []
-  const code = COMPANION_ALIAS[companionId] ?? null
-  if (!code) return []
-  return [{ companionCode: code, hasPet: Boolean(hasPet || companionId === 'withPet' || companionId === 'pets') }]
+function toCompanions(companionIds, hasPet) {
+  if (!Array.isArray(companionIds) || companionIds.length === 0) return []
+  return companionIds
+    .map((id) => {
+      const code = COMPANION_ALIAS[id] ?? null
+      if (!code) return null
+      return { companionCode: code, hasPet: Boolean(hasPet || id === 'withPet' || id === 'pets') }
+    })
+    .filter(Boolean)
 }
 
 /**
@@ -105,7 +109,7 @@ function toTravelStyles(styleIds) {
 export function buildCreateTripPayload(plan, step5) {
   if (!plan?.destination?.countryCode) return null
   if (!plan.tripStartDate || !plan.tripEndDate) return null
-  if (!step5?.companionId || !Array.isArray(step5?.travelStyleIds) || step5.travelStyleIds.length === 0) {
+  if (!step5?.companionIds?.length || !Array.isArray(step5?.travelStyleIds) || step5.travelStyleIds.length === 0) {
     return null
   }
 
@@ -130,7 +134,7 @@ export function buildCreateTripPayload(plan, step5) {
     status: 'planning',
     cities,
     flights: [],
-    companions: toCompanions(step5.companionId, step5.hasPet),
+    companions: toCompanions(step5.companionIds, step5.hasPet),
     travelStyles: toTravelStyles(step5.travelStyleIds),
   }
 }
