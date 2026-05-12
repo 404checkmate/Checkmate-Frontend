@@ -430,6 +430,11 @@ export default function TripNewDestinationPage() {
     const t = arrivalQuery.trim()
     if (t && arrivalSuggestions.length > 0) {
       handlePickArrival(arrivalSuggestions[0])
+      return
+    }
+    // DB에 없는 도시 — 자유 입력 텍스트로 진행 허용
+    if (t && arrivalSuggestions.length === 0 && draftCountry) {
+      handlePickArrival({ city: t, iata: null })
     }
   }
 

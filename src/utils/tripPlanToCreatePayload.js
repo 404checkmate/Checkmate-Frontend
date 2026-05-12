@@ -115,15 +115,14 @@ export function buildCreateTripPayload(plan, step5) {
 
   const countryCode = String(plan.destination.countryCode).toUpperCase().slice(0, 2)
   const iata = plan.destination.iata ? String(plan.destination.iata).toUpperCase().slice(0, 3) : null
-  // 백엔드 CreateTripDto 는 cities 최소 1개를 요구하므로 iata 가 비면 생성 자체를 skip.
-  if (!iata) return null
-  const cities = [
-    {
-      cityIata: iata,
-      orderIndex: 0,
-      isAutoSynced: false,
-    },
-  ]
+  const customCityName = !iata ? (plan.destination.city?.trim() || null) : null
+
+  // 백엔드 CreateTripDto 는 cities 최소 1개를 요구 — iata 또는 customCityName 중 하나 필요.
+  if (!iata && !customCityName) return null
+
+  const cities = iata
+    ? [{ cityIata: iata, orderIndex: 0, isAutoSynced: false }]
+    : [{ customCityName, orderIndex: 0, isAutoSynced: false }]
 
   return {
     countryCode,

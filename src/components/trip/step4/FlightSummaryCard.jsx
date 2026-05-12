@@ -14,7 +14,10 @@ export default function FlightSummaryCard({ arrival, tripWindow, tripDatesLoadin
             {arrival.country} · {arrival.city}
           </p>
           <p className="mt-1 text-sm text-gray-600">
-            도착 공항 <span className="font-semibold text-gray-800">{arrival.iata}</span>
+            도착 공항{' '}
+            <span className="font-semibold text-gray-800">
+              {arrival.iata ?? '직접 입력'}
+            </span>
           </p>
 
           {tripDatesLoading && (
