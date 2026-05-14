@@ -134,6 +134,6 @@ export async function getChecklistByTrip(tripId) {
  * }
  */
 export async function reclassifyGuideArchiveItems(payload) {
-  const res = await apiClient.post('/checklists/reclassify-guide-archive', payload)
+  const res = await apiClient.post('/checklists/reclassify-guide-archive', payload, { timeout: 45000 })
   return res.data
 }
