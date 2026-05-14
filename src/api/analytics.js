@@ -3,6 +3,7 @@ import { apiClient } from '@/api/client'
 /**
  * 사용자 행동 이벤트 수집 — 로우 레벨 배치 전송.
  *
+ * 
  *   POST /api/analytics/events     Body: Event | Event[]
  *
  * Event = {
