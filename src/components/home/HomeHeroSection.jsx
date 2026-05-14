@@ -44,7 +44,7 @@ export default function HomeHeroSection({ heroRevealed, onStartTrip }) {
           <RevealBlock
             show={heroRevealed}
             delayClass="delay-[320ms]"
-            className="flex w-full flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:justify-start sm:gap-4"
+            className="hidden lg:flex w-full flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:justify-start sm:gap-4"
           >
             <button
               type="button"

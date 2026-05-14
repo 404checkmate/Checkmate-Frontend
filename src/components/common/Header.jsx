@@ -195,44 +195,45 @@ function Header() {
             </>
           )}
 
-          {/* 모바일: 비로그인 — 간단 진입 / 로그인 — 햄버거 */}
-          {!isWebLoggedIn ? (
-            <div className="flex items-center gap-2 md:hidden">
-              <Link
-                to="/login"
-                className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-bold text-gray-800"
-              >
-                로그인
-              </Link>
-            </div>
-          ) : (
-            <div ref={menuRef} className="relative md:hidden">
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
-                aria-expanded={mobileMenuOpen}
-                aria-controls={menuId}
-                aria-haspopup="true"
-                aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-                onClick={() => setMobileMenuOpen((o) => !o)}
-              >
-                {mobileMenuOpen ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
-                  </svg>
-                )}
-              </button>
-
+          {/* 모바일/태블릿: 항상 햄버거 버튼 표시 */}
+          <div ref={menuRef} className="relative md:hidden">
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
+              aria-expanded={mobileMenuOpen}
+              aria-controls={menuId}
+              aria-haspopup="true"
+              aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              onClick={() => setMobileMenuOpen((o) => !o)}
+            >
               {mobileMenuOpen ? (
-                <div
-                  id={menuId}
-                  className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
-                  role="menu"
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              )}
+            </button>
+
+            {mobileMenuOpen ? (
+              <div
+                id={menuId}
+                className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
+                role="menu"
+              >
+                <Link
+                  to="/about"
+                  role="menuitem"
+                  className="block w-full px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-teal-50/80"
+                  onClick={closeMobileMenu}
                 >
+                  서비스 소개
+                </Link>
+                <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
+                {isWebLoggedIn ? (
+                  <>
                     <button
                       type="button"
                       role="menuitem"
@@ -252,10 +253,20 @@ function Header() {
                     >
                       로그아웃
                     </button>
-                  </div>
-              ) : null}
-            </div>
-          )}
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    role="menuitem"
+                    className="block w-full px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-teal-50/80"
+                    onClick={closeMobileMenu}
+                  >
+                    로그인
+                  </Link>
+                )}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

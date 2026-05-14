@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { useMobileScrollChromeVisibility } from '@/hooks/useMobileScrollChromeVisibility'
+import { useNavigate } from 'react-router-dom'
 import {
   STEP_DESTINATION_CONFIG,
   COUNTRY_ARRIVAL_OPTIONS,
@@ -15,13 +14,11 @@ import StepHeader from '@/components/common/StepHeader'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
 import {
   TripNewFlowDesktopPrevBar,
-  TripNewFlowMobilePrevAction,
 } from '@/components/trip/TripNewFlowPrevControls'
 import DestinationMobileRangeCalendar from '@/components/trip/DestinationMobileRangeCalendar'
 import DestinationCountryAutocomplete from '@/components/trip/DestinationCountryAutocomplete'
 import SelectedCountryChip from '@/components/trip/SelectedCountryChip'
 import { TripDestinationSvgIcon } from '@/components/trip/TripDestinationIcons'
-import { formatKoreanDateRangeLine, formatTripNightsDaysLabel } from '@/utils/tripDateFormat'
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { clearActiveTripId } from '@/utils/activeTripIdStorage'
@@ -82,6 +79,12 @@ function countryRowWithoutArrivals(row) {
   if (!row) return row
   const { arrivals: _a, ...rest } = row
   return rest
+}
+
+function formatDateKo(ymd) {
+  if (!ymd) return ''
+  const [y, m, d] = ymd.split('-').map(Number)
+  return `${y}년 ${m}월 ${d}일`
 }
 
 const SUBTITLE_DESKTOP = (
@@ -218,8 +221,6 @@ function DestinationDateForm({
 
 export default function TripNewDestinationPage() {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
-  const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
   const [today, setToday] = useState(getLocalDateYYYYMMDD)
   const comboRef = useRef(null)
 
@@ -269,6 +270,7 @@ export default function TripNewDestinationPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -303,22 +305,22 @@ export default function TripNewDestinationPage() {
     return filterArrivalsByQuery(all, sanitizeArrivalInput(arrivalQuery))
   }, [pickerPhase, draftCountry, arrivalQuery])
 
+  const calendarRef = useRef(null)
+
   useEffect(() => {
     function handlePointerDown(e) {
-      if (!comboRef.current?.contains(e.target)) {
-        setDropdownOpen(false)
-      }
+      if (!comboRef.current?.contains(e.target)) setDropdownOpen(false)
+      if (!calendarRef.current?.contains(e.target)) setCalendarOpen(false)
     }
     document.addEventListener('mousedown', handlePointerDown)
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [])
 
-  /** 국가 선택이 해제되면 날짜도 비워 일관성 유지 */
   useEffect(() => {
     if (!selectedCountry) {
       setStartDate('')
       setEndDate('')
-
+      setCalendarOpen(false)
     }
   }, [selectedCountry])
 
@@ -456,6 +458,36 @@ export default function TripNewDestinationPage() {
 
   const isValid = Boolean(selectedCountry) && dateSectionOk
 
+  const mobileIsValid = Boolean(selectedCountry) && dateSectionOk
+
+  const goNextMobile = () => {
+    if (!mobileIsValid || !selectedCountry) return
+    const navState = {
+      destination: {
+        iata: selectedCountry.iata,
+        city: selectedCountry.city,
+        country: selectedCountry.country,
+        countryCode: selectedCountry.countryCode,
+      },
+      fromDestinationPage: true,
+      tripStartDate: startDate,
+      tripEndDate: endDate,
+    }
+    trackEvent('step_complete', { step: 'destination', destination: navState.destination?.city })
+    saveStep4NavigationState(navState)
+    saveActiveTripPlan({
+      destination: {
+        iata: selectedCountry.iata,
+        city: selectedCountry.city,
+        country: selectedCountry.country,
+        countryCode: selectedCountry.countryCode,
+      },
+      tripStartDate: startDate,
+      tripEndDate: endDate,
+    })
+    navigate('/trips/new/step4', { state: navState })
+  }
+
   const goNext = () => {
     if (!isValid || !selectedCountry) return
     const navState = {
@@ -513,7 +545,7 @@ export default function TripNewDestinationPage() {
   return (
     <div className="min-h-screen" style={TRIP_FLOW_PAGE_BG_STYLE}>
       {/* 데스크톱: 풀블리드 이미지 없음 — 본문만 뷰포트 중앙 정렬 */}
-      <div className="hidden min-h-screen flex-col md:flex">
+      <div className="hidden min-h-screen flex-col lg:flex">
         {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·이전으로 왼선 일치 */}
         <div className="shrink-0 mx-auto w-full max-w-7xl px-3 pt-8 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
           <TripNewFlowDesktopPrevBar align="start" />
@@ -541,121 +573,168 @@ export default function TripNewDestinationPage() {
         </div>
       </div>
 
-      <div className="md:hidden">
-        <div className="px-5 pt-4 pb-56">
-          <StepHeader
-            currentStep={STEP_DESTINATION_CONFIG.currentStep}
-            totalSteps={STEP_DESTINATION_CONFIG.totalSteps}
-            title={
-              <>
-                방문 도시와 날짜를
-                <br />
-                알려주세요
-              </>
-            }
-            className="mb-4"
-            titleClassName="text-2xl"
-            topEndAction={<TripNewFlowMobilePrevAction />}
-          />
-
-          <div className="mb-8 rounded-2xl border border-sky-100/90 bg-sky-50/95 p-4 shadow-sm">
-            <DestinationCountryAutocomplete
-              comboRef={comboRef}
-              countryQuery={countryQuery}
-              onCountryInputChange={handleCountryInputChange}
-              onCountryKeyDown={handleCountryKeyDown}
-              onCountryFocus={handleCountryFocus}
-              countryInputReadOnly={pickerPhase === 'arrival'}
-              onChangeCountryRequest={handleChangeCountryRequest}
-              suggestions={suggestions}
-              isPanelOpen={dropdownOpen && (pickerPhase === 'arrival' || countryQuery.trim().length > 0)}
-              onPickCountry={handlePickCountryFromList}
-              pickerPhase={pickerPhase}
-              arrivalQuery={arrivalQuery}
-              onArrivalQueryChange={handleArrivalQueryChange}
-              onArrivalKeyDown={handleArrivalKeyDown}
-              arrivalSuggestions={arrivalSuggestions}
-              onPickArrival={handlePickArrival}
-              panelId="country-autocomplete-panel-mobile"
-              placeholder="어디로 떠나시나요?"
-            />
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {MOBILE_QUICK_DESTINATION_CHIPS.map((chip) => (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={() => {
-                    const c = countryOptions.find((x) => x.name === chip.countryName)
-                    if (c) handlePickCountryFromList(c)
-                  }}
-                  className="rounded-full border border-sky-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-sky-800 shadow-sm transition active:scale-[0.98]"
-                >
-                  #{chip.label}
-                </button>
-              ))}
-            </div>
-
-            {selectedCountry && (
-              <SelectedCountryChip country={selectedCountry} onRemove={removeCountryTag} variant="mobile" />
-            )}
-          </div>
-
-          <div className="mb-3 flex items-center gap-2">
-            <h2 className={`text-lg font-bold ${selectedCountry ? 'text-gray-900' : 'text-gray-400'}`}>
-              언제 떠나시나요?
-            </h2>
-          </div>
-
-          <div className="rounded-2xl border border-teal-100/90 bg-gradient-to-br from-teal-50/60 to-cyan-50/30 p-3 shadow-sm">
-            {!selectedCountry && (
-              <p className="mb-2 rounded-xl bg-white/90 px-3 py-2 text-xs leading-relaxed text-gray-600 ring-1 ring-teal-100/80">
-                위에서 <strong className="text-teal-700">여행지</strong>를 먼저 선택하면 일정을 고를 수 있어요.
-              </p>
-            )}
-            <DestinationMobileRangeCalendar
-              startDate={startDate}
-              endDate={endDate}
-              todayYmd={today}
-              minDateYmd={today}
-              disabled={!selectedCountry}
-              onChangeRange={handleMobileRangeChange}
-            />
+      {/* Mobile + Tablet (< 1024px) */}
+      <div
+        className="lg:hidden flex min-h-screen flex-col"
+        style={{
+          backgroundColor: '#f3fff8',
+          backgroundImage: `
+            radial-gradient(circle at 8% 12%, rgba(117,221,255,0.34) 0%, rgba(117,221,255,0) 20%),
+            radial-gradient(circle at 80% 16%, rgba(248,215,116,0.34) 0%, rgba(248,215,116,0) 24%),
+            radial-gradient(circle at 10% 44%, rgba(117,221,255,0.18) 0%, rgba(117,221,255,0) 20%),
+            radial-gradient(circle at 68% 78%, rgba(251,222,132,0.2) 0%, rgba(251,222,132,0) 28%),
+            linear-gradient(180deg, #e8fffe 0%, #f4fff1 52%, #fff9e8 100%)`,
+        }}
+      >
+        {/* 상단 바: 뒤로가기(< 모양) 절대 위치 + 진행률 바 완전 중앙 */}
+        <div className="relative flex items-center justify-center px-5 pt-12 pb-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            aria-label="이전으로"
+            className="absolute left-5 flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition hover:bg-white/60 active:bg-white/80"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div className="flex w-1/2 gap-1.5">
+            {Array.from({ length: STEP_DESTINATION_CONFIG.totalSteps }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  i < STEP_DESTINATION_CONFIG.currentStep ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
+                }`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* 날짜 선택 완료 시: 예시 이미지처럼 노란 CTA 바로 위에 떠 있는 요약 캡슐 */}
-        <div
-          className="fixed bottom-16 left-0 right-0 z-40 flex flex-col items-stretch px-4 transition-[bottom] duration-300 ease-out [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
-          style={!navBarVisible ? { bottom: 0 } : undefined}
-        >
-          {selectedCountry && startDate && endDate && (
-            <div
-              className="mb-2 flex justify-center px-1"
-              role="status"
-              aria-live="polite"
-            >
-              <div
-                className="flex max-w-full items-center gap-2.5 rounded-full border border-gray-100 bg-white px-4 py-2.5 shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-[18px] w-[18px] shrink-0 text-amber-500"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden
+        {/* 제목 */}
+        <div className="px-6 pt-8 pb-10">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">
+            Step {STEP_DESTINATION_CONFIG.currentStep}
+          </p>
+          <h1 className="text-[1.65rem] font-extrabold leading-snug text-slate-900">
+            어떤 여행을 계획하고
+            <br />
+            계신가요?
+          </h1>
+        </div>
+
+        {/* 폼 */}
+        <div className="flex-1 px-6">
+          {/* ① 여행지 — 항상 표시 */}
+          <div className="mb-5">
+            <label className="mb-2 block text-sm font-medium text-[#0f5762]">여행지</label>
+            {selectedCountry ? (
+              <div className="flex items-center justify-between rounded-xl border border-[#3db4dd]/40 bg-white/80 px-4 py-3.5 shadow-sm">
+                <span className="font-medium text-gray-900">
+                  {selectedCountry.country}, {selectedCountry.city}
+                </span>
+                <button
+                  type="button"
+                  onClick={removeCountryTag}
+                  className="text-xs font-medium text-[#3db4dd] hover:text-[#0f5762]"
                 >
-                  <path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z" />
-                </svg>
-                <p className="truncate text-center text-[13px] font-semibold leading-snug text-gray-900">
-                  {formatKoreanDateRangeLine(startDate, endDate)} ({formatTripNightsDaysLabel(startDate, endDate)})
-                </p>
+                  변경
+                </button>
+              </div>
+            ) : (
+              <DestinationCountryAutocomplete
+                comboRef={comboRef}
+                countryQuery={countryQuery}
+                onCountryInputChange={handleCountryInputChange}
+                onCountryKeyDown={handleCountryKeyDown}
+                onCountryFocus={handleCountryFocus}
+                countryInputReadOnly={pickerPhase === 'arrival'}
+                onChangeCountryRequest={handleChangeCountryRequest}
+                suggestions={suggestions}
+                isPanelOpen={dropdownOpen && (pickerPhase === 'arrival' || countryQuery.trim().length > 0)}
+                onPickCountry={handlePickCountryFromList}
+                pickerPhase={pickerPhase}
+                arrivalQuery={arrivalQuery}
+                onArrivalQueryChange={handleArrivalQueryChange}
+                onArrivalKeyDown={handleArrivalKeyDown}
+                arrivalSuggestions={arrivalSuggestions}
+                onPickArrival={handlePickArrival}
+                panelId="country-autocomplete-panel-mobile-v2"
+                placeholder="일본, 도쿄"
+              />
+            )}
+          </div>
+
+          {/* ② 여행 시기 — 여행지 선택 후 등장 */}
+          <div
+            className={`grid transition-all duration-500 ${
+              selectedCountry ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+            }`}
+            style={{ transitionTimingFunction: selectedCountry ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+          >
+            <div className="overflow-hidden">
+              <div
+                className={`mb-5 transition-transform duration-500 ${selectedCountry ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: selectedCountry ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+              >
+                <div ref={calendarRef}>
+                  <label className="mb-2 block text-sm font-medium text-[#0f5762]">여행 시기</label>
+                  <button
+                    type="button"
+                    onClick={() => setCalendarOpen((v) => !v)}
+                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left shadow-sm transition ${
+                      calendarOpen
+                        ? 'border-[#3db4dd]/60 bg-white ring-2 ring-[#3db4dd]/20'
+                        : startDate
+                        ? 'border-[#3db4dd]/40 bg-white/80'
+                        : 'border-gray-200 bg-white/60'
+                    }`}
+                  >
+                    <span className={startDate ? 'font-medium text-gray-900' : 'text-gray-400'}>
+                      {startDate && endDate
+                        ? `${formatDateKo(startDate)} ~ ${formatDateKo(endDate)}`
+                        : startDate
+                        ? `${formatDateKo(startDate)} 출발`
+                        : '날짜를 선택하세요'}
+                    </span>
+                    <svg className="h-4 w-4 shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  {/* 인라인 캘린더 — overflow-hidden 부모에 의한 잘림 방지 */}
+                  <div
+                    className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
+                      calendarOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="mt-1 rounded-xl border border-[#3db4dd]/25 bg-white p-3 shadow-lg">
+                      <DestinationMobileRangeCalendar
+                        startDate={startDate}
+                        endDate={endDate}
+                        todayYmd={today}
+                        minDateYmd={today}
+                        onChangeRange={({ start, end }) => {
+                          handleMobileRangeChange({ start, end })
+                          if (start && end) setCalendarOpen(false)
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
-          <div className="px-1 pt-1">
-            <TripFlowNextStepButton variant="amber" disabled={!isValid} onClick={goNext} />
           </div>
+        </div>
+
+        {/* 다음 버튼 */}
+        <div className="px-6 pb-10 pt-8">
+          <button
+            type="button"
+            onClick={goNextMobile}
+            disabled={!mobileIsValid}
+            className="w-full rounded-2xl bg-gradient-to-r from-amber-300 to-amber-400 py-4 text-base font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 active:scale-[0.99] disabled:opacity-40"
+          >
+            다음
+          </button>
         </div>
       </div>
     </div>

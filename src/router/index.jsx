@@ -4,6 +4,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 
 const RootLayout = lazy(() => import('@/layouts/RootLayout'))
 const HomePage = lazy(() => import('@/pages/HomePage'))
+const ServiceIntroPage = lazy(() => import('@/pages/ServiceIntroPage'))
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const AuthConsentPage = lazy(() => import('@/pages/AuthConsentPage'))
 const AuthCallbackPage = lazy(() => import('@/pages/AuthCallbackPage'))
@@ -66,6 +67,7 @@ const AppRoutes = () => {
       errorElement: withSuspense(<ErrorPage />),
       children: [
         { path: '/',                    element: withSuspense(<HomePage />) },
+        { path: '/about',               element: withSuspense(<ServiceIntroPage />) },
         { path: '/login',               element: withSuspense(<LoginPage />) },
         { path: '/auth/consent',        element: withSuspense(<AuthConsentPage />) },
         { path: '/auth/callback',       element: withSuspense(<AuthCallbackPage />) },

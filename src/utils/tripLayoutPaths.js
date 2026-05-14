@@ -24,6 +24,8 @@ export function shouldHideMobileBottomNav(pathname) {
 export function shouldPadMainForMobileBottomNav(pathname) {
   const p = normalizePathname(pathname)
   if (shouldHideMobileBottomNav(pathname)) return false
+  /** 홈: 모바일 홈페이지가 그라데이션 배경으로 전체 영역을 채우므로 페이지 내부에서 pb-16 처리 */
+  if (p === '/') return false
   if (p === '/trips/new' || p.startsWith('/trips/new/')) return false
   /** 가이드 목록·상세: 그라데이션 배경이 있고, main pb-16 이 흰 띠로 보이는 것 방지 */
   if (/^\/trips\/[^/]+\/guide-archive(\/[^/]+)?$/.test(p)) return false
