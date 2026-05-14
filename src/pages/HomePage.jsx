@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useRevealOnScrollOnce } from '@/hooks/useRevealOnScrollOnce'
 import HomeHeroSection from '@/components/home/HomeHeroSection'
 import HomeFeatureSection from '@/components/home/HomeFeatureSection'
@@ -12,6 +12,13 @@ import { SNAP_TAIL_GROUP } from '@/components/home/constants'
 import { trackEvent } from '@/utils/analyticsTracker'
 
 const HOME_SCROLL_SNAP_HTML_CLASS = 'home-page-scroll-snap'
+
+const CURATION_CARDS = [
+  { country: 'vietnam',  flag: '🇻🇳', name: '베트남', cities: '다낭 · 하노이 · 호치민',   color: 'from-teal-50 to-emerald-50',  border: 'border-teal-100' },
+  { country: 'japan',    flag: '🇯🇵', name: '일본',   cities: '도쿄 · 오사카 · 교토',     color: 'from-red-50 to-pink-50',      border: 'border-red-100' },
+  { country: 'thailand', flag: '🇹🇭', name: '태국',   cities: '방콕 · 치앙마이 · 푸켓',   color: 'from-amber-50 to-orange-50',  border: 'border-amber-100' },
+  { country: 'usa',      flag: '🇺🇸', name: '미국',   cities: '뉴욕 · LA · 라스베가스',   color: 'from-blue-50 to-sky-50',      border: 'border-blue-100' },
+]
 
 const HOME_PAGE_BG_STYLE = {
   backgroundColor: '#f3fff8',
@@ -104,6 +111,29 @@ function HomePage() {
       <HomeFeatureSection featuresRef={featuresRef} featuresRevealed={featuresRevealed} />
       <HomeProcessSection processRef={processRef} processRevealed={processRevealed} />
       <HomeCtaSection ctaRef={ctaRef} ctaRevealed={ctaRevealed} onStartTrip={handleStartTrip} />
+
+      {/* 여행지별 큐레이션 가이드 */}
+      <section className="mt-12 px-4 pb-4">
+        <h2 className="mb-4 text-lg font-extrabold text-slate-800">
+          ✈️ 여행지별 준비 가이드
+        </h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {CURATION_CARDS.map((card) => (
+            <Link
+              key={card.country}
+              to={`/guide/${card.country}`}
+              className={`rounded-2xl border ${card.border} bg-gradient-to-br ${card.color} p-4 transition hover:shadow-md hover:-translate-y-0.5`}
+            >
+              <div className="text-3xl">{card.flag}</div>
+              <div className="mt-2 font-extrabold text-slate-800">{card.name}</div>
+              <div className="mt-0.5 text-xs text-slate-500">{card.cities}</div>
+              <div className="mt-3 text-xs font-bold text-teal-600">
+                가이드 보기 →
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <div className={SNAP_TAIL_GROUP}>
         <HomeCatchphraseSection
