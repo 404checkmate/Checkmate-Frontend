@@ -24,10 +24,10 @@ function useIsDesktop() {
 
 const CURATION_COUNTRIES = [
   {
-    id: 'us',
-    name: '미국',
-    sub: '자유여행의 클래식',
-    image: 'https://picsum.photos/seed/america-city/800/500',
+    id: 'vn',
+    name: '베트남',
+    sub: '가성비 최고의 선택',
+    image: 'https://picsum.photos/seed/vietnam-bay/800/500',
   },
   {
     id: 'jp',
@@ -36,10 +36,10 @@ const CURATION_COUNTRIES = [
     image: 'https://picsum.photos/seed/japan-nature/800/500',
   },
   {
-    id: 'vn',
-    name: '베트남',
-    sub: '가성비 최고의 선택',
-    image: 'https://picsum.photos/seed/vietnam-bay/800/500',
+    id: 'us',
+    name: '미국',
+    sub: '자유여행의 클래식',
+    image: 'https://picsum.photos/seed/america-city/800/500',
   },
   {
     id: 'th',
@@ -60,51 +60,56 @@ function CurationCard({ country, index }) {
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.2 },
+      { threshold: 0.15 },
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
   return (
-    <button
+    <div
       ref={ref}
-      type="button"
-      className="relative w-full overflow-hidden rounded-2xl shadow-sm shadow-gray-200/60 transition-transform active:scale-[0.985]"
-      style={{ height: '200px' }}
+      style={{
+        transform: visible ? 'translateY(0)' : 'translateY(20px)',
+        opacity: visible ? 1 : 0,
+        transition: `transform 0.65s cubic-bezier(0.22,1,0.36,1) ${index * 0.1}s,
+                     opacity 0.55s ease ${index * 0.1}s`,
+      }}
     >
-      {/* 배경 이미지 */}
-      <img
-        src={country.image}
-        alt={country.name}
-        className="absolute inset-0 h-full w-full object-cover"
-        loading="lazy"
-        draggable={false}
-      />
-
-      {/* 하단에서 위로 올라오는 흰 그라디언트 오버레이 */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0"
-        style={{
-          height: '42%',
-          background: 'linear-gradient(to top, white 25%, rgba(255,255,255,0.75) 60%, transparent 100%)',
-        }}
-      />
-
-      {/* 텍스트 — 카드 진입 시 아래→위 슬라이드 */}
-      <div
-        className="absolute inset-x-0 bottom-0 px-4 pb-4"
-        style={{
-          transform: visible ? 'translateY(0)' : 'translateY(18px)',
-          opacity: visible ? 1 : 0,
-          transition: `transform 0.65s cubic-bezier(0.22,1,0.36,1) ${index * 0.1}s,
-                       opacity 0.65s ease ${index * 0.1}s`,
-        }}
+      <button
+        type="button"
+        className="w-full bg-white rounded-2xl p-2 pb-3 shadow-lg shadow-gray-300/50 border border-gray-100 transition-transform active:scale-[0.97]"
       >
-        <p className="text-base font-extrabold text-[#04384a]">{country.name}</p>
-        <p className="mt-0.5 text-xs text-gray-500">{country.sub}</p>
-      </div>
-    </button>
+        {/* 이미지 액자 영역 */}
+        <div className="overflow-hidden rounded-xl aspect-[4/3]">
+          <img
+            src={country.image}
+            alt={country.name}
+            className="h-full w-full object-cover"
+            style={{
+              transform: visible ? 'scale(1)' : 'scale(1.08)',
+              transition: `transform 0.75s cubic-bezier(0.22,1,0.36,1) ${index * 0.1}s`,
+            }}
+            loading="lazy"
+            draggable={false}
+          />
+        </div>
+
+        {/* 폴라로이드 캡션 */}
+        <div
+          className="px-1 pt-2 text-left"
+          style={{
+            transform: visible ? 'translateY(0)' : 'translateY(8px)',
+            opacity: visible ? 1 : 0,
+            transition: `transform 0.6s cubic-bezier(0.22,1,0.36,1) ${index * 0.1 + 0.08}s,
+                         opacity 0.5s ease ${index * 0.1 + 0.08}s`,
+          }}
+        >
+          <p className="text-sm font-extrabold leading-tight text-[#04384a]">{country.name}</p>
+          <p className="mt-0.5 text-[10px] leading-snug text-gray-400">{country.sub}</p>
+        </div>
+      </button>
+    </div>
   )
 }
 
@@ -426,7 +431,7 @@ function MobileHomePage() {
             </h2>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {CURATION_COUNTRIES.map((country, index) => (
               <CurationCard key={country.id} country={country} index={index} />
             ))}
