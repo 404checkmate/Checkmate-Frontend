@@ -779,6 +779,7 @@ export default function TripNewDestinationPage() {
                     value={additionalInput}
                     onChange={(e) => { setAdditionalInput(e.target.value); setAdditionalDropOpen(true) }}
                     onFocus={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
+                    onClick={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') { setAdditionalDropOpen(false); return }
                       if (e.key === 'Enter' && additionalArrivalSuggestions.length > 0) {
