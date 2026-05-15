@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import Header from '@/components/common/Header'
 import AiPlannerFab from '@/components/common/AiPlannerFab'
+import HomeFooter from '@/components/home/HomeFooter'
 import {
   shouldHideGlobalHeaderOnMobile,
   shouldHideMobileBottomNav,
@@ -65,6 +66,7 @@ function RootLayout() {
   const scrollChromeEnabled = !hideMobileBottomNav
   const scrollChromeVisible = useMobileScrollChromeVisibility(scrollChromeEnabled, pathname)
   const showAiPlannerFab = SHOW_AI_PLANNER_FAB && shouldShowAiPlannerFab(pathname)
+  const showFooter = pathname !== '/' && pathname !== '/about'
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -93,6 +95,8 @@ function RootLayout() {
       >
         <Outlet />
       </main>
+
+      {showFooter ? <HomeFooter /> : null}
 
       {/* 모바일 바텀 네비 (md 이상 숨김). 약관·온보딩 제외. 헤더와 동일 스크롤 규칙 */}
       {!hideMobileBottomNav ? (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRevealOnScrollOnce } from '@/hooks/useRevealOnScrollOnce'
 import HomeHeroSection from '@/components/home/HomeHeroSection'
@@ -24,8 +24,6 @@ const HOME_PAGE_BG_STYLE = {
 
 function HomePage() {
   const navigate = useNavigate()
-  const noticeToastTimerRef = useRef(null)
-  const [noticeToastVisible, setNoticeToastVisible] = useState(false)
   const [heroRevealed, setHeroRevealed] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -71,31 +69,12 @@ function HomePage() {
   }, [])
 
   useEffect(() => {
-    return () => {
-      if (noticeToastTimerRef.current) {
-        window.clearTimeout(noticeToastTimerRef.current)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
     trackEvent('page_view', { page: 'home' })
   }, [])
 
   const handleStartTrip = () => {
     trackEvent('cta_click', { button: 'start_trip', page: 'home' })
     navigate('/trips/new/destination')
-  }
-
-  const showNoticePreparingToast = () => {
-    if (noticeToastTimerRef.current) {
-      window.clearTimeout(noticeToastTimerRef.current)
-    }
-    setNoticeToastVisible(true)
-    noticeToastTimerRef.current = window.setTimeout(() => {
-      setNoticeToastVisible(false)
-      noticeToastTimerRef.current = null
-    }, 3000)
   }
 
   return (
@@ -110,18 +89,8 @@ function HomePage() {
           catchphraseRef={catchphraseRef}
           catchphraseRevealed={catchphraseRevealed}
         />
-        <HomeFooter showNoticePreparingToast={showNoticePreparingToast} />
+        <HomeFooter />
       </div>
-
-      {noticeToastVisible ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-6 left-1/2 z-[90] -translate-x-1/2 rounded-full bg-gray-900/90 px-4 py-2 text-sm font-semibold text-white shadow-lg"
-        >
-          준비중입니다
-        </div>
-      ) : null}
 
       <HomeScrollToTopFab />
     </div>

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import mascotLuggageUrl from '@/assets/home-cta-mascot-luggage.png'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchMyGuideArchives } from '@/api/guideArchives'
+import HomeFooter from '@/components/home/HomeFooter'
 
 const ServiceIntroPage = lazy(() => import('./ServiceIntroPage'))
 
@@ -351,7 +352,7 @@ function MobileHomePage() {
         `,
       }}
     >
-      <div className="flex flex-col gap-5 px-4 pb-16 pt-5">
+      <div className="flex flex-col gap-5 px-4 pb-6 pt-5">
 
         {/* 환영 배너 */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-[#3db4dd] px-5 py-5 shadow-md shadow-teal-900/15">
@@ -433,6 +434,7 @@ function MobileHomePage() {
         </section>
 
       </div>
+      <HomeFooter />
     </div>
   )
 }
