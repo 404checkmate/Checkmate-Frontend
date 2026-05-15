@@ -26,8 +26,11 @@ import DestinationCountryAutocomplete from '@/components/trip/DestinationCountry
 import SelectedCountryChip from '@/components/trip/SelectedCountryChip'
 import { TripDestinationSvgIcon } from '@/components/trip/TripDestinationIcons'
 import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
-import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
-import { clearActiveTripId } from '@/utils/activeTripIdStorage'
+import { saveActiveTripPlan, loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage'
+import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
+import { createTrip } from '@/api/trips'
+import { resolveAccessToken } from '@/api/client'
 import { trackEvent } from '@/utils/analyticsTracker'
 
 const STYLE_FILTER_IDLE = 'brightness(0) saturate(100%) invert(44%) sepia(82%) saturate(520%) hue-rotate(139deg) brightness(0.93) contrast(0.95)'
@@ -331,6 +334,8 @@ export default function TripNewDestinationPage() {
   const [step3Confirmed, setStep3Confirmed] = useState(false)
   const [companionIds, setCompanionIds] = useState([])
   const [styleIds, setStyleIds] = useState([])
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const additionalDropRef = useRef(null)
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
   const [calendarOpen, setCalendarOpen] = useState(false)
@@ -566,38 +571,92 @@ export default function TripNewDestinationPage() {
 
   const mobileIsValid = Boolean(selectedCountry) && dateSectionOk && step3Confirmed && companionIds.length >= 1 && styleIds.length >= 1
 
-  const goNextMobile = () => {
-    if (!mobileIsValid || !selectedCountry) return
-    const navState = {
-      destination: {
-        iata: selectedCountry.iata,
-        city: selectedCountry.city,
-        country: selectedCountry.country,
-        countryCode: selectedCountry.countryCode,
-      },
-      fromDestinationPage: true,
-      tripStartDate: startDate,
-      tripEndDate: endDate,
-      additionalDestinations: additionalDests,
-      companionIds,
-      travelStyleIds: styleIds,
+  const goNextMobile = async () => {
+    if (!mobileIsValid || !selectedCountry || submitting) return
+    setSubmitError('')
+    setSubmitting(true)
+
+    try {
+      trackEvent('step_complete', { step: 'destination_mobile', destination: selectedCountry.city })
+
+      // companion 레이블·hasPet 계산
+      const hasPet = companionIds.some((id) => id === 'pets' || id === 'withPet')
+      const companionLabel = COMPANIONS
+        .filter((c) => companionIds.includes(c.id))
+        .map((c) => c.label)
+        .join(', ') || null
+      const travelStyleLabels = TRAVEL_STYLES
+        .filter((s) => styleIds.includes(s.id))
+        .map((s) => s.label)
+
+      // 플랜 전체 저장 (로딩·체크리스트 페이지에서 참조)
+      saveActiveTripPlan({
+        destination: {
+          iata: selectedCountry.iata,
+          city: selectedCountry.city,
+          country: selectedCountry.country,
+          countryCode: selectedCountry.countryCode,
+        },
+        tripStartDate: startDate,
+        tripEndDate: endDate,
+        additionalDestinations: additionalDests,
+        companion: companionLabel,
+        hasPet,
+        travelStyles: travelStyleLabels,
+        companionIds,
+        travelStyleIds: styleIds,
+      })
+
+      const step5State = { companionIds, travelStyleIds: styleIds }
+      const baseState = {
+        destination: {
+          iata: selectedCountry.iata,
+          city: selectedCountry.city,
+          country: selectedCountry.country,
+          countryCode: selectedCountry.countryCode,
+        },
+        fromDestinationPage: true,
+        tripStartDate: startDate,
+        tripEndDate: endDate,
+        additionalDestinations: additionalDests,
+        step5: step5State,
+      }
+
+      // 비로그인: 서버 저장 없이 guest 로딩으로 이동
+      const token = await resolveAccessToken()
+      if (!token) {
+        navigate('/trips/guest/loading', { state: baseState })
+        return
+      }
+
+      // 로그인: trip 생성 후 로딩 페이지로 이동
+      const plan = loadActiveTripPlan()
+      const payload = buildCreateTripPayload(plan, { companionIds, hasPet, travelStyleIds: styleIds })
+
+      if (!payload) {
+        setSubmitError('여행 정보를 모두 입력한 뒤 다시 시도해 주세요.')
+        return
+      }
+
+      const created = await createTrip(payload)
+      const rawId = created?.id ?? created?.tripId
+      const createdTripId = rawId != null ? String(rawId) : null
+
+      if (createdTripId) {
+        saveActiveTripId(createdTripId)
+        trackEvent('trip_creation_completed', { trip_id: createdTripId })
+        navigate(`/trips/${createdTripId}/loading`, { state: { ...baseState, createdTripId } })
+      } else {
+        navigate('/guide-archives', { replace: true })
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || '여행 계획을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.'
+      console.warn('[TripNewDestinationPage] createTrip 실패:', msg)
+      setSubmitError('여행 계획 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.')
+      clearActiveTripId()
+    } finally {
+      setSubmitting(false)
     }
-    trackEvent('step_complete', { step: 'destination', destination: navState.destination?.city })
-    saveStep4NavigationState(navState)
-    saveActiveTripPlan({
-      destination: {
-        iata: selectedCountry.iata,
-        city: selectedCountry.city,
-        country: selectedCountry.country,
-        countryCode: selectedCountry.countryCode,
-      },
-      tripStartDate: startDate,
-      tripEndDate: endDate,
-      additionalDestinations: additionalDests,
-      companionIds,
-      travelStyleIds: styleIds,
-    })
-    navigate('/trips/new/step4', { state: navState })
   }
 
   const goNext = () => {
@@ -1048,12 +1107,18 @@ export default function TripNewDestinationPage() {
               : 'translate-y-full opacity-0 pointer-events-none'
           }`}
         >
+          {submitError && (
+            <p className="mb-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-center text-xs font-medium text-red-600">
+              {submitError}
+            </p>
+          )}
           <button
             type="button"
             onClick={goNextMobile}
-            className="w-full rounded-2xl bg-gradient-to-r from-amber-300 to-amber-400 py-4 text-base font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 active:scale-[0.99]"
+            disabled={submitting}
+            className="w-full rounded-2xl bg-gradient-to-r from-amber-300 to-amber-400 py-4 text-base font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            다음
+            {submitting ? '여행 계획 저장 중…' : '다음'}
           </button>
         </div>
       </div>
