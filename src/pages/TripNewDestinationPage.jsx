@@ -328,6 +328,10 @@ export default function TripNewDestinationPage() {
       setStartDate('')
       setEndDate('')
       setCalendarOpen(false)
+      setAdditionalDests([])
+      setDraftDests([])
+      setAdditionalInput('')
+      setAdditionalDropOpen(false)
     }
   }, [selectedCountry])
 
@@ -638,7 +642,7 @@ export default function TripNewDestinationPage() {
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                  i < (additionalDests.length > 0 ? 3 : dateSectionOk ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
+                  i < (additionalDests.length > 0 && dateSectionOk && !calendarOpen ? 3 : dateSectionOk && !calendarOpen ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
                 }`}
               />
             ))}
@@ -756,17 +760,17 @@ export default function TripNewDestinationPage() {
           </div>
 
 
-          {/* ③ 추가 취항지 — 날짜 입력 후 등장 (선택) */}
+          {/* ③ 추가 취항지 — 날짜 확정 + 캘린더 닫힌 후 등장 (선택) */}
           <div
             className={`grid transition-all duration-500 ${
-              dateSectionOk ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+              dateSectionOk && !calendarOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
-            style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+            style={{ transitionTimingFunction: dateSectionOk && !calendarOpen ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
           >
-            <div className={dateSectionOk ? 'overflow-visible' : 'overflow-hidden'}>
+            <div className={dateSectionOk && !calendarOpen ? 'overflow-visible' : 'overflow-hidden'}>
               <div
-                className={`mb-5 transition-transform duration-500 ${dateSectionOk ? 'translate-y-0' : 'translate-y-4'}`}
-                style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+                className={`mb-5 transition-transform duration-500 ${dateSectionOk && !calendarOpen ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: dateSectionOk && !calendarOpen ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
                 <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 3</p>
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">추가로 방문할 도시가 있나요?</h2>
