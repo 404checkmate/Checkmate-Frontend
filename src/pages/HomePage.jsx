@@ -4,6 +4,7 @@ import mascotLuggageUrl from '@/assets/home-cta-mascot-luggage.png'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchMyGuideArchives } from '@/api/guideArchives'
 import HomeFooter from '@/components/home/HomeFooter'
+import { formatTripNightsDaysLabel } from '@/utils/tripDateFormat'
 
 const ServiceIntroPage = lazy(() => import('./ServiceIntroPage'))
 
@@ -118,33 +119,37 @@ function CurationCard({ country, index }) {
 const DUMMY_ARCHIVES = [
   {
     id: 'demo-1',
-    name: '도쿄 여름 여행',
-    trip: { title: '도쿄 3박 4일', id: null },
+    trip: { id: null },
     archivedAt: '2026-05-08T12:00:00Z',
-    snapshot: { checklistProgressPercent: 78 },
+    snapshot: { checklistProgressPercent: 78, country: '일본', tripStartDate: '2026-07-10', tripEndDate: '2026-07-13' },
   },
   {
     id: 'demo-2',
-    name: '오사카 맛집 투어',
-    trip: { title: '오사카 5박 6일', id: null },
+    trip: { id: null },
     archivedAt: '2026-04-20T09:00:00Z',
-    snapshot: { checklistProgressPercent: 42 },
+    snapshot: { checklistProgressPercent: 42, country: '일본', tripStartDate: '2026-08-01', tripEndDate: '2026-08-06' },
   },
   {
     id: 'demo-3',
-    name: '방콕 힐링 여행',
-    trip: { title: '방콕 4박 5일', id: null },
+    trip: { id: null },
     archivedAt: '2026-03-15T08:00:00Z',
-    snapshot: { checklistProgressPercent: 100 },
+    snapshot: { checklistProgressPercent: 100, country: '태국', tripStartDate: '2026-09-20', tripEndDate: '2026-09-24' },
   },
 ]
+
+function formatKoreanFullDate(dateStr) {
+  if (!dateStr) return ''
+  const [y, m, d] = dateStr.split('-').map(Number)
+  if (!y || !m || !d) return ''
+  return `${y}년 ${m}월 ${d}일`
+}
 
 function formatArchiveDate(iso) {
   if (!iso) return ''
   try {
     return new Intl.DateTimeFormat('ko-KR', { month: '2-digit', day: '2-digit' })
       .format(new Date(iso))
-      .replace(/\. $/, '')
+      .replace(/\.+\s*$/, '')
   } catch {
     return ''
   }
@@ -159,16 +164,24 @@ function ChecklistCard({ archive }) {
       ? `/trips/${tripId}/guide-archive/${archive.id}`
       : '/guide-archives'
 
+  const snap = archive.snapshot ?? {}
+  const country = snap.country
+  const nightsDays = formatTripNightsDaysLabel(snap.tripStartDate, snap.tripEndDate)
+  const mainText = country && nightsDays
+    ? `${country} ${nightsDays}`
+    : archive.trip?.title ?? archive.name ?? ''
+  const subText = formatKoreanFullDate(snap.tripStartDate)
+
   return (
     <Link
       to={to}
       className="flex w-44 shrink-0 flex-col gap-2 overflow-hidden rounded-2xl bg-white p-3.5 shadow-sm shadow-gray-200/60 transition-all active:scale-[0.97]"
     >
       <div className="min-w-0">
-        <p className="truncate text-sm font-extrabold text-[#04384a]">{archive.name}</p>
-        {archive.trip?.title && (
+        <p className="truncate text-sm font-extrabold text-[#04384a]">{mainText}</p>
+        {subText && (
           <p className="mt-0.5 truncate text-[11px] font-semibold text-[#3db4dd]">
-            {archive.trip.title}
+            {subText}
           </p>
         )}
       </div>
@@ -187,7 +200,7 @@ function ChecklistCard({ archive }) {
       </div>
 
       {archive.archivedAt && (
-        <p className="text-[10px] text-gray-400">{formatArchiveDate(archive.archivedAt)}</p>
+        <p className="text-[10px] text-gray-400">작성일: {formatArchiveDate(archive.archivedAt)}</p>
       )}
     </Link>
   )
@@ -221,9 +234,9 @@ function MyChecklistsSection() {
             ? data
             : []
         setArchives(
-          [...list].sort(
-            (a, b) => new Date(b.archivedAt ?? 0) - new Date(a.archivedAt ?? 0),
-          ),
+          [...list]
+            .sort((a, b) => new Date(b.archivedAt ?? 0) - new Date(a.archivedAt ?? 0))
+            .slice(0, 5),
         )
       })
       .catch(() => setArchives([]))
@@ -334,6 +347,17 @@ function MyChecklistsSection() {
   )
 }
 
+// ─── 인기 취항지 태그 데이터 ─────────────────────────────────────────────────
+
+const POPULAR_DESTINATION_TAGS = [
+  { label: '도쿄',    name: '일본',      country: '일본',      countryCode: 'JP', iata: 'NRT', city: '도쿄(나리타)' },
+  { label: '오사카',  name: '일본',      country: '일본',      countryCode: 'JP', iata: 'KIX', city: '오사카(간사이)' },
+  { label: '방콕',   name: '태국',      country: '태국',      countryCode: 'TH', iata: 'BKK', city: '방콕(수완나품)' },
+  { label: '다낭',   name: '베트남',    country: '베트남',    countryCode: 'VN', iata: 'DAD', city: '다낭' },
+  { label: '싱가포르', name: '싱가포르',  country: '싱가포르',  countryCode: 'SG', iata: 'SIN', city: '싱가포르' },
+  { label: '발리',   name: '인도네시아', country: '인도네시아', countryCode: 'ID', iata: 'DPS', city: '발리(응우라라이)' },
+]
+
 // ─── 모바일/태블릿 홈페이지 ──────────────────────────────────────────────────
 
 function MobileHomePage() {
@@ -418,6 +442,31 @@ function MobileHomePage() {
               </button>
             </form>
 
+            {/* 인기 취항지 태그 */}
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {POPULAR_DESTINATION_TAGS.map((tag) => (
+                <button
+                  key={`${tag.countryCode}-${tag.label}`}
+                  type="button"
+                  onClick={() =>
+                    navigate('/trips/new/destination', {
+                      state: {
+                        preselectedCountry: {
+                          name: tag.name,
+                          country: tag.country,
+                          countryCode: tag.countryCode,
+                          iata: tag.iata,
+                          city: tag.city,
+                        },
+                      },
+                    })
+                  }
+                  className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-semibold text-teal-700 transition-colors active:bg-teal-200 hover:bg-teal-100"
+                >
+                  {tag.label}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 

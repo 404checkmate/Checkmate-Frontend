@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   STEP_DESTINATION_CONFIG,
   COUNTRY_ARRIVAL_OPTIONS,
@@ -221,6 +221,7 @@ function DestinationDateForm({
 
 export default function TripNewDestinationPage() {
   const navigate = useNavigate()
+  const { state: navState } = useLocation()
   const [today, setToday] = useState(getLocalDateYYYYMMDD)
   const comboRef = useRef(null)
 
@@ -262,7 +263,7 @@ export default function TripNewDestinationPage() {
   }, [])
 
   const [countryQuery, setCountryQuery] = useState('')
-  const [selectedCountry, setSelectedCountry] = useState(null)
+  const [selectedCountry, setSelectedCountry] = useState(navState?.preselectedCountry ?? null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [pickerPhase, setPickerPhase] = useState('country')
   const [draftCountry, setDraftCountry] = useState(null)
