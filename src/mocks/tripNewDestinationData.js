@@ -7,7 +7,7 @@ import tripNewDestinationHero from '../assets/trip-new-destination-hero.png'
 import destinationDesktopRight from '../assets/destination-desktop-right.png'
 
 export const STEP_DESTINATION_CONFIG = {
-  totalSteps: 3,
+  totalSteps: 4,
   currentStep: 1,
 }
 

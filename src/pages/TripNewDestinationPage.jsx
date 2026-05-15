@@ -9,6 +9,11 @@ import {
   sanitizeCountryInput,
   sanitizeArrivalInput,
 } from '@/mocks/tripNewDestinationData'
+import {
+  COMPANIONS,
+  STEP5_ICON_PATHS,
+  STEP5_ICON_COMPOSITE,
+} from '@/mocks/tripNewStep5Data'
 import { listCountries, listCities } from '@/api/master'
 import StepHeader from '@/components/common/StepHeader'
 import { TripFlowNextStepButton } from '@/components/trip/TripFlowNextStepButton'
@@ -23,6 +28,25 @@ import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { clearActiveTripId } from '@/utils/activeTripIdStorage'
 import { trackEvent } from '@/utils/analyticsTracker'
+
+function SvgIcon({ name, className = 'w-6 h-6' }) {
+  const composite = STEP5_ICON_COMPOSITE[name]
+  if (composite) {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+        {composite.circles.map((c, i) => <circle key={i} cx={c.cx} cy={c.cy} r={c.r} />)}
+        <path d={composite.path} />
+      </svg>
+    )
+  }
+  const d = STEP5_ICON_PATHS[name]
+  if (!d) return null
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d={d} />
+    </svg>
+  )
+}
 
 /** `<input type="date" min>` 용 — 브라우저 로컬 달력과 맞추기 위해 UTC가 아닌 로컬 날짜 사용 */
 function getLocalDateYYYYMMDD() {
@@ -274,6 +298,8 @@ export default function TripNewDestinationPage() {
   const [draftDests, setDraftDests] = useState([])
   const [additionalInput, setAdditionalInput] = useState('')
   const [additionalDropOpen, setAdditionalDropOpen] = useState(false)
+  const [step3Confirmed, setStep3Confirmed] = useState(false)
+  const [companionIds, setCompanionIds] = useState([])
   const additionalDropRef = useRef(null)
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
   const [calendarOpen, setCalendarOpen] = useState(false)
@@ -332,6 +358,8 @@ export default function TripNewDestinationPage() {
       setDraftDests([])
       setAdditionalInput('')
       setAdditionalDropOpen(false)
+      setStep3Confirmed(false)
+      setCompanionIds([])
     }
   }, [selectedCountry])
 
@@ -484,10 +512,15 @@ export default function TripNewDestinationPage() {
     setAdditionalDests(draftDests)
     setAdditionalInput('')
     setAdditionalDropOpen(false)
+    setStep3Confirmed(true)
   }
 
-  const removeAdditionalDest = (city) => {
-    setAdditionalDests((prev) => prev.filter((c) => c !== city))
+  const toggleCompanion = (id) => {
+    setCompanionIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id)
+      if (prev.length >= 2) return prev
+      return [...prev, id]
+    })
   }
 
   const dateSectionOk =
@@ -495,7 +528,7 @@ export default function TripNewDestinationPage() {
 
   const isValid = Boolean(selectedCountry) && dateSectionOk
 
-  const mobileIsValid = Boolean(selectedCountry) && dateSectionOk
+  const mobileIsValid = Boolean(selectedCountry) && dateSectionOk && step3Confirmed && companionIds.length >= 1
 
   const goNextMobile = () => {
     if (!mobileIsValid || !selectedCountry) return
@@ -510,6 +543,7 @@ export default function TripNewDestinationPage() {
       tripStartDate: startDate,
       tripEndDate: endDate,
       additionalDestinations: additionalDests,
+      companionIds,
     }
     trackEvent('step_complete', { step: 'destination', destination: navState.destination?.city })
     saveStep4NavigationState(navState)
@@ -523,6 +557,7 @@ export default function TripNewDestinationPage() {
       tripStartDate: startDate,
       tripEndDate: endDate,
       additionalDestinations: additionalDests,
+      companionIds,
     })
     navigate('/trips/new/step4', { state: navState })
   }
@@ -642,7 +677,7 @@ export default function TripNewDestinationPage() {
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                  i < (additionalDests.length > 0 && dateSectionOk && !calendarOpen ? 3 : dateSectionOk && !calendarOpen ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
+                  i < (companionIds.length > 0 ? 4 : step3Confirmed ? 3 : dateSectionOk && !calendarOpen ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
                 }`}
               />
             ))}
@@ -721,6 +756,8 @@ export default function TripNewDestinationPage() {
                         setDraftDests([])
                         setAdditionalInput('')
                         setAdditionalDropOpen(false)
+                        setStep3Confirmed(false)
+                        setCompanionIds([])
                       }
                       return !v
                     })}
@@ -782,91 +819,143 @@ export default function TripNewDestinationPage() {
               >
                 <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 3</p>
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">추가로 방문할 도시가 있나요?</h2>
-                <p className="mb-3 text-xs text-gray-400">선택사항이에요. 없으면 바로 다음으로 넘어가세요.</p>
 
-                {/* 드롭다운 인풋 */}
-                <div ref={additionalDropRef} className="relative">
-                  <input
-                    type="text"
-                    value={additionalInput}
-                    onChange={(e) => { setAdditionalInput(e.target.value); setAdditionalDropOpen(true) }}
-                    onFocus={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
-                    onClick={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') { setAdditionalDropOpen(false); return }
-                      if (e.key === 'Enter' && additionalArrivalSuggestions.length > 0) {
-                        e.preventDefault()
-                        toggleDraftDest(additionalArrivalSuggestions[0].city)
-                      }
-                    }}
-                    placeholder="도시 이름을 검색하세요"
-                    className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[#3db4dd]/60 focus:outline-none focus:ring-2 focus:ring-[#3db4dd]/20"
-                  />
-                  {additionalDropOpen && additionalArrivalSuggestions.length > 0 && (
-                    <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-xl border border-[#3db4dd]/20 bg-white shadow-lg">
-                      <ul className="max-h-44 overflow-y-auto">
-                        {additionalArrivalSuggestions.map((arrival) => {
-                          const isSelected = draftDests.includes(arrival.city)
-                          return (
-                            <li key={arrival.iata ?? arrival.city}>
-                              <button
-                                type="button"
-                                onMouseDown={(e) => { e.preventDefault(); toggleDraftDest(arrival.city) }}
-                                className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${
-                                  isSelected ? 'bg-[#3db4dd]/10 text-[#0f5762]' : 'text-gray-800 hover:bg-teal-50'
-                                }`}
-                              >
-                                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
-                                  isSelected ? 'border-[#3db4dd] bg-[#3db4dd]' : 'border-gray-300'
-                                }`}>
-                                  {isSelected && (
-                                    <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                      <path d="M20 6L9 17l-5-5" />
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className="font-semibold">{arrival.city}</span>
-                                {arrival.iata && <span className="text-xs text-gray-400">{arrival.iata}</span>}
-                              </button>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                      <div className="sticky bottom-0 border-t border-[#3db4dd]/20 px-3 py-2">
-                        <button
-                          type="button"
-                          onMouseDown={(e) => { e.preventDefault(); confirmAdditionalDests() }}
-                          className="w-full rounded-lg bg-[#3db4dd] py-2 text-sm font-bold text-white transition hover:bg-[#2da0c8] active:scale-[0.99]"
-                        >
-                          확인{draftDests.length > 0 ? ` (${draftDests.length})` : ''}
-                        </button>
-                      </div>
+                {/* 미확정: 인풋 + 없음 버튼 */}
+                {!step3Confirmed && (
+                  <>
+                    <p className="mb-3 text-xs text-gray-400">선택사항이에요. 없으면 '없음'을 눌러주세요.</p>
+                    <div ref={additionalDropRef} className="relative">
+                      <input
+                        type="text"
+                        value={additionalInput}
+                        onChange={(e) => { setAdditionalInput(e.target.value); setAdditionalDropOpen(true) }}
+                        onFocus={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
+                        onClick={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') { setAdditionalDropOpen(false); return }
+                          if (e.key === 'Enter' && additionalArrivalSuggestions.length > 0) {
+                            e.preventDefault()
+                            toggleDraftDest(additionalArrivalSuggestions[0].city)
+                          }
+                        }}
+                        placeholder="도시 이름을 검색하세요"
+                        className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[#3db4dd]/60 focus:outline-none focus:ring-2 focus:ring-[#3db4dd]/20"
+                      />
+                      {additionalDropOpen && additionalArrivalSuggestions.length > 0 && (
+                        <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-xl border border-[#3db4dd]/20 bg-white shadow-lg">
+                          <ul className="max-h-44 overflow-y-auto">
+                            {additionalArrivalSuggestions.map((arrival) => {
+                              const isSelected = draftDests.includes(arrival.city)
+                              return (
+                                <li key={arrival.iata ?? arrival.city}>
+                                  <button
+                                    type="button"
+                                    onMouseDown={(e) => { e.preventDefault(); toggleDraftDest(arrival.city) }}
+                                    className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${
+                                      isSelected ? 'bg-[#3db4dd]/10 text-[#0f5762]' : 'text-gray-800 hover:bg-teal-50'
+                                    }`}
+                                  >
+                                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                                      isSelected ? 'border-[#3db4dd] bg-[#3db4dd]' : 'border-gray-300'
+                                    }`}>
+                                      {isSelected && (
+                                        <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M20 6L9 17l-5-5" />
+                                        </svg>
+                                      )}
+                                    </span>
+                                    <span className="font-semibold">{arrival.city}</span>
+                                    {arrival.iata && <span className="text-xs text-gray-400">{arrival.iata}</span>}
+                                  </button>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                          <div className="sticky bottom-0 border-t border-[#3db4dd]/20 px-3 py-2">
+                            <button
+                              type="button"
+                              onMouseDown={(e) => { e.preventDefault(); confirmAdditionalDests() }}
+                              className="w-full rounded-lg bg-[#3db4dd] py-2 text-sm font-bold text-white transition hover:bg-[#2da0c8] active:scale-[0.99]"
+                            >
+                              확인{draftDests.length > 0 ? ` (${draftDests.length})` : ''}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => { setAdditionalDests([]); setStep3Confirmed(true) }}
+                      className="mt-3 w-full rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-semibold text-gray-400 transition hover:border-gray-300 hover:text-gray-500 active:scale-[0.99]"
+                    >
+                      없음
+                    </button>
+                  </>
+                )}
 
-                {additionalDests.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {additionalDests.map((city) => (
-                      <span
-                        key={city}
-                        className="flex items-center gap-1.5 rounded-full border border-[#3db4dd]/30 bg-[#3db4dd]/10 px-3 py-1 text-sm font-semibold text-[#0f5762]"
-                      >
-                        {city}
-                        <button
-                          type="button"
-                          onClick={() => removeAdditionalDest(city)}
-                          className="flex h-4 w-4 items-center justify-center rounded-full text-[#3db4dd] hover:bg-[#3db4dd]/20"
-                          aria-label={`${city} 삭제`}
-                        >
-                          <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                            <path d="M18 6L6 18M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </span>
-                    ))}
+                {/* 확정 후: 선택된 도시 요약 + 변경 */}
+                {step3Confirmed && (
+                  <div className="flex items-center justify-between rounded-xl border border-[#3db4dd]/30 bg-white/80 px-4 py-3 shadow-sm">
+                    <div className="flex flex-wrap gap-1.5">
+                      {additionalDests.length > 0 ? additionalDests.map((city) => (
+                        <span key={city} className="rounded-full bg-[#3db4dd]/10 px-2.5 py-0.5 text-xs font-semibold text-[#0f5762]">
+                          {city}
+                        </span>
+                      )) : (
+                        <span className="text-sm text-gray-500">추가 도시 없음</span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setStep3Confirmed(false); setCompanionIds([]) }}
+                      className="ml-3 shrink-0 text-xs font-medium text-[#3db4dd] hover:text-[#0f5762]"
+                    >
+                      변경
+                    </button>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* ④ 동행인 — step3 확정 후 등장 */}
+          <div
+            className={`grid transition-all duration-500 ${
+              step3Confirmed ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+            }`}
+            style={{ transitionTimingFunction: step3Confirmed ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+          >
+            <div className="overflow-hidden">
+              <div
+                className={`mb-5 transition-transform duration-500 ${step3Confirmed ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: step3Confirmed ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+              >
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 4</p>
+                <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">누구와 함께 하나요?</h2>
+                <p className="mb-3 text-xs text-gray-400">최대 2개까지 선택 가능해요.</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {COMPANIONS.map((c) => {
+                    const isSelected = companionIds.includes(c.id)
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => toggleCompanion(c.id)}
+                        className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3.5 text-center transition active:scale-[0.97] ${
+                          isSelected
+                            ? 'border-[#3db4dd] bg-[#3db4dd]/10 text-[#0f5762]'
+                            : 'border-gray-200 bg-white/80 text-gray-500 hover:border-[#3db4dd]/40 hover:bg-[#3db4dd]/5'
+                        }`}
+                      >
+                        <SvgIcon
+                          name={c.icon}
+                          className={`h-6 w-6 transition-colors ${isSelected ? 'text-[#3db4dd]' : 'text-gray-400'}`}
+                        />
+                        <span className="text-xs font-bold leading-tight">{c.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>
