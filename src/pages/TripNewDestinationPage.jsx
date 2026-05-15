@@ -473,7 +473,6 @@ export default function TripNewDestinationPage() {
     if (!city || additionalDests.includes(city)) return
     setAdditionalDests((prev) => [...prev, city])
     setAdditionalInput('')
-    setAdditionalDropOpen(false)
   }
 
   const removeAdditionalDest = (city) => {
