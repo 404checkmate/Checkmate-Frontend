@@ -149,21 +149,17 @@ function SectionH2({ children }) {
   )
 }
 
-function TipBox({ icon, title, body }) {
+function TipBox({ icon, body }) {
   return (
     <aside className="cur-reveal relative my-10 rounded-2xl border border-sky-200 bg-sky-50/80 px-6 py-5">
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 grid place-items-center h-9 w-9 rounded-xl bg-white shadow-sm text-lg">
-          {icon}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-xl">{icon}</span>
+          <span className="text-xs font-extrabold text-teal-600">Mate Tip!</span>
         </div>
-        <div>
-          <div className="text-[10.5px] font-bold tracking-[0.22em] uppercase text-sky-700 mb-1">
-            {title}
-          </div>
-          <p className="font-extrabold text-[17px] md:text-[19px] leading-[1.55] text-sky-900">
-            {body}
-          </p>
-        </div>
+        <p className="font-extrabold text-[17px] md:text-[19px] leading-[1.55] text-sky-900">
+          {body}
+        </p>
       </div>
     </aside>
   )
@@ -188,7 +184,7 @@ function Hero({ data }) {
   }, [])
 
   return (
-    <section className="relative isolate overflow-hidden bg-slate-900">
+    <section className="relative isolate overflow-hidden w-full bg-slate-900">
       <img
         ref={bgRef}
         src={data.photos.hero}
@@ -290,8 +286,8 @@ function TableOfContents({ sections, activeId }) {
 function AppShelf({ apps }) {
   const TONES = ['teal', 'sky', 'amber', 'teal']
   return (
-    <div className="cur-reveal -mx-4 md:-mx-12 lg:-mx-20">
-      <ul className="flex md:grid md:grid-cols-3 gap-4 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory cur-no-scrollbar px-4 md:px-0 pb-2">
+    <div className="cur-reveal">
+      <ul className="grid grid-cols-2 gap-3">
         {apps.map((a, i) => {
           const tone = TONES[i % TONES.length]
           const toneCls =
@@ -301,7 +297,7 @@ function AppShelf({ apps }) {
           return (
             <li
               key={a.name}
-              className="group snap-center shrink-0 w-[78%] md:w-auto rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:border-sky-200 hover:shadow-md hover:-translate-y-0.5"
+              className="group rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:border-sky-200 hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-5">
                 <div className={'h-12 w-12 rounded-xl grid place-items-center font-extrabold text-[22px] ' + toneCls}>
@@ -333,6 +329,38 @@ function AppShelf({ apps }) {
 }
 
 /* ════════════════════════════════════════════
+   InlineCheckItem
+════════════════════════════════════════════ */
+function InlineCheckItem({ item }) {
+  const [checked, setChecked] = useState(false)
+  return (
+    <div
+      className="flex items-start gap-3 py-2.5 border-b border-slate-100 last:border-0 cursor-pointer"
+      onClick={() => setChecked((v) => !v)}
+    >
+      <span
+        className={
+          'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' +
+          (checked ? 'bg-teal-700 border-teal-700' : 'border-slate-300 bg-white')
+        }
+      >
+        {checked && (
+          <svg viewBox="0 0 24 24" className="absolute inset-0 m-auto h-3.5 w-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12l5 5L20 7" />
+          </svg>
+        )}
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="text-[9.5px] font-bold tracking-[0.22em] uppercase text-amber-600 mr-2">{item.cat}</span>
+        <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+          {item.label}
+        </span>
+      </span>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════
    Article
 ════════════════════════════════════════════ */
 function Article({ data }) {
@@ -344,6 +372,11 @@ function Article({ data }) {
         const isAppsSection = section.id === 'apps'
         const imageLeft = idx % 2 === 0
         const paragraphs = section.body.split('\n\n').filter(Boolean)
+        const relatedItems = section.relatedCats
+          ? data.checklist
+              .filter((g) => section.relatedCats.includes(g.cat))
+              .flatMap((g) => g.items.map((label) => ({ cat: g.cat, label })))
+          : []
 
         return (
           <div key={section.id}>
@@ -371,9 +404,17 @@ function Article({ data }) {
               {section.tip && (
                 <TipBox
                   icon={section.tip.icon}
-                  title={section.tip.title}
                   body={section.tip.body}
                 />
+              )}
+
+              {relatedItems.length > 0 && (
+                <div className="mt-4 rounded-xl bg-white border border-slate-100 p-4">
+                  <div className="text-xs font-bold text-slate-400 mb-2">이 섹션 체크리스트</div>
+                  {relatedItems.map((item, i) => (
+                    <InlineCheckItem key={i} item={item} />
+                  ))}
+                </div>
               )}
             </section>
 
@@ -620,7 +661,8 @@ function CtaBanner({ data }) {
               나만의 {data.name}, 메이트가 함께
             </div>
             <h2 className="font-extrabold text-[2rem] md:text-[3.4rem] leading-[1.1] tracking-tight max-w-[16ch]">
-              {data.footerCta.title.replace(/[🌴🗼🐘🗽]/gu, '').trim()}
+              나만의 {data.name} 여행 체크리스트,<br />
+              지금 바로 만들어보세요 🗺️
             </h2>
             <p className="mt-5 font-medium text-[15px] md:text-[16.5px] leading-relaxed text-white/85 max-w-[44ch]">
               {data.footerCta.subtitle}
@@ -660,8 +702,7 @@ function Related({ currentCode }) {
               Keep reading · 함께 보면 좋은 글
             </div>
             <h2 className="font-extrabold text-[1.9rem] md:text-[2.6rem] leading-[1.1] tracking-tight text-slate-900 max-w-[20ch]">
-              다른 여행지도{' '}
-              <span style={{ color: '#3db4dd' }}>준비해볼까요</span>
+              다른 여행지도 같이 준비해볼까요? ✈️
             </h2>
           </div>
           <Link to="/" className="hidden md:inline-flex items-center gap-1.5 text-[12.5px] font-extrabold tracking-wide text-teal-700 hover:text-teal-800">
@@ -713,7 +754,7 @@ function PageFooter() {
               CHECKMATE
             </Link>
             <p className="mt-4 font-extrabold text-[18px] leading-snug text-slate-800 max-w-[26ch]">
-              준비는 가볍게, 여행은{' '}
+              준비는 <span style={{ color: '#FFB901' }}>가볍게</span>, 여행은{' '}
               <span style={{ color: '#3db4dd' }}>완벽하게</span>.
             </p>
             <p className="mt-2 font-medium text-[13px] text-gray-600 max-w-[36ch] leading-relaxed">
@@ -835,11 +876,11 @@ function CurationArticleContent({ data }) {
         />
       </div>
 
-      <div className="cur-page-bg" style={{ wordBreak: 'keep-all' }}>
+      <div className="cur-page-bg overflow-x-hidden" style={{ wordBreak: 'keep-all' }}>
         <Hero data={data} />
 
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_220px] gap-12 xl:gap-20">
-          <div className="min-w-0 max-w-3xl mx-auto w-full lg:mx-0">
+          <div className="min-w-0 max-w-3xl mx-auto w-full lg:mx-0 overflow-x-hidden">
             <Article data={data} />
           </div>
           <TableOfContents sections={data.sections} activeId={activeId} />
