@@ -270,6 +270,10 @@ export default function TripNewDestinationPage() {
   const [arrivalQuery, setArrivalQuery] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [additionalDests, setAdditionalDests] = useState([])
+  const [additionalInput, setAdditionalInput] = useState('')
+  const [additionalDropOpen, setAdditionalDropOpen] = useState(false)
+  const additionalDropRef = useRef(null)
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
   const [calendarOpen, setCalendarOpen] = useState(false)
 
@@ -312,6 +316,7 @@ export default function TripNewDestinationPage() {
     function handlePointerDown(e) {
       if (!comboRef.current?.contains(e.target)) setDropdownOpen(false)
       if (!calendarRef.current?.contains(e.target)) setCalendarOpen(false)
+      if (!additionalDropRef.current?.contains(e.target)) setAdditionalDropOpen(false)
     }
     document.addEventListener('mousedown', handlePointerDown)
     return () => document.removeEventListener('mousedown', handlePointerDown)
@@ -454,6 +459,27 @@ export default function TripNewDestinationPage() {
     setEndDate(end)
   }
 
+  const additionalArrivalSuggestions = useMemo(() => {
+    if (!selectedCountry) return []
+    const fullEntry = countryOptions.find((c) => c.countryCode === selectedCountry.countryCode) ?? selectedCountry
+    const all = getArrivalsForCountry(fullEntry)
+    const existing = new Set([selectedCountry.city, ...additionalDests])
+    const query = sanitizeArrivalInput(additionalInput)
+    const filtered = query ? filterArrivalsByQuery(all, query) : all
+    return filtered.filter((a) => !existing.has(a.city))
+  }, [selectedCountry, additionalInput, additionalDests, countryOptions])
+
+  const addAdditionalDest = (city) => {
+    if (!city || additionalDests.includes(city)) return
+    setAdditionalDests((prev) => [...prev, city])
+    setAdditionalInput('')
+    setAdditionalDropOpen(false)
+  }
+
+  const removeAdditionalDest = (city) => {
+    setAdditionalDests((prev) => prev.filter((c) => c !== city))
+  }
+
   const dateSectionOk =
     startDate !== '' && endDate !== '' && endDate >= startDate
 
@@ -473,6 +499,7 @@ export default function TripNewDestinationPage() {
       fromDestinationPage: true,
       tripStartDate: startDate,
       tripEndDate: endDate,
+      additionalDestinations: additionalDests,
     }
     trackEvent('step_complete', { step: 'destination', destination: navState.destination?.city })
     saveStep4NavigationState(navState)
@@ -485,6 +512,7 @@ export default function TripNewDestinationPage() {
       },
       tripStartDate: startDate,
       tripEndDate: endDate,
+      additionalDestinations: additionalDests,
     })
     navigate('/trips/new/step4', { state: navState })
   }
@@ -603,31 +631,26 @@ export default function TripNewDestinationPage() {
             {Array.from({ length: STEP_DESTINATION_CONFIG.totalSteps }).map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i < STEP_DESTINATION_CONFIG.currentStep ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
+                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                  i < (additionalDests.length > 0 ? 3 : dateSectionOk ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
                 }`}
               />
             ))}
           </div>
         </div>
 
-        {/* 제목 */}
-        <div className="px-6 pt-8 pb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">
-            Step {STEP_DESTINATION_CONFIG.currentStep}
-          </p>
-          <h1 className="text-[1.65rem] font-extrabold leading-snug text-slate-900">
-            어떤 여행을 계획하고
-            <br />
-            계신가요?
-          </h1>
-        </div>
-
         {/* 폼 */}
-        <div className="flex-1 px-6">
+        <div className="flex-1 px-6 pt-8">
           {/* ① 여행지 — 항상 표시 */}
           <div className="mb-5">
-            <label className="mb-2 block text-sm font-medium text-[#0f5762]">여행지</label>
+            <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">
+              Step {STEP_DESTINATION_CONFIG.currentStep}
+            </p>
+            <h1 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">
+              어떤 여행을 계획하고
+              <br />
+              계신가요?
+            </h1>
             {selectedCountry ? (
               <div className="flex items-center justify-between rounded-xl border border-[#3db4dd]/40 bg-white/80 px-4 py-3.5 shadow-sm">
                 <span className="font-medium text-gray-900">
@@ -678,7 +701,8 @@ export default function TripNewDestinationPage() {
                 style={{ transitionTimingFunction: selectedCountry ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
                 <div ref={calendarRef}>
-                  <label className="mb-2 block text-sm font-medium text-[#0f5762]">여행 시기</label>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 2</p>
+                  <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">언제 떠나실 예정인가요?</h2>
                   <button
                     type="button"
                     onClick={() => setCalendarOpen((v) => !v)}
@@ -721,6 +745,84 @@ export default function TripNewDestinationPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+
+          {/* ③ 추가 취항지 — 날짜 입력 후 등장 (선택) */}
+          <div
+            className={`grid transition-all duration-500 ${
+              dateSectionOk ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+            }`}
+            style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+          >
+            <div className="overflow-hidden">
+              <div
+                className={`mb-5 transition-transform duration-500 ${dateSectionOk ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+              >
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 3</p>
+                <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">추가로 방문할 도시가 있나요?</h2>
+                <p className="mb-3 text-xs text-gray-400">선택사항이에요. 없으면 바로 다음으로 넘어가세요.</p>
+
+                {/* 드롭다운 인풋 */}
+                <div ref={additionalDropRef} className="relative">
+                  <input
+                    type="text"
+                    value={additionalInput}
+                    onChange={(e) => { setAdditionalInput(e.target.value); setAdditionalDropOpen(true) }}
+                    onFocus={() => setAdditionalDropOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') { setAdditionalDropOpen(false); return }
+                      if (e.key === 'Enter' && additionalArrivalSuggestions.length > 0) {
+                        e.preventDefault()
+                        addAdditionalDest(additionalArrivalSuggestions[0].city)
+                      }
+                    }}
+                    placeholder="도시 이름을 검색하세요"
+                    className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[#3db4dd]/60 focus:outline-none focus:ring-2 focus:ring-[#3db4dd]/20"
+                  />
+                  {additionalDropOpen && additionalArrivalSuggestions.length > 0 && (
+                    <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-48 overflow-y-auto rounded-xl border border-[#3db4dd]/20 bg-white shadow-lg">
+                      {additionalArrivalSuggestions.map((arrival) => (
+                        <li key={arrival.iata ?? arrival.city}>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); addAdditionalDest(arrival.city) }}
+                            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gray-800 hover:bg-teal-50 active:bg-teal-100"
+                          >
+                            <span className="font-semibold">{arrival.city}</span>
+                            {arrival.iata && <span className="text-xs text-gray-400">{arrival.iata}</span>}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {additionalDests.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {additionalDests.map((city) => (
+                      <span
+                        key={city}
+                        className="flex items-center gap-1.5 rounded-full border border-[#3db4dd]/30 bg-[#3db4dd]/10 px-3 py-1 text-sm font-semibold text-[#0f5762]"
+                      >
+                        {city}
+                        <button
+                          type="button"
+                          onClick={() => removeAdditionalDest(city)}
+                          className="flex h-4 w-4 items-center justify-center rounded-full text-[#3db4dd] hover:bg-[#3db4dd]/20"
+                          aria-label={`${city} 삭제`}
+                        >
+                          <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
