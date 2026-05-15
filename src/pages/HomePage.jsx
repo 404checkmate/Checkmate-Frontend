@@ -259,35 +259,37 @@ function MyChecklistsSection() {
             </span>
           )}
         </div>
-        {hasArchives && (
-          <Link
-            to="/guide-archives"
-            className="text-xs font-semibold text-[#3db4dd] transition-colors hover:text-teal-600"
-          >
-            전체 보기
-          </Link>
-        )}
-        {!fetching && !hasArchives && !previewMode && (
-          <button
-            type="button"
-            onClick={() => setPreviewMode(true)}
-            className="rounded-full bg-teal-500 px-3 py-1 text-xs font-bold text-white transition-colors active:bg-teal-600"
-          >
-            예시 보기
-          </button>
-        )}
-        {previewMode && (
-          <button
-            type="button"
-            onClick={() => setPreviewMode(false)}
-            className="flex items-center gap-1 text-xs font-semibold text-gray-400 transition-colors hover:text-gray-600"
-          >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
-              <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
-            </svg>
-            닫기
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {!fetching && !hasArchives && !previewMode && (
+            <button
+              type="button"
+              onClick={() => setPreviewMode(true)}
+              className="rounded-full bg-teal-500 px-3 py-1 text-xs font-bold text-white transition-colors active:bg-teal-600"
+            >
+              예시 보기
+            </button>
+          )}
+          {previewMode && (
+            <button
+              type="button"
+              onClick={() => setPreviewMode(false)}
+              className="flex items-center gap-1 text-xs font-semibold text-gray-400 transition-colors hover:text-gray-600"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+                <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
+              </svg>
+              닫기
+            </button>
+          )}
+          {(hasArchives || previewMode) && (
+            <Link
+              to="/guide-archives"
+              className="text-xs font-semibold text-[#3db4dd] transition-colors hover:text-teal-600"
+            >
+              자세히
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* 로딩 중 */}
