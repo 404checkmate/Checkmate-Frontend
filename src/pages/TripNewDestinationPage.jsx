@@ -1026,7 +1026,7 @@ export default function TripNewDestinationPage() {
 
         {/* step5 완료 시 하단 고정 다음 버튼 */}
         <div
-          className={`fixed bottom-0 left-0 right-0 z-40 px-6 pb-8 pt-4 transition-all duration-500 ${
+          className={`fixed bottom-16 left-0 right-0 z-40 px-6 pb-4 pt-4 transition-all duration-500 ${
             styleIds.length > 0
               ? 'translate-y-0 opacity-100'
               : 'translate-y-full opacity-0 pointer-events-none'
