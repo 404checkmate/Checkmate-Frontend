@@ -886,12 +886,9 @@ export default function TripNewDestinationPage() {
                     <button
                       type="button"
                       onClick={() => { setAdditionalDests([]); setStep3Confirmed(true) }}
-                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-gray-50 py-3 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-600 active:scale-[0.99]"
+                      className="mt-3 w-full rounded-xl border border-[#3db4dd]/40 bg-white py-3 text-sm font-semibold text-[#3db4dd] shadow-sm transition hover:bg-[#3db4dd]/5 hover:border-[#3db4dd]/60 active:scale-[0.99]"
                     >
                       없음
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
                     </button>
                   </>
                 )}
