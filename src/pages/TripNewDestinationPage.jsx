@@ -271,6 +271,7 @@ export default function TripNewDestinationPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [additionalDests, setAdditionalDests] = useState([])
+  const [draftDests, setDraftDests] = useState([])
   const [additionalInput, setAdditionalInput] = useState('')
   const [additionalDropOpen, setAdditionalDropOpen] = useState(false)
   const additionalDropRef = useRef(null)
@@ -468,11 +469,17 @@ export default function TripNewDestinationPage() {
     return filtered.filter((a) => a.city !== selectedCountry.city)
   }, [selectedCountry, additionalInput, countryOptions])
 
-  const toggleAdditionalDest = (city) => {
+  const toggleDraftDest = (city) => {
     if (!city) return
-    setAdditionalDests((prev) =>
+    setDraftDests((prev) =>
       prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
     )
+  }
+
+  const confirmAdditionalDests = () => {
+    setAdditionalDests(draftDests)
+    setAdditionalInput('')
+    setAdditionalDropOpen(false)
   }
 
   const removeAdditionalDest = (city) => {
@@ -771,46 +778,57 @@ export default function TripNewDestinationPage() {
                     type="text"
                     value={additionalInput}
                     onChange={(e) => { setAdditionalInput(e.target.value); setAdditionalDropOpen(true) }}
-                    onFocus={() => setAdditionalDropOpen(true)}
+                    onFocus={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') { setAdditionalDropOpen(false); return }
                       if (e.key === 'Enter' && additionalArrivalSuggestions.length > 0) {
                         e.preventDefault()
-                        toggleAdditionalDest(additionalArrivalSuggestions[0].city)
+                        toggleDraftDest(additionalArrivalSuggestions[0].city)
                       }
                     }}
                     placeholder="도시 이름을 검색하세요"
                     className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[#3db4dd]/60 focus:outline-none focus:ring-2 focus:ring-[#3db4dd]/20"
                   />
                   {additionalDropOpen && additionalArrivalSuggestions.length > 0 && (
-                    <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-48 overflow-y-auto rounded-xl border border-[#3db4dd]/20 bg-white shadow-lg">
-                      {additionalArrivalSuggestions.map((arrival) => {
-                        const isSelected = additionalDests.includes(arrival.city)
-                        return (
-                          <li key={arrival.iata ?? arrival.city}>
-                            <button
-                              type="button"
-                              onMouseDown={(e) => { e.preventDefault(); toggleAdditionalDest(arrival.city) }}
-                              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${
-                                isSelected ? 'bg-[#3db4dd]/10 text-[#0f5762]' : 'text-gray-800 hover:bg-teal-50'
-                              }`}
-                            >
-                              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
-                                isSelected ? 'border-[#3db4dd] bg-[#3db4dd]' : 'border-gray-300'
-                              }`}>
-                                {isSelected && (
-                                  <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M20 6L9 17l-5-5" />
-                                  </svg>
-                                )}
-                              </span>
-                              <span className="font-semibold">{arrival.city}</span>
-                              {arrival.iata && <span className="text-xs text-gray-400">{arrival.iata}</span>}
-                            </button>
-                          </li>
-                        )
-                      })}
-                    </ul>
+                    <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-xl border border-[#3db4dd]/20 bg-white shadow-lg">
+                      <ul className="max-h-44 overflow-y-auto">
+                        {additionalArrivalSuggestions.map((arrival) => {
+                          const isSelected = draftDests.includes(arrival.city)
+                          return (
+                            <li key={arrival.iata ?? arrival.city}>
+                              <button
+                                type="button"
+                                onMouseDown={(e) => { e.preventDefault(); toggleDraftDest(arrival.city) }}
+                                className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${
+                                  isSelected ? 'bg-[#3db4dd]/10 text-[#0f5762]' : 'text-gray-800 hover:bg-teal-50'
+                                }`}
+                              >
+                                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                                  isSelected ? 'border-[#3db4dd] bg-[#3db4dd]' : 'border-gray-300'
+                                }`}>
+                                  {isSelected && (
+                                    <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M20 6L9 17l-5-5" />
+                                    </svg>
+                                  )}
+                                </span>
+                                <span className="font-semibold">{arrival.city}</span>
+                                {arrival.iata && <span className="text-xs text-gray-400">{arrival.iata}</span>}
+                              </button>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                      <div className="sticky bottom-0 border-t border-[#3db4dd]/20 px-3 py-2">
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); confirmAdditionalDests() }}
+                          className="w-full rounded-lg bg-[#3db4dd] py-2 text-sm font-bold text-white transition hover:bg-[#2da0c8] active:scale-[0.99]"
+                        >
+                          확인{draftDests.length > 0 ? ` (${draftDests.length})` : ''}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
 
