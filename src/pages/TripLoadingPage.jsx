@@ -9,7 +9,6 @@ import {
   TIPS,
   LOADING_ICON_PATHS,
   BLUR_ORBS,
-  BRAND_DOTS,
 } from '@/mocks/loadingData'
 import loadingWordMatePng from '@/assets/loading-word-mate-user-latest.png'
 import loadingWordChecklistPng from '@/assets/loading-word-checklist-user-latest.png'
@@ -160,11 +159,6 @@ function TripLoadingPage() {
           }}
         />
       ))}
-      {/* 모바일 데코 아이콘 (온도계 실루엣) */}
-      <div className="md:hidden absolute top-6 left-4 opacity-10 pointer-events-none">
-        <SvgIcon name="thermometer" className="w-24 h-24 text-cyan-400" />
-      </div>
-
       {/* ══════════════════════════════════
           본문 컨텐츠 (relative z-10)
       ══════════════════════════════════ */}
@@ -277,15 +271,7 @@ function TripLoadingPage() {
       </div>
 
       {/* ── 하단 브랜딩 ── */}
-      <div className="absolute bottom-8 flex flex-col items-center gap-2 z-10">
-        <div className="flex items-center gap-1.5">
-          {BRAND_DOTS.map((dot) => (
-            <span
-              key={dot.id}
-              className={`w-1.5 h-1.5 rounded-full ${dot.color} ${dot.desktopOnly ? 'hidden md:block' : ''}`}
-            />
-          ))}
-        </div>
+      <div className="absolute bottom-8 flex flex-col items-center z-10">
         <BrandLogo className="h-5 w-auto opacity-95" />
       </div>
 

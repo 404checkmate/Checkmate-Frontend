@@ -116,26 +116,6 @@ function CurationCard({ country, index }) {
 
 // ─── 내 체크리스트 가로 스크롤 섹션 ─────────────────────────────────────────
 
-const DUMMY_ARCHIVES = [
-  {
-    id: 'demo-1',
-    trip: { id: null },
-    archivedAt: '2026-05-08T12:00:00Z',
-    snapshot: { checklistProgressPercent: 78, country: '일본', tripStartDate: '2026-07-10', tripEndDate: '2026-07-13' },
-  },
-  {
-    id: 'demo-2',
-    trip: { id: null },
-    archivedAt: '2026-04-20T09:00:00Z',
-    snapshot: { checklistProgressPercent: 42, country: '일본', tripStartDate: '2026-08-01', tripEndDate: '2026-08-06' },
-  },
-  {
-    id: 'demo-3',
-    trip: { id: null },
-    archivedAt: '2026-03-15T08:00:00Z',
-    snapshot: { checklistProgressPercent: 100, country: '태국', tripStartDate: '2026-09-20', tripEndDate: '2026-09-24' },
-  },
-]
 
 function formatKoreanFullDate(dateStr) {
   if (!dateStr) return ''
@@ -221,7 +201,6 @@ function MyChecklistsSection() {
   const { isLoggedIn, loading: authLoading } = useAuth()
   const [archives, setArchives] = useState([])
   const [fetching, setFetching] = useState(false)
-  const [previewMode, setPreviewMode] = useState(false)
 
   useEffect(() => {
     if (!isLoggedIn) return
@@ -251,45 +230,15 @@ function MyChecklistsSection() {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-[#04384a]">내 체크리스트</h2>
-          {previewMode && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600">
-              예시
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {!fetching && !hasArchives && !previewMode && (
-            <button
-              type="button"
-              onClick={() => setPreviewMode(true)}
-              className="rounded-full bg-teal-500 px-3 py-1 text-xs font-bold text-white transition-colors active:bg-teal-600"
-            >
-              예시 보기
-            </button>
-          )}
-          {previewMode && (
-            <button
-              type="button"
-              onClick={() => setPreviewMode(false)}
-              className="flex items-center gap-1 text-xs font-semibold text-gray-400 transition-colors hover:text-gray-600"
-            >
-              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
-                <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
-              </svg>
-              닫기
-            </button>
-          )}
-          {(hasArchives || previewMode) && (
-            <Link
-              to="/guide-archives"
-              className="text-xs font-semibold text-[#3db4dd] transition-colors hover:text-teal-600"
-            >
-              자세히
-            </Link>
-          )}
-        </div>
+        <h2 className="text-sm font-bold text-[#04384a]">내 체크리스트</h2>
+        {hasArchives && (
+          <Link
+            to="/guide-archives"
+            className="text-xs font-semibold text-[#3db4dd] transition-colors hover:text-teal-600"
+          >
+            자세히
+          </Link>
+        )}
       </div>
 
       {/* 로딩 중 */}
@@ -303,8 +252,8 @@ function MyChecklistsSection() {
         </div>
       )}
 
-      {/* 저장된 체크리스트 없음 + 미리보기 꺼짐 */}
-      {!fetching && !hasArchives && !previewMode && (
+      {/* 저장된 체크리스트 없음 */}
+      {!fetching && !hasArchives && (
         <div className="flex flex-col items-center gap-2.5 rounded-2xl bg-white px-5 py-6 shadow-sm shadow-gray-200/60">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50">
             <svg className="h-5 w-5 text-teal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
@@ -317,19 +266,6 @@ function MyChecklistsSection() {
               여행을 준비하고 체크리스트를 저장하면<br />여기서 바로 확인할 수 있어요
             </p>
           </div>
-        </div>
-      )}
-
-      {/* 예시 미리보기 */}
-      {!fetching && !hasArchives && previewMode && (
-        <div
-          className="flex gap-3 overflow-x-auto"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {DUMMY_ARCHIVES.map((archive) => (
-            <ChecklistCard key={archive.id} archive={archive} />
-          ))}
-          <div className="w-1 shrink-0" aria-hidden />
         </div>
       )}
 
