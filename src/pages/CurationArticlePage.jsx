@@ -243,37 +243,36 @@ function Hero({ data }) {
    TOC
 ════════════════════════════════════════════ */
 function TableOfContents({ sections, activeId }) {
-  const tocItems = useMemo(() => [
-    ...sections.map((s, i) => ({ id: s.id, label: `${String(i + 1).padStart(2, '0')} · ${s.title}` })),
-    { id: 'checklist', label: '체크리스트 저장' },
-  ], [sections])
-
   return (
-    <aside className="hidden lg:block">
-      <div className="sticky top-24">
-        <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-500 mb-5 pl-1">
-          In this guide
+    <aside className="hidden lg:block w-52 shrink-0">
+      <div className="sticky top-24 space-y-1">
+        <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-400 mb-3">
+          IN THIS GUIDE
         </div>
-        <nav className="space-y-3.5 pl-4 border-l border-slate-200">
-          {tocItems.map((s) => (
+        {sections.map((s, i) => {
+          const isActive = activeId === `section-${s.id}`
+          return (
             <a
               key={s.id}
-              href={`#${s.id}`}
+              href={`#section-${s.id}`}
               className={
-                'cur-toc-link block text-[12.5px] leading-snug text-slate-500 hover:text-slate-800 transition ' +
-                (activeId === s.id ? 'active' : '')
+                'flex items-center gap-2 py-1.5 text-sm transition-colors group ' +
+                (isActive ? 'text-teal-600 font-bold' : 'text-slate-500 hover:text-teal-600')
               }
             >
-              {s.label}
+              <span className={'text-xs shrink-0 ' + (isActive ? 'text-teal-400' : 'text-slate-300 group-hover:text-teal-400')}>
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="leading-snug">{s.title}</span>
             </a>
-          ))}
-        </nav>
+          )
+        })}
         <a
           href="#checklist"
-          className="mt-8 inline-flex items-center gap-1.5 font-extrabold text-[13px] text-teal-700 hover:text-teal-800"
+          className={'flex items-center gap-2 py-1.5 text-sm font-bold transition-colors mt-2 ' +
+            (activeId === 'checklist' ? 'text-teal-500' : 'text-teal-600 hover:text-teal-500')}
         >
-          <span>체크리스트로 바로 가기</span>
-          <span className="text-amber-500" aria-hidden>→</span>
+          → 체크리스트 저장
         </a>
       </div>
     </aside>
@@ -380,7 +379,7 @@ function Article({ data }) {
 
         return (
           <div key={section.id}>
-            <section id={section.id} data-toc className={idx > 0 ? 'mt-20 md:mt-28' : ''}>
+            <section id={`section-${section.id}`} data-toc className={idx > 0 ? 'mt-20 md:mt-28' : ''}>
               <Kicker idx={String(idx + 1).padStart(2, '0')} label={KICKER_LABELS[idx] || 'Guide'} />
               <SectionH2>
                 {section.icon} {section.title}
@@ -806,7 +805,7 @@ function CurationArticleContent({ data }) {
   const [shake, setShake] = useState(null)
 
   const tocSectionIds = useMemo(
-    () => [...data.sections.map((s) => s.id), 'checklist'],
+    () => [...data.sections.map((s) => `section-${s.id}`), 'checklist'],
     [data],
   )
   const activeId = useActiveSection(tocSectionIds)
@@ -879,11 +878,13 @@ function CurationArticleContent({ data }) {
       <div className="cur-page-bg overflow-x-hidden" style={{ wordBreak: 'keep-all' }}>
         <Hero data={data} />
 
-        <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_220px] gap-12 xl:gap-20">
-          <div className="min-w-0 max-w-3xl mx-auto w-full lg:mx-0 overflow-x-hidden">
-            <Article data={data} />
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="flex gap-12 items-start">
+            <div className="flex-1 min-w-0 max-w-2xl mx-auto overflow-x-hidden">
+              <Article data={data} />
+            </div>
+            <TableOfContents sections={data.sections} activeId={activeId} />
           </div>
-          <TableOfContents sections={data.sections} activeId={activeId} />
         </div>
 
         <ChecklistSection
