@@ -715,7 +715,15 @@ export default function TripNewDestinationPage() {
                   <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">언제 떠나실 예정인가요?</h2>
                   <button
                     type="button"
-                    onClick={() => setCalendarOpen((v) => !v)}
+                    onClick={() => setCalendarOpen((v) => {
+                      if (!v) {
+                        setAdditionalDests([])
+                        setDraftDests([])
+                        setAdditionalInput('')
+                        setAdditionalDropOpen(false)
+                      }
+                      return !v
+                    })}
                     className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left shadow-sm transition ${
                       calendarOpen
                         ? 'border-[#3db4dd]/60 bg-white ring-2 ring-[#3db4dd]/20'
