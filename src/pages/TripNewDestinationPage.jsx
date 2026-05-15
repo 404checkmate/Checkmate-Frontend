@@ -757,7 +757,7 @@ export default function TripNewDestinationPage() {
             }`}
             style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
           >
-            <div className="overflow-hidden">
+            <div className={dateSectionOk ? 'overflow-visible' : 'overflow-hidden'}>
               <div
                 className={`mb-5 transition-transform duration-500 ${dateSectionOk ? 'translate-y-0' : 'translate-y-4'}`}
                 style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
