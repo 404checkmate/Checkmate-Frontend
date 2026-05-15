@@ -11,6 +11,7 @@ import {
 } from '@/mocks/tripNewDestinationData'
 import {
   COMPANIONS,
+  TRAVEL_STYLES,
   STEP5_ICON_PATHS,
   STEP5_ICON_COMPOSITE,
 } from '@/mocks/tripNewStep5Data'
@@ -28,6 +29,21 @@ import { saveStep4NavigationState } from '@/utils/tripFlowDraftStorage'
 import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { clearActiveTripId } from '@/utils/activeTripIdStorage'
 import { trackEvent } from '@/utils/analyticsTracker'
+
+const STYLE_FILTER_IDLE = 'brightness(0) saturate(100%) invert(44%) sepia(82%) saturate(520%) hue-rotate(139deg) brightness(0.93) contrast(0.95)'
+const STYLE_FILTER_SELECTED = 'brightness(0) saturate(100%) invert(19%) sepia(60%) saturate(600%) hue-rotate(158deg) brightness(0.85) contrast(1.1)'
+
+function TravelStyleIcon({ src, selected, className }) {
+  return (
+    <img
+      src={src}
+      alt=""
+      aria-hidden
+      className={`shrink-0 object-contain transition-[filter] duration-200 ${className ?? ''}`}
+      style={{ filter: selected ? STYLE_FILTER_SELECTED : STYLE_FILTER_IDLE }}
+    />
+  )
+}
 
 function SvgIcon({ name, className = 'w-6 h-6' }) {
   const composite = STEP5_ICON_COMPOSITE[name]
@@ -300,6 +316,7 @@ export default function TripNewDestinationPage() {
   const [additionalDropOpen, setAdditionalDropOpen] = useState(false)
   const [step3Confirmed, setStep3Confirmed] = useState(false)
   const [companionIds, setCompanionIds] = useState([])
+  const [styleIds, setStyleIds] = useState([])
   const additionalDropRef = useRef(null)
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
   const [calendarOpen, setCalendarOpen] = useState(false)
@@ -360,6 +377,7 @@ export default function TripNewDestinationPage() {
       setAdditionalDropOpen(false)
       setStep3Confirmed(false)
       setCompanionIds([])
+      setStyleIds([])
     }
   }, [selectedCountry])
 
@@ -523,12 +541,16 @@ export default function TripNewDestinationPage() {
     })
   }
 
+  const toggleStyle = (id) => {
+    setStyleIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+  }
+
   const dateSectionOk =
     startDate !== '' && endDate !== '' && endDate >= startDate
 
   const isValid = Boolean(selectedCountry) && dateSectionOk
 
-  const mobileIsValid = Boolean(selectedCountry) && dateSectionOk && step3Confirmed && companionIds.length >= 1
+  const mobileIsValid = Boolean(selectedCountry) && dateSectionOk && step3Confirmed && companionIds.length >= 1 && styleIds.length >= 1
 
   const goNextMobile = () => {
     if (!mobileIsValid || !selectedCountry) return
@@ -544,6 +566,7 @@ export default function TripNewDestinationPage() {
       tripEndDate: endDate,
       additionalDestinations: additionalDests,
       companionIds,
+      travelStyleIds: styleIds,
     }
     trackEvent('step_complete', { step: 'destination', destination: navState.destination?.city })
     saveStep4NavigationState(navState)
@@ -558,6 +581,7 @@ export default function TripNewDestinationPage() {
       tripEndDate: endDate,
       additionalDestinations: additionalDests,
       companionIds,
+      travelStyleIds: styleIds,
     })
     navigate('/trips/new/step4', { state: navState })
   }
@@ -677,7 +701,7 @@ export default function TripNewDestinationPage() {
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                  i < (companionIds.length > 0 ? 4 : step3Confirmed ? 3 : dateSectionOk && !calendarOpen ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
+                  i < (styleIds.length > 0 ? 5 : companionIds.length > 0 ? 4 : step3Confirmed ? 3 : dateSectionOk && !calendarOpen ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
                 }`}
               />
             ))}
@@ -758,6 +782,7 @@ export default function TripNewDestinationPage() {
                         setAdditionalDropOpen(false)
                         setStep3Confirmed(false)
                         setCompanionIds([])
+                        setStyleIds([])
                       }
                       return !v
                     })}
@@ -907,7 +932,7 @@ export default function TripNewDestinationPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => { setStep3Confirmed(false); setCompanionIds([]) }}
+                      onClick={() => { setStep3Confirmed(false); setCompanionIds([]); setStyleIds([]) }}
                       className="ml-3 shrink-0 text-xs font-medium text-[#3db4dd] hover:text-[#0f5762]"
                     >
                       변경
@@ -952,6 +977,44 @@ export default function TripNewDestinationPage() {
                           className={`h-6 w-6 transition-colors ${isSelected ? 'text-[#3db4dd]' : 'text-gray-400'}`}
                         />
                         <span className="text-xs font-bold leading-tight">{c.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* ⑤ 여행 스타일 — 동행인 선택 후 등장 */}
+          <div
+            className={`grid transition-all duration-500 ${
+              companionIds.length > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+            }`}
+            style={{ transitionTimingFunction: companionIds.length > 0 ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+          >
+            <div className="overflow-hidden">
+              <div
+                className={`mb-5 transition-transform duration-500 ${companionIds.length > 0 ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: companionIds.length > 0 ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+              >
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 5</p>
+                <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">어떤 여행을 즐기시나요?</h2>
+                <p className="mb-3 text-xs text-gray-400">복수 선택 가능해요.</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {TRAVEL_STYLES.map((s) => {
+                    const isSelected = styleIds.includes(s.id)
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => toggleStyle(s.id)}
+                        className={`flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 text-center transition active:scale-[0.97] ${
+                          isSelected
+                            ? 'border-[#3db4dd] bg-[#3db4dd]/10 text-[#0f5762]'
+                            : 'border-gray-200 bg-white/80 text-gray-500 hover:border-[#3db4dd]/40 hover:bg-[#3db4dd]/5'
+                        }`}
+                      >
+                        <TravelStyleIcon src={s.iconSrc} selected={isSelected} className="h-7 w-7" />
+                        <span className="text-xs font-bold leading-tight">{s.label}</span>
                       </button>
                     )
                   })}
