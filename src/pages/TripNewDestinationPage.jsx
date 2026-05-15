@@ -512,7 +512,7 @@ export default function TripNewDestinationPage() {
     setAdditionalDests(draftDests)
     setAdditionalInput('')
     setAdditionalDropOpen(false)
-    setStep3Confirmed(true)
+    if (draftDests.length > 0) setStep3Confirmed(true)
   }
 
   const toggleCompanion = (id) => {
