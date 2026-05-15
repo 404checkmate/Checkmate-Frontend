@@ -709,7 +709,7 @@ export default function TripNewDestinationPage() {
         </div>
 
         {/* 폼 */}
-        <div className="flex-1 px-6 pt-8">
+        <div className="flex-1 px-6 pt-8 pb-32">
           {/* ① 여행지 — 항상 표시 */}
           <div className="mb-5">
             <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">
@@ -1024,13 +1024,19 @@ export default function TripNewDestinationPage() {
           </div>
         </div>
 
-        {/* 다음 버튼 */}
-        <div className="px-6 pb-10 pt-8">
+        {/* step5 완료 시 하단 고정 다음 버튼 */}
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-40 px-6 pb-8 pt-4 transition-all duration-500 ${
+            styleIds.length > 0
+              ? 'translate-y-0 opacity-100'
+              : 'translate-y-full opacity-0 pointer-events-none'
+          }`}
+          style={{ background: 'linear-gradient(to top, rgba(244,255,241,1) 60%, rgba(244,255,241,0))' }}
+        >
           <button
             type="button"
             onClick={goNextMobile}
-            disabled={!mobileIsValid}
-            className="w-full rounded-2xl bg-gradient-to-r from-amber-300 to-amber-400 py-4 text-base font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 active:scale-[0.99] disabled:opacity-40"
+            className="w-full rounded-2xl bg-gradient-to-r from-amber-300 to-amber-400 py-4 text-base font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 active:scale-[0.99]"
           >
             다음
           </button>
