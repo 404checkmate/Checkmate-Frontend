@@ -76,10 +76,10 @@ const japan = {
   ],
 
   apps: [
-    { emoji: '🚇', name: 'Suica / PASMO', badge: '필수', desc: '전철·버스·편의점 결제까지. 애플페이·구글페이로 등록하면 실물 카드 불필요.' },
-    { emoji: '🗺️', name: 'Google Maps', badge: '필수', desc: '오프라인 지도 다운로드 필수. 전철 환승·도보 길찾기 모두 정확해요.' },
-    { emoji: '🍽️', name: 'Tabelog', desc: '일본 최대 맛집 앱. 3.5 이상이면 믿을 만한 수준.' },
-    { emoji: '🌐', name: 'Google Translate', desc: '카메라 번역으로 메뉴판·간판을 실시간으로 읽어줍니다.' },
+    { emoji: '🚇', iconUrl: 'https://www.google.com/s2/favicons?domain=jreast.co.jp&sz=128', name: 'Suica / PASMO', badge: '필수', desc: '전철·버스·편의점 결제까지. 애플페이·구글페이로 등록하면 실물 카드 불필요.' },
+    { emoji: '🗺️', iconUrl: 'https://www.google.com/s2/favicons?domain=maps.google.com&sz=128', name: 'Google Maps', badge: '필수', desc: '오프라인 지도 다운로드 필수. 전철 환승·도보 길찾기 모두 정확해요.' },
+    { emoji: '🍽️', iconUrl: 'https://www.google.com/s2/favicons?domain=tabelog.com&sz=128', name: 'Tabelog', desc: '일본 최대 맛집 앱. 3.5 이상이면 믿을 만한 수준.' },
+    { emoji: '🌐', iconUrl: 'https://www.google.com/s2/favicons?domain=translate.google.com&sz=128', name: 'Google Translate', desc: '카메라 번역으로 메뉴판·간판을 실시간으로 읽어줍니다.' },
   ],
 
   checklist: [

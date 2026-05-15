@@ -76,10 +76,10 @@ const usa = {
   ],
 
   apps: [
-    { emoji: '🚗', name: 'Uber / Lyft', badge: '필수', desc: '대중교통 불편 지역 필수. 미리 설치하고 결제 카드 등록해 두세요.' },
-    { emoji: '🗺️', name: 'Google Maps', badge: '필수', desc: '대중교통·도보·자동차 길찾기 모두 정확. 오프라인 지도도 다운로드하세요.' },
-    { emoji: '⭐', name: 'Yelp', desc: '미국 최대 맛집·서비스 앱. 별점 4.0 이상이면 믿을 만한 수준.' },
-    { emoji: '🍽️', name: 'OpenTable', desc: '인기 레스토랑 사전 예약 전용. 고급 식당은 수주 전 예약 필수.' },
+    { emoji: '🚗', iconUrl: 'https://www.google.com/s2/favicons?domain=uber.com&sz=128', name: 'Uber / Lyft', badge: '필수', desc: '대중교통 불편 지역 필수. 미리 설치하고 결제 카드 등록해 두세요.' },
+    { emoji: '🗺️', iconUrl: 'https://www.google.com/s2/favicons?domain=maps.google.com&sz=128', name: 'Google Maps', badge: '필수', desc: '대중교통·도보·자동차 길찾기 모두 정확. 오프라인 지도도 다운로드하세요.' },
+    { emoji: '⭐', iconUrl: 'https://www.google.com/s2/favicons?domain=yelp.com&sz=128', name: 'Yelp', desc: '미국 최대 맛집·서비스 앱. 별점 4.0 이상이면 믿을 만한 수준.' },
+    { emoji: '🍽️', iconUrl: 'https://www.google.com/s2/favicons?domain=opentable.com&sz=128', name: 'OpenTable', desc: '인기 레스토랑 사전 예약 전용. 고급 식당은 수주 전 예약 필수.' },
   ],
 
   checklist: [

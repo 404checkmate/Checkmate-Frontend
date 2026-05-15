@@ -76,10 +76,10 @@ const thailand = {
   ],
 
   apps: [
-    { emoji: '🚗', name: 'Grab', badge: '필수', desc: '방콕 택시 미터기 거부 많음. Grab으로 요금을 미리 확인하고 이동하세요.' },
-    { emoji: '🛵', name: 'LINE MAN', desc: '태국 현지 배달·맛집 앱. 로컬 식당 음식을 숙소로 배달 가능.' },
-    { emoji: '🗺️', name: 'Google Maps', desc: 'BTS·MRT 노선 안내까지. 방콕 복잡한 대중교통 필수 앱.' },
-    { emoji: '🎡', name: 'Klook', desc: '투어·액티비티·입장권 현지 최저가. 코끼리 트레킹, 시내 투어 예약.' },
+    { emoji: '🚗', iconUrl: 'https://www.google.com/s2/favicons?domain=grab.com&sz=128', name: 'Grab', badge: '필수', desc: '방콕 택시 미터기 거부 많음. Grab으로 요금을 미리 확인하고 이동하세요.' },
+    { emoji: '🛵', iconUrl: 'https://www.google.com/s2/favicons?domain=linemanwongnai.com&sz=128', name: 'LINE MAN', desc: '태국 현지 배달·맛집 앱. 로컬 식당 음식을 숙소로 배달 가능.' },
+    { emoji: '🗺️', iconUrl: 'https://www.google.com/s2/favicons?domain=maps.google.com&sz=128', name: 'Google Maps', desc: 'BTS·MRT 노선 안내까지. 방콕 복잡한 대중교통 필수 앱.' },
+    { emoji: '🎡', iconUrl: 'https://www.google.com/s2/favicons?domain=klook.com&sz=128', name: 'Klook', desc: '투어·액티비티·입장권 현지 최저가. 코끼리 트레킹, 시내 투어 예약.' },
   ],
 
   checklist: [

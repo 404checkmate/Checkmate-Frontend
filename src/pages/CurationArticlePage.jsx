@@ -151,8 +151,8 @@ function SectionH2({ children }) {
 
 function TipBox({ icon, body }) {
   return (
-    <aside className="cur-reveal relative my-10 rounded-2xl border border-sky-200 bg-sky-50/80 px-6 py-5">
-      <div className="flex items-center gap-3">
+    <aside className="cur-reveal relative my-5 rounded-2xl border border-sky-200 bg-sky-50/80 px-6 py-5">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-xl">{icon}</span>
           <span className="text-xs font-extrabold text-teal-600">Mate Tip!</span>
@@ -191,16 +191,20 @@ function Hero({ data }) {
         alt=""
         aria-hidden
         className="absolute inset-0 -z-10 h-full w-full object-cover will-change-transform"
-        style={{ transform: 'scale(1.08)' }}
+        style={{
+          transform: 'scale(1.08)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 55%, transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, black 0%, black 55%, transparent 100%)'
+        }}
       />
       <div
         className="absolute inset-0 -z-10"
-        style={{ background: 'linear-gradient(to bottom, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.3) 45%, rgba(15,23,42,0.85) 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.45) 50%, rgba(15,23,42,0.1) 80%, rgba(15,23,42,0) 100%)' }}
         aria-hidden
       />
       <div
-        className="absolute inset-x-0 bottom-0 -z-10 h-40"
-        style={{ background: 'linear-gradient(to top, #f3fff8 0%, rgba(243,255,248,0.4) 50%, rgba(243,255,248,0) 100%)' }}
+        className="absolute inset-x-0 bottom-0 -z-10 h-1/3"
+        style={{ background: 'linear-gradient(to top, #e8fffe 0%, rgba(232,255,254,0.85) 25%, rgba(232,255,254,0.4) 60%, rgba(232,255,254,0) 100%)' }}
         aria-hidden
       />
 
@@ -222,16 +226,18 @@ function Hero({ data }) {
           </p>
 
           {/* City chips */}
-          <div className="cur-reveal mt-8 flex flex-wrap items-center gap-2">
-            <span className="text-4xl">{data.flag}</span>
-            {data.cities.map((city) => (
-              <span
-                key={city}
-                className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-semibold text-white/90 backdrop-blur-sm"
-              >
-                {city}
-              </span>
-            ))}
+          <div className="cur-reveal mt-8 flex items-start gap-3">
+            <span className="text-4xl shrink-0 leading-none mt-1">{data.flag}</span>
+            <div className="flex flex-wrap gap-2">
+              {data.cities.map((city) => (
+                <span
+                  key={city}
+                  className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-semibold text-gray-900 backdrop-blur-sm"
+                >
+                  {city}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -242,35 +248,41 @@ function Hero({ data }) {
 /* ════════════════════════════════════════════
    TOC
 ════════════════════════════════════════════ */
-function TableOfContents({ sections, activeId }) {
+function TableOfContents({ sections, activeSection }) {
   return (
-    <aside className="hidden lg:block w-52 shrink-0">
-      <div className="sticky top-24 space-y-1">
-        <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-400 mb-3">
-          IN THIS GUIDE
+    <aside className="w-52 shrink-0 sticky top-24">
+      <div className="space-y-1">
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          In This Guide
         </div>
-        {sections.map((s, i) => {
-          const isActive = activeId === `section-${s.id}`
-          return (
-            <a
-              key={s.id}
-              href={`#section-${s.id}`}
-              className={
-                'flex items-center gap-2 py-1.5 text-sm transition-colors group ' +
-                (isActive ? 'text-teal-600 font-bold' : 'text-slate-500 hover:text-teal-600')
-              }
-            >
-              <span className={'text-xs shrink-0 ' + (isActive ? 'text-teal-400' : 'text-slate-300 group-hover:text-teal-400')}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span className="leading-snug">{s.title}</span>
-            </a>
-          )
-        })}
+        {sections.map((s, i) => (
+          <a
+            key={s.id}
+            href={`#section-${s.id}`}
+            onClick={(e) => {
+              e.preventDefault()
+              document.getElementById(`section-${s.id}`)
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            className={`block border-l-2 pl-3 py-1.5 text-sm transition-colors ${
+              activeSection === s.id
+                ? 'border-teal-500 font-bold text-teal-600'
+                : 'border-slate-100 text-slate-400 hover:text-slate-700'
+            }`}
+          >
+            <span className="mr-1.5 text-[10px] text-slate-300">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            {s.title}
+          </a>
+        ))}
         <a
-          href="#checklist"
-          className={'flex items-center gap-2 py-1.5 text-sm font-bold transition-colors mt-2 ' +
-            (activeId === 'checklist' ? 'text-teal-500' : 'text-teal-600 hover:text-teal-500')}
+          onClick={(e) => {
+            e.preventDefault()
+            document.getElementById('checklist')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+          className="block border-l-2 border-teal-300 pl-3 pt-3 text-sm font-bold text-teal-500 hover:text-teal-600 cursor-pointer"
         >
           → 체크리스트 저장
         </a>
@@ -282,46 +294,61 @@ function TableOfContents({ sections, activeId }) {
 /* ════════════════════════════════════════════
    App Shelf
 ════════════════════════════════════════════ */
-function AppShelf({ apps }) {
+function AppCard({ a, i }) {
+  const [open, setOpen] = useState(false)
+  const [imgError, setImgError] = useState(false)
   const TONES = ['teal', 'sky', 'amber', 'teal']
+  const tone = TONES[i % TONES.length]
+  const toneCls =
+    tone === 'teal'  ? 'bg-teal-50' :
+    tone === 'sky'   ? 'bg-sky-50' :
+                       'bg-amber-50'
+  return (
+    <li className="rounded-2xl border border-slate-100 bg-white shadow-sm transition duration-300 hover:border-sky-200 hover:shadow-md">
+      <button
+        className="w-full text-left px-5 py-4"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-4">
+          <div className={'h-12 w-12 shrink-0 rounded-xl grid place-items-center ' + toneCls}>
+            {a.iconUrl && !imgError
+              ? <img src={a.iconUrl} alt={a.name} className="h-8 w-8 object-contain" onError={() => setImgError(true)} />
+              : <span className="text-[22px]">{a.emoji}</span>
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[17px] font-extrabold leading-tight text-slate-900">{a.name}</div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[11px] font-bold text-slate-400">
+              {open ? '닫기' : '상세보기'}
+            </span>
+            <span className={'text-slate-400 transition-transform duration-200 inline-block text-[11px] ' + (open ? 'rotate-180' : '')}>
+              ▾
+            </span>
+          </div>
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 pt-1">
+          <p className="font-medium text-[14px] leading-relaxed text-gray-700">{a.desc}</p>
+          <div className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-teal-700">
+            <span>설치하러 가기</span>
+            <span aria-hidden className="text-amber-500">→</span>
+          </div>
+        </div>
+      )}
+    </li>
+  )
+}
+
+function AppShelf({ apps }) {
   return (
     <div className="cur-reveal">
-      <ul className="grid grid-cols-2 gap-3">
-        {apps.map((a, i) => {
-          const tone = TONES[i % TONES.length]
-          const toneCls =
-            tone === 'teal'  ? 'bg-teal-50 text-teal-700' :
-            tone === 'sky'   ? 'bg-sky-50 text-sky-700' :
-                               'bg-amber-50 text-amber-700'
-          return (
-            <li
-              key={a.name}
-              className="group rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:border-sky-200 hover:shadow-md hover:-translate-y-0.5"
-            >
-              <div className="flex items-center justify-between mb-5">
-                <div className={'h-12 w-12 rounded-xl grid place-items-center font-extrabold text-[22px] ' + toneCls}>
-                  {a.emoji}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {a.badge && (
-                    <span className="rounded-full bg-teal-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                      {a.badge}
-                    </span>
-                  )}
-                  <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-slate-400">
-                    No. {String(i + 1).padStart(2, '0')}
-                  </span>
-                </div>
-              </div>
-              <div className="text-[20px] font-extrabold leading-tight text-slate-900">{a.name}</div>
-              <p className="mt-3 font-medium text-[14px] leading-relaxed text-gray-700">{a.desc}</p>
-              <div className="mt-5 inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-teal-700">
-                <span>설치하러 가기</span>
-                <span aria-hidden className="text-amber-500">→</span>
-              </div>
-            </li>
-          )
-        })}
+      <ul className="grid grid-cols-1 gap-3">
+        {apps.map((a, i) => <AppCard key={a.name} a={a} i={i} />)}
       </ul>
     </div>
   )
@@ -330,12 +357,11 @@ function AppShelf({ apps }) {
 /* ════════════════════════════════════════════
    InlineCheckItem
 ════════════════════════════════════════════ */
-function InlineCheckItem({ item }) {
-  const [checked, setChecked] = useState(false)
+function InlineCheckItem({ item, checked, onToggle }) {
   return (
     <div
       className="flex items-start gap-3 py-2.5 border-b border-slate-100 last:border-0 cursor-pointer"
-      onClick={() => setChecked((v) => !v)}
+      onClick={onToggle}
     >
       <span
         className={
@@ -350,7 +376,6 @@ function InlineCheckItem({ item }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className="text-[9.5px] font-bold tracking-[0.22em] uppercase text-amber-600 mr-2">{item.cat}</span>
         <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
           {item.label}
         </span>
@@ -362,7 +387,7 @@ function InlineCheckItem({ item }) {
 /* ════════════════════════════════════════════
    Article
 ════════════════════════════════════════════ */
-function Article({ data }) {
+function Article({ data, checked, toggle }) {
   const KICKER_LABELS = ['Before You Pack', 'Money & Pay', 'Must-Have Apps', 'Health & Safety', 'Food & Culture', 'What to Know']
 
   return (
@@ -371,10 +396,9 @@ function Article({ data }) {
         const isAppsSection = section.id === 'apps'
         const imageLeft = idx % 2 === 0
         const paragraphs = section.body.split('\n\n').filter(Boolean)
-        const relatedItems = section.relatedCats
-          ? data.checklist
-              .filter((g) => section.relatedCats.includes(g.cat))
-              .flatMap((g) => g.items.map((label) => ({ cat: g.cat, label })))
+        const mainTitle = section.title.split('—')[0].trim()
+        const relatedGroups = section.relatedCats
+          ? data.checklist.filter((g) => section.relatedCats.includes(g.cat))
           : []
 
         return (
@@ -382,94 +406,63 @@ function Article({ data }) {
             <section id={`section-${section.id}`} data-toc className={idx > 0 ? 'mt-20 md:mt-28' : ''}>
               <Kicker idx={String(idx + 1).padStart(2, '0')} label={KICKER_LABELS[idx] || 'Guide'} />
               <SectionH2>
-                {section.icon} {section.title}
+                {section.icon} {mainTitle}
               </SectionH2>
 
-              {paragraphs.map((p, pi) => (
-                <p
-                  key={pi}
-                  className={
-                    'cur-reveal' +
-                    (idx === 0 && pi === 0 ? ' cur-drop-cap' : '') +
-                    (isAppsSection && pi === paragraphs.length - 1 ? ' mb-10' : '')
-                  }
-                >
-                  {p}
-                </p>
-              ))}
-
-              {isAppsSection && <AppShelf apps={data.apps} />}
-
-              {section.tip && (
-                <TipBox
-                  icon={section.tip.icon}
-                  body={section.tip.body}
-                />
+              {!isAppsSection && section.photo && (
+                <figure className="cur-reveal my-6 overflow-hidden rounded-2xl aspect-[7/4] shadow-[0_14px_30px_rgba(13,58,76,0.18)]">
+                  <BlurImg src={section.photo} alt={section.title} />
+                </figure>
               )}
 
-              {relatedItems.length > 0 && (
-                <div className="mt-4 rounded-xl bg-white border border-slate-100 p-4">
-                  <div className="text-xs font-bold text-slate-400 mb-2">이 섹션 체크리스트</div>
-                  {relatedItems.map((item, i) => (
-                    <InlineCheckItem key={i} item={item} />
-                  ))}
-                </div>
-              )}
-            </section>
+              <div className="px-[7.5%]">
+                {paragraphs.map((p, pi) => (
+                  <p
+                    key={pi}
+                    className={
+                      'cur-reveal' +
+                      (isAppsSection && pi === paragraphs.length - 1 ? ' mb-10' : '')
+                    }
+                  >
+                    {p}
+                  </p>
+                ))}
 
-            {/* Magazine breakout image — skip for apps section */}
-            {!isAppsSection && section.photo && (
-              <section className="cur-reveal relative -mx-4 md:mx-0 my-16 md:my-24 md:grid md:grid-cols-12 md:gap-10 md:items-center">
-                {imageLeft ? (
-                  <>
-                    <figure className="md:col-span-7 md:-ml-24 lg:-ml-32">
-                      <div className="relative overflow-hidden rounded-2xl aspect-[5/4] shadow-[0_14px_30px_rgba(13,58,76,0.18)]">
-                        <BlurImg src={section.photo} alt={section.title} />
-                      </div>
-                      <Caption>
-                        <span className="font-bold tracking-wider text-[10px] uppercase mr-2 text-amber-600">
-                          Pl. {String(idx + 1).padStart(2, '0')}
-                        </span>
-                        {section.photoCaption}
-                      </Caption>
-                    </figure>
-                    <div className="md:col-span-5 mt-7 md:mt-0 md:pl-2 px-4 md:px-0">
-                      <div className="font-extrabold text-[22px] md:text-[26px] leading-[1.4] text-slate-900 max-w-[24ch]">
-                        "{section.photoCaption}"
-                      </div>
-                      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-1.5">
-                        <span className="text-base">{section.icon}</span>
-                        <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-amber-700">
-                          {section.title} · 팁
-                        </span>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="md:col-span-5 order-2 md:order-1 mt-7 md:mt-0 md:pr-2 px-4 md:px-0">
-                      <div className="font-extrabold text-[22px] md:text-[26px] leading-[1.4] text-slate-900 max-w-[24ch]">
-                        "{section.photoCaption}"
-                      </div>
-                      <div className="mt-5 text-[11px] font-bold tracking-[0.22em] uppercase text-amber-600">
-                        — {data.name} · 여행 팁
-                      </div>
-                    </div>
-                    <figure className="md:col-span-7 order-1 md:order-2 md:-mr-24 lg:-mr-32">
-                      <div className="relative overflow-hidden rounded-2xl aspect-[5/4] shadow-[0_14px_30px_rgba(13,58,76,0.18)]">
-                        <BlurImg src={section.photo} alt={section.title} />
-                      </div>
-                      <Caption>
-                        <span className="font-bold tracking-wider text-[10px] uppercase mr-2 text-amber-600">
-                          Pl. {String(idx + 1).padStart(2, '0')}
-                        </span>
-                        {section.photoCaption}
-                      </Caption>
-                    </figure>
-                  </>
+                {isAppsSection && <AppShelf apps={data.apps} />}
+
+                {section.tip && (
+                  <TipBox
+                    icon={section.tip.icon}
+                    body={section.tip.body}
+                  />
                 )}
-              </section>
-            )}
+
+                {relatedGroups.length > 0 && (
+                  <div className="mt-3 rounded-xl bg-white border border-slate-100 p-4">
+                    <div className="text-xs font-bold text-slate-400 mb-3">이 섹션 체크리스트</div>
+                    {relatedGroups.map((group) => {
+                      const gi = data.checklist.findIndex((g) => g.cat === group.cat)
+                      return (
+                        <div key={group.cat} className="mb-3 last:mb-0">
+                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10.5px] font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
+                          {group.items.map((label, ii) => {
+                            const id = `${gi}-${ii}`
+                            return (
+                              <InlineCheckItem
+                                key={ii}
+                                item={{ label }}
+                                checked={!!checked[id]}
+                                onToggle={() => toggle(id)}
+                              />
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
         )
       })}
@@ -480,53 +473,22 @@ function Article({ data }) {
 /* ════════════════════════════════════════════
    Checklist
 ════════════════════════════════════════════ */
-function ChecklistSection({ data, checked, toggle, onSaveAll, filter, setFilter, shake, setShake }) {
+function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake }) {
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
-  const categories = useMemo(() => ['전체', ...data.checklist.map((g) => g.cat)], [data])
   const total = flatItems.length
   const done = Object.values(checked).filter(Boolean).length
-  const pct = Math.round((done / total) * 100)
-  const pctDisplay = useCountUp(pct, 700)
-  const doneDisplay = useCountUp(done, 600)
-  const items = useMemo(
-    () => (filter === '전체' ? flatItems : flatItems.filter((i) => i.cat === filter)),
-    [filter, flatItems],
+  const allGroups = useMemo(
+    () => data.checklist.map((group, gi) => ({
+      cat: group.cat,
+      items: group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label })),
+    })),
+    [data],
   )
 
   return (
     <section id="checklist" data-toc className="relative">
-      <div className="mx-auto max-w-3xl px-4 md:px-6 pt-6 pb-24">
+      <div className="mx-auto max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-4 md:px-3 lg:px-2 pt-6 md:pt-3 pb-24 md:pb-10">
         <div className="rounded-3xl border border-slate-100 bg-white shadow-[0_14px_30px_rgba(13,58,76,0.10)] overflow-hidden">
-          {/* Sticky save bar */}
-          <div className="sticky top-14 z-30 bg-white/95 backdrop-blur border-b border-slate-100">
-            <div className="px-5 md:px-7 py-3.5 flex items-center gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="font-extrabold text-[18px] md:text-[20px] leading-none text-slate-900">
-                  {doneDisplay}
-                  <span className="text-slate-400 font-bold"> / {total}</span>
-                </div>
-                <div className="h-[10px] w-28 md:w-44 rounded-full bg-slate-100 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-teal-400 to-teal-600 transition-[width] duration-500 ease-out"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <div className="text-[12px] font-extrabold tracking-wide text-teal-700">
-                  {pctDisplay}
-                  <span className="text-slate-400 font-bold">%</span>
-                </div>
-              </div>
-              <button
-                onClick={onSaveAll}
-                className="ml-auto inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[12.5px] tracking-wide px-4 md:px-5 py-2.5 shadow-sm shadow-amber-900/15 transition"
-              >
-                <span>전체 저장</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12l5 5L20 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
 
           {/* Header */}
           <div className="px-5 md:px-7 pt-10 pb-2">
@@ -539,101 +501,73 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, filter, setFilter,
               <p className="mt-5 font-medium text-[15px] leading-relaxed text-gray-700 max-w-[50ch]">
                 필요한 것만, 빠짐없이. 카테고리별로 골라 체크하고 저장해두면 출발 전 마지막 점검도 같은 곳에서 이어집니다.
               </p>
-            </div>
-          </div>
-
-          {/* Filter chips */}
-          <div className="cur-reveal px-5 md:px-7 mt-6">
-            <div className="flex md:flex-wrap gap-2 overflow-x-auto cur-no-scrollbar pb-1 -mx-1 px-1">
-              {categories.map((c) => {
-                const active = filter === c
-                const count = c === '전체' ? total : flatItems.filter((i) => i.cat === c).length
-                return (
-                  <button
-                    key={c}
-                    onClick={() => setFilter(c)}
-                    className={
-                      'shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-extrabold tracking-wide transition border ' +
-                      (active
-                        ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-teal-200 hover:text-teal-700')
-                    }
-                  >
-                    {c}
-                    <span className={'ml-1.5 font-bold text-[11px] ' + (active ? 'text-white/70' : 'text-slate-400')}>
-                      {count}
-                    </span>
-                  </button>
-                )
-              })}
+              <div className="mt-5 flex justify-end">
+                <button
+                  onClick={onSaveAll}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[13px] tracking-wide px-5 py-2.5 shadow-sm shadow-amber-900/15 transition active:scale-[0.98]"
+                >
+                  전체 체크
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Items */}
-          <ul role="list" className="px-5 md:px-7 mt-6 grid md:grid-cols-2 gap-x-8 pb-7">
-            {items.map((it) => {
-              const on = !!checked[it.id]
-              const isShaking = shake === it.id
-              return (
-                <li
-                  key={it.id}
-                  className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer ' + (isShaking ? 'cur-shake' : '')}
-                  onClick={() => {
-                    toggle(it.id)
-                    setShake(it.id)
-                    setTimeout(() => setShake(null), 320)
-                  }}
-                  aria-label={it.label}
-                >
-                  <span
-                    className={
-                      'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' +
-                      (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')
-                    }
-                  >
-                    {on && (
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="absolute inset-0 m-auto h-3.5 w-3.5 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+          <div className="px-5 md:px-7 mt-6 pb-7">
+            {allGroups.map((group) => (
+              <div key={group.cat} className="mb-6 last:mb-0">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10.5px] font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">
+                  {group.cat}
+                </div>
+                <ul>
+                  {group.items.map((it) => {
+                    const on = !!checked[it.id]
+                    const isShaking = shake === it.id
+                    return (
+                      <li
+                        key={it.id}
+                        className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer ' + (isShaking ? 'cur-shake' : '')}
+                        onClick={() => {
+                          toggle(it.id)
+                          setShake(it.id)
+                          setTimeout(() => setShake(null), 320)
+                        }}
+                        aria-label={it.label}
                       >
-                        <path d="M5 12l5 5L20 7" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="text-[9.5px] font-bold tracking-[0.22em] uppercase text-amber-600 mr-2">{it.cat}</span>
-                    <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
-                      <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
-                    </span>
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
+                        <span
+                          className={
+                            'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' +
+                            (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')
+                          }
+                        >
+                          {on && (
+                            <svg viewBox="0 0 24 24" className="absolute inset-0 m-auto h-3.5 w-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M5 12l5 5L20 7" />
+                            </svg>
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
+                            <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
+                          </span>
+                        </span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
 
-          {/* Bottom CTAs */}
-          <div className="cur-reveal px-5 md:px-7 pb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button
-              onClick={onSaveAll}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
-            >
-              ✅ 체크리스트 저장하기
-            </button>
+          {/* Bottom CTA */}
+          <div className="cur-reveal px-5 md:px-7 pb-8">
             <Link
               to="/trips/new/destination"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border-2 border-gray-100 bg-white hover:bg-gray-50 text-gray-800 font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm active:scale-[0.98] transition w-full"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
-              ✈️ 내 여행 맞춤 체크리스트
+              저장하기
             </Link>
           </div>
-          <p className="px-5 md:px-7 pb-7 text-center font-medium text-[12.5px] text-slate-500">
-            AI가 여행 일정·동행·스타일에 맞춰 항목을 추가해 드려요.
-          </p>
         </div>
       </div>
     </section>
@@ -801,7 +735,6 @@ function PageFooter() {
 function CurationArticleContent({ data }) {
   const progress = useReadingProgress()
   const [checked, setChecked] = useState({})
-  const [filter, setFilter] = useState('전체')
   const [shake, setShake] = useState(null)
 
   const tocSectionIds = useMemo(
@@ -809,6 +742,7 @@ function CurationArticleContent({ data }) {
     [data],
   )
   const activeId = useActiveSection(tocSectionIds)
+  const activeSection = activeId?.replace('section-', '') ?? null
   useReveal()
 
   const toggle = useCallback((id) => {
@@ -860,11 +794,10 @@ function CurationArticleContent({ data }) {
         .cur-strike-line { background-image: linear-gradient(currentColor, currentColor); background-position: 0 50%; background-size: 0% 1.5px; background-repeat: no-repeat; transition: background-size .35s ease; }
         .cur-strike-on { background-size: 100% 1.5px; }
 
-        .cur-drop-cap::first-letter { float: left; font-family: 'SeoulNotice','Inter',system-ui,sans-serif; font-size: 4.6rem; line-height: 0.92; font-weight: 900; color: #0f766e; margin: 0.34rem 0.7rem -0.1rem -0.06rem; }
-
-        .cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.003em; color: #1f2937; }
+.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; word-break: normal; overflow-wrap: break-word; }
         @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
-        .cur-editorial p + p { margin-top: 1.3em; }
+        .cur-editorial p + p { margin-top: 1.15em; }
+        .cur-editorial aside p { text-align: left; }
       `}</style>
 
       {/* Reading progress bar */}
@@ -875,15 +808,13 @@ function CurationArticleContent({ data }) {
         />
       </div>
 
-      <div className="cur-page-bg overflow-x-hidden" style={{ wordBreak: 'keep-all' }}>
+      <div className="cur-page-bg [overflow-x:clip]" style={{ wordBreak: 'keep-all' }}>
         <Hero data={data} />
 
-        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
-          <div className="flex gap-12 items-start">
-            <div className="flex-1 min-w-0 max-w-2xl mx-auto overflow-x-hidden">
-              <Article data={data} />
-            </div>
-            <TableOfContents sections={data.sections} activeId={activeId} />
+        <div className="relative mx-auto max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-[22px] md:px-3 lg:px-2 py-10 md:py-4">
+          <Article data={data} checked={checked} toggle={toggle} />
+          <div className="hidden xl:block absolute top-0 left-full h-full pl-8">
+            <TableOfContents sections={data.sections} activeSection={activeSection} />
           </div>
         </div>
 
@@ -892,8 +823,6 @@ function CurationArticleContent({ data }) {
           checked={checked}
           toggle={toggle}
           onSaveAll={onSaveAll}
-          filter={filter}
-          setFilter={setFilter}
           shake={shake}
           setShake={setShake}
         />

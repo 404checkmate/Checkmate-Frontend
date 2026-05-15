@@ -71,10 +71,10 @@ const vietnam = {
   ],
 
   apps: [
-    { emoji: '🚗', name: 'Grab', badge: '필수', desc: '동남아 우버. 택시보다 저렴하고 안전해요. 미터기 바가지 걱정 없음.' },
-    { emoji: '🗺️', name: 'Google Maps', badge: '필수', desc: '오프라인 지도 다운로드 필수. 데이터 없어도 사용 가능.' },
-    { emoji: '🍜', name: 'Foody / ShopeeFood', desc: '현지인 맛집·배달 앱. 로컬 식당 정보 찾기 좋아요.' },
-    { emoji: '🏨', name: 'Agoda', desc: '숙소·액티비티 현지 최저가 확인용. 미리 예약하면 할인 혜택.' },
+    { emoji: '🚗', iconUrl: 'https://www.google.com/s2/favicons?domain=grab.com&sz=128', name: 'Grab', badge: '필수', desc: '동남아 우버. 택시보다 저렴하고 안전해요. 미터기 바가지 걱정 없음.' },
+    { emoji: '🗺️', iconUrl: 'https://www.google.com/s2/favicons?domain=maps.google.com&sz=128', name: 'Google Maps', badge: '필수', desc: '오프라인 지도 다운로드 필수. 데이터 없어도 사용 가능.' },
+    { emoji: '🍜', iconUrl: 'https://www.google.com/s2/favicons?domain=shopeefood.vn&sz=128', name: 'Foody / ShopeeFood', desc: '현지인 맛집·배달 앱. 로컬 식당 정보 찾기 좋아요.' },
+    { emoji: '🏨', iconUrl: 'https://www.google.com/s2/favicons?domain=agoda.com&sz=128', name: 'Agoda', desc: '숙소·액티비티 현지 최저가 확인용. 미리 예약하면 할인 혜택.' },
   ],
 
   checklist: [
