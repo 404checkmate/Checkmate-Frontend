@@ -302,6 +302,20 @@ export default function TripNewDestinationPage() {
     }
   }, [])
 
+  const [bottomNavVisible, setBottomNavVisible] = useState(true)
+  const lastScrollY = useRef(0)
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y < 10) setBottomNavVisible(true)
+      else if (y > lastScrollY.current) setBottomNavVisible(false)
+      else setBottomNavVisible(true)
+      lastScrollY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const [countryQuery, setCountryQuery] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(navState?.preselectedCountry ?? null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -1026,12 +1040,13 @@ export default function TripNewDestinationPage() {
 
         {/* step5 완료 시 하단 고정 다음 버튼 */}
         <div
-          className={`fixed bottom-16 left-0 right-0 z-40 px-6 pb-4 pt-4 transition-all duration-500 ${
+          className={`fixed left-0 right-0 z-40 px-6 py-3 transition-all duration-300 ${
+            bottomNavVisible ? 'bottom-16' : 'bottom-0'
+          } ${
             styleIds.length > 0
               ? 'translate-y-0 opacity-100'
               : 'translate-y-full opacity-0 pointer-events-none'
           }`}
-          style={{ background: 'linear-gradient(to top, rgba(244,255,241,1) 60%, rgba(244,255,241,0))' }}
         >
           <button
             type="button"
