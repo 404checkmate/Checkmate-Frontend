@@ -17,8 +17,6 @@ const vietnam = {
   hero: {
     title: '베트남 여행 완벽 준비 가이드 🌴',
     subtitle: '다낭·나트랑·하노이 공통 필수 준비물부터 환전·앱까지 한 번에',
-    readTime: 4,
-    checklistCount: 23,
   },
 
   sections: [
@@ -29,10 +27,8 @@ const vietnam = {
       title: '짐 싸기 전 필수 체크',
       body: `베트남은 여름 내내 덥고 습합니다. 다낭 기준 평균 기온은 28~35°C로, 얇고 통기성 좋은 소재 위주로 챙기는 게 포인트예요. 슬리퍼와 편한 운동화는 필수이고, 사원이나 호이안 올드타운을 방문할 때를 대비해 긴 바지나 얇은 스카프도 하나쯤 가방에 넣어두면 좋습니다.\n\n짐의 핵심은 빼는 것이에요. 현지에서 구할 수 있는 것과 한국에서 가져가야 할 것을 명확히 구분하면 짐이 절반으로 줄어듭니다. 선크림·약·어댑터는 꼭 챙기고, 저렴한 슬리퍼나 모기약은 현지에서 사는 편이 이득입니다.`,
       photo: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=900&q=85',
-      photoCaption: '얇은 면 셔츠 3벌·반바지 2벌·긴바지 1벌이면 다낭 5일은 충분합니다.',
       tip: {
         icon: '💡',
-        title: '팁',
         body: '수분이 많은 과일(망고, 용과 등)은 입국 시 반입 금지예요. 현지에서 저렴하게 즐기세요!',
       },
     },
@@ -43,7 +39,6 @@ const vietnam = {
       title: '환전 & 결제 완전 정복',
       body: `베트남 화폐는 동(VND)이며, 1,000동이 약 50원이에요. 0이 많아 익숙해지는 데 며칠 걸리지만, "마지막 세 자리를 지우고 ÷2"가 가장 빠른 환산법입니다. 다낭·하노이 공항 환전소는 환율이 나쁘니, 시내 환전소(금은방)나 ATM을 이용하세요.\n\n트래블로그·하나머니 등 환율 우대 카드를 미리 준비하면 수수료를 크게 줄일 수 있어요. 시장이나 골목 식당은 현금만 받는 경우가 많으니 소액 현금은 꼭 챙기세요. 큰돈은 호텔 금고에, 다닐 때는 두세 군데로 나눠 보관하는 것이 안전합니다.`,
       photo: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=900&q=85',
-      photoCaption: 'Hồ Chí Minh이 그려진 지폐. 500,000 đ까지 0이 다섯 개.',
     },
     {
       id: 'apps',
@@ -52,7 +47,6 @@ const vietnam = {
       title: '베트남 여행 필수 앱 4가지',
       body: `출발 전 설치하고, 한 번씩 켜봐 두세요. Grab은 동남아판 우버로 택시보다 저렴하고 안전해 미터기 바가지 걱정이 없습니다. Google Maps는 오프라인 지도를 미리 다운로드해두면 데이터 없이도 길찾기가 가능합니다.\n\nFoody(지금은 ShopeeFood)는 현지인이 즐겨 쓰는 배달·맛집 앱으로, 로컬 식당 정보를 찾기 좋아요. Agoda·Klook은 숙소·액티비티 현지 최저가 확인용으로 출발 전 예약해두면 할인 혜택을 받을 수 있습니다.`,
       photo: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=900&q=85',
-      photoCaption: '호이안 등불 축제. Klook에서 보트 투어를 미리 예약하면 20~30% 저렴합니다.',
     },
     {
       id: 'health',
@@ -61,18 +55,16 @@ const vietnam = {
       title: '건강 & 안전 준비',
       body: `베트남 길거리 음식은 매력적이지만 배탈 위험도 있어요. 정장제(지사제), 소화제, 모기 기피제는 꼭 챙기세요. 여행자 보험도 출발 전 필수입니다. 일부 의료 서비스는 현금 결제가 필요하니 여유 현금도 준비하세요.\n\n밤 외출 시에는 호텔 카드(주소가 적힌 명함)를 챙기고, Grab으로 이동하는 것이 안전합니다. 비상 시 한국 영사관 연락처는 미리 저장해 두세요.`,
       photo: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=85',
-      photoCaption: '다낭 해변. 저녁에는 모기가 많아 기피제와 긴팔이 필요합니다.',
       tip: {
         icon: '🦟',
-        title: '메이트가 알려드려요',
         body: '다낭 해변 주변은 저녁에 모기가 많아요. 기피제 + 긴팔 하나는 꼭 챙기세요!',
       },
     },
   ],
 
   apps: [
-    { emoji: '🚗', iconUrl: 'https://www.google.com/s2/favicons?domain=grab.com&sz=128', name: 'Grab', badge: '필수', desc: '동남아 우버. 택시보다 저렴하고 안전해요. 미터기 바가지 걱정 없음.' },
-    { emoji: '🗺️', iconUrl: 'https://www.google.com/s2/favicons?domain=maps.google.com&sz=128', name: 'Google Maps', badge: '필수', desc: '오프라인 지도 다운로드 필수. 데이터 없어도 사용 가능.' },
+    { emoji: '🚗', iconUrl: 'https://www.google.com/s2/favicons?domain=grab.com&sz=128', name: 'Grab', desc: '동남아 우버. 택시보다 저렴하고 안전해요. 미터기 바가지 걱정 없음.' },
+    { emoji: '🗺️', iconUrl: 'https://www.google.com/s2/favicons?domain=maps.google.com&sz=128', name: 'Google Maps', desc: '오프라인 지도 다운로드 필수. 데이터 없어도 사용 가능.' },
     { emoji: '🍜', iconUrl: 'https://www.google.com/s2/favicons?domain=shopeefood.vn&sz=128', name: 'Foody / ShopeeFood', desc: '현지인 맛집·배달 앱. 로컬 식당 정보 찾기 좋아요.' },
     { emoji: '🏨', iconUrl: 'https://www.google.com/s2/favicons?domain=agoda.com&sz=128', name: 'Agoda', desc: '숙소·액티비티 현지 최저가 확인용. 미리 예약하면 할인 혜택.' },
   ],
