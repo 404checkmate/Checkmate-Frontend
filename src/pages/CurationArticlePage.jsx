@@ -4,8 +4,9 @@ import vietnam from '@/data/curation/vietnam'
 import japan from '@/data/curation/japan'
 import thailand from '@/data/curation/thailand'
 import usa from '@/data/curation/usa'
+import france from '@/data/curation/france'
 
-const DATA_MAP = { vietnam, japan, thailand, usa }
+const DATA_MAP = { vietnam, japan, thailand, usa, france }
 
 /* ─── flat checklist items ─── */
 function buildFlatItems(checklist) {
@@ -104,8 +105,16 @@ function BlurImg({ src, alt, className = '' }) {
     if (!el) return
     if (el.complete && el.naturalWidth > 0) el.classList.add('is-loaded')
     const onload = () => el.classList.add('is-loaded')
+    const onerror = () => {
+      el.style.display = 'none'
+      el.parentElement?.classList.add('img-error')
+    }
     el.addEventListener('load', onload)
-    return () => el.removeEventListener('load', onload)
+    el.addEventListener('error', onerror)
+    return () => {
+      el.removeEventListener('load', onload)
+      el.removeEventListener('error', onerror)
+    }
   }, [src])
   return (
     <img
@@ -334,9 +343,23 @@ function AppCard({ a, i }) {
       {open && (
         <div className="px-5 pb-5 pt-1">
           <p className="font-medium text-[14px] leading-relaxed text-gray-700">{a.desc}</p>
-          <div className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-teal-700">
-            <span>설치하러 가기</span>
-            <span aria-hidden className="text-amber-500">→</span>
+          <div className="mt-3">
+            {a.storeUrl ? (
+              <a
+                href={a.storeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-teal-700 hover:text-teal-500"
+              >
+                <span>설치하러 가기</span>
+                <span aria-hidden className="text-amber-500">→</span>
+              </a>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-slate-300">
+                <span>설치하러 가기</span>
+                <span aria-hidden>→</span>
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -648,13 +671,18 @@ function Related({ currentCode }) {
             <li key={d.code} className="cur-reveal group">
               <Link to={`/guide/${d.code}`} className="block">
                 <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4 shadow-sm">
-                  <BlurImg
+                  <img
                     src={d.photos.hero}
                     alt={d.name}
-                    className="group-hover:scale-105 transition-transform duration-700"
+                    style={{ opacity: 1 }}
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&q=85'
+                      e.target.onerror = null
+                    }}
+                    className="cur-img-fade w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
-                  <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                  <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-900/40 to-transparent" />
+                  <div className="absolute bottom-3 left-3 pointer-events-none flex items-center gap-2">
                     <span className="text-2xl">{d.flag}</span>
                     <span className="font-extrabold text-white text-[15px]">{d.name}</span>
                   </div>
@@ -745,6 +773,10 @@ function CurationArticleContent({ data }) {
   const activeSection = activeId?.replace('section-', '') ?? null
   useReveal()
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [data.code])
+
   const toggle = useCallback((id) => {
     setChecked((c) => ({ ...c, [id]: !c[id] }))
   }, [])
@@ -777,8 +809,9 @@ function CurationArticleContent({ data }) {
         .cur-reveal.is-in { opacity: 1; transform: none; }
         @media (prefers-reduced-motion: reduce) { .cur-reveal { opacity: 1; transform: none; transition: none; } }
 
-        .cur-img-fade { opacity: 0; filter: blur(14px); transform: scale(1.03); transition: opacity 1.1s ease, filter 1.1s ease, transform 1.4s ease; }
+        .cur-img-fade { opacity: 0.3; filter: blur(8px); transform: scale(1.03); transition: opacity 1.1s ease, filter 1.1s ease, transform 1.4s ease; }
         .cur-img-fade.is-loaded { opacity: 1; filter: blur(0); transform: scale(1); }
+        .img-error { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
 
         @keyframes cur-shake { 0%,100% { transform: translateX(0); } 30% { transform: translateX(-2px); } 70% { transform: translateX(2px); } }
         .cur-shake { animation: cur-shake 0.32s ease both; }
@@ -842,5 +875,5 @@ export default function CurationArticlePage() {
   const { country } = useParams()
   const data = DATA_MAP[country]
   if (!data) return <Navigate to="/guide/vietnam" replace />
-  return <CurationArticleContent data={data} />
+  return <CurationArticleContent key={data.code} data={data} />
 }

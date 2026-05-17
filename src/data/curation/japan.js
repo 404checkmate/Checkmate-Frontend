@@ -5,7 +5,7 @@ const japan = {
   cities: ['도쿄', '오사카', '교토', '후쿠오카', '삿포로'],
 
   photos: {
-    hero: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=1400&q=85&fit=crop',
+    hero: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1400&q=85&fit=crop',
     sections: [
       'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=900&q=85',
       'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=900&q=85',

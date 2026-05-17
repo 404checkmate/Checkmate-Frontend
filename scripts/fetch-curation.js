@@ -126,10 +126,11 @@ async function main() {
     const apps = appPages.map((ap) => {
       const a = ap.properties
       return {
-        name:    getText(a.Name),
-        iconUrl: getUrl(a.iconUrl),
-        emoji:   getText(a.emoji),
-        desc:    getText(a.desc),
+        name:     getText(a.Name),
+        iconUrl:  getUrl(a.iconUrl),
+        emoji:    getText(a.emoji),
+        desc:     getText(a.desc),
+        storeUrl: getUrl(a.storeUrl),
       }
     })
 
@@ -153,7 +154,10 @@ async function main() {
     const data = {
       code,
       flag:   getText(p.flag),
-      name:   getText(p.name),
+      // Title 타입은 rich_text와 다르게 파싱
+      name:   p['Name']?.title?.[0]?.plain_text
+           ?? p['이름']?.title?.[0]?.plain_text
+           ?? '',
       cities: getMultiSelect(p.cities),
 
       photos: {
