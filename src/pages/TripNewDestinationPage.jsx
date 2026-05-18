@@ -332,10 +332,13 @@ export default function TripNewDestinationPage() {
   const [additionalInput, setAdditionalInput] = useState('')
   const [additionalDropOpen, setAdditionalDropOpen] = useState(false)
   const [step3Confirmed, setStep3Confirmed] = useState(false)
+  const [section4Visible, setSection4Visible] = useState(false)
+  const [section5Visible, setSection5Visible] = useState(false)
   const [companionIds, setCompanionIds] = useState([])
   const [styleIds, setStyleIds] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
   const additionalDropRef = useRef(null)
   const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
   const [calendarOpen, setCalendarOpen] = useState(false)
@@ -412,6 +415,8 @@ export default function TripNewDestinationPage() {
       setAdditionalInput('')
       setAdditionalDropOpen(false)
       setStep3Confirmed(false)
+      setSection4Visible(false)
+      setSection5Visible(false)
       setCompanionIds([])
       setStyleIds([])
     }
@@ -594,17 +599,19 @@ export default function TripNewDestinationPage() {
 
   const prevSection3Ref = useRef(false)
   useEffect(() => {
-    const visible = dateSectionOk && !calendarOpen
     const prev = prevSection3Ref.current
-    prevSection3Ref.current = visible
-    if (!prev && visible) scrollToSection(step3Ref)
-  }, [dateSectionOk, calendarOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+    prevSection3Ref.current = dateSectionOk
+    if (!prev && dateSectionOk) scrollToSection(step3Ref)
+  }, [dateSectionOk]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const prevStep3ConfirmedRef = useRef(false)
   useEffect(() => {
     const prev = prevStep3ConfirmedRef.current
     prevStep3ConfirmedRef.current = step3Confirmed
-    if (!prev && step3Confirmed) scrollToSection(step4Ref)
+    if (!prev && step3Confirmed) {
+      setSection4Visible(true)
+      scrollToSection(step4Ref)
+    }
   }, [step3Confirmed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const prevHasCompanionRef = useRef(false)
@@ -612,7 +619,10 @@ export default function TripNewDestinationPage() {
     const hasCompanion = companionIds.length > 0
     const prev = prevHasCompanionRef.current
     prevHasCompanionRef.current = hasCompanion
-    if (!prev && hasCompanion) scrollToSection(step5Ref)
+    if (!prev && hasCompanion) {
+      setSection5Visible(true)
+      scrollToSection(step5Ref)
+    }
   }, [companionIds.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isValid = Boolean(selectedCountry) && dateSectionOk
@@ -822,7 +832,7 @@ export default function TripNewDestinationPage() {
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                  i < (styleIds.length > 0 ? 5 : companionIds.length > 0 ? 4 : step3Confirmed ? 3 : dateSectionOk && !calendarOpen ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
+                  i < (styleIds.length > 0 ? 5 : companionIds.length > 0 ? 4 : section4Visible ? 3 : dateSectionOk ? 2 : selectedCountry ? 1 : 0) ? 'bg-[#3db4dd]' : 'bg-gray-200/80'
                 }`}
               />
             ))}
@@ -834,9 +844,7 @@ export default function TripNewDestinationPage() {
           {/* ① 여행지 — 항상 표시 */}
           <div className="mb-5">
             <h1 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">
-              어떤 여행을 계획하고
-              <br />
-              계신가요?
+              어떤 여행을 계획하고 계신가요?
             </h1>
             {selectedCountry ? (
               <div className="flex items-center justify-between rounded-xl border border-[#3db4dd]/40 bg-white/80 px-4 py-3.5 shadow-sm">
@@ -845,7 +853,7 @@ export default function TripNewDestinationPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={removeCountryTag}
+                  onClick={() => setShowResetConfirm(true)}
                   className="text-xs font-medium text-[#3db4dd] hover:text-[#0f5762]"
                 >
                   변경
@@ -892,18 +900,7 @@ export default function TripNewDestinationPage() {
                   <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">언제 떠나실 예정인가요?</h2>
                   <button
                     type="button"
-                    onClick={() => setCalendarOpen((v) => {
-                      if (!v) {
-                        setAdditionalDests([])
-                        setDraftDests([])
-                        setAdditionalInput('')
-                        setAdditionalDropOpen(false)
-                        setStep3Confirmed(false)
-                        setCompanionIds([])
-                        setStyleIds([])
-                      }
-                      return !v
-                    })}
+                    onClick={() => setCalendarOpen((v) => !v)}
                     className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left shadow-sm transition ${
                       calendarOpen
                         ? 'border-[#3db4dd]/60 bg-white ring-2 ring-[#3db4dd]/20'
@@ -951,15 +948,15 @@ export default function TripNewDestinationPage() {
           {/* ③ 추가 취항지 — 날짜 확정 + 캘린더 닫힌 후 등장 (선택) */}
           <div
             ref={step3Ref}
-            className={`grid transition-all duration-500 ${
-              dateSectionOk && !calendarOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+            className={`relative z-10 grid transition-all duration-500 ${
+              dateSectionOk ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
-            style={{ transitionTimingFunction: dateSectionOk && !calendarOpen ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+            style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
           >
-            <div className={dateSectionOk && !calendarOpen ? 'overflow-visible' : 'overflow-hidden'}>
+            <div className={dateSectionOk ? 'overflow-visible' : 'overflow-hidden'}>
               <div
-                className={`mb-5 transition-transform duration-500 ${dateSectionOk && !calendarOpen ? 'translate-y-0' : 'translate-y-4'}`}
-                style={{ transitionTimingFunction: dateSectionOk && !calendarOpen ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+                className={`mb-5 transition-transform duration-500 ${dateSectionOk ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: dateSectionOk ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">추가로 방문할 도시가 있나요?</h2>
 
@@ -1050,7 +1047,7 @@ export default function TripNewDestinationPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => { setStep3Confirmed(false); setCompanionIds([]); setStyleIds([]) }}
+                      onClick={() => setStep3Confirmed(false)}
                       className="ml-3 shrink-0 text-xs font-medium text-[#3db4dd] hover:text-[#0f5762]"
                     >
                       변경
@@ -1065,14 +1062,14 @@ export default function TripNewDestinationPage() {
           <div
             ref={step4Ref}
             className={`grid transition-all duration-500 ${
-              step3Confirmed ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+              section4Visible ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
-            style={{ transitionTimingFunction: step3Confirmed ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+            style={{ transitionTimingFunction: section4Visible ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
           >
             <div className="overflow-hidden">
               <div
-                className={`mb-5 transition-transform duration-500 ${step3Confirmed ? 'translate-y-0' : 'translate-y-4'}`}
-                style={{ transitionTimingFunction: step3Confirmed ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+                className={`mb-5 transition-transform duration-500 ${section4Visible ? 'translate-y-0' : 'translate-y-4'}`}
+                style={{ transitionTimingFunction: section4Visible ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">누구와 함께 하나요?</h2>
                 <p className="mb-3 text-xs text-gray-400">최대 2개까지 선택 가능해요.</p>
@@ -1106,13 +1103,13 @@ export default function TripNewDestinationPage() {
           <div
             ref={step5Ref}
             className={`grid transition-all duration-500 ${
-              companionIds.length > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+              section5Visible ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
-            style={{ transitionTimingFunction: companionIds.length > 0 ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
+            style={{ transitionTimingFunction: section5Visible ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
           >
             <div className="overflow-hidden">
               <div
-                className={`mb-5 transition-transform duration-500 ${companionIds.length > 0 ? 'translate-y-0' : 'translate-y-4'}`}
+                className={`mb-5 transition-transform duration-500 ${section5Visible ? 'translate-y-0' : 'translate-y-4'}`}
                 style={{ transitionTimingFunction: companionIds.length > 0 ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">어떤 여행을 즐기시나요?</h2>
@@ -1141,6 +1138,38 @@ export default function TripNewDestinationPage() {
             </div>
           </div>
         </div>
+
+        {/* 여행지 변경 확인 모달 */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setShowResetConfirm(false)}
+            />
+            <div className="relative w-full max-w-xs rounded-2xl bg-white px-6 py-6 shadow-2xl">
+              <h3 className="mb-2 text-base font-extrabold text-gray-900">여행지를 변경하시겠어요?</h3>
+              <p className="mb-5 text-sm leading-relaxed text-gray-500">
+                여행지를 다시 선택하면 지금까지 입력한 날짜, 도시, 동행인, 여행 스타일 정보가 모두 초기화돼요.
+              </p>
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 rounded-xl border border-gray-200 bg-gray-50 py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 active:scale-[0.99]"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowResetConfirm(false); removeCountryTag() }}
+                  className="flex-1 rounded-xl bg-[#3db4dd] py-3 text-sm font-bold text-white transition hover:bg-[#2da0c8] active:scale-[0.99]"
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* step5 완료 시 하단 고정 다음 버튼 */}
         <div
