@@ -1,25 +1,10 @@
-import { lazy, Suspense, useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import mascotLuggageUrl from '@/assets/home-cta-mascot-luggage.png'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchMyGuideArchives } from '@/api/guideArchives'
 import HomeFooter from '@/components/home/HomeFooter'
 import { formatTripNightsDaysLabel } from '@/utils/tripDateFormat'
-
-const ServiceIntroPage = lazy(() => import('./ServiceIntroPage'))
-
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const update = (e) => setIsDesktop(e.matches)
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
-  return isDesktop
-}
 
 // ─── 큐레이션 데이터 ────────────────────────────────────────────────────────
 
@@ -319,10 +304,10 @@ function MobileHomePage() {
         `,
       }}
     >
-      <div className="flex flex-col gap-5 px-4 pb-6 pt-5">
+      <div className="flex flex-col gap-5 px-4 pb-6 pt-5 lg:mx-auto lg:w-full lg:max-w-3xl lg:gap-7 lg:px-0 lg:py-10">
 
         {/* 환영 배너 */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-[#3db4dd] px-5 py-5 shadow-md shadow-teal-900/15">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-[#3db4dd] px-5 py-5 shadow-md shadow-teal-900/15 lg:px-8 lg:py-8">
           <div
             className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl"
             aria-hidden
@@ -333,30 +318,30 @@ function MobileHomePage() {
           />
           <div className="relative z-10 flex items-end justify-between">
             <div>
-              <p className="text-xs font-semibold text-teal-100">오늘도 설레는 여행 준비 ✨</p>
-              <h1 className="mt-1 text-xl font-extrabold leading-tight text-white">
+              <p className="text-xs font-semibold text-teal-100 lg:text-sm">오늘도 설레는 여행 준비 ✨</p>
+              <h1 className="mt-1 text-xl font-extrabold leading-tight text-white lg:text-3xl">
                 어디로 떠날까요?
               </h1>
-              <p className="mt-1 text-[11px] font-medium text-teal-100/80">
+              <p className="mt-1 text-[11px] font-medium text-teal-100/80 lg:mt-2 lg:text-sm">
                 조건만 입력하면 메이트가 자동으로 준비해드려요
               </p>
             </div>
             <img
               src={mascotLuggageUrl}
               alt="여행 가방을 든 메이트 마스코트"
-              className="h-20 w-20 shrink-0 object-contain drop-shadow-md"
+              className="h-20 w-20 shrink-0 object-contain drop-shadow-md lg:h-28 lg:w-28"
             />
           </div>
         </div>
 
         {/* 목적지 검색 카드 */}
         <section className="overflow-hidden rounded-2xl bg-white shadow-sm shadow-gray-200/60">
-          <div className="px-5 pb-4 pt-4">
-            <h2 className="mb-3 text-sm font-bold text-[#04384a]">목적지 검색</h2>
+          <div className="px-5 pb-4 pt-4 lg:px-6 lg:py-5">
+            <h2 className="mb-3 text-sm font-bold text-[#04384a] lg:text-base">목적지 검색</h2>
             <form onSubmit={handleSubmit}>
               <button
                 type="submit"
-                className="flex w-full items-center gap-2 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3 text-left transition-colors focus-within:border-teal-400 focus-within:ring-2 focus-within:ring-teal-400/20 hover:border-teal-300"
+                className="flex w-full items-center gap-2 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3 text-left transition-colors focus-within:border-teal-400 focus-within:ring-2 focus-within:ring-teal-400/20 hover:border-teal-300 lg:py-3.5"
               >
                 <svg
                   className="h-4 w-4 shrink-0 text-[#3db4dd]"
@@ -399,7 +384,7 @@ function MobileHomePage() {
                       },
                     })
                   }
-                  className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-semibold text-teal-700 transition-colors active:bg-teal-200 hover:bg-teal-100"
+                  className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-semibold text-teal-700 transition-colors active:bg-teal-200 hover:bg-teal-100 lg:text-xs"
                 >
                   {tag.label}
                 </button>
@@ -413,12 +398,12 @@ function MobileHomePage() {
         {/* MATE 맞춤 큐레이션 */}
         <section>
           <div className="mb-4">
-            <h2 className="text-[1.1rem] font-extrabold leading-snug text-[#04384a]">
+            <h2 className="text-[1.1rem] font-extrabold leading-snug text-[#04384a] lg:text-xl">
               지금 떠나기 좋은 <span className="text-[#3db4dd]">인기여행지</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {CURATION_COUNTRIES.map((country, index) => (
               <CurationCard key={country.id} country={country} index={index} />
             ))}
@@ -431,18 +416,6 @@ function MobileHomePage() {
   )
 }
 
-// ─── 라우트 진입점 ────────────────────────────────────────────────────────────
-
 export default function HomePage() {
-  const isDesktop = useIsDesktop()
-
-  if (isDesktop) {
-    return (
-      <Suspense fallback={null}>
-        <ServiceIntroPage />
-      </Suspense>
-    )
-  }
-
   return <MobileHomePage />
 }

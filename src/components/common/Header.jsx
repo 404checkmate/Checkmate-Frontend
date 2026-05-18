@@ -13,7 +13,9 @@ const NAV_ITEMS = [
     label: '체크리스트',
     path: '/guide-archives',
     match: (p) => p.includes('/guide-archive'),
+    requiresLogin: true,
   },
+  { label: '서비스소개', path: '/about', match: (p) => p === '/about' },
 ]
 
 function Header() {
@@ -139,27 +141,25 @@ function Header() {
           </Link>
         </div>
 
-        {/* 데스크톱: 로그인 시에만 중앙 네비 표시 — 비로그인은 하단 푸터 등에서 진입 */}
-        {isWebLoggedIn ? (
-          <nav
-            className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 md:flex"
-            aria-label="주요 메뉴"
-          >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
-                  item.match(pathname)
-                    ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        ) : null}
+        {/* 데스크톱: 항상 중앙 네비 표시. 로그인 필요 항목(체크리스트)은 로그인 시에만 노출 */}
+        <nav
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 md:flex"
+          aria-label="주요 메뉴"
+        >
+          {NAV_ITEMS.filter((item) => !item.requiresLogin || isWebLoggedIn).map((item) => (
+            <Link
+              key={item.label}
+              to={item.path}
+              className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
+                item.match(pathname)
+                  ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
           {isWebLoggedIn ? (
