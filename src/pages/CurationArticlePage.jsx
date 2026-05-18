@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link, useParams, Navigate } from 'react-router-dom'
-import vietnam from '@/data/curation/vietnam'
-import japan from '@/data/curation/japan'
-import thailand from '@/data/curation/thailand'
-import usa from '@/data/curation/usa'
-import france from '@/data/curation/france'
-
-const DATA_MAP = { vietnam, japan, thailand, usa, france }
+const modules = import.meta.glob(
+  '/src/data/curation/*.js',
+  { eager: true }
+)
+const DATA_MAP = Object.fromEntries(
+  Object.entries(modules)
+    .filter(([path]) => !path.includes('template'))
+    .map(([path, mod]) => {
+      const code = path.match(/\/(\w+)\.js$/)[1]
+      return [code, mod.default]
+    })
+)
 
 /* ─── flat checklist items ─── */
 function buildFlatItems(checklist) {
@@ -217,7 +222,7 @@ function Hero({ data }) {
         aria-hidden
       />
 
-      <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 pt-24 pb-24 md:pt-32 md:pb-28 lg:pt-40 lg:pb-32 text-white">
+      <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 pt-24 pb-36 md:pt-32 md:pb-44 lg:pt-40 lg:pb-52 text-white">
         <div ref={titleRef} className="will-change-transform max-w-3xl">
           <div className="cur-reveal flex flex-wrap items-center gap-3 mb-7">
             <span className="text-[10.5px] font-bold tracking-[0.24em] uppercase text-amber-300">
@@ -233,9 +238,13 @@ function Hero({ data }) {
           <p className="cur-reveal mt-6 max-w-2xl font-medium text-[16px] md:text-[19px] leading-relaxed text-white/90">
             {data.hero.subtitle}
           </p>
+        </div>
+      </div>
 
-          {/* City chips */}
-          <div className="cur-reveal mt-8 flex items-start gap-3">
+      {/* City chips — 히어로 하단 고정 */}
+      <div className="absolute bottom-8 left-0 right-0 px-4 md:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="cur-reveal flex items-start gap-3">
             <span className="text-4xl shrink-0 leading-none mt-1">{data.flag}</span>
             <div className="flex flex-wrap gap-2">
               {data.cities.map((city) => (
@@ -438,7 +447,7 @@ function Article({ data, checked, toggle }) {
                 </figure>
               )}
 
-              <div className="px-[7.5%]">
+              <div>
                 {paragraphs.map((p, pi) => (
                   <p
                     key={pi}
@@ -831,6 +840,10 @@ function CurationArticleContent({ data }) {
         @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; }
+        @media (max-width: 767px) {
+          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; }
+          .cur-editorial aside p { font-size: inherit; letter-spacing: inherit; }
+        }
       `}</style>
 
       {/* Reading progress bar */}
@@ -844,7 +857,7 @@ function CurationArticleContent({ data }) {
       <div className="cur-page-bg [overflow-x:clip]" style={{ wordBreak: 'keep-all' }}>
         <Hero data={data} />
 
-        <div className="relative mx-auto max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-[22px] md:px-3 lg:px-2 py-10 md:py-4">
+        <div className="relative mx-auto max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-[22px] md:px-3 lg:px-2 pt-16 pb-10 md:pt-20 md:pb-4">
           <Article data={data} checked={checked} toggle={toggle} />
           <div className="hidden xl:block absolute top-0 left-full h-full pl-8">
             <TableOfContents sections={data.sections} activeSection={activeSection} />

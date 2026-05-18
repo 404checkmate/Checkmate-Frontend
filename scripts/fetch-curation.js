@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { Client } from '@notionhq/client'
-import { writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -190,6 +190,21 @@ async function main() {
     )
     console.log(`   ✅  Written → src/data/curation/${code}.js`)
   }
+
+  // Notion에서 삭제된 국가 파일 제거
+  const generatedCodes = articlePages
+    .map((page) => getText(page.properties.code))
+    .filter(Boolean)
+  const existingFiles = readdirSync(OUT_DIR)
+    .filter((f) => f.endsWith('.js') && f !== 'template.js')
+
+  existingFiles.forEach((file) => {
+    const code = file.replace('.js', '')
+    if (!generatedCodes.includes(code)) {
+      unlinkSync(join(OUT_DIR, file))
+      console.log(`🗑️   Deleted → src/data/curation/${file}`)
+    }
+  })
 
   console.log('\n🎉  Done.')
 }
