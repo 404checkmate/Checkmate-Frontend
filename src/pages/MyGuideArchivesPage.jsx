@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
 
@@ -165,6 +165,7 @@ function SkeletonCard() {
 }
 
 export default function MyGuideArchivesPage() {
+  const navigate = useNavigate()
   const location = useLocation()
   const [archives, setArchives] = useState([])
   const [status, setStatus] = useState('loading')
@@ -253,6 +254,16 @@ export default function MyGuideArchivesPage() {
     <>
     <div className="min-h-screen" style={PAGE_BG}>
       <div className="mx-auto max-w-5xl px-4 pb-24 pt-6 md:px-8 md:pb-16 md:pt-10">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          aria-label="홈으로"
+          className="mb-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition hover:bg-white/60 active:bg-white/80 md:hidden"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
         <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">
           My Checklists
         </p>

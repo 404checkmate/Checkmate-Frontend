@@ -374,6 +374,23 @@ export default function TripNewDestinationPage() {
   }, [pickerPhase, draftCountry, arrivalQuery])
 
   const calendarRef = useRef(null)
+  const step2Ref = useRef(null)
+  const step3Ref = useRef(null)
+  const step4Ref = useRef(null)
+  const step5Ref = useRef(null)
+
+  const scrollToSection = (ref) => {
+    setTimeout(() => {
+      if (!ref.current) return
+      const BAR_H = 72
+      const target = ref.current.getBoundingClientRect().top + window.scrollY - BAR_H
+      const footer = document.querySelector('footer')
+      const maxY = footer
+        ? footer.getBoundingClientRect().top + window.scrollY - window.innerHeight
+        : document.documentElement.scrollHeight - window.innerHeight
+      window.scrollTo({ top: Math.min(Math.max(0, target), Math.max(0, maxY)), behavior: 'smooth' })
+    }, 200)
+  }
 
   useEffect(() => {
     function handlePointerDown(e) {
@@ -567,6 +584,37 @@ export default function TripNewDestinationPage() {
   const dateSectionOk =
     startDate !== '' && endDate !== '' && endDate >= startDate
 
+  // 섹션 전환 시 해당 섹션 상단으로 스크롤 (이전 값과 비교해 새로 등장할 때만)
+  const prevSelectedCountryRef = useRef(null)
+  useEffect(() => {
+    const prev = prevSelectedCountryRef.current
+    prevSelectedCountryRef.current = selectedCountry
+    if (!prev && selectedCountry) scrollToSection(step2Ref)
+  }, [selectedCountry]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const prevSection3Ref = useRef(false)
+  useEffect(() => {
+    const visible = dateSectionOk && !calendarOpen
+    const prev = prevSection3Ref.current
+    prevSection3Ref.current = visible
+    if (!prev && visible) scrollToSection(step3Ref)
+  }, [dateSectionOk, calendarOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const prevStep3ConfirmedRef = useRef(false)
+  useEffect(() => {
+    const prev = prevStep3ConfirmedRef.current
+    prevStep3ConfirmedRef.current = step3Confirmed
+    if (!prev && step3Confirmed) scrollToSection(step4Ref)
+  }, [step3Confirmed]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const prevHasCompanionRef = useRef(false)
+  useEffect(() => {
+    const hasCompanion = companionIds.length > 0
+    const prev = prevHasCompanionRef.current
+    prevHasCompanionRef.current = hasCompanion
+    if (!prev && hasCompanion) scrollToSection(step5Ref)
+  }, [companionIds.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const isValid = Boolean(selectedCountry) && dateSectionOk
 
   const mobileIsValid = Boolean(selectedCountry) && dateSectionOk && step3Confirmed && companionIds.length >= 1 && styleIds.length >= 1
@@ -758,7 +806,7 @@ export default function TripNewDestinationPage() {
         }}
       >
         {/* 상단 바: 뒤로가기(< 모양) 절대 위치 + 진행률 바 완전 중앙 */}
-        <div className="relative flex items-center justify-center px-5 pt-12 pb-2">
+        <div className={`fixed left-0 right-0 z-[65] flex items-center justify-center px-5 pt-3 pb-2 lg:hidden transition-[top] duration-300 ease-out ${bottomNavVisible ? 'top-14' : 'top-0'}`}>
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -782,12 +830,9 @@ export default function TripNewDestinationPage() {
         </div>
 
         {/* 폼 */}
-        <div className="flex-1 px-6 pt-8 pb-32">
+        <div className="flex-1 px-6 pb-32 pt-14">
           {/* ① 여행지 — 항상 표시 */}
           <div className="mb-5">
-            <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">
-              Step {STEP_DESTINATION_CONFIG.currentStep}
-            </p>
             <h1 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">
               어떤 여행을 계획하고
               <br />
@@ -832,6 +877,7 @@ export default function TripNewDestinationPage() {
 
           {/* ② 여행 시기 — 여행지 선택 후 등장 */}
           <div
+            ref={step2Ref}
             className={`grid transition-all duration-500 ${
               selectedCountry ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
@@ -843,7 +889,6 @@ export default function TripNewDestinationPage() {
                 style={{ transitionTimingFunction: selectedCountry ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
                 <div ref={calendarRef}>
-                  <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 2</p>
                   <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">언제 떠나실 예정인가요?</h2>
                   <button
                     type="button"
@@ -905,6 +950,7 @@ export default function TripNewDestinationPage() {
 
           {/* ③ 추가 취항지 — 날짜 확정 + 캘린더 닫힌 후 등장 (선택) */}
           <div
+            ref={step3Ref}
             className={`grid transition-all duration-500 ${
               dateSectionOk && !calendarOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
@@ -915,7 +961,6 @@ export default function TripNewDestinationPage() {
                 className={`mb-5 transition-transform duration-500 ${dateSectionOk && !calendarOpen ? 'translate-y-0' : 'translate-y-4'}`}
                 style={{ transitionTimingFunction: dateSectionOk && !calendarOpen ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
-                <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 3</p>
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">추가로 방문할 도시가 있나요?</h2>
 
                 {/* 미확정: 인풋 + 없음 버튼 */}
@@ -1018,6 +1063,7 @@ export default function TripNewDestinationPage() {
 
           {/* ④ 동행인 — step3 확정 후 등장 */}
           <div
+            ref={step4Ref}
             className={`grid transition-all duration-500 ${
               step3Confirmed ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
@@ -1028,7 +1074,6 @@ export default function TripNewDestinationPage() {
                 className={`mb-5 transition-transform duration-500 ${step3Confirmed ? 'translate-y-0' : 'translate-y-4'}`}
                 style={{ transitionTimingFunction: step3Confirmed ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
-                <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 4</p>
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">누구와 함께 하나요?</h2>
                 <p className="mb-3 text-xs text-gray-400">최대 2개까지 선택 가능해요.</p>
                 <div className="grid grid-cols-3 gap-2">
@@ -1059,6 +1104,7 @@ export default function TripNewDestinationPage() {
           </div>
           {/* ⑤ 여행 스타일 — 동행인 선택 후 등장 */}
           <div
+            ref={step5Ref}
             className={`grid transition-all duration-500 ${
               companionIds.length > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
             }`}
@@ -1069,7 +1115,6 @@ export default function TripNewDestinationPage() {
                 className={`mb-5 transition-transform duration-500 ${companionIds.length > 0 ? 'translate-y-0' : 'translate-y-4'}`}
                 style={{ transitionTimingFunction: companionIds.length > 0 ? 'cubic-bezier(0.34,1.36,0.64,1)' : 'ease-in' }}
               >
-                <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#3db4dd]">Step 5</p>
                 <h2 className="mb-3 text-xl font-extrabold leading-snug text-slate-900">어떤 여행을 즐기시나요?</h2>
                 <p className="mb-3 text-xs text-gray-400">복수 선택 가능해요.</p>
                 <div className="grid grid-cols-3 gap-2">
