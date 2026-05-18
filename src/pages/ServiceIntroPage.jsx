@@ -79,7 +79,7 @@ function HomePage() {
 
   return (
     <div className="relative" style={HOME_PAGE_BG_STYLE}>
-      <HomeHeroSection heroRevealed={heroRevealed} onStartTrip={handleStartTrip} />
+      <HomeHeroSection heroRevealed={heroRevealed} />
       <HomeFeatureSection featuresRef={featuresRef} featuresRevealed={featuresRevealed} />
       <HomeProcessSection processRef={processRef} processRevealed={processRevealed} />
       <HomeCtaSection ctaRef={ctaRef} ctaRevealed={ctaRevealed} onStartTrip={handleStartTrip} />
