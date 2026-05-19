@@ -122,7 +122,7 @@ function TripNewStep3Page() {
   const [loading, setLoading] = useState({ departure: false, return: false })
   const [error, setError] = useState({ departure: '', return: '' })
 
-  if (window.innerWidth < 768) {
+  if (window.innerWidth < 1024) {
     return <Navigate to="/trips/new/destination" replace />
   }
 

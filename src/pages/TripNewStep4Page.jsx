@@ -9,7 +9,7 @@ import TripNewStep4PageContent from '@/components/trip/step4/TripNewStep4PageCon
 export default function TripNewStep4Page() {
   const location = useLocation()
 
-  if (window.innerWidth < 768) {
+  if (window.innerWidth < 1024) {
     return <Navigate to="/trips/new/destination" replace />
   }
 

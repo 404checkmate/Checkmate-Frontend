@@ -73,7 +73,7 @@ function RootLayout() {
       <div
         className={
           hideHeaderOnMobile
-            ? 'hidden md:block md:sticky md:top-0 md:z-[60] md:w-full'
+            ? 'hidden lg:block lg:sticky lg:top-0 lg:z-[60] lg:w-full'
             : [
                 'sticky top-0 z-[60] w-full',
                 'transition-transform duration-300 ease-out motion-reduce:transition-none',
@@ -82,7 +82,7 @@ function RootLayout() {
                     ? 'translate-y-0'
                     : 'pointer-events-none -translate-y-full'
                   : 'translate-y-0',
-                'md:translate-y-0',
+                'lg:translate-y-0',
               ].join(' ')
         }
       >
@@ -91,17 +91,17 @@ function RootLayout() {
 
       {/* flex-col + min-h-0: 자식 페이지가 flex-1로 뷰 높이까지 배경·레이아웃 채우기 가능 */}
       <main
-        className={`flex min-h-0 flex-1 flex-col md:pb-0 ${padMainMobile ? 'pb-16' : ''}`}
+        className={`flex min-h-0 flex-1 flex-col lg:pb-0 ${padMainMobile ? 'pb-16' : ''}`}
       >
         <Outlet />
       </main>
 
       {showFooter ? <HomeFooter /> : null}
 
-      {/* 모바일 바텀 네비 (md 이상 숨김). 약관·온보딩 제외. 헤더와 동일 스크롤 규칙 */}
+      {/* 모바일/태블릿 바텀 네비 (lg 이상 숨김). 약관·온보딩 제외. 헤더와 동일 스크롤 규칙 */}
       {!hideMobileBottomNav ? (
         <nav
-          className={`md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none ${
+          className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none ${
             scrollChromeVisible ? 'translate-y-0' : 'pointer-events-none translate-y-full'
           }`}
         >
