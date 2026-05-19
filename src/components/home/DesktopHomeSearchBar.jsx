@@ -203,7 +203,7 @@ function CountryDropdown({
           <input
             ref={inputRef}
             type="text"
-            onChange={(e) => {}}
+            onChange={() => {}}
             placeholder="도시 또는 공항명"
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition"
           />
@@ -229,10 +229,25 @@ function CountryDropdown({
 
 // ─── Dates dropdown ──────────────────────────────────────────────────────────
 
-function DatesDropdown({ startDate, endDate, today, onRangeChange }) {
+function DatesDropdown({ startDate, endDate, today, onRangeChange, onNext }) {
+  const datesSelected = Boolean(startDate && endDate)
   return (
     <DropdownPanel className="left-1/2 -translate-x-1/2 w-[660px] p-5">
-      <p className="mb-3 text-xs font-bold text-gray-500">여행 날짜를 선택해 주세요</p>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-bold text-gray-500">여행 날짜를 선택해 주세요</p>
+        {datesSelected && (
+          <button
+            type="button"
+            onClick={onNext}
+            className="flex items-center gap-1 rounded-full bg-teal-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-teal-700 hover:shadow-md"
+          >
+            다음
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
       <DestinationMobileRangeCalendar
         startDate={startDate}
         endDate={endDate}
@@ -680,6 +695,7 @@ export default function DesktopHomeSearchBar() {
               endDate={endDate}
               today={today}
               onRangeChange={({ start, end }) => { setStartDate(start); setEndDate(end) }}
+              onNext={() => setActiveSection('extra')}
             />
           )}
         </div>
