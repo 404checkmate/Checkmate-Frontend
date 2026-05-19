@@ -24,6 +24,29 @@ function getText(prop) {
   return ''
 }
 
+function richTextToHtml(richTextArr) {
+  if (!richTextArr?.length) return ''
+  return richTextArr.map(block => {
+    let text = block.plain_text
+    if (!text) return ''
+    text = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    text = text.replace(/\n/g, '<br/>')
+    const a = block.annotations
+    if (a?.bold)          text = `<strong>${text}</strong>`
+    if (a?.italic)        text = `<em>${text}</em>`
+    if (a?.strikethrough) text = `<del>${text}</del>`
+    if (a?.underline)     text = `<u>${text}</u>`
+    if (a?.code)          text = `<code>${text}</code>`
+    if (a?.color && a.color !== 'default') {
+      text = `<span class="notion-${a.color}">${text}</span>`
+    }
+    return text
+  }).join('')
+}
+
 function getUrl(prop) {
   if (!prop) return ''
   if (prop.type === 'url')   return prop.url || ''
@@ -109,12 +132,12 @@ async function main() {
     const sections = sectionPages.map((sp) => {
       const s = sp.properties
       const tipIcon = getText(s.tip_icon)
-      const tipBody = getText(s.tip_body)
+      const tipBody = richTextToHtml(s.tip_body?.rich_text)
       return {
         id:          getText(s.id) || getText(s.Name),
         icon:        getText(s.icon),
         title:       getText(s.Name),
-        body:        getText(s.body),
+        body:        richTextToHtml(s.body?.rich_text),
         photo:       getUrl(s.photo),
         relatedCats: getMultiSelect(s.relatedCats),
         tip:         tipBody ? { icon: tipIcon, body: tipBody } : null,
