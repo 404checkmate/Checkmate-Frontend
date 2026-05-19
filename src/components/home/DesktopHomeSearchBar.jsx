@@ -515,6 +515,13 @@ export default function DesktopHomeSearchBar() {
     setCountryQuery('')
     setPickerPhase('country')
     setDraftCountry(null)
+    // 국가가 바뀌면 이후 섹션 데이터 초기화
+    setStartDate('')
+    setEndDate('')
+    setAdditionalDests([])
+    setAdditionalInput('')
+    setCompanionIds([])
+    setStyleIds([])
     setActiveSection('dates')
   }
 
