@@ -153,6 +153,7 @@ function CountryDropdown({
   pickerPhase, suggestions, arrivalSuggestions,
   draftCountry,
   onPickCountry, onPickArrival, onBackToCountry,
+  onConfirm,
 }) {
   const inputRef = useRef(null)
 
@@ -174,7 +175,7 @@ function CountryDropdown({
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition"
           />
           {suggestions.length > 0 && (
-            <ul className="mt-2 max-h-56 overflow-y-auto space-y-0.5">
+            <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
               {suggestions.map((c) => (
                 <li key={c.countryCode}>
                   <button
@@ -212,7 +213,7 @@ function CountryDropdown({
             placeholder="도시 또는 공항명"
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition"
           />
-          <ul className="mt-2 max-h-52 overflow-y-auto space-y-0.5">
+          <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
             {arrivalSuggestions.map((a) => (
               <li key={a.iata || a.city}>
                 <button
@@ -228,31 +229,23 @@ function CountryDropdown({
           </ul>
         </>
       )}
+      <button
+        type="button"
+        onClick={onConfirm}
+        className="mt-3 w-full rounded-xl bg-teal-600 py-2 text-sm font-bold text-white transition-colors hover:bg-teal-700"
+      >
+        확인
+      </button>
     </DropdownPanel>
   )
 }
 
 // ─── Dates dropdown ──────────────────────────────────────────────────────────
 
-function DatesDropdown({ open, startDate, endDate, today, onRangeChange, onNext }) {
-  const datesSelected = Boolean(startDate && endDate)
+function DatesDropdown({ open, startDate, endDate, today, onRangeChange, onConfirm }) {
   return (
     <DropdownPanel open={open} className="w-[620px] p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-bold text-gray-500">여행 날짜를 선택해 주세요</p>
-        {datesSelected && (
-          <button
-            type="button"
-            onClick={onNext}
-            className="flex items-center gap-1 rounded-full bg-teal-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-teal-700 hover:shadow-md"
-          >
-            다음
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        )}
-      </div>
+      <p className="mb-3 text-xs font-bold text-gray-500">여행 날짜를 선택해 주세요</p>
       <DestinationMobileRangeCalendar
         startDate={startDate}
         endDate={endDate}
@@ -261,6 +254,13 @@ function DatesDropdown({ open, startDate, endDate, today, onRangeChange, onNext 
         disabled={false}
         onChangeRange={onRangeChange}
       />
+      <button
+        type="button"
+        onClick={onConfirm}
+        className="mt-4 w-full rounded-xl bg-teal-600 py-2 text-sm font-bold text-white transition-colors hover:bg-teal-700"
+      >
+        확인
+      </button>
     </DropdownPanel>
   )
 }
@@ -320,7 +320,7 @@ function ExtraDropdown({ open, suggestions, selectedCities, onToggle, onConfirm,
 
 // ─── Companion dropdown ──────────────────────────────────────────────────────
 
-function CompanionDropdown({ open, companions, companionIds, onToggle }) {
+function CompanionDropdown({ open, companions, companionIds, onToggle, onConfirm }) {
   return (
     <DropdownPanel open={open} className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">누구와 함께하나요? (최대 2개)</p>
@@ -347,13 +347,20 @@ function CompanionDropdown({ open, companions, companionIds, onToggle }) {
           )
         })}
       </div>
+      <button
+        type="button"
+        onClick={onConfirm}
+        className="mt-3 w-full rounded-xl bg-teal-600 py-2 text-sm font-bold text-white transition-colors hover:bg-teal-700"
+      >
+        확인
+      </button>
     </DropdownPanel>
   )
 }
 
 // ─── Style dropdown ──────────────────────────────────────────────────────────
 
-function StyleDropdown({ open, travelStyles, styleIds, onToggle }) {
+function StyleDropdown({ open, travelStyles, styleIds, onToggle, onConfirm }) {
   return (
     <DropdownPanel open={open} className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">어떤 여행을 원하나요? (복수 선택)</p>
@@ -384,6 +391,13 @@ function StyleDropdown({ open, travelStyles, styleIds, onToggle }) {
           )
         })}
       </div>
+      <button
+        type="button"
+        onClick={onConfirm}
+        className="mt-3 w-full rounded-xl bg-teal-600 py-2 text-sm font-bold text-white transition-colors hover:bg-teal-700"
+      >
+        확인
+      </button>
     </DropdownPanel>
   )
 }
@@ -678,6 +692,7 @@ export default function DesktopHomeSearchBar() {
             onPickCountry={handlePickCountry}
             onPickArrival={handlePickArrival}
             onBackToCountry={handleBackToCountry}
+            onConfirm={() => setActiveSection(null)}
           />
         </div>
 
@@ -699,7 +714,7 @@ export default function DesktopHomeSearchBar() {
             endDate={endDate}
             today={today}
             onRangeChange={({ start, end }) => { setStartDate(start); setEndDate(end) }}
-            onNext={() => setActiveSection('extra')}
+            onConfirm={() => setActiveSection(null)}
           />
         </div>
 
@@ -743,6 +758,7 @@ export default function DesktopHomeSearchBar() {
             companions={companions}
             companionIds={companionIds}
             onToggle={toggleCompanion}
+            onConfirm={() => setActiveSection(null)}
           />
         </div>
 
@@ -763,6 +779,7 @@ export default function DesktopHomeSearchBar() {
             travelStyles={travelStyles}
             styleIds={styleIds}
             onToggle={toggleStyle}
+            onConfirm={() => setActiveSection(null)}
           />
         </div>
 
