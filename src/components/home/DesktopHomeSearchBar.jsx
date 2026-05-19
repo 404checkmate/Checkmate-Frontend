@@ -128,11 +128,15 @@ function FieldButton({ label, value, placeholder, active, onClick, className = '
 
 // ─── Dropdown container ──────────────────────────────────────────────────────
 
-function DropdownPanel({ children, className = '' }) {
+function DropdownPanel({ open, children, className = '' }) {
   return (
     <div
       className={[
-        'absolute top-[calc(100%+10px)] z-[300] rounded-3xl border border-gray-100 bg-white shadow-2xl shadow-gray-300/30',
+        'absolute top-[calc(100%+12px)] left-0 z-[300] rounded-3xl border border-gray-100 bg-white shadow-2xl shadow-gray-300/25',
+        'transition-[opacity,transform] duration-200 ease-out origin-top-left',
+        open
+          ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+          : 'opacity-0 translate-y-1.5 scale-[0.97] pointer-events-none',
         className,
       ].join(' ')}
     >
@@ -144,6 +148,7 @@ function DropdownPanel({ children, className = '' }) {
 // ─── Country dropdown ────────────────────────────────────────────────────────
 
 function CountryDropdown({
+  open,
   countryQuery, onCountryQueryChange,
   pickerPhase, suggestions, arrivalSuggestions,
   draftCountry,
@@ -152,11 +157,11 @@ function CountryDropdown({
   const inputRef = useRef(null)
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [pickerPhase])
+    if (open) inputRef.current?.focus()
+  }, [open, pickerPhase])
 
   return (
-    <DropdownPanel className="left-0 w-80 p-4">
+    <DropdownPanel open={open} className="w-80 p-4">
       {pickerPhase === 'country' ? (
         <>
           <p className="mb-2 text-xs font-bold text-gray-500 px-1">여행 국가를 검색하세요</p>
@@ -229,10 +234,10 @@ function CountryDropdown({
 
 // ─── Dates dropdown ──────────────────────────────────────────────────────────
 
-function DatesDropdown({ startDate, endDate, today, onRangeChange, onNext }) {
+function DatesDropdown({ open, startDate, endDate, today, onRangeChange, onNext }) {
   const datesSelected = Boolean(startDate && endDate)
   return (
-    <DropdownPanel className="left-1/2 -translate-x-1/2 w-[660px] p-5">
+    <DropdownPanel open={open} className="w-[620px] p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-bold text-gray-500">여행 날짜를 선택해 주세요</p>
         {datesSelected && (
@@ -262,9 +267,9 @@ function DatesDropdown({ startDate, endDate, today, onRangeChange, onNext }) {
 
 // ─── Extra destinations dropdown ─────────────────────────────────────────────
 
-function ExtraDropdown({ suggestions, selectedCities, onToggle, onConfirm, additionalInput, onAdditionalInputChange }) {
+function ExtraDropdown({ open, suggestions, selectedCities, onToggle, onConfirm, additionalInput, onAdditionalInputChange }) {
   return (
-    <DropdownPanel className="left-1/2 -translate-x-1/4 w-72 p-4">
+    <DropdownPanel open={open} className="w-72 p-4">
       <p className="mb-2 text-xs font-bold text-gray-500">추가 여행지 선택 (선택사항)</p>
       <input
         type="text"
@@ -315,9 +320,9 @@ function ExtraDropdown({ suggestions, selectedCities, onToggle, onConfirm, addit
 
 // ─── Companion dropdown ──────────────────────────────────────────────────────
 
-function CompanionDropdown({ companions, companionIds, onToggle }) {
+function CompanionDropdown({ open, companions, companionIds, onToggle }) {
   return (
-    <DropdownPanel className="right-[200px] w-80 p-4">
+    <DropdownPanel open={open} className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">누구와 함께하나요? (최대 2개)</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {companions.map((c) => {
@@ -348,9 +353,9 @@ function CompanionDropdown({ companions, companionIds, onToggle }) {
 
 // ─── Style dropdown ──────────────────────────────────────────────────────────
 
-function StyleDropdown({ travelStyles, styleIds, onToggle }) {
+function StyleDropdown({ open, travelStyles, styleIds, onToggle }) {
   return (
-    <DropdownPanel className="right-[60px] w-80 p-4">
+    <DropdownPanel open={open} className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">어떤 여행을 원하나요? (복수 선택)</p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         {travelStyles.map((s) => {
@@ -662,19 +667,18 @@ export default function DesktopHomeSearchBar() {
             onClick={() => toggleSection('country')}
             className="w-full pl-6 pr-4"
           />
-          {activeSection === 'country' && (
-            <CountryDropdown
-              countryQuery={countryQuery}
-              onCountryQueryChange={setCountryQuery}
-              pickerPhase={pickerPhase}
-              suggestions={suggestions}
-              arrivalSuggestions={arrivalSuggestions}
-              draftCountry={draftCountry}
-              onPickCountry={handlePickCountry}
-              onPickArrival={handlePickArrival}
-              onBackToCountry={handleBackToCountry}
-            />
-          )}
+          <CountryDropdown
+            open={activeSection === 'country'}
+            countryQuery={countryQuery}
+            onCountryQueryChange={setCountryQuery}
+            pickerPhase={pickerPhase}
+            suggestions={suggestions}
+            arrivalSuggestions={arrivalSuggestions}
+            draftCountry={draftCountry}
+            onPickCountry={handlePickCountry}
+            onPickArrival={handlePickArrival}
+            onBackToCountry={handleBackToCountry}
+          />
         </div>
 
         <PillDivider />
@@ -689,15 +693,14 @@ export default function DesktopHomeSearchBar() {
             onClick={() => toggleSection('dates')}
             className="w-full px-5"
           />
-          {activeSection === 'dates' && (
-            <DatesDropdown
-              startDate={startDate}
-              endDate={endDate}
-              today={today}
-              onRangeChange={({ start, end }) => { setStartDate(start); setEndDate(end) }}
-              onNext={() => setActiveSection('extra')}
-            />
-          )}
+          <DatesDropdown
+            open={activeSection === 'dates'}
+            startDate={startDate}
+            endDate={endDate}
+            today={today}
+            onRangeChange={({ start, end }) => { setStartDate(start); setEndDate(end) }}
+            onNext={() => setActiveSection('extra')}
+          />
         </div>
 
         <PillDivider />
@@ -712,16 +715,15 @@ export default function DesktopHomeSearchBar() {
             onClick={() => selectedCountry ? toggleSection('extra') : undefined}
             className={`w-full px-5 ${!selectedCountry ? 'opacity-50 cursor-default' : ''}`}
           />
-          {activeSection === 'extra' && (
-            <ExtraDropdown
-              suggestions={additionalArrivalSuggestions}
-              selectedCities={additionalDests}
-              onToggle={toggleExtraDest}
-              onConfirm={confirmExtraDests}
-              additionalInput={additionalInput}
-              onAdditionalInputChange={setAdditionalInput}
-            />
-          )}
+          <ExtraDropdown
+            open={activeSection === 'extra'}
+            suggestions={additionalArrivalSuggestions}
+            selectedCities={additionalDests}
+            onToggle={toggleExtraDest}
+            onConfirm={confirmExtraDests}
+            additionalInput={additionalInput}
+            onAdditionalInputChange={setAdditionalInput}
+          />
         </div>
 
         <PillDivider />
@@ -736,13 +738,12 @@ export default function DesktopHomeSearchBar() {
             onClick={() => toggleSection('companion')}
             className="w-full px-5"
           />
-          {activeSection === 'companion' && (
-            <CompanionDropdown
-              companions={companions}
-              companionIds={companionIds}
-              onToggle={toggleCompanion}
-            />
-          )}
+          <CompanionDropdown
+            open={activeSection === 'companion'}
+            companions={companions}
+            companionIds={companionIds}
+            onToggle={toggleCompanion}
+          />
         </div>
 
         <PillDivider />
@@ -757,13 +758,12 @@ export default function DesktopHomeSearchBar() {
             onClick={() => toggleSection('style')}
             className="w-full pl-5 pr-4"
           />
-          {activeSection === 'style' && (
-            <StyleDropdown
-              travelStyles={travelStyles}
-              styleIds={styleIds}
-              onToggle={toggleStyle}
-            />
-          )}
+          <StyleDropdown
+            open={activeSection === 'style'}
+            travelStyles={travelStyles}
+            styleIds={styleIds}
+            onToggle={toggleStyle}
+          />
         </div>
 
         {/* Search button */}
