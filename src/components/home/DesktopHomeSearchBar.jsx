@@ -133,12 +133,18 @@ function DropdownPanel({ open, children, className = '' }) {
     <div
       className={[
         'absolute top-[calc(100%+12px)] left-0 z-[300] rounded-3xl border border-gray-100 bg-white shadow-2xl shadow-gray-300/25',
-        'transition-[opacity,transform] duration-200 ease-out origin-top-left',
-        open
-          ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
-          : 'opacity-0 translate-y-1.5 scale-[0.97] pointer-events-none',
         className,
       ].join(' ')}
+      style={{
+        opacity: open ? 1 : 0,
+        transform: open ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.96)',
+        transformOrigin: 'top left',
+        pointerEvents: open ? 'auto' : 'none',
+        transition: open
+          ? 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 280ms cubic-bezier(0.16,1,0.3,1)'
+          : 'opacity 180ms cubic-bezier(0.4,0,1,1), transform 180ms cubic-bezier(0.4,0,1,1)',
+        willChange: 'opacity, transform',
+      }}
     >
       {children}
     </div>
