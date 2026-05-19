@@ -774,7 +774,7 @@ export default function DesktopHomeSearchBar() {
         <PillDivider />
 
         {/* 4. 동행인 선택 */}
-        <div className="relative flex-none min-w-[160px]">
+        <div className="relative flex-none min-w-[160px] max-w-[190px]">
           <FieldButton
             label="동행인 선택"
             value={companionValue}
@@ -795,7 +795,7 @@ export default function DesktopHomeSearchBar() {
         <PillDivider />
 
         {/* 5. 여행 스타일 */}
-        <div className="relative flex-none min-w-[160px]">
+        <div className="relative flex-none min-w-[160px] max-w-[190px]">
           <FieldButton
             label="여행 스타일"
             value={styleValue}
