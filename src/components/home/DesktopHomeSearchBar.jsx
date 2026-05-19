@@ -107,7 +107,7 @@ function PillDivider() {
 
 // ─── Field button ─────────────────────────────────────────────────────────────
 
-function FieldButton({ label, value, placeholder, active, onClick, className = '' }) {
+function FieldButton({ label, value, placeholder, active, onClick, className = '', optional = false }) {
   return (
     <button
       type="button"
@@ -118,7 +118,14 @@ function FieldButton({ label, value, placeholder, active, onClick, className = '
         className,
       ].join(' ')}
     >
-      <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-0.5">{label}</span>
+      <span className="flex items-center gap-1.5 mb-0.5">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">{label}</span>
+        {optional && (
+          <span className="rounded-full bg-gray-100 px-1.5 py-px text-[9px] font-bold leading-tight text-gray-400">
+            선택
+          </span>
+        )}
+      </span>
       <span className={`block text-sm font-semibold leading-tight truncate ${value ? 'text-gray-900' : 'text-gray-400'}`}>
         {value || placeholder}
       </span>
@@ -276,7 +283,17 @@ function DatesDropdown({ open, startDate, endDate, today, onRangeChange, onConfi
 function ExtraDropdown({ open, suggestions, selectedCities, onToggle, onConfirm, additionalInput, onAdditionalInputChange }) {
   return (
     <DropdownPanel open={open} className="w-72 p-4">
-      <p className="mb-2 text-xs font-bold text-gray-500">추가 여행지 선택 (선택사항)</p>
+      <div className="mb-3 flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-gray-800">추가 여행지</p>
+            <span className="rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-600">
+              선택사항
+            </span>
+          </div>
+          <p className="mt-0.5 text-[11px] text-gray-400">건너뛰어도 괜찮아요</p>
+        </div>
+      </div>
       <input
         type="text"
         value={additionalInput}
@@ -742,6 +759,7 @@ export default function DesktopHomeSearchBar() {
             active={activeSection === 'extra'}
             onClick={() => selectedCountry ? toggleSection('extra') : undefined}
             className={`w-full px-5 ${!selectedCountry ? 'opacity-50 cursor-default' : ''}`}
+            optional
           />
           <ExtraDropdown
             open={activeSection === 'extra'}
