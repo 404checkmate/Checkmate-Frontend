@@ -774,7 +774,7 @@ export default function TripNewDestinationPage() {
   return (
     <div className="min-h-screen" style={TRIP_FLOW_PAGE_BG_STYLE}>
       {/* 데스크톱: 풀블리드 이미지 없음 — 본문만 뷰포트 중앙 정렬 */}
-      <div className="hidden min-h-screen flex-col lg:flex">
+      <div className="hidden min-h-screen flex-col xl:flex">
         {/* Header.jsx 와 동일: max-w-7xl + px-3 md:px-6 lg:px-8 → 로고·이전으로 왼선 일치 */}
         <div className="shrink-0 mx-auto w-full max-w-7xl px-3 pt-8 md:px-6 md:pt-8 lg:px-8 lg:pt-10">
           <TripNewFlowDesktopPrevBar align="start" />
@@ -802,9 +802,9 @@ export default function TripNewDestinationPage() {
         </div>
       </div>
 
-      {/* Mobile + Tablet (< 1024px) */}
+      {/* Mobile + Tablet (< 1280px) */}
       <div
-        className="lg:hidden flex min-h-screen flex-col"
+        className="xl:hidden flex min-h-screen flex-col"
         style={{
           backgroundColor: '#f3fff8',
           backgroundImage: `
@@ -816,7 +816,7 @@ export default function TripNewDestinationPage() {
         }}
       >
         {/* 상단 바: 뒤로가기(< 모양) 절대 위치 + 진행률 바 완전 중앙 */}
-        <div className={`fixed left-0 right-0 z-[65] flex items-center justify-center px-5 pt-3 pb-2 lg:hidden transition-[top] duration-300 ease-out ${bottomNavVisible ? 'top-14' : 'top-0'}`}>
+        <div className={`fixed left-0 right-0 z-[65] flex items-center justify-center px-5 pt-3 pb-2 xl:hidden transition-[top] duration-300 ease-out ${bottomNavVisible ? 'top-14' : 'top-0'}`}>
           <button
             type="button"
             onClick={() => navigate(-1)}

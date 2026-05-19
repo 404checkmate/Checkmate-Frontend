@@ -32,7 +32,7 @@ function TripNewStep2Page() {
     clearActiveTripId()
   }, [])
 
-  if (window.innerWidth < 1024) {
+  if (window.innerWidth < 1280) {
     return <Navigate to="/trips/new/destination" replace />
   }
 

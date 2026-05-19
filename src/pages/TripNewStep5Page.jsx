@@ -336,7 +336,7 @@ function TripNewStep5PageContent() {
 export default function TripNewStep5Page() {
   const location = useLocation()
 
-  if (window.innerWidth < 1024) {
+  if (window.innerWidth < 1280) {
     return <Navigate to="/trips/new/destination" replace />
   }
 
