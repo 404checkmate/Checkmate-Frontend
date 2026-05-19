@@ -171,9 +171,10 @@ function TipBox({ icon, body }) {
           <span className="text-xl">{icon}</span>
           <span className="text-xs font-extrabold text-teal-600">Mate Tip!</span>
         </div>
-        <p className="font-extrabold text-[17px] md:text-[19px] leading-[1.55] text-sky-900">
-          {body}
-        </p>
+        <p
+          className="font-extrabold text-[17px] md:text-[19px] leading-[1.55] text-sky-900"
+          dangerouslySetInnerHTML={{ __html: body }}
+        />
       </div>
     </aside>
   )
@@ -353,7 +354,7 @@ function AppCard({ a, i }) {
         <div className="px-5 pb-5 pt-1">
           <p className="font-medium text-[14px] leading-relaxed text-gray-700">{a.desc}</p>
           <div className="mt-3">
-            {a.storeUrl ? (
+            {a.storeUrl && (
               <a
                 href={a.storeUrl}
                 target="_blank"
@@ -363,11 +364,6 @@ function AppCard({ a, i }) {
                 <span>설치하러 가기</span>
                 <span aria-hidden className="text-amber-500">→</span>
               </a>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-slate-300">
-                <span>설치하러 가기</span>
-                <span aria-hidden>→</span>
-              </span>
             )}
           </div>
         </div>
@@ -427,7 +423,10 @@ function Article({ data, checked, toggle }) {
       {data.sections.map((section, idx) => {
         const isAppsSection = section.id === 'apps'
         const imageLeft = idx % 2 === 0
-        const paragraphs = section.body.split('\n\n').filter(Boolean)
+        const paragraphs = (section.body.includes('<br/>')
+          ? section.body.split('<br/><br/>')
+          : section.body.split('\n\n')
+        ).filter(Boolean)
         const mainTitle = section.title.split('—')[0].trim()
         const relatedGroups = section.relatedCats
           ? data.checklist.filter((g) => section.relatedCats.includes(g.cat))
@@ -455,9 +454,8 @@ function Article({ data, checked, toggle }) {
                       'cur-reveal' +
                       (isAppsSection && pi === paragraphs.length - 1 ? ' mb-10' : '')
                     }
-                  >
-                    {p}
-                  </p>
+                    dangerouslySetInnerHTML={{ __html: p }}
+                  />
                 ))}
 
                 {isAppsSection && <AppShelf apps={data.apps} />}
