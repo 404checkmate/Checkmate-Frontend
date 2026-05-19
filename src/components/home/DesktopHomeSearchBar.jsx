@@ -759,7 +759,6 @@ export default function DesktopHomeSearchBar() {
             active={activeSection === 'extra'}
             onClick={() => selectedCountry ? toggleSection('extra') : undefined}
             className={`w-full px-5 ${!selectedCountry ? 'opacity-50 cursor-default' : ''}`}
-            optional
           />
           <ExtraDropdown
             open={activeSection === 'extra'}
