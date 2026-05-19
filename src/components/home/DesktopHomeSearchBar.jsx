@@ -795,31 +795,6 @@ export default function DesktopHomeSearchBar() {
         </p>
       )}
 
-      {/* Progress hint */}
-      <div className="mt-3 flex items-center gap-2 px-2">
-        {[
-          { key: 'country', done: Boolean(selectedCountry), label: '국가' },
-          { key: 'dates', done: Boolean(startDate && endDate), label: '날짜' },
-          { key: 'companion', done: companionIds.length > 0, label: '동행인' },
-          { key: 'style', done: styleIds.length > 0, label: '스타일' },
-        ].map(({ key, done, label }) => (
-          <span
-            key={key}
-            className={`flex items-center gap-1 text-[11px] font-semibold transition-colors ${done ? 'text-teal-600' : 'text-gray-300'}`}
-          >
-            {done ? (
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <circle cx="12" cy="12" r="9" opacity=".3" />
-              </svg>
-            )}
-            {label}
-          </span>
-        ))}
-      </div>
     </div>
   )
 }
