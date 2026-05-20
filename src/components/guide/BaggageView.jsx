@@ -19,7 +19,7 @@ export default function BaggageView({ sections, firstHintBagKey, total, effectiv
               key={`${bagKey}-${categoryValue}`}
               className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition md:p-5"
             >
-              <div className="mb-3 border-b border-teal-100/90 pb-2">
+              <div className="mb-3">
                 <h3 className="flex min-w-0 items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
                   {categoryLabel}
                 </h3>
