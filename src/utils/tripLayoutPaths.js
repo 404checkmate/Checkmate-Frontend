@@ -10,7 +10,7 @@ export function normalizePathname(pathname) {
  * 예전에는 TripFlowMobileBar와 겹쳐 숨겼으나, 모바일도 전역 Header(햄버거)로 통일함.
  */
 /** 모바일 전용 하단 탭 네비를 숨길 경로 (데스크톱은 원래 `md:hidden`으로 안 보임) */
-const MOBILE_BOTTOM_NAV_HIDDEN_PATHS = new Set(['/auth/consent', '/onboarding'])
+const MOBILE_BOTTOM_NAV_HIDDEN_PATHS = new Set(['/auth/consent', '/onboarding', '/404'])
 
 export function shouldHideMobileBottomNav(pathname) {
   return MOBILE_BOTTOM_NAV_HIDDEN_PATHS.has(normalizePathname(pathname))
