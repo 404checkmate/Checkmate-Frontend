@@ -31,9 +31,9 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
     item?.prepType === 'ai_recommend'
 
   const cardToneClass = on
-    ? 'border-amber-400 bg-amber-200/95 shadow-sm ring-1 ring-amber-300/70'
+    ? 'border-amber-400 bg-amber-200 shadow-sm ring-1 ring-amber-300/70'
     : isAiOrigin
-      ? 'border-violet-200/90 bg-gradient-to-b from-violet-50/95 to-violet-50/75 shadow-sm shadow-violet-900/5 ring-1 ring-violet-100/85'
+      ? 'border-violet-200 bg-violet-50 shadow-sm shadow-violet-900/5 ring-1 ring-violet-100'
       : 'border-gray-100 bg-white shadow-sm'
 
   return (
@@ -246,9 +246,9 @@ export default function GuideArchiveSortableChecklistItem({
     : 'md:border md:border-slate-100 md:bg-slate-50/80 md:rounded-lg md:text-slate-400'
 
   const cardToneClass = on
-    ? 'border-amber-400 bg-amber-200/95 shadow-sm ring-1 ring-amber-300/70'
+    ? 'border-amber-400 bg-amber-200 shadow-sm ring-1 ring-amber-300/70'
     : isAiOrigin
-      ? 'border-violet-200/90 bg-gradient-to-b from-violet-50/95 to-violet-50/75 shadow-sm shadow-violet-900/5 ring-1 ring-violet-100/85'
+      ? 'border-violet-200 bg-violet-50 shadow-sm shadow-violet-900/5 ring-1 ring-violet-100'
       : 'border-gray-100 bg-white shadow-sm'
 
   const actionRailBorder = isAiOrigin && !on ? 'border-violet-200/55' : 'border-slate-100/90'
