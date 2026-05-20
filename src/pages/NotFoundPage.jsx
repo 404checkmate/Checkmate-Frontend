@@ -27,7 +27,7 @@ function NotFoundPage() {
 
       {/* 모바일 */}
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5 py-10 md:hidden">
-        <div className="mb-5 flex w-full max-w-[240px] items-center justify-center">
+        <div className="mb-5 flex self-start max-w-[240px] items-center justify-start">
           <NotFoundMascotImage className="max-h-[200px] w-full object-contain" />
         </div>
         <h1 className="mb-2 text-center text-2xl font-extrabold leading-snug text-gray-900">
