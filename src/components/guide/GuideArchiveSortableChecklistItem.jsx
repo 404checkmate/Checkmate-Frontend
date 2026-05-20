@@ -59,7 +59,7 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
           ) : null}
           <span className="flex items-start justify-between gap-2">
             <span
-              className={`block text-sm font-extrabold ${
+              className={`block text-sm font-semibold ${
                 showCheckedStyle
                   ? 'text-gray-900 line-through decoration-amber-700/45'
                   : 'text-gray-900'
@@ -342,7 +342,7 @@ export default function GuideArchiveSortableChecklistItem({
                 <span className="mb-1 block sm:hidden"><AiRecommendedBadge /></span>
               ) : null}
               <span className="flex items-start justify-between gap-2">
-                <span className={`block text-sm font-extrabold ${showCheckedStyle ? 'text-gray-900 line-through decoration-amber-700/45' : 'text-gray-900'}`}>
+                <span className={`block text-sm font-semibold ${showCheckedStyle ? 'text-gray-900 line-through decoration-amber-700/45' : 'text-gray-900'}`}>
                   {item.title}
                 </span>
                 {isAiOrigin ? <span className="hidden sm:inline-flex"><AiRecommendedBadge /></span> : null}

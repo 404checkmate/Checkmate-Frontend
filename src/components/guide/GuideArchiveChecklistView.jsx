@@ -415,7 +415,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
           onBaggageSectionChange={setBaggageSection}
         />
 
-        <div className="mb-4 flex w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3">
+        <div className="mb-4 hidden w-full max-w-full flex-wrap items-center gap-x-3 gap-y-3 md:flex">
           <p className="min-w-0 flex-1 text-sm font-semibold text-gray-700 md:text-base">
             {viewBasis === VIEW_BASIS_SUPPLIES ? (
               <>
