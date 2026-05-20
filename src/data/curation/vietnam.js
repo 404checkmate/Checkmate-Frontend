@@ -113,10 +113,10 @@ const vietnam = {
     },
     {
       "name": "트래블월렛",
-      "iconUrl": "https://www.google.com/s2/favicons?domain=travelwallet.kr&sz=128",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=travel-wallet.com&sz=128",
       "emoji": "💳",
       "desc": "환전 및 해외 결제를 편리하게 이용할 수 있으며, 실물 카드를 함께 사용할 수 있는 해외여행 필수앱입니다.",
-      "storeUrl": "https://www.travelwallet.kr"
+      "storeUrl": "https://www.travel-wallet.com/ko"
     }
   ],
   "checklist": [
