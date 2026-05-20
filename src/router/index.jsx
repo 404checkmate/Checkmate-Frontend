@@ -87,10 +87,9 @@ const AppRoutes = () => {
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
         { path: '/trips/:id/guide-archive/:entryId',  element: <ProtectedRoute>{withSuspense(<TripGuideArchiveDetailPage />)}</ProtectedRoute> },
-        { path: '/trips/:id/guide-archive',           element: <ProtectedRoute>{withSuspense(<TripGuideArchivePage />)}</ProtectedRoute> },
+        { path: '/trips/:id/guide-archive',           element: <Navigate to="/guide-archives" replace /> },
         { path: '/guide/:country',          element: withSuspense(<CurationArticlePage />) },
         { path: '/404',                 element: withSuspense(<NotFoundPage />) },
-{ path: '/404',                 element: withSuspense(<NotFoundPage />) },
       ],
     },
 
