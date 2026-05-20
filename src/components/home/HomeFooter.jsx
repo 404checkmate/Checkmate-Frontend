@@ -99,16 +99,9 @@ export default function HomeFooter({ showNoticePreparingToast }) {
               {HOME_BRAND_TAGLINE}
             </p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-gray-500 md:mt-4 md:text-xs">
-              {/* 모바일·태블릿: 모바일 홈(/) / 웹: 서비스 소개(/about) */}
               <Link
                 to="/"
-                className="text-gray-500 transition-colors hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1 lg:hidden"
-              >
-                홈
-              </Link>
-              <Link
-                to="/about"
-                className="hidden text-gray-500 transition-colors hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1 lg:inline"
+                className="text-gray-500 transition-colors hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1"
               >
                 홈
               </Link>
