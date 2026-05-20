@@ -23,7 +23,7 @@ export default function SectionHeaderWithHint({ title, showHint }) {
               <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
               </svg>
-              왼쪽으로 밀면 수정·삭제
+              왼쪽으로 슬라이드하여 직접 수정·삭제해보세요!
             </span>
           </div>
           {/* 데스크톱: 단일 텍스트 힌트 */}
