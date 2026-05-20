@@ -208,12 +208,14 @@ function TripSearchInner({ tripId }) {
             />
           ) : (
             <>
-              <SelectionProgressCard
-                mergeToArchive={mergeToArchive}
-                selectedCount={selectedForSave.size}
-                totalCount={totalItemCount}
-                progressPercent={selectionProgressPercent}
-              />
+              {!mergeToArchive && (
+                <SelectionProgressCard
+                  mergeToArchive={mergeToArchive}
+                  selectedCount={selectedForSave.size}
+                  totalCount={totalItemCount}
+                  progressPercent={selectionProgressPercent}
+                />
+              )}
 
               <section className="lg:hidden" aria-label="준비물 목록">
                 <MobileAccordionChecklist
