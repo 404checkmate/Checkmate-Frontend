@@ -181,7 +181,7 @@ function TripSearchInner({ tripId }) {
   // ── 렌더 ──────────────────────────────────────────────
   return (
     <div className="min-h-screen" style={pageBackgroundStyle}>
-      <TripSearchBackNav mergeToArchive={mergeToArchive} tripId={tripId} />
+      <TripSearchBackNav archiveEntryId={archiveEntryId} />
 
       <div className="mx-auto w-full max-w-7xl px-3 pb-36 pt-5 md:px-6 md:pb-28 md:pt-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
