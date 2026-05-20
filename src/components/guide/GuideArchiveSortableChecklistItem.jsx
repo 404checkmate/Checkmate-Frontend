@@ -138,8 +138,8 @@ const DeleteIcon = () => (
 
 /**
  * 보관함 체크리스트 행
- * - 모바일: 좌로 스와이프하면 수정/삭제 버튼 노출 (카카오톡 스타일)
- * - 데스크톱(md+): 기존처럼 오른쪽에 버튼 항상 표시
+ * - 모바일: 드래그 핸들은 카드 왼쪽 인라인, 좌로 스와이프하면 수정/삭제 버튼 노출 (카카오톡 스타일)
+ * - 데스크톱(md+): 드래그 핸들은 카드 바깥 왼쪽(-left-10) 절대 배치, 수정/삭제 버튼은 카드 오른쪽에 항상 표시
  */
 export default function GuideArchiveSortableChecklistItem({
   item,
@@ -285,7 +285,7 @@ export default function GuideArchiveSortableChecklistItem({
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
           onClickCapture={onClickCapture}
-          className={`flex min-w-0 w-full items-center gap-1 rounded-xl border py-1.5 pl-2.5 pr-2.5 transition-[border-color,background-color,box-shadow] duration-200 ease-out md:rounded-2xl md:border-2 md:py-2 md:pl-3 md:pr-2 ${cardToneClass}`}
+          className={`relative flex min-w-0 w-full items-center gap-1 rounded-xl border py-1.5 pl-2.5 pr-2.5 transition-[border-color,background-color,box-shadow] duration-200 ease-out md:rounded-2xl md:border-2 md:py-2 md:pl-3 md:pr-2 ${cardToneClass}`}
         >
           {/* 드래그 핸들 */}
           <button
