@@ -21,6 +21,7 @@ const MyPage = lazy(() => import('@/pages/MyPage'))
 const ErrorPage = lazy(() => import('@/pages/ErrorPage'))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
+const CurationArticlePage = lazy(() => import('@/pages/CurationArticlePage'))
 import { FEATURE_PROFILE_ONBOARDING_ENABLED } from '@/utils/onboardingGate'
 
 function RouteFallback() {
@@ -86,6 +87,9 @@ const AppRoutes = () => {
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
         { path: '/trips/:id/guide-archive/:entryId',  element: <ProtectedRoute>{withSuspense(<TripGuideArchiveDetailPage />)}</ProtectedRoute> },
+        { path: '/trips/:id/guide-archive',           element: <ProtectedRoute>{withSuspense(<TripGuideArchivePage />)}</ProtectedRoute> },
+        { path: '/guide/:country',          element: withSuspense(<CurationArticlePage />) },
+        { path: '/404',                 element: withSuspense(<NotFoundPage />) },
 { path: '/404',                 element: withSuspense(<NotFoundPage />) },
       ],
     },
