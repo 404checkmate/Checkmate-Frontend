@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 
-/** Tailwind `md` 미만과 동일 (768px 미만만 모바일 크롬) */
-const MOBILE_MAX_PX = 767
+/** Tailwind `lg` 미만 (1024px 미만, iPad Pro 이하에서 스크롤 크롬 적용) */
+const MOBILE_MAX_PX = 1023
 
 /** 이 높이 이하면 항상 상단·하단 크롬 표시 */
 const TOP_ALWAYS_SHOW_PX = 32

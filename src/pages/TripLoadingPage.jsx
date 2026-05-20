@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { generateChecklist, getGenerateStatus } from '@/api/checklists'
+import { generateChecklist } from '@/api/checklists'
 import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
@@ -98,35 +98,29 @@ function TripLoadingPage() {
       })
     }, 50)
 
-    generateChecklist(id).catch((err) => {
-      console.error('[TripLoadingPage] generate 킥오프 실패:', err)
-      setGenerateError(true)
-    })
-
-    const pollStatus = async () => {
-      const MAX_WAIT = 30000
-      const INTERVAL = 2000
-      const startTime = Date.now()
-
-      while (Date.now() - startTime < MAX_WAIT) {
-        try {
-          const res = await getGenerateStatus(id)
-          if (res.status === 'completed') {
-            generateDone = true
-            tryNavigate()
-            return
-          }
-        } catch {
-          // polling 에러 무시 — 타임아웃까지 계속 시도
+    const runGenerate = async () => {
+      try {
+        // status 폴링보다 generate 직접 await가 더 안정적:
+        // getGenerateStatus가 404를 반환하면 폴링이 30초간 낭비됨.
+        const result = await generateChecklist(id)
+        if (result?.items?.length > 0) {
+          generateDone = true
+          tryNavigate()
+          return
         }
-        await new Promise(r => setTimeout(r, INTERVAL))
+        // items 없이 응답이 왔어도 이동은 시켜 줌 (TripSearchPage에서 context 재시도)
+        generateDone = true
+        tryNavigate()
+      } catch (err) {
+        console.error('[TripLoadingPage] generate 실패:', err)
+        setGenerateError(true)
+        // 실패해도 이동 — TripSearchPage에서 context 기반으로 재시도
+        generateDone = true
+        tryNavigate()
       }
-      // 30초 초과 시 TripSearchPage에서 재시도 가능하도록 그냥 이동
-      generateDone = true
-      tryNavigate()
     }
 
-    pollStatus()
+    runGenerate()
 
     return () => clearInterval(interval)
   }, [id, isGuest, navigate, location.state])

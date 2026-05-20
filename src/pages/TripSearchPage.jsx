@@ -127,19 +127,22 @@ function TripSearchInner({ tripId }) {
   const visibleItemCount = selectedCategory === 'all' ? sourceItems.length : singleCategoryItems.length
 
   // ── 헤더 파생값 ───────────────────────────────────────
-  const pageMainTitle = mergeToArchive
+  // archiveEntryId: URL에서 즉시 확인 가능 → 로딩 전부터 올바른 UI 표시
+  // mergeToArchive: archiveEntry 로드 완료 후 true → 데이터 의존 항목에만 사용
+  const isArchiveMode = Boolean(archiveEntryId)
+  const pageMainTitle = isArchiveMode
     ? '여행 필수품 추가'
     : tripDestinationLabel
       ? `${tripDestinationLabel} 여행 체크리스트`
       : TRIP_SEARCH_CONTEXT.title
-  const categoryCardHeading = mergeToArchive ? '카테고리별 추가 선택' : '카테고리별 선택'
+  const categoryCardHeading = isArchiveMode ? '카테고리별 추가 선택' : '카테고리별 선택'
   const headerDateLine =
     mergeToArchive && archiveEntry ? buildGuideArchiveDateLine(archiveEntry) : tripDateLabel || ''
   const headerDescription =
     mergeToArchive && archiveEntry
       ? `「${buildGuideArchiveListTitle(archiveEntry)}」에 담을 준비물을 고르세요.`
       : '맞춤 준비 항목을 확인하고 나의 체크리스트에 담아보세요!'
-  const pageBackgroundStyle = mergeToArchive
+  const pageBackgroundStyle = isArchiveMode
     ? TRIP_SEARCH_MERGE_PAGE_BACKGROUND_STYLE
     : TRIP_MINT_PAGE_BACKGROUND_STYLE
 
@@ -208,7 +211,7 @@ function TripSearchInner({ tripId }) {
             />
           ) : (
             <>
-              {!mergeToArchive && (
+              {!isArchiveMode && (
                 <SelectionProgressCard
                   mergeToArchive={mergeToArchive}
                   selectedCount={selectedForSave.size}

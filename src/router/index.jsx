@@ -11,14 +11,9 @@ const AuthCallbackPage = lazy(() => import('@/pages/AuthCallbackPage'))
 const OnboardingProfilePage = lazy(() => import('@/pages/OnboardingProfilePage'))
 /* 회원가입 UI 보관: 복구 시 아래 라우트를 SignupPage로 되돌리고 import 활성화 */
 // import SignupPage from '@/pages/SignupPage'
-const TripNewStep2Page = lazy(() => import('@/pages/TripNewStep2Page'))
 const TripNewDestinationPage = lazy(() => import('@/pages/TripNewDestinationPage'))
-const TripNewStep3Page = lazy(() => import('@/pages/TripNewStep3Page'))
-const TripNewStep4Page = lazy(() => import('@/pages/TripNewStep4Page'))
-const TripNewStep5Page = lazy(() => import('@/pages/TripNewStep5Page'))
 const TripLoadingPage = lazy(() => import('@/pages/TripLoadingPage'))
 const TripSearchPage = lazy(() => import('@/pages/TripSearchPage'))
-const TripGuideArchivePage = lazy(() => import('@/pages/TripGuideArchivePage'))
 const TripGuideArchiveDetailPage = lazy(() => import('@/pages/TripGuideArchiveDetailPage'))
 const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
@@ -80,26 +75,18 @@ const AppRoutes = () => {
         },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <ProtectedRoute>{withSuspense(<MyPage />)}</ProtectedRoute> },
-        { path: '/trips/new',           element: <Navigate to="/trips/new/destination" replace /> },
-        // [비로그인 허용] 여행 생성 Wizard
-        // 게스트 사용자도 여행 정보 입력 가능
-        // step5에서 저장 시도 시 loginGate 팝업으로 로그인 유도
-        // pendingTripSubmit으로 상태 보존 후 로그인 완료 시 자동 제출
-        /** 보관: 예전 예매 분기 UI — 직접 URL로만 진입. 활성 플로우는 destination부터 */
-        { path: '/trips/new/step2',     element: withSuspense(<TripNewStep2Page />) },
+        { path: '/trips/new',             element: <Navigate to="/trips/new/destination" replace /> },
         { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },
-        /** 보관: 항공편 입력 UI — 직접 URL로만 진입 */
-        { path: '/trips/new/step3',     element: withSuspense(<TripNewStep3Page />) },
-        /** Step4: 이 경로는 TripNewStep4Page 단 하나만 사용 (중복 라우트 없음) */
-        { path: '/trips/new/step4',     element: withSuspense(<TripNewStep4Page />) },
-        { path: '/trips/new/step5',     element: withSuspense(<TripNewStep5Page />) },
+        { path: '/trips/new/step2',       element: <Navigate to="/" replace /> },
+        { path: '/trips/new/step3',       element: <Navigate to="/" replace /> },
+        { path: '/trips/new/step4',       element: <Navigate to="/" replace /> },
+        { path: '/trips/new/step5',       element: <Navigate to="/" replace /> },
         { path: '/trips/guest/loading',               element: withSuspense(<TripLoadingPage />) },
         { path: '/trips/guest/search',                element: withSuspense(<TripSearchPage />) },
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
         { path: '/trips/:id/guide-archive/:entryId',  element: <ProtectedRoute>{withSuspense(<TripGuideArchiveDetailPage />)}</ProtectedRoute> },
-        { path: '/trips/:id/guide-archive',           element: <ProtectedRoute>{withSuspense(<TripGuideArchivePage />)}</ProtectedRoute> },
-        { path: '/404',                 element: withSuspense(<NotFoundPage />) },
+{ path: '/404',                 element: withSuspense(<NotFoundPage />) },
       ],
     },
 
