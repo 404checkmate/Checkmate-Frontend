@@ -227,12 +227,14 @@ function TripSearchInner({ tripId }) {
               </section>
 
               <div className="hidden lg:block">
-                <TripSearchCategoryFilter
-                  categoryCardHeading={categoryCardHeading}
-                  tabCategories={tabCategories}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={handleCategoryChange}
-                />
+                {!mergeToArchive && (
+                  <TripSearchCategoryFilter
+                    categoryCardHeading={categoryCardHeading}
+                    tabCategories={tabCategories}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={handleCategoryChange}
+                  />
+                )}
                 <DesktopCategoryControls
                   selectedCategory={selectedCategory}
                   tabCategories={tabCategories}

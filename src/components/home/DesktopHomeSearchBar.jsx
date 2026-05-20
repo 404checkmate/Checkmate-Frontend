@@ -168,7 +168,7 @@ function CountryDropdown({
   draftCountry,
   onPickCountry, onPickArrival, onBackToCountry,
   onConfirm,
-  popularCityDests, onPickPopularCity,
+  popularCountries,
 }) {
   const inputRef = useRef(null)
 
@@ -189,18 +189,18 @@ function CountryDropdown({
             placeholder="예: 일본, 태국, 미국…"
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition"
           />
-          {!countryQuery.trim() && popularCityDests?.length > 0 && (
+          {!countryQuery.trim() && popularCountries?.length > 0 && (
             <div className="mt-3">
               <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">인기 여행지</p>
               <div className="flex flex-wrap gap-1.5">
-                {popularCityDests.map((dest) => (
+                {popularCountries.map((c) => (
                   <button
-                    key={dest.label}
+                    key={c.countryCode}
                     type="button"
-                    onClick={() => onPickPopularCity(dest)}
+                    onClick={() => onPickCountry(c)}
                     className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 transition hover:bg-teal-100 hover:border-teal-300"
                   >
-                    {dest.label}
+                    {c.name}
                   </button>
                 ))}
               </div>
@@ -444,18 +444,7 @@ function StyleDropdown({ open, travelStyles, styleIds, onToggle, onConfirm }) {
   )
 }
 
-const POPULAR_CITY_DESTINATIONS = [
-  { label: '도쿄', countryCode: 'JP', iata: 'NRT' },
-  { label: '오사카', countryCode: 'JP', iata: 'KIX' },
-  { label: '방콕', countryCode: 'TH', iata: 'BKK' },
-  { label: '다낭', countryCode: 'VN', iata: 'DAD' },
-  { label: '호치민', countryCode: 'VN', iata: 'SGN' },
-  { label: '마닐라', countryCode: 'PH', iata: 'MNL' },
-  { label: '싱가포르', countryCode: 'SG', iata: 'SIN' },
-  { label: '홍콩', countryCode: 'HK', iata: 'HKG' },
-  { label: '타이베이', countryCode: 'TW', iata: 'TPE' },
-  { label: '발리', countryCode: 'ID', iata: 'DPS' },
-]
+const POPULAR_COUNTRY_NAMES = ['일본', '태국', '베트남', '미국', '필리핀', '싱가포르', '홍콩', '대만', '인도네시아']
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
@@ -541,8 +530,8 @@ export default function DesktopHomeSearchBar() {
     }
   }, [selectedCountry])
 
-  const popularCityDests = useMemo(
-    () => POPULAR_CITY_DESTINATIONS.filter(({ countryCode }) => countryOptions.some((c) => c.countryCode === countryCode)),
+  const popularCountries = useMemo(
+    () => POPULAR_COUNTRY_NAMES.map((name) => countryOptions.find((c) => c.name === name)).filter(Boolean),
     [countryOptions],
   )
 
@@ -609,13 +598,6 @@ export default function DesktopHomeSearchBar() {
     setPickerPhase('country')
     setDraftCountry(null)
     setCountryQuery('')
-  }
-
-  const handlePickPopularCity = ({ label, countryCode, iata }) => {
-    const country = countryOptions.find((c) => c.countryCode === countryCode)
-    if (!country) return
-    const merged = { ...countryRowWithoutArrivals(country), city: label, iata }
-    confirmCountry(merged)
   }
 
   const toggleSection = (name) => {
@@ -767,8 +749,7 @@ export default function DesktopHomeSearchBar() {
             onPickArrival={handlePickArrival}
             onBackToCountry={handleBackToCountry}
             onConfirm={() => setActiveSection(null)}
-            popularCityDests={popularCityDests}
-            onPickPopularCity={handlePickPopularCity}
+            popularCountries={popularCountries}
           />
         </div>
 
