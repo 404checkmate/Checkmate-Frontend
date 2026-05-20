@@ -95,7 +95,7 @@ export default function HomeFooter({ showNoticePreparingToast }) {
           {/* 브랜드 */}
           <div className="max-w-xs">
             <BrandLogo className="h-5 w-auto md:h-7" />
-            <p className="mt-2 text-[10px] leading-relaxed text-gray-600 md:mt-3 md:text-xs">
+            <p className="mt-2 text-[10px] leading-relaxed text-gray-600 md:mt-3 md:text-xs lg:whitespace-nowrap">
               {HOME_BRAND_TAGLINE}
             </p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-gray-500 md:mt-4 md:text-xs">
