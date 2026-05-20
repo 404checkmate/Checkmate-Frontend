@@ -233,6 +233,15 @@ function Header() {
                 <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
                 {isWebLoggedIn ? (
                   <>
+                    <Link
+                      to="/guide-archives"
+                      role="menuitem"
+                      className="block w-full px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-teal-50/80"
+                      onClick={closeMobileMenu}
+                    >
+                      나의 체크리스트
+                    </Link>
+                    <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
                     <button
                       type="button"
                       role="menuitem"
