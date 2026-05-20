@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { isInExistingArchive } from '@/hooks/useArchiveEntry'
 
 export function useChecklistSelection({
   sourceItems,
@@ -21,7 +22,7 @@ export function useChecklistSelection({
 
   const selectableItemsInView = useMemo(() => {
     const list = selectedCategory === 'all' ? sourceItems : singleCategoryItems
-    return list.filter((i) => !existingArchiveItemIds.has(String(i.id)))
+    return list.filter((i) => !isInExistingArchive(i, existingArchiveItemIds))
   }, [selectedCategory, singleCategoryItems, sourceItems, existingArchiveItemIds])
 
   const allSelectableInViewSelected = useMemo(() => {
@@ -36,7 +37,7 @@ export function useChecklistSelection({
 
   const toggleItemSelect = (item) => {
     const id = String(item.id)
-    if (existingArchiveItemIds.has(id)) return
+    if (isInExistingArchive(item, existingArchiveItemIds)) return
     setSelectedForSave((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
@@ -81,7 +82,7 @@ export function useChecklistSelection({
   }
 
   const handleToggleSelectAllInGroup = (group) => {
-    const selectable = group.items.filter((i) => !existingArchiveItemIds.has(String(i.id)))
+    const selectable = group.items.filter((i) => !isInExistingArchive(i, existingArchiveItemIds))
     if (selectable.length === 0) return
     const allOn = selectable.every((i) => selectedForSave.has(String(i.id)))
     setSelectedForSave((prev) => {

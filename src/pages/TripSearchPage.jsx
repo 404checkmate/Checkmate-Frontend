@@ -27,7 +27,6 @@ import TripSearchLeaveModal from '@/components/search/TripSearchLeaveModal'
 import LoginGateModal from '@/components/search/LoginGateModal'
 import TripSearchActionBar from '@/components/search/TripSearchActionBar'
 import TripSearchBackNav from '@/components/search/TripSearchBackNav'
-import SelectionProgressCard from '@/components/search/SelectionProgressCard'
 import ChecklistSkeleton from '@/components/search/ChecklistSkeleton'
 import TripSearchFallbackState from '@/components/search/TripSearchFallbackState'
 import DesktopCategoryControls from '@/components/search/DesktopCategoryControls'
@@ -50,7 +49,7 @@ function TripSearchInner({ tripId }) {
   const { loadState, setLoadState, apiItems, apiSummary } = useChecklistLoad(tripId, retryTick)
 
   // ── UI 상태 ────────────────────────────────────────────
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState('supplies')
   const [leaveModalOpen, setLeaveModalOpen] = useState(false)
 
   // ── 파생 데이터 ────────────────────────────────────────
@@ -85,7 +84,6 @@ function TripSearchInner({ tripId }) {
     handleToggleSelectAllInGroup,
     selectableItemsInView,
     allSelectableInViewSelected,
-    selectionProgressPercent,
   } = useChecklistSelection({
     sourceItems,
     existingArchiveItemIds,
@@ -164,12 +162,21 @@ function TripSearchInner({ tripId }) {
   // ── guest → 실제 trip 업그레이드 ──────────────────────
   useGuestTripUpgrade({ tripId, setLoadState })
 
+  // ── 모바일 체크리스트 스크롤 ref ───────────────────────
+  const mobileChecklistRef = useRef(null)
+
   // ── 이벤트 핸들러 ──────────────────────────────────────
   const handleCategoryChange = (category) => {
     if (selectedCategory !== 'all' && category !== selectedCategory) {
       trackEvent('research_trigger', { trip_id: tripId, from_category: selectedCategory, to_category: category })
     }
     setSelectedCategory(category)
+    // 모바일/태블릿에서만 체크리스트 섹션 최상단으로 스크롤
+    if (window.innerWidth < 1024) {
+      setTimeout(() => {
+        mobileChecklistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 0)
+    }
   }
 
   const handleLeaveWithoutSave = () => {
@@ -211,19 +218,52 @@ function TripSearchInner({ tripId }) {
             />
           ) : (
             <>
-              {!isArchiveMode && (
-                <SelectionProgressCard
-                  mergeToArchive={mergeToArchive}
-                  selectedCount={selectedForSave.size}
-                  totalCount={totalItemCount}
-                  progressPercent={selectionProgressPercent}
-                />
+              {/* 모바일/태블릿 카테고리 탭 바
+                  - 처음엔 페이지 헤더 태그 바로 아래 콘텐츠 흐름에 위치
+                  - 스크롤 시 화면 상단(헤더 바로 아래)에 고정됨 (sticky)
+                  - -mx-3/-mx-6 로 부모 패딩 상쇄 → 화면 너비 꽉 채움 */}
+              {tabCategories.length > 0 && (
+                <div
+                  className={[
+                    'lg:hidden sticky z-[50]',
+                    '-mx-3 md:-mx-6',
+                    'transition-[top] duration-300 ease-out motion-reduce:transition-none',
+                    'mb-5',
+                    navBarVisible ? 'top-14' : 'top-0',
+                  ].join(' ')}
+                  role="tablist"
+                  aria-label="카테고리 필터"
+                >
+                  <div className="flex gap-2 overflow-x-auto px-3 py-2.5 scrollbar-hide md:px-6">
+                    {tabCategories.map((cat) => {
+                      const selected = selectedCategory === cat.value
+                      return (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          role="tab"
+                          aria-selected={selected}
+                          onClick={() => handleCategoryChange(cat.value)}
+                          className={[
+                            'inline-flex shrink-0 items-center rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors',
+                            selected
+                              ? 'bg-teal-600 text-white shadow-sm'
+                              : 'border border-gray-200 bg-white text-gray-600 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700',
+                          ].join(' ')}
+                        >
+                          {cat.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               )}
 
-              <section className="lg:hidden" aria-label="준비물 목록">
+              <section ref={mobileChecklistRef} className="lg:hidden scroll-mt-28" aria-label="준비물 목록">
                 <MobileAccordionChecklist
                   loadState={loadState}
                   groupedItemsByCategory={groupedItemsByCategory}
+                  selectedCategory={selectedCategory}
                   selectedForSave={selectedForSave}
                   existingArchiveItemIds={existingArchiveItemIds}
                   onToggleSelectAllInGroup={handleToggleSelectAllInGroup}

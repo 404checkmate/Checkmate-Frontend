@@ -6,6 +6,7 @@ import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guid
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { saveItemsForTrip, loadSavedItems } from '@/utils/savedTripItems'
 import { mapMockItemToArchiveItem, buildArchiveSnapshot } from '@/utils/tripSearchUtils'
+import { isInExistingArchive } from '@/hooks/useArchiveEntry'
 import { savePendingGuestSearch } from '@/utils/pendingGuestSearch'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -57,15 +58,22 @@ export function useTripSearchSave({
 
   const executeMergeSave = async (itemsToSave) => {
     const existing = archiveEntry.items ?? []
-    const existingIds = new Set(existing.map((i) => String(i.id)))
-    const additions = itemsToSave.filter((i) => !existingIds.has(String(i.id))).map(mapMockItemToArchiveItem)
+    const existingSet = (() => {
+      const s = new Set()
+      existing.forEach((i) => {
+        if (i.id) s.add(String(i.id))
+        if (i.title) s.add(`${i.subCategory ?? ''}::${String(i.title ?? '').trim()}`)
+      })
+      return s
+    })()
+    const additions = itemsToSave.filter((i) => !isInExistingArchive(i, existingSet)).map(mapMockItemToArchiveItem)
     if (additions.length === 0) {
       setSaving(false)
       setSaveConfirmModalOpen(false)
       return
     }
 
-    markItemsSelectedOnServer(itemsToSave.filter((i) => !existingIds.has(String(i.id))))
+    markItemsSelectedOnServer(itemsToSave.filter((i) => !isInExistingArchive(i, existingSet)))
 
     const baseSnap = Object.fromEntries(
       Object.entries(archiveEntry).filter(([k]) => !['id', 'serverId', 'archivedAt', 'updatedAt'].includes(k))

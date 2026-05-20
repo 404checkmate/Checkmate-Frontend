@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SearchResultItem from './SearchResultItem'
 import { buildSuppliesSubsections } from '@/utils/tripSearchUtils'
+import { isInExistingArchive } from '@/hooks/useArchiveEntry'
 
 function ChevronIcon({ open, small = false }) {
   return (
@@ -50,7 +51,7 @@ function SubsectionAccordion({ section, selectedForSave, existingArchiveItemIds,
                 item={item}
                 aiRecommended={Boolean(item.isAiRecommended)}
                 selected={selectedForSave.has(String(item.id))}
-                inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+                inArchiveAlready={isInExistingArchive(item, existingArchiveItemIds)}
                 onToggle={() => onToggleItem(item)}
               />
             ))}
@@ -71,7 +72,7 @@ function AccordionSection({
 }) {
   const [open, setOpen] = useState(defaultOpen)
 
-  const selectableInGroup = group.items.filter((i) => !existingArchiveItemIds.has(String(i.id)))
+  const selectableInGroup = group.items.filter((i) => !isInExistingArchive(i, existingArchiveItemIds))
   const allInGroupSelected =
     selectableInGroup.length > 0 &&
     selectableInGroup.every((i) => selectedForSave.has(String(i.id)))
@@ -127,7 +128,7 @@ function AccordionSection({
                     selectedForSave={selectedForSave}
                     existingArchiveItemIds={existingArchiveItemIds}
                     onToggleItem={onToggleItem}
-                    defaultOpen={false}
+                    defaultOpen={section.key === 'essentials'}
                   />
                 ))}
               </div>
@@ -139,7 +140,7 @@ function AccordionSection({
                     item={item}
                     aiRecommended={Boolean(item.isAiRecommended)}
                     selected={selectedForSave.has(String(item.id))}
-                    inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+                    inArchiveAlready={isInExistingArchive(item, existingArchiveItemIds)}
                     onToggle={() => onToggleItem(item)}
                   />
                 ))}
@@ -155,11 +156,17 @@ function AccordionSection({
 export default function MobileAccordionChecklist({
   loadState,
   groupedItemsByCategory,
+  selectedCategory = 'all',
   selectedForSave,
   existingArchiveItemIds,
   onToggleSelectAllInGroup,
   onToggleItem,
 }) {
+  const isSingleCategory = selectedCategory !== 'all'
+  const visibleGroups = isSingleCategory
+    ? groupedItemsByCategory.filter((g) => g.categoryValue === selectedCategory)
+    : groupedItemsByCategory
+
   if (loadState.status === 'loading') {
     return (
       <div className="flex flex-col gap-3">
@@ -174,7 +181,7 @@ export default function MobileAccordionChecklist({
     )
   }
 
-  if (groupedItemsByCategory.length === 0) {
+  if (visibleGroups.length === 0) {
     return (
       <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-sm text-gray-500 shadow-sm">
         표시할 항목이 없습니다.
@@ -184,15 +191,15 @@ export default function MobileAccordionChecklist({
 
   return (
     <div className="flex flex-col gap-3">
-      {groupedItemsByCategory.map((group) => (
+      {visibleGroups.map((group) => (
         <AccordionSection
-          key={group.categoryValue}
+          key={`${group.categoryValue}-${selectedCategory}`}
           group={group}
           selectedForSave={selectedForSave}
           existingArchiveItemIds={existingArchiveItemIds}
           onToggleSelectAllInGroup={onToggleSelectAllInGroup}
           onToggleItem={onToggleItem}
-          defaultOpen={false}
+          defaultOpen={isSingleCategory}
         />
       ))}
     </div>
