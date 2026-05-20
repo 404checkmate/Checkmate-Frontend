@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GUIDE_ARCHIVE_LEGACY_AI_CATEGORY } from '@/utils/guideArchiveChecklistReorder'
@@ -164,6 +164,7 @@ export default function GuideArchiveSortableChecklistItem({
 
   // ── 스와이프 상태 (DOM 직접 조작으로 jank 없이 부드럽게) ────────────
   const cardInnerRef = useRef(null)
+  const liRef = useRef(null)
   const touchState = useRef({ startX: 0, startY: 0, startOffset: 0, isHoriz: false, isVert: false })
   const currentXRef = useRef(0)
 
@@ -213,6 +214,21 @@ export default function GuideArchiveSortableChecklistItem({
     }
   }
 
+  // 카드가 열린 상태에서 외부 터치/클릭 시 부드럽게 닫기
+  useEffect(() => {
+    const close = (e) => {
+      if (currentXRef.current <= 0) return
+      if (liRef.current?.contains(e.target)) return
+      setCardX(0)
+    }
+    document.addEventListener('touchstart', close, { passive: true })
+    document.addEventListener('mousedown', close)
+    return () => {
+      document.removeEventListener('touchstart', close)
+      document.removeEventListener('mousedown', close)
+    }
+  }, [])
+
   // ── 파생값 ────────────────────────────────────────────────────────────
   const on = Boolean(checks[id])
   const showCheckedStyle = on
@@ -246,7 +262,7 @@ export default function GuideArchiveSortableChecklistItem({
 
   return (
     <li
-      ref={setNodeRef}
+      ref={(node) => { liRef.current = node; setNodeRef(node) }}
       data-guide-archive-dnd-item={id}
       style={style}
       className={`relative list-none transition-[opacity,filter] duration-200 ease-out ${
