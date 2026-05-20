@@ -230,7 +230,6 @@ function Header() {
                 >
                   서비스 소개
                 </Link>
-                <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
                 {isWebLoggedIn ? (
                   <>
                     <Link
@@ -241,7 +240,6 @@ function Header() {
                     >
                       나의 체크리스트
                     </Link>
-                    <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
                     <button
                       type="button"
                       role="menuitem"
@@ -253,6 +251,7 @@ function Header() {
                     >
                       프로필
                     </button>
+                    <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
                     <button
                       type="button"
                       role="menuitem"
