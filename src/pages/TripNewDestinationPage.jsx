@@ -277,6 +277,18 @@ export default function TripNewDestinationPage() {
 
   const handleCountryFocus = () => setDropdownOpen(true)
 
+  const handlePickQuickCity = (chip) => {
+    const country = countryOptions.find((c) => c.name === chip.countryName)
+    if (!country) return
+    const arrivals = getArrivalsForCountry(country)
+    const arrival = arrivals.find((a) => a.iata === chip.iata) ?? arrivals[0]
+    if (arrival) {
+      confirmCountry({ ...countryRowWithoutArrivals(country), city: arrival.city, iata: arrival.iata })
+    } else {
+      confirmCountry(country)
+    }
+  }
+
   const handleCountryKeyDown = (e) => {
     if (pickerPhase === 'arrival') return
     if (e.key !== 'Enter') return
@@ -510,56 +522,28 @@ export default function TripNewDestinationPage() {
                 </button>
               </div>
             ) : (
-              <>
-                <DestinationCountryAutocomplete
-                  comboRef={comboRef}
-                  countryQuery={countryQuery}
-                  onCountryInputChange={handleCountryInputChange}
-                  onCountryKeyDown={handleCountryKeyDown}
-                  onCountryFocus={handleCountryFocus}
-                  countryInputReadOnly={pickerPhase === 'arrival'}
-                  onChangeCountryRequest={handleChangeCountryRequest}
-                  suggestions={suggestions}
-                  isPanelOpen={dropdownOpen && (pickerPhase === 'arrival' || countryQuery.trim().length > 0)}
-                  onPickCountry={handlePickCountryFromList}
-                  pickerPhase={pickerPhase}
-                  arrivalQuery={arrivalQuery}
-                  onArrivalQueryChange={handleArrivalQueryChange}
-                  onArrivalKeyDown={handleArrivalKeyDown}
-                  arrivalSuggestions={arrivalSuggestions}
-                  onPickArrival={handlePickArrival}
-                  panelId="country-autocomplete-panel-mobile-v2"
-                  placeholder="일본, 도쿄"
-                />
-                {/* 인풋 포커스 시 빈 쿼리 상태에서 인기 여행지 태그 노출 */}
-                <div
-                  className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
-                    dropdownOpen && !countryQuery.trim() && pickerPhase === 'country'
-                      ? 'max-h-24 opacity-100'
-                      : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className="pt-3">
-                    <p className="mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">인기 여행지</p>
-                    <div className="flex flex-wrap gap-2">
-                      {MOBILE_QUICK_DESTINATION_CHIPS.map((chip) => {
-                        const country = countryOptions.find((c) => c.name === chip.countryName)
-                        return (
-                          <button
-                            key={chip.label}
-                            type="button"
-                            onMouseDown={(e) => { e.preventDefault(); if (country) handlePickCountryFromList(country) }}
-                            onTouchEnd={(e) => { e.preventDefault(); if (country) handlePickCountryFromList(country) }}
-                            className="inline-flex items-center rounded-full border border-[#3db4dd]/30 bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#0f5762] shadow-sm transition active:scale-95 hover:border-[#3db4dd]/60 hover:bg-[#3db4dd]/5"
-                          >
-                            {chip.label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </>
+              <DestinationCountryAutocomplete
+                comboRef={comboRef}
+                countryQuery={countryQuery}
+                onCountryInputChange={handleCountryInputChange}
+                onCountryKeyDown={handleCountryKeyDown}
+                onCountryFocus={handleCountryFocus}
+                countryInputReadOnly={pickerPhase === 'arrival'}
+                onChangeCountryRequest={handleChangeCountryRequest}
+                suggestions={suggestions}
+                isPanelOpen={dropdownOpen}
+                onPickCountry={handlePickCountryFromList}
+                pickerPhase={pickerPhase}
+                arrivalQuery={arrivalQuery}
+                onArrivalQueryChange={handleArrivalQueryChange}
+                onArrivalKeyDown={handleArrivalKeyDown}
+                arrivalSuggestions={arrivalSuggestions}
+                onPickArrival={handlePickArrival}
+                panelId="country-autocomplete-panel-mobile-v2"
+                placeholder="일본, 도쿄"
+                quickCityChips={MOBILE_QUICK_DESTINATION_CHIPS}
+                onPickQuickCity={handlePickQuickCity}
+              />
             )}
           </div>
 

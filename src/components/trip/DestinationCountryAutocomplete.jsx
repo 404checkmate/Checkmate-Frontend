@@ -26,6 +26,8 @@ export default function DestinationCountryAutocomplete({
   onPickArrival,
   panelId,
   placeholder,
+  quickCityChips,
+  onPickQuickCity,
 }) {
   const arrivalInputRef = useRef(null)
   const isArrivalStep = pickerPhase === 'arrival'
@@ -88,7 +90,25 @@ export default function DestinationCountryAutocomplete({
         >
           {!isArrivalStep && (
             <>
-              {suggestions.length === 0 ? (
+              {!countryQuery?.trim() && quickCityChips?.length > 0 ? (
+                <div className="px-4 py-3">
+                  <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    인기 여행지
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {quickCityChips.map((chip) => (
+                      <button
+                        key={chip.label}
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onPickQuickCity?.(chip) }}
+                        className="inline-flex items-center rounded-full border border-[#3db4dd]/30 bg-[#3db4dd]/5 px-3 py-1.5 text-xs font-semibold text-[#0f5762] transition active:scale-95 hover:border-[#3db4dd]/60 hover:bg-[#3db4dd]/10"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : suggestions.length === 0 ? (
                 <p className="px-4 py-3 text-sm text-gray-500">
                   일치하는 국가가 없어요. 다른 검색어를 입력해 보세요.
                 </p>

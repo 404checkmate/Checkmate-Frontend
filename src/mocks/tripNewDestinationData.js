@@ -35,11 +35,14 @@ export const DESTINATION_ICON_PATHS = {
  */
 /** 빠른 선택(추천) 칩 — 모바일·데스크톱 공용, 표시 라벨 → `COUNTRY_ARRIVAL_OPTIONS`의 `name`과 매칭 */
 export const MOBILE_QUICK_DESTINATION_CHIPS = [
-  { label: '일본', countryName: '일본' },
-  { label: '중국', countryName: '중국' },
-  { label: '미국', countryName: '미국' },
-  { label: '베트남', countryName: '베트남' },
-  { label: '대만', countryName: '대만' },
+  { label: '도쿄', countryName: '일본', iata: 'HND' },
+  { label: '오사카', countryName: '일본', iata: 'KIX' },
+  { label: '후쿠오카', countryName: '일본', iata: 'FUK' },
+  { label: '방콕', countryName: '태국', iata: 'BKK' },
+  { label: '타이베이', countryName: '대만', iata: 'TPE' },
+  { label: '싱가포르', countryName: '싱가포르', iata: 'SIN' },
+  { label: '홍콩', countryName: '홍콩', iata: 'HKG' },
+  { label: '다낭', countryName: '베트남', iata: 'DAD' },
 ]
 
 /**
