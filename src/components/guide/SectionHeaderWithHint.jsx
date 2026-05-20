@@ -8,7 +8,7 @@ export default function SectionHeaderWithHint({ title, showHint }) {
         <>
           {/* 모바일: 드래그 + 스와이프 두 힌트를 칩 형태로 */}
           <div className="flex flex-wrap gap-2 sm:hidden" role="note" aria-label="사용 방법">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 text-[11px] font-medium text-slate-500">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
               <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <circle cx="9" cy="6" r="1.5" />
                 <circle cx="15" cy="6" r="1.5" />
@@ -19,7 +19,7 @@ export default function SectionHeaderWithHint({ title, showHint }) {
               </svg>
               왼쪽 아이콘 길게 눌러 순서 변경
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 text-[11px] font-medium text-slate-500">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
               <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
               </svg>
