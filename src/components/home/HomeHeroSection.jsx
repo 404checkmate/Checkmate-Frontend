@@ -4,7 +4,7 @@ import { HOME_HERO_TITLE_LINES } from '@/mocks/homeData'
 import RevealBlock from './RevealBlock'
 import { SNAP_SLIDE } from './constants'
 
-export default function HomeHeroSection({ heroRevealed, onStartTrip }) {
+export default function HomeHeroSection({ heroRevealed }) {
   return (
     <section className={`relative isolate overflow-hidden bg-transparent ${SNAP_SLIDE}`}>
       <div
@@ -40,19 +40,6 @@ export default function HomeHeroSection({ heroRevealed, onStartTrip }) {
               복잡한 여행 준비, 이제는 <span className="font-extrabold text-amber-500">메이트</span>가
               도와드릴게요
             </p>
-          </RevealBlock>
-          <RevealBlock
-            show={heroRevealed}
-            delayClass="delay-[320ms]"
-            className="flex w-full flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:justify-start sm:gap-4"
-          >
-            <button
-              type="button"
-              onClick={onStartTrip}
-              className="w-full max-w-sm self-start rounded-xl bg-gradient-to-r from-amber-300 to-amber-400 px-6 py-3.5 text-center text-sm font-bold text-[#6a4a00] shadow-md shadow-amber-900/15 transition hover:from-amber-200 hover:to-amber-300 md:w-auto md:max-w-none md:px-8"
-            >
-              여행 준비 시작하기
-            </button>
           </RevealBlock>
         </div>
 
