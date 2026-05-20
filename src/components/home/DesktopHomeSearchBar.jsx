@@ -135,17 +135,18 @@ function FieldButton({ label, value, placeholder, active, onClick, className = '
 
 // ─── Dropdown container ──────────────────────────────────────────────────────
 
-function DropdownPanel({ open, children, className = '' }) {
+function DropdownPanel({ open, children, className = '', align = 'left' }) {
   return (
     <div
       className={[
-        'absolute top-[calc(100%+12px)] left-0 z-[300] rounded-3xl border border-gray-100 bg-white shadow-2xl shadow-gray-300/25',
+        'absolute top-[calc(100%+12px)] z-[300] rounded-3xl border border-gray-100 bg-white shadow-2xl shadow-gray-300/25',
+        align === 'right' ? 'right-0' : 'left-0',
         className,
       ].join(' ')}
       style={{
         opacity: open ? 1 : 0,
         transform: open ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.96)',
-        transformOrigin: 'top left',
+        transformOrigin: align === 'right' ? 'top right' : 'top left',
         pointerEvents: open ? 'auto' : 'none',
         transition: open
           ? 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 280ms cubic-bezier(0.16,1,0.3,1)'
@@ -167,6 +168,7 @@ function CountryDropdown({
   draftCountry,
   onPickCountry, onPickArrival, onBackToCountry,
   onConfirm,
+  popularCountries,
 }) {
   const inputRef = useRef(null)
 
@@ -187,6 +189,23 @@ function CountryDropdown({
             placeholder="예: 일본, 태국, 미국…"
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition"
           />
+          {!countryQuery.trim() && popularCountries?.length > 0 && (
+            <div className="mt-3">
+              <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">인기 여행지</p>
+              <div className="flex flex-wrap gap-1.5">
+                {popularCountries.map((c) => (
+                  <button
+                    key={c.countryCode}
+                    type="button"
+                    onClick={() => onPickCountry(c)}
+                    className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 transition hover:bg-teal-100 hover:border-teal-300"
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {suggestions.length > 0 && (
             <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
               {suggestions.map((c) => (
@@ -345,7 +364,7 @@ function ExtraDropdown({ open, suggestions, selectedCities, onToggle, onConfirm,
 
 function CompanionDropdown({ open, companions, companionIds, onToggle, onConfirm }) {
   return (
-    <DropdownPanel open={open} className="w-80 p-4">
+    <DropdownPanel open={open} align="right" className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">누구와 함께하나요? (최대 2개)</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {companions.map((c) => {
@@ -385,7 +404,7 @@ function CompanionDropdown({ open, companions, companionIds, onToggle, onConfirm
 
 function StyleDropdown({ open, travelStyles, styleIds, onToggle, onConfirm }) {
   return (
-    <DropdownPanel open={open} className="w-80 p-4">
+    <DropdownPanel open={open} align="right" className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">어떤 여행을 원하나요? (복수 선택)</p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         {travelStyles.map((s) => {
@@ -424,6 +443,8 @@ function StyleDropdown({ open, travelStyles, styleIds, onToggle, onConfirm }) {
     </DropdownPanel>
   )
 }
+
+const POPULAR_COUNTRY_NAMES = ['일본', '태국', '베트남', '미국', '필리핀', '싱가포르', '홍콩', '대만', '인도네시아']
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
@@ -508,6 +529,11 @@ export default function DesktopHomeSearchBar() {
       setStyleIds([])
     }
   }, [selectedCountry])
+
+  const popularCountries = useMemo(
+    () => POPULAR_COUNTRY_NAMES.map((name) => countryOptions.find((c) => c.name === name)).filter(Boolean),
+    [countryOptions],
+  )
 
   const suggestions = useMemo(() => {
     const q = countryQuery.trim()
@@ -723,6 +749,7 @@ export default function DesktopHomeSearchBar() {
             onPickArrival={handlePickArrival}
             onBackToCountry={handleBackToCountry}
             onConfirm={() => setActiveSection(null)}
+            popularCountries={popularCountries}
           />
         </div>
 
