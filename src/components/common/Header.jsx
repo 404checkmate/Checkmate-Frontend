@@ -8,14 +8,13 @@ import defaultProfileImg from '@/assets/default-profile.png'
 
 const NAV_ITEMS = [
   { label: '홈', path: '/', match: (p) => p === '/' },
-  { label: '여행 준비', path: '/trips/new/destination', match: (p) => p.startsWith('/trips/new') },
+  { label: '서비스 소개', path: '/about', match: (p) => p === '/about' },
   {
-    label: '체크리스트',
+    label: '나의 체크리스트',
     path: '/guide-archives',
     match: (p) => p.includes('/guide-archive'),
     requiresLogin: true,
   },
-  { label: '서비스소개', path: '/about', match: (p) => p === '/about' },
 ]
 
 function Header() {
@@ -143,7 +142,7 @@ function Header() {
 
         {/* 데스크톱: 항상 중앙 네비 표시. 로그인 필요 항목(체크리스트)은 로그인 시에만 노출 */}
         <nav
-          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 xl:flex"
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-12 lg:flex"
           aria-label="주요 메뉴"
         >
           {NAV_ITEMS.filter((item) => !item.requiresLogin || isWebLoggedIn).map((item) => (
@@ -167,14 +166,14 @@ function Header() {
               <button
                 type="button"
                 onClick={openLogoutConfirm}
-                className="hidden shrink-0 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 xl:inline-flex"
+                className="hidden shrink-0 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 lg:inline-flex"
               >
                 로그아웃
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/mypage')}
-                className="hidden h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-100 transition-colors hover:bg-gray-200 xl:flex"
+                className="hidden h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-100 transition-colors hover:bg-gray-200 lg:flex"
                 aria-label="마이페이지"
               >
                 <img src={defaultProfileImg} alt="" className="h-full w-full object-cover" aria-hidden />
@@ -184,7 +183,7 @@ function Header() {
             <>
               <Link
                 to="/login"
-                className={`hidden rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors xl:inline-flex ${
+                className={`hidden rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors lg:inline-flex ${
                   pathname === '/login' || pathname === '/signup'
                     ? 'text-teal-700'
                     : 'text-gray-700 hover:text-gray-900'
@@ -196,7 +195,7 @@ function Header() {
           )}
 
           {/* 모바일/태블릿: 항상 햄버거 버튼 표시 */}
-          <div ref={menuRef} className="relative xl:hidden">
+          <div ref={menuRef} className="relative lg:hidden">
             <button
               type="button"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
