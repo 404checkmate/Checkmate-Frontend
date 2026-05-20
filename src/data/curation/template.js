@@ -27,7 +27,6 @@ export default {
       title: '섹션 제목',
       body: '본문 단락1\n\n본문 단락2',  // \n\n으로 단락 구분
       photo: 'https://images.unsplash.com/photo-XXXX?w=900&q=85',
-      relatedCats: ['의류', '짐'],       // checklist의 cat 값과 일치
       tip: {
         icon: '💡',
         body: '팁 내용',                 // null이면 TipBox 미표시
@@ -39,7 +38,6 @@ export default {
       title: '환전 & 결제',
       body: '본문',
       photo: 'https://images.unsplash.com/photo-XXXX?w=900&q=85',
-      relatedCats: ['환전'],
       tip: null,
     },
     {
@@ -48,7 +46,6 @@ export default {
       title: '필수 앱',
       body: '본문',
       photo: 'https://images.unsplash.com/photo-XXXX?w=900&q=85',
-      relatedCats: ['앱', '전자기기'],
       tip: null,
     },
     {
@@ -57,7 +54,6 @@ export default {
       title: '건강 & 안전',
       body: '본문',
       photo: 'https://images.unsplash.com/photo-XXXX?w=900&q=85',
-      relatedCats: ['건강'],
       tip: {
         icon: '⚠️',
         body: '주의사항',
@@ -75,13 +71,13 @@ export default {
   ],
 
   checklist: [
-    { cat: '📄 서류', items: ['항목1', '항목2'] },
-    { cat: '💴 환전', items: ['항목1', '항목2'] },
-    { cat: '👕 의류', items: ['항목1', '항목2'] },
-    { cat: '🌿 건강', items: ['항목1', '항목2'] },
-    { cat: '🔌 전자기기', items: ['항목1', '항목2'] },
-    { cat: '📱 앱', items: ['항목1', '항목2'] },
-    { cat: '🎒 짐', items: ['항목1', '항목2'] },
+    { cat: '📄 서류', section: [], items: ['항목1', '항목2'] },
+    { cat: '💴 환전', section: [], items: ['항목1', '항목2'] },
+    { cat: '👕 의류', section: [], items: ['항목1', '항목2'] },
+    { cat: '🌿 건강', section: [], items: ['항목1', '항목2'] },
+    { cat: '🔌 전자기기', section: [], items: ['항목1', '항목2'] },
+    { cat: '📱 앱', section: [], items: ['항목1', '항목2'] },
+    { cat: '🎒 짐', section: [], items: ['항목1', '항목2'] },
   ],
 
   footerCta: {

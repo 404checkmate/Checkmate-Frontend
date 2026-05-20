@@ -129,18 +129,25 @@ async function main() {
 
     /* ── sections ── */
     const sectionPages = await fetchRelated(DB.sections, page.id)
+
+    // Notion 페이지 UUID → section id 문자열 매핑 (나라별로 독립 생성)
+    const sectionIdMap = {}
+    sectionPages.forEach((sp) => {
+      const sectionId = getText(sp.properties['id']) || getText(sp.properties['Name'])
+      if (sectionId) sectionIdMap[sp.id] = sectionId
+    })
+
     const sections = sectionPages.map((sp) => {
       const s = sp.properties
       const tipIcon = getText(s.tip_icon)
       const tipBody = richTextToHtml(s.tip_body?.rich_text)
       return {
-        id:          getText(s.id) || getText(s.Name),
-        icon:        getText(s.icon),
-        title:       getText(s.Name),
-        body:        richTextToHtml(s.body?.rich_text),
-        photo:       getUrl(s.photo),
-        relatedCats: getMultiSelect(s.relatedCats),
-        tip:         tipBody ? { icon: tipIcon, body: tipBody } : null,
+        id:    getText(s.id) || getText(s.Name),
+        icon:  getText(s.icon),
+        title: getText(s.Name),
+        body:  richTextToHtml(s.body?.rich_text),
+        photo: getUrl(s.photo),
+        tip:   tipBody ? { icon: tipIcon, body: tipBody } : null,
       }
     })
 
@@ -163,8 +170,9 @@ async function main() {
       const c = cp.properties
       const rawItems = getText(c.items)
       return {
-        cat:   getText(c.Name),
-        items: rawItems.split('\n').map((s) => s.trim()).filter(Boolean),
+        cat:     getText(c.Name),
+        section: getRelationIds(c.section).map((uuid) => sectionIdMap[uuid]).filter(Boolean),
+        items:   rawItems.split('\n').map((s) => s.trim()).filter(Boolean),
       }
     })
 

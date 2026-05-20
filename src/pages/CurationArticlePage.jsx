@@ -428,9 +428,7 @@ function Article({ data, checked, toggle }) {
           : section.body.split('\n\n')
         ).filter(Boolean)
         const mainTitle = section.title.split('—')[0].trim()
-        const relatedGroups = section.relatedCats
-          ? data.checklist.filter((g) => section.relatedCats.includes(g.cat))
-          : []
+        const relatedGroups = data.checklist.filter((g) => g.section?.includes(section.id))
 
         return (
           <div key={section.id}>
