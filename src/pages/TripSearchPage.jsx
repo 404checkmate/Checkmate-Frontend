@@ -681,9 +681,22 @@ function TripSearchInner({ tripId }) {
 
   const handleSaveButtonClick = async () => {
     if (selectedForSave.size === 0) return
-    // guest 모드: 세션 체크 없이 무조건 로그인 유도
+    // guest 모드: 로그인 여부 확인 후 미로그인이면 로그인 유도
     if (tripId === 'guest') {
-      setLoginGateOpen(true)
+      const supabase = getSupabaseClient()
+      let isLoggedIn = false
+      if (supabase) {
+        const { data } = await supabase.auth.getSession()
+        isLoggedIn = !!data?.session?.access_token
+      } else {
+        isLoggedIn = !!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+      }
+      if (!isLoggedIn) {
+        setLoginGateOpen(true)
+        return
+      }
+      // 로그인 상태에서 guest 페이지에 남아있는 경우 (trip 생성 중이거나 실패 상태)
+      setSaveConfirmModalOpen(true)
       return
     }
     const supabase = getSupabaseClient()
@@ -705,8 +718,9 @@ function TripSearchInner({ tripId }) {
     setLoginGateOpen(false)
     if (tripId === 'guest') {
       const step5 = location.state?.step5
+      // step5에서 companionIds(배열)로 전달되므로 첫 번째 값 사용
       savePendingGuestSearch({
-        companionId: step5?.companionId ?? null,
+        companionId: step5?.companionIds?.[0] ?? step5?.companionId ?? null,
         travelStyleIds: step5?.travelStyleIds ?? [],
         selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
       })
