@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 
 const CURATION_COUNTRIES = [
-  { id: 'vn', name: '베트남',  sub: '가성비 최고의 선택',    image: 'https://picsum.photos/seed/vietnam-bay/800/500' },
-  { id: 'jp', name: '일본',    sub: '가장 인기 있는 여행지',  image: 'https://picsum.photos/seed/japan-nature/800/500' },
-  { id: 'us', name: '미국',    sub: '자유여행의 클래식',      image: 'https://picsum.photos/seed/america-city/800/500' },
-  { id: 'th', name: '태국',    sub: '힐링이 필요할 때',       image: 'https://picsum.photos/seed/thailand-temple/800/500' },
+  { id: 'vietnam',  name: '베트남',  sub: '가성비 최고의 선택',    image: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&q=80' },
+  { id: 'japan',    name: '일본',    sub: '가장 인기 있는 여행지',  image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80' },
+  { id: 'usa',      name: '미국',    sub: '자유여행의 클래식',      image: 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=800&q=80' },
+  { id: 'thailand', name: '태국',    sub: '힐링이 필요할 때',       image: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800&q=80' },
 ]
 
 function CurationCard({ country, index }) {
@@ -32,9 +33,9 @@ function CurationCard({ country, index }) {
                      opacity 0.55s ease ${index * 0.1}s`,
       }}
     >
-      <button
-        type="button"
-        className="w-full bg-white rounded-2xl p-2 pb-3 shadow-lg shadow-gray-300/50 border border-gray-100 transition-transform active:scale-[0.97]"
+      <Link
+        to={`/guide/${country.id}`}
+        className="block w-full bg-white rounded-2xl p-2 pb-3 shadow-lg shadow-gray-300/50 border border-gray-100 transition-transform active:scale-[0.97]"
       >
         <div className="overflow-hidden rounded-xl aspect-[4/3]">
           <img
@@ -61,7 +62,7 @@ function CurationCard({ country, index }) {
           <p className="text-sm font-extrabold leading-tight text-[#04384a]">{country.name}</p>
           <p className="mt-0.5 text-[10px] leading-snug text-gray-400">{country.sub}</p>
         </div>
-      </button>
+      </Link>
     </div>
   )
 }
