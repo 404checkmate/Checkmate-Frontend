@@ -693,12 +693,11 @@ function Related({ currentCode }) {
                   <img
                     src={d.photos.hero}
                     alt={d.name}
-                    style={{ opacity: 1 }}
                     onError={(e) => {
                       e.target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&q=85'
                       e.target.onerror = null
                     }}
-                    className="cur-img-fade w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-900/40 to-transparent" />
                   <div className="absolute bottom-3 left-3 pointer-events-none flex items-center gap-2">
