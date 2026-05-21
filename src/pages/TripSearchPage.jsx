@@ -522,6 +522,11 @@ function TripSearchInner({ tripId }) {
 
   const handleConfirmSaveAndGoArchive = async () => {
     if (saving) return
+    // guest tripId는 DB에 존재하지 않으므로 API 호출 불가
+    if (tripId === 'guest') {
+      setSaveError('여행 정보가 없습니다. 처음부터 다시 시작해 주세요.')
+      return
+    }
     const itemsToSave = sourceItems.filter((i) => selectedForSave.has(String(i.id)))
     if (itemsToSave.length === 0) {
       setSaveConfirmModalOpen(false)
@@ -695,7 +700,19 @@ function TripSearchInner({ tripId }) {
         setLoginGateOpen(true)
         return
       }
-      // 로그인 상태에서 guest 페이지에 남아있는 경우 (trip 생성 중이거나 실패 상태)
+      // 로그인 상태인데 guest 페이지에 남아있는 경우 — trip 생성이 완료되지 않은 상태.
+      // pendingGuestSearch가 있으면 선택 항목만 갱신 후 페이지 풀리로드해서 효과 재실행
+      const pending = loadPendingGuestSearch()
+      if (pending?.companionId) {
+        savePendingGuestSearch({
+          ...pending,
+          selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
+        })
+        window.location.reload()
+        return
+      }
+      // pending이 없거나 companionId가 없으면 복구 불가 → 처음부터 재시작 안내
+      setSaveError('여행 정보가 없습니다. 처음부터 다시 시작해 주세요.')
       setSaveConfirmModalOpen(true)
       return
     }
