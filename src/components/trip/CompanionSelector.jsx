@@ -20,18 +20,23 @@ function SvgIcon({ name, className = 'w-6 h-6' }) {
 }
 
 export default function CompanionSelector({ selectedIds, onToggle }) {
+  const aloneSelected = selectedIds.includes('alone')
   return (
     <div className="grid grid-cols-3 gap-2">
       {COMPANIONS.map((c) => {
         const isSelected = selectedIds.includes(c.id)
+        const isDisabled = aloneSelected && c.id !== 'alone'
         return (
           <button
             key={c.id}
             type="button"
             onClick={() => onToggle(c.id)}
+            disabled={isDisabled}
             className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3.5 text-center transition active:scale-[0.97] ${
               isSelected
                 ? 'border-[#3db4dd] bg-[#3db4dd]/10 text-[#0f5762]'
+                : isDisabled
+                ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-40'
                 : 'border-gray-200 bg-white/80 text-gray-500 hover:border-[#3db4dd]/40 hover:bg-[#3db4dd]/5'
             }`}
           >

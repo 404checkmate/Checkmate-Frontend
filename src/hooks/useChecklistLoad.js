@@ -10,7 +10,7 @@ import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildContextInputFromPlan } from '@/utils/tripSearchUtils'
 import { trackEvent } from '@/utils/analyticsTracker'
 
-export function useChecklistLoad(tripId, retryTick) {
+export function useChecklistLoad(tripId, retryTick, prefetchedItems = null) {
   const [loadState, setLoadState] = useState({ status: 'loading', fromApi: false })
   const [apiItems, setApiItems] = useState([])
   const [apiSummary, setApiSummary] = useState(null)
@@ -110,6 +110,11 @@ export function useChecklistLoad(tripId, retryTick) {
       }
 
       if (tripId === 'guest') {
+        // 로딩 페이지에서 미리 가져온 데이터가 있으면 API 재호출 없이 즉시 사용
+        if (prefetchedItems) {
+          applyAdapted(prefetchedItems, 'context')
+          return
+        }
         if (contextInput) {
           try {
             const data = await generateChecklistFromContext(contextInput)
@@ -187,7 +192,7 @@ export function useChecklistLoad(tripId, retryTick) {
     })()
 
     return () => { cancelled = true }
-  }, [tripId, retryTick])
+  }, [tripId, retryTick, prefetchedItems])
 
   return { loadState, setLoadState, apiItems, apiSummary }
 }

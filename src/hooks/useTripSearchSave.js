@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { upsertChecklistItems } from '@/api/checklists'
 import { fetchTripGuideArchives, createGuideArchive, updateGuideArchive } from '@/api/guideArchives'
+import { createTrip } from '@/api/trips'
+import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
+import { saveActiveTripId } from '@/utils/activeTripIdStorage'
 import { loadEntryChecklistChecks, saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { saveItemsForTrip, loadSavedItems } from '@/utils/savedTripItems'
@@ -209,11 +212,70 @@ export function useTripSearchSave({
       return
     }
 
-    // 로그인 상태지만 guest tripId → 여행 생성 위저드로 안내 (curationSave 보존)
+    // 로그인 상태 + guest tripId → 플랜 데이터로 여행 즉시 생성 후 저장
     if (tripId === 'guest') {
-      navigate('/trips/new/destination', {
-        state: { fromCuration: !!sessionStorage.getItem('curationSave') },
-      })
+      const plan = loadActiveTripPlan()
+      const companionIds = plan?.companionIds?.length ? plan.companionIds : []
+      const travelStyleIds = plan?.travelStyleIds?.length ? plan.travelStyleIds : []
+
+      if (!companionIds.length || !travelStyleIds.length) {
+        // 플랜 정보 부족 → 여행 생성 위저드로
+        navigate('/trips/new/destination', {
+          state: { fromCuration: !!sessionStorage.getItem('curationSave') },
+        })
+        return
+      }
+
+      setSaving(true)
+      setSaveError('')
+      try {
+        const hasPet = companionIds.some((id) => id === 'pets' || id === 'withPet')
+        const payload = buildCreateTripPayload(plan, { companionIds, hasPet, travelStyleIds })
+        if (!payload) {
+          navigate('/trips/new/destination', { state: { fromCuration: false } })
+          setSaving(false)
+          return
+        }
+
+        const itemsToSave = sourceItems.filter((i) => selectedForSave.has(String(i.id)))
+        const created = await createTrip(payload)
+        const rawId = created?.id ?? created?.tripId
+        const realId = rawId != null ? String(rawId) : null
+        if (!realId) throw new Error('여행 생성에 실패했습니다.')
+
+        saveActiveTripId(realId)
+
+        if (itemsToSave.length > 0) {
+          const upsertPayload = itemsToSave
+            .filter((i) => i.title)
+            .map((item, idx) => ({
+              title: item.title,
+              ...(item.description ? { description: item.description } : {}),
+              categoryCode: item.subCategory || 'ai_recommend',
+              prepType: item.prepType || 'item',
+              baggageType: item.baggageType || 'none',
+              source: item.source || 'template',
+              orderIndex: idx,
+            }))
+          if (upsertPayload.length > 0) {
+            await upsertChecklistItems(realId, upsertPayload).catch((err) => {
+              console.error('[useTripSearchSave] guest upsertItems 실패:', err)
+            })
+          }
+          const snapshot = buildArchiveSnapshot(loadActiveTripPlan(), itemsToSave)
+          const archiveCreated = await createGuideArchive(realId, { name: snapshot.pageTitle, snapshot })
+          if (archiveCreated?.id) sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
+          sessionStorage.removeItem('curationSave')
+          setSaving(false)
+          navigate('/guide-archives')
+        } else {
+          setSaving(false)
+          navigate(`/trips/${realId}/search`)
+        }
+      } catch (err) {
+        setSaveError(err?.response?.data?.message || err?.message || '저장 중 오류가 발생했습니다.')
+        setSaving(false)
+      }
       return
     }
 
@@ -225,7 +287,7 @@ export function useTripSearchSave({
     if (tripId === 'guest') {
       const step5 = location.state?.step5
       savePendingGuestSearch({
-        companionId: step5?.companionId ?? null,
+        companionIds: step5?.companionIds ?? [],
         travelStyleIds: step5?.travelStyleIds ?? [],
         selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
       })

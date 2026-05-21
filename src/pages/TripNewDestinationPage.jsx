@@ -359,7 +359,9 @@ function TripNewDestinationPageInner({ navState }) {
   // ─── 동행인·스타일 핸들러 ──────────────────────────────────────────────────
   const toggleCompanion = (id) => {
     setCompanionIds((prev) => {
+      if (prev.includes('alone') && id !== 'alone') return prev
       if (prev.includes(id)) return prev.filter((x) => x !== id)
+      if (id === 'alone') return ['alone']
       if (prev.length >= 2) return prev
       return [...prev, id]
     })

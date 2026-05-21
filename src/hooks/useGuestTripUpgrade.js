@@ -61,14 +61,23 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
       }
 
       const pending = loadPendingGuestSearch()
-      if (!pending?.companionId || !pending?.travelStyleIds?.length) return
+      if (!pending) return
 
       const plan = loadActiveTripPlan()
-      const hasPet = pending.companionId === 'pets' || pending.companionId === 'withPet'
+      // plan에 companionIds가 저장되어 있으면 우선 사용 (pending의 companionId 키 오류 방지)
+      const companionIds = plan?.companionIds?.length ? plan.companionIds
+        : pending.companionIds?.length ? pending.companionIds : []
+      const travelStyleIds = pending.travelStyleIds?.length ? pending.travelStyleIds
+        : plan?.travelStyleIds ?? []
+      if (!companionIds.length || !travelStyleIds.length) {
+        setLoadState({ status: 'fallback', fromApi: false, errorMessage: '여행 정보가 부족합니다. 처음부터 다시 시도해 주세요.' })
+        return
+      }
+      const hasPet = companionIds.some((id) => id === 'pets' || id === 'withPet')
       const payload = buildCreateTripPayload(plan, {
-        companionId: pending.companionId,
+        companionIds,
         hasPet,
-        travelStyleIds: pending.travelStyleIds,
+        travelStyleIds,
       })
       if (!payload) {
         setLoadState({ status: 'fallback', fromApi: false, errorMessage: '여행 정보가 부족합니다. 처음부터 다시 시도해 주세요.' })

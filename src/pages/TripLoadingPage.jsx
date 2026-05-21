@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { generateChecklist } from '@/api/checklists'
+import { generateChecklist, getGenerateStatus, generateChecklistFromContext } from '@/api/checklists'
+import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { buildContextInputFromPlan } from '@/utils/tripSearchUtils'
 import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
@@ -55,24 +57,75 @@ function TripLoadingPage() {
       return
     }
 
-    // guest 흐름: generateChecklist 호출 없이 애니메이션만 완료 후 이동
+    // guest 흐름: generateChecklistFromContext를 애니메이션과 병렬 실행 후 이동
     if (isGuest) {
+      // curationSave 흐름은 templates를 직접 구성하므로 generate 불필요
+      const hasCuration = !!sessionStorage.getItem('curationSave')
+
+      if (hasCuration) {
+        const interval = setInterval(() => {
+          setProgress((prev) => {
+            const next = prev + (prev < 70 ? 1.2 : 0.7)
+            if (next >= 100) {
+              clearInterval(interval)
+              setProgress(100)
+              setTimeout(() => {
+                navigate('/trips/guest/search', { state: location.state, replace: true })
+              }, 600)
+            }
+            return Math.min(next, 100)
+          })
+        }, 50)
+        return () => clearInterval(interval)
+      }
+
+      let cancelled = false
+      let progressDone = false
+      let generateDone = false
+      let generatedData = null
+
+      const tryNavigate = () => {
+        if (progressDone && generateDone) {
+          navigate('/trips/guest/search', {
+            state: { ...location.state, prefetchedItems: generatedData },
+            replace: true,
+          })
+        }
+      }
+
       const interval = setInterval(() => {
         setProgress((prev) => {
-          const next = prev + (prev < 70 ? 1.2 : 0.7)
+          const cap = generateDone ? 100 : 95
+          const speed = prev < 70 ? 1.2 : prev < 90 ? 0.7 : 0.15
+          const next = Math.min(prev + speed, cap)
           if (next >= 100) {
             clearInterval(interval)
-            setProgress(100)
-            setTimeout(() => {
-              navigate('/trips/guest/search', { state: location.state, replace: true })
-            }, 600)
+            setTimeout(() => { progressDone = true; tryNavigate() }, 600)
           }
-          return Math.min(next, 100)
+          return next
         })
       }, 50)
-      return () => clearInterval(interval)
+
+      const runGuestGenerate = async () => {
+        try {
+          const plan = loadActiveTripPlan()
+          const contextInput = buildContextInputFromPlan(plan)
+          if (contextInput) {
+            const data = await generateChecklistFromContext(contextInput)
+            if (!cancelled) generatedData = data
+          }
+        } catch {
+          // 실패 시 prefetch 없이 이동 — guest/search에서 자체 재시도
+        } finally {
+          if (!cancelled) { generateDone = true; tryNavigate() }
+        }
+      }
+
+      runGuestGenerate()
+      return () => { clearInterval(interval); cancelled = true }
     }
 
+    let cancelled = false
     let progressDone = false
     let generateDone = false
 
@@ -85,44 +138,46 @@ function TripLoadingPage() {
 
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + (prev < 70 ? 1.2 : 0.7)
+        // 95% 이후로는 generateDone 될 때까지 천천히 대기
+        const cap = generateDone ? 100 : 95
+        const speed = prev < 70 ? 1.2 : prev < 90 ? 0.7 : 0.15
+        const next = Math.min(prev + speed, cap)
         if (next >= 100) {
           clearInterval(interval)
-          setProgress(100)
-          setTimeout(() => {
-            progressDone = true
-            tryNavigate()
-          }, 600)
+          setTimeout(() => { progressDone = true; tryNavigate() }, 600)
         }
-        return Math.min(next, 100)
+        return next
       })
     }, 50)
 
     const runGenerate = async () => {
       try {
-        // status 폴링보다 generate 직접 await가 더 안정적:
-        // getGenerateStatus가 404를 반환하면 폴링이 30초간 낭비됨.
-        const result = await generateChecklist(id)
-        if (result?.items?.length > 0) {
-          generateDone = true
-          tryNavigate()
-          return
+        await generateChecklist(id)  // 202: 백그라운드 생성 트리거
+        // 생성 완료까지 폴링 (최대 32s, 2s 간격)
+        const MAX_WAIT = 32000
+        const POLL_MS = 2000
+        const started = Date.now()
+        while (!cancelled && Date.now() - started < MAX_WAIT) {
+          await new Promise((r) => setTimeout(r, POLL_MS))
+          if (cancelled) break
+          try {
+            const status = await getGenerateStatus(id)
+            if (status?.status === 'completed') break
+          } catch {
+            break
+          }
         }
-        // items 없이 응답이 왔어도 이동은 시켜 줌 (TripSearchPage에서 context 재시도)
-        generateDone = true
-        tryNavigate()
       } catch (err) {
         console.error('[TripLoadingPage] generate 실패:', err)
         setGenerateError(true)
-        // 실패해도 이동 — TripSearchPage에서 context 기반으로 재시도
-        generateDone = true
-        tryNavigate()
+      } finally {
+        if (!cancelled) { generateDone = true; tryNavigate() }
       }
     }
 
     runGenerate()
 
-    return () => clearInterval(interval)
+    return () => { clearInterval(interval); cancelled = true }
   }, [id, isGuest, navigate, location.state])
 
   const pct = Math.round(progress)

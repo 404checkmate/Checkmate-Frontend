@@ -46,7 +46,8 @@ function TripSearchInner({ tripId }) {
     useArchiveEntry(tripId, archiveEntryId)
 
   const [retryTick, setRetryTick] = useState(0)
-  const { loadState, setLoadState, apiItems, apiSummary } = useChecklistLoad(tripId, retryTick)
+  const prefetchedItems = location.state?.prefetchedItems ?? null
+  const { loadState, setLoadState, apiItems, apiSummary } = useChecklistLoad(tripId, retryTick, prefetchedItems)
 
   // ── UI 상태 ────────────────────────────────────────────
   const [selectedCategory, setSelectedCategory] = useState('supplies')
@@ -313,7 +314,18 @@ function TripSearchInner({ tripId }) {
         selectedCount={selectedForSave.size}
         onLeave={() => setLeaveModalOpen(true)}
         onSave={handleSaveButtonClick}
+        saving={saving}
       />
+
+      {/* 게스트 저장 직접 실행 시 모달 없이 로딩 오버레이 표시 */}
+      {saving && !saveConfirmModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-8 py-6 shadow-xl">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-500" />
+            <p className="text-sm font-semibold text-gray-700">저장 중…</p>
+          </div>
+        </div>
+      )}
 
       <TripSearchSaveModal
         open={saveConfirmModalOpen}

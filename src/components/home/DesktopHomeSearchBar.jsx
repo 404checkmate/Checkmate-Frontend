@@ -363,21 +363,26 @@ function ExtraDropdown({ open, suggestions, selectedCities, onToggle, onConfirm,
 // ─── Companion dropdown ──────────────────────────────────────────────────────
 
 function CompanionDropdown({ open, companions, companionIds, onToggle, onConfirm }) {
+  const aloneSelected = companionIds.includes('alone')
   return (
     <DropdownPanel open={open} align="right" className="w-80 p-4">
       <p className="mb-1 text-xs font-bold text-gray-500">누구와 함께하나요? (최대 2개)</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {companions.map((c) => {
           const on = companionIds.includes(c.id)
+          const disabled = aloneSelected && c.id !== 'alone'
           return (
             <button
               key={c.id}
               type="button"
               onClick={() => onToggle(c.id)}
+              disabled={disabled}
               className={[
                 'flex flex-col items-start gap-1.5 rounded-2xl border-2 p-3 text-left transition-all',
                 on
                   ? 'border-amber-400 bg-amber-100/90 text-gray-900'
+                  : disabled
+                  ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-40'
                   : 'border-gray-100 bg-gray-50 text-gray-800 hover:bg-teal-50/50',
               ].join(' ')}
             >
@@ -624,7 +629,9 @@ export default function DesktopHomeSearchBar() {
 
   const toggleCompanion = (id) => {
     setCompanionIds((prev) => {
+      if (prev.includes('alone') && id !== 'alone') return prev
       if (prev.includes(id)) return prev.filter((x) => x !== id)
+      if (id === 'alone') return ['alone']
       if (prev.length >= 2) return prev
       return [...prev, id]
     })
@@ -790,7 +797,7 @@ export default function DesktopHomeSearchBar() {
             endDate={endDate}
             today={today}
             onRangeChange={({ start, end }) => { setStartDate(start); setEndDate(end) }}
-            onConfirm={() => setActiveSection(null)}
+            onConfirm={() => setActiveSection('extra')}
           />
         </div>
 
@@ -811,7 +818,7 @@ export default function DesktopHomeSearchBar() {
             suggestions={additionalArrivalSuggestions}
             selectedCities={additionalDests}
             onToggle={toggleExtraDest}
-            onConfirm={confirmExtraDests}
+            onConfirm={() => { setAdditionalInput(''); setActiveSection('companion') }}
             additionalInput={additionalInput}
             onAdditionalInputChange={setAdditionalInput}
           />
@@ -834,7 +841,7 @@ export default function DesktopHomeSearchBar() {
             companions={companions}
             companionIds={companionIds}
             onToggle={toggleCompanion}
-            onConfirm={() => setActiveSection(null)}
+            onConfirm={() => setActiveSection('style')}
           />
         </div>
 
