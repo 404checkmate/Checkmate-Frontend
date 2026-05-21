@@ -37,7 +37,6 @@ export function useTripSearchSave({
       .filter((i) => i.title)
       .map((item, idx) => ({
         title: item.title,
-        ...(item.description ? { description: item.description } : {}),
         categoryCode: item.subCategory || 'ai_recommend',
         prepType: item.prepType || 'item',
         baggageType: item.baggageType || 'none',

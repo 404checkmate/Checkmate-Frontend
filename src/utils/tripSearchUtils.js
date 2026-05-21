@@ -106,8 +106,8 @@ export function mapMockItemToArchiveItem(i) {
     prepType: i.prepType ?? '',
     source: i.source ?? '',
     title: i.title,
-    description: i.description,
-    detail: i.detail,
+    description: undefined,
+    detail: undefined,
   }
 }
 

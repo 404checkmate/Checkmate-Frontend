@@ -137,42 +137,52 @@ export function useChecklistLoad(tripId, retryTick) {
         }
       }
 
+      const tryContextFallback = async (reason) => {
+        if (!contextInput) {
+          if (import.meta.env.DEV) console.warn('[useChecklistLoad] context 재시도 불가 — 로컬 플랜 없음')
+          return false
+        }
+        try {
+          const data2 = await generateChecklistFromContext(contextInput)
+          if (cancelled) return true
+          applyAdapted(data2, 'context')
+          return true
+        } catch (ctxErr) {
+          if (cancelled) return true
+          console.warn(`[useChecklistLoad] context 재시도 실패 (${reason}):`, ctxErr?.message ?? ctxErr)
+          const isTimeout = ctxErr?.code === 'ECONNABORTED' || ctxErr?.message?.includes('timeout')
+          applyFallback(
+            ctxErr?.response?.data?.message ||
+            (isTimeout ? '서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.' : ctxErr?.message)
+          )
+          return true
+        }
+      }
+
       try {
         const data = await generateChecklist(tripId)
         if (Array.isArray(data?.items) && data.items.length > 0) {
           applyAdapted(data, 'trip')
           return
         }
-        if (contextInput) {
-          if (import.meta.env.DEV) {
-            console.warn('[useChecklistLoad] generateChecklist items 비어 있음 — context로 재시도')
-          }
-          const data2 = await generateChecklistFromContext(contextInput)
-          if (cancelled) return
-          applyAdapted(data2, 'context')
-          return
+        if (import.meta.env.DEV) {
+          console.warn('[useChecklistLoad] generateChecklist items 비어 있음 — context로 재시도')
         }
+        if (await tryContextFallback('empty-items')) return
         applyAdapted(data, 'trip')
       } catch (err1) {
-        const status = err1?.response?.status
         if (cancelled) return
+        const status = err1?.response?.status
         if (status === 404 || status === 400) {
-          if (contextInput) {
-            try {
-              const data2 = await generateChecklistFromContext(contextInput)
-              applyAdapted(data2, 'context')
-              return
-            } catch (err2) {
-              if (cancelled) return
-              console.warn('[useChecklistLoad] generateFromContext 실패:', err2?.message ?? err2)
-            }
-          } else {
-            console.warn('[useChecklistLoad] trip 없음 + 로컬 플랜도 없어 context 재시도 불가')
-          }
+          if (await tryContextFallback(`generate-${status}`)) return
         } else {
           console.warn('[useChecklistLoad] generateChecklist 실패:', err1?.message ?? err1)
         }
-        applyFallback(err1?.response?.data?.message || err1?.message)
+        const isTimeout = err1?.code === 'ECONNABORTED' || err1?.message?.includes('timeout')
+        applyFallback(
+          err1?.response?.data?.message ||
+          (isTimeout ? '서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.' : err1?.message)
+        )
       }
     })()
 

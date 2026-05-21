@@ -59,7 +59,7 @@ export default function SearchResultItem({
               </p>
             )}
             {subtitleText ? (
-              <p className="mt-1 lg:mt-1.5 text-sm leading-relaxed text-gray-600">{subtitleText}</p>
+              <p className={`mt-1 lg:mt-1.5 text-sm leading-relaxed text-gray-600${aiRecommended ? '' : ' hidden lg:block'}`}>{subtitleText}</p>
             ) : null}
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function SearchResultItem({
           ) : null}
           <p className="text-sm lg:text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
           {subtitleText ? (
-            <p className="mt-1 lg:mt-1.5 text-xs lg:text-sm leading-relaxed text-gray-600">{subtitleText}</p>
+            <p className={`mt-1 lg:mt-1.5 text-xs lg:text-sm leading-relaxed text-gray-600${aiRecommended ? '' : ' hidden lg:block'}`}>{subtitleText}</p>
           ) : null}
         </div>
       </div>
