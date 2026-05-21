@@ -111,6 +111,7 @@ export function useTripSearchSave({
     setSaveConfirmModalOpen(false)
     setSelectedForSave(new Set())
     sessionStorage.setItem('lastSavedArchiveId', String(archiveEntryId))
+    sessionStorage.removeItem('curationSave')
     navigate('/guide-archives')
   }
 
@@ -157,6 +158,7 @@ export function useTripSearchSave({
     setSaving(false)
     setSaveConfirmModalOpen(false)
     if (created?.id) sessionStorage.setItem('lastSavedArchiveId', String(created.id))
+    sessionStorage.removeItem('curationSave')
     navigate('/guide-archives')
   }
 

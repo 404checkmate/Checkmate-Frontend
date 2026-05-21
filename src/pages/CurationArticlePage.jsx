@@ -501,7 +501,7 @@ function Article({ data, checked, toggle }) {
 /* ════════════════════════════════════════════
    Checklist
 ════════════════════════════════════════════ */
-function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake }) {
+function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, onSave }) {
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
   const total = flatItems.length
   const done = Object.values(checked).filter(Boolean).length
@@ -589,12 +589,13 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake })
 
           {/* Bottom CTA */}
           <div className="cur-reveal px-5 md:px-7 pb-8">
-            <Link
-              to="/trips/new/destination"
+            <button
+              type="button"
+              onClick={onSave}
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
               저장하기
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -766,6 +767,7 @@ function PageFooter() {
    Content (hooks live here — called only when data exists)
 ════════════════════════════════════════════ */
 function CurationArticleContent({ data }) {
+  const navigate = useNavigate()
   const progress = useReadingProgress()
   const [checked, setChecked] = useState({})
   const [shake, setShake] = useState(null)
@@ -794,6 +796,17 @@ function CurationArticleContent({ data }) {
     flatItems.forEach((it) => { next[it.id] = !allOn })
     setChecked(next)
   }, [checked, flatItems])
+
+  const handleCurationSave = useCallback(() => {
+    const checkedItems = flatItems.filter((it) => checked[it.id])
+    sessionStorage.setItem('curationSave', JSON.stringify({
+      items: checkedItems.map((it) => ({ label: it.label, cat: it.cat })),
+      country: data.code,
+      countryName: data.name,
+      timestamp: Date.now(),
+    }))
+    navigate('/trips/guest/search')
+  }, [checked, flatItems, data, navigate])
 
   return (
     <>
@@ -867,6 +880,7 @@ function CurationArticleContent({ data }) {
           onSaveAll={onSaveAll}
           shake={shake}
           setShake={setShake}
+          onSave={handleCurationSave}
         />
 
         <CtaBanner data={data} />
