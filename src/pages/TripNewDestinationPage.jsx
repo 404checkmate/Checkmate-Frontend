@@ -41,14 +41,8 @@ const TRIP_FLOW_PAGE_BG_STYLE = {
   `,
 }
 
-export default function TripNewDestinationPage() {
-  const fromCuration = typeof window !== 'undefined' && !!window.history.state?.usr?.fromCuration
-  if (typeof window !== 'undefined' && window.innerWidth >= 1024 && !fromCuration) {
-    return <Navigate to="/" replace />
-  }
-
+function TripNewDestinationPageInner({ navState }) {
   const navigate = useNavigate()
-  const { state: navState } = useLocation()
 
   // ─── 날짜·스크롤·나라 옵션 훅 ───────────────────────────────────────────────
   const today = useTodaySync()
@@ -739,4 +733,13 @@ export default function TripNewDestinationPage() {
       </div>
     </div>
   )
+}
+
+export default function TripNewDestinationPage() {
+  const { state: navState } = useLocation()
+  const fromCuration = navState?.fromCuration ?? false
+  if (typeof window !== 'undefined' && window.innerWidth >= 1024 && !fromCuration) {
+    return <Navigate to="/" replace />
+  }
+  return <TripNewDestinationPageInner navState={navState} />
 }

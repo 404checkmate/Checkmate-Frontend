@@ -82,7 +82,6 @@ const AppRoutes = () => {
         { path: '/trips/new/step3',       element: <Navigate to="/" replace /> },
         { path: '/trips/new/step4',       element: <Navigate to="/" replace /> },
         { path: '/trips/new/step5',       element: <Navigate to="/" replace /> },
-        { path: '/trips/guest/loading',               element: withSuspense(<TripLoadingPage />) },
         { path: '/trips/guest/search',                element: withSuspense(<TripSearchPage />) },
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
@@ -93,6 +92,7 @@ const AppRoutes = () => {
     },
 
     // 로딩 페이지 - Header/Footer 없는 독립 풀스크린 (RootLayout 미적용)
+    { path: '/trips/guest/loading',   element: withSuspense(<TripLoadingPage />) },
     { path: '/trips/:id/loading', element: <ProtectedRoute>{withSuspense(<TripLoadingPage />)}</ProtectedRoute> },
 
     // 법적 고지 - Header/Footer 없는 단독 페이지 (누구나 접근 가능)
