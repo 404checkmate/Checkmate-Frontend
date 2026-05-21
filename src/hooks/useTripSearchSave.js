@@ -115,6 +115,11 @@ export function useTripSearchSave({
   }
 
   const executeNewArchiveSave = async (itemsToSave) => {
+    if (tripId === 'guest') {
+      setSaveError('여행을 먼저 생성해야 저장할 수 있습니다.')
+      setSaving(false)
+      return
+    }
     const selectedIdSet = new Set(itemsToSave.map((i) => String(i.id)))
     const existingArchives = await fetchTripGuideArchives(tripId)
     const duplicateEntry = existingArchives.find((archive) => {
@@ -186,10 +191,8 @@ export function useTripSearchSave({
 
   const handleSaveButtonClick = async () => {
     if (selectedForSave.size === 0) return
-    if (tripId === 'guest') {
-      setLoginGateOpen(true)
-      return
-    }
+
+    // 로그인 여부를 먼저 확인 (guest 여부와 무관)
     const supabase = getSupabaseClient()
     let isLoggedIn = false
     if (supabase) {
@@ -198,10 +201,20 @@ export function useTripSearchSave({
     } else {
       isLoggedIn = !!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
     }
+
     if (!isLoggedIn) {
       setLoginGateOpen(true)
       return
     }
+
+    // 로그인 상태지만 guest tripId → 여행 생성 위저드로 안내 (curationSave 보존)
+    if (tripId === 'guest') {
+      navigate('/trips/new/destination', {
+        state: { fromCuration: !!sessionStorage.getItem('curationSave') },
+      })
+      return
+    }
+
     setSaveConfirmModalOpen(true)
   }
 

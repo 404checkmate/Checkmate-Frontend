@@ -42,7 +42,8 @@ const TRIP_FLOW_PAGE_BG_STYLE = {
 }
 
 export default function TripNewDestinationPage() {
-  if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+  const fromCuration = typeof window !== 'undefined' && !!window.history.state?.usr?.fromCuration
+  if (typeof window !== 'undefined' && window.innerWidth >= 1024 && !fromCuration) {
     return <Navigate to="/" replace />
   }
 
@@ -446,7 +447,11 @@ export default function TripNewDestinationPage() {
       if (createdTripId) {
         saveActiveTripId(createdTripId)
         trackEvent('trip_creation_completed', { trip_id: createdTripId })
-        navigate(`/trips/${createdTripId}/loading`, { state: { ...baseState, createdTripId } })
+        if (sessionStorage.getItem('curationSave')) {
+          navigate(`/trips/${createdTripId}/search`, { state: { ...baseState, createdTripId, fromCuration: true } })
+        } else {
+          navigate(`/trips/${createdTripId}/loading`, { state: { ...baseState, createdTripId } })
+        }
       } else {
         navigate('/guide-archives', { replace: true })
       }
@@ -502,6 +507,13 @@ export default function TripNewDestinationPage() {
 
         {/* 폼 */}
         <div className="flex-1 px-6 pb-32 pt-14">
+
+          {/* 큐레이션에서 진입 시 안내 배너 */}
+          {navState?.fromCuration && (
+            <div className="mb-4 rounded-xl bg-teal-50 border border-teal-200 px-4 py-3 text-sm text-teal-700 font-medium">
+              ✅ 큐레이션 항목이 저장됩니다. 여행 정보를 입력해주세요!
+            </div>
+          )}
 
           {/* ① 여행지 — 항상 표시 */}
           <div className="mb-5">

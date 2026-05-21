@@ -92,7 +92,7 @@ const vietnam = {
     },
     {
       "name": "배달K",
-      "iconUrl": "https://www.google.com/s2/favicons?domain=deliveryk.com&sz=128",
+      "iconUrl": "",
       "emoji": "🍜",
       "desc": "현지 음식 배달, 마트, 약국까지 한국 업체에서 운영하는 배달 서비스입니다.",
       "storeUrl": "https://www.deliveryk.com"
@@ -155,11 +155,6 @@ const vietnam = {
         "하롱베이 크루즈 예약 (하노이 방문 시)",
         "오토바이 렌트 또는 시클로 투어 확인"
       ]
-    },
-    {
-      "cat": "환전 및 결제",
-      "section": [],
-      "items": []
     },
     {
       "cat": "건강 및 위생",

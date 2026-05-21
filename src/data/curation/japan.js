@@ -93,10 +93,10 @@ const japan = {
     },
     {
       "name": "Safety Tips",
-      "iconUrl": "https://www.google.com/s2/favicons?domain=jnto.go.jp&sz=128",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=apps.apple.com&sz=128",
       "emoji": "🚨",
       "desc": "일본 관광청 공식 앱으로 지진 속보, 쓰나미 경보, 기상 특보를 실시간으로 알려줍니다. 현재 위치에서 가까운 대피소 찾기 기능도 있습니다.",
-      "storeUrl": ""
+      "storeUrl": "https://www.jnto.go.jp/safety-tips/kor/app.html"
     },
     {
       "name": "트래블월렛",

@@ -32,6 +32,34 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
       if (!data?.session?.access_token) return
       if (cancelledRef.current) return
 
+      // curationSave가 있으면 저장된 플랜으로 여행 자동 생성 후 search 직행
+      const rawCuration = sessionStorage.getItem('curationSave')
+      if (rawCuration) {
+        const plan = loadActiveTripPlan()
+        const payload = buildCreateTripPayload(plan, {
+          companionIds: ['alone'],
+          hasPet: false,
+          travelStyleIds: ['healing'],
+        })
+        if (payload) {
+          try {
+            const created = await createTrip(payload)
+            if (cancelledRef.current) return
+            const rawId = created?.id ?? created?.tripId
+            const realId = rawId != null ? String(rawId) : null
+            if (realId) {
+              saveActiveTripId(realId)
+              clearPendingGuestSearch()
+              navigate(`/trips/${realId}/search`, { replace: true })
+              return
+            }
+          } catch (err) {
+            if (cancelledRef.current) return
+            console.warn('[useGuestTripUpgrade] curation trip 생성 실패:', err?.message)
+          }
+        }
+      }
+
       const pending = loadPendingGuestSearch()
       if (!pending?.companionId || !pending?.travelStyleIds?.length) return
 

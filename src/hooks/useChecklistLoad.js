@@ -47,69 +47,69 @@ export function useChecklistLoad(tripId, retryTick) {
       const plan = loadActiveTripPlan()
       const contextInput = buildContextInputFromPlan(plan)
 
-      if (tripId === 'guest') {
-        // 큐레이션 페이지에서 넘어온 경우: sessionStorage에 저장된 체크 항목 + 공통 템플릿으로 체크리스트 구성
-        const rawCuration = sessionStorage.getItem('curationSave')
-        if (rawCuration) {
-          try {
-            const { items: curationItems, countryName } = JSON.parse(rawCuration)
-            const templateGroups = await getGlobalTemplates()
+      // 큐레이션 페이지에서 넘어온 경우: tripId 무관하게 처리 (로그인/비로그인 모두)
+      const rawCuration = sessionStorage.getItem('curationSave')
+      if (rawCuration) {
+        try {
+          const { items: curationItems, countryName } = JSON.parse(rawCuration)
+          const templateGroups = await getGlobalTemplates()
 
-            const builtItems = [
-              // 큐레이션에서 체크한 항목 — AI 추천 탭에 pre-selected 상태로 표시
-              ...curationItems.map((item, i) => ({
-                id: `curation-${i}`,
-                title: item.label,
-                categoryCode: 'ai_recommend',
-                categoryLabel: item.cat,
-                prepType: 'item',
-                baggageType: 'none',
-                source: 'curation',
-                isEssential: false,
-                isSelected: true,
+          const builtItems = [
+            // 큐레이션에서 체크한 항목 — AI 추천 탭에 pre-selected 상태로 표시
+            ...curationItems.map((item, i) => ({
+              id: `curation-${i}`,
+              title: item.label,
+              categoryCode: 'ai_recommend',
+              categoryLabel: item.cat,
+              prepType: 'item',
+              baggageType: 'none',
+              source: 'curation',
+              isEssential: false,
+              isSelected: true,
+              isChecked: false,
+            })),
+            // 공통 기본 템플릿 항목 — 추가 선택 가능 상태로 표시
+            ...templateGroups.flatMap((group) =>
+              group.items.map((item) => ({
+                title: item.title,
+                categoryCode: group.categoryCode,
+                categoryLabel: group.categoryLabel,
+                prepType: item.prepType,
+                baggageType: item.baggageType,
+                source: 'template',
+                isEssential: item.isEssential,
+                isSelected: false,
                 isChecked: false,
-              })),
-              // 공통 기본 템플릿 항목 — 추가 선택 가능 상태로 표시
-              ...templateGroups.flatMap((group) =>
-                group.items.map((item) => ({
-                  title: item.title,
-                  categoryCode: group.categoryCode,
-                  categoryLabel: group.categoryLabel,
-                  prepType: item.prepType,
-                  baggageType: item.baggageType,
-                  source: 'template',
-                  isEssential: item.isEssential,
-                  isSelected: false,
-                  isChecked: false,
-                }))
-              ),
-            ]
+              }))
+            ),
+          ]
 
-            applyAdapted(
-              {
-                items: builtItems,
-                sections: [],
-                summary: {
-                  total: builtItems.length,
-                  fromTemplate: templateGroups.reduce((s, g) => s + g.items.length, 0),
-                  fromLlm: 0,
-                  duplicatesRemoved: 0,
-                  llmTokensUsed: 0,
-                  model: null,
-                  cacheStatus: 'fresh',
-                },
-                context: { destination: countryName ?? '' },
+          applyAdapted(
+            {
+              items: builtItems,
+              sections: [],
+              summary: {
+                total: builtItems.length,
+                fromTemplate: templateGroups.reduce((s, g) => s + g.items.length, 0),
+                fromLlm: 0,
+                duplicatesRemoved: 0,
+                llmTokensUsed: 0,
+                model: null,
+                cacheStatus: 'fresh',
               },
-              'curation',
-            )
-            return
-          } catch (e) {
-            // 파싱 또는 API 실패 시 sessionStorage 제거 후 기존 플로우로 계속
-            sessionStorage.removeItem('curationSave')
-            console.warn('[useChecklistLoad] curation 플로우 실패, 기존 흐름으로 폴백:', e?.message ?? e)
-          }
+              context: { destination: countryName ?? '' },
+            },
+            'curation',
+          )
+          return
+        } catch (e) {
+          // 파싱 또는 API 실패 시 sessionStorage 제거 후 기존 플로우로 계속
+          sessionStorage.removeItem('curationSave')
+          console.warn('[useChecklistLoad] curation 플로우 실패, 기존 흐름으로 폴백:', e?.message ?? e)
         }
+      }
 
+      if (tripId === 'guest') {
         if (contextInput) {
           try {
             const data = await generateChecklistFromContext(contextInput)

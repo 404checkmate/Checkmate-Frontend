@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { Link, useParams, Navigate } from 'react-router-dom'
+import { Link, useParams, Navigate, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import { createTrip } from '@/api/trips'
+import { saveActiveTripId } from '@/utils/activeTripIdStorage'
+import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
+
+// 큐레이션 코드 → 여행 자동생성에 쓸 기본 목적지 정보
+const CURATION_COUNTRY_MAP = {
+  vietnam:  { country: '베트남', countryCode: 'VN', city: '호치민', iata: 'SGN' },
+  japan:    { country: '일본',   countryCode: 'JP', city: '도쿄',   iata: 'NRT' },
+  thailand: { country: '태국',   countryCode: 'TH', city: '방콕',   iata: 'BKK' },
+  usa:      { country: '미국',   countryCode: 'US', city: '로스앤젤레스', iata: 'LAX' },
+}
 const modules = import.meta.glob(
   '/src/data/curation/*.js',
   { eager: true }
@@ -501,7 +513,7 @@ function Article({ data, checked, toggle }) {
 /* ════════════════════════════════════════════
    Checklist
 ════════════════════════════════════════════ */
-function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, onSave }) {
+function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, onSave, saving }) {
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
   const total = flatItems.length
   const done = Object.values(checked).filter(Boolean).length
@@ -592,9 +604,10 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
             <button
               type="button"
               onClick={onSave}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
+              disabled={saving}
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
-              저장하기
+              {saving ? '저장 중...' : '저장하기'}
             </button>
           </div>
         </div>
@@ -675,7 +688,7 @@ function Related({ currentCode }) {
         <ul className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7">
           {others.map((d) => (
             <li key={d.code} className="cur-reveal group">
-              <Link to={`/guide/${d.code}`} className="block">
+              <Link to={`/curation/${d.code}`} className="block">
                 <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4 shadow-sm">
                   <img
                     src={d.photos.hero}
@@ -735,7 +748,7 @@ function PageFooter() {
             <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5">
               {Object.values(DATA_MAP).map((d) => (
                 <li key={d.code}>
-                  <Link to={`/guide/${d.code}`} className="group inline-flex items-baseline gap-2">
+                  <Link to={`/curation/${d.code}`} className="group inline-flex items-baseline gap-2">
                     <span className="text-base">{d.flag}</span>
                     <span className="font-extrabold text-[15px] text-slate-800 group-hover:text-teal-700 transition">{d.name}</span>
                   </Link>
@@ -768,6 +781,7 @@ function PageFooter() {
 ════════════════════════════════════════════ */
 function CurationArticleContent({ data }) {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const progress = useReadingProgress()
   const [checked, setChecked] = useState({})
   const [shake, setShake] = useState(null)
@@ -797,7 +811,10 @@ function CurationArticleContent({ data }) {
     setChecked(next)
   }, [checked, flatItems])
 
-  const handleCurationSave = useCallback(() => {
+  const [curationSaving, setCurationSaving] = useState(false)
+
+  const handleCurationSave = useCallback(async () => {
+    if (curationSaving) return
     const checkedItems = flatItems.filter((it) => checked[it.id])
     sessionStorage.setItem('curationSave', JSON.stringify({
       items: checkedItems.map((it) => ({ label: it.label, cat: it.cat })),
@@ -805,8 +822,58 @@ function CurationArticleContent({ data }) {
       countryName: data.name,
       timestamp: Date.now(),
     }))
-    navigate('/trips/guest/search')
-  }, [checked, flatItems, data, navigate])
+
+    if (!user) {
+      navigate('/trips/guest/search')
+      return
+    }
+
+    // 로그인 → 여행 자동 생성 후 search 페이지 직행 (AI 없이 큐레이션 항목 로드)
+    const dest = CURATION_COUNTRY_MAP[data.code]
+    if (!dest) {
+      navigate('/trips/guest/search')
+      return
+    }
+
+    setCurationSaving(true)
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+      const created = await createTrip({
+        countryCode: dest.countryCode,
+        title: `${dest.country} 여행`,
+        tripStart: today,
+        tripEnd: nextWeek,
+        bookingStatus: 'not_booked',
+        status: 'planning',
+        cities: [{ cityIata: dest.iata, orderIndex: 0, isAutoSynced: false }],
+        flights: [],
+        companions: [{ companionCode: 'alone', hasPet: false }],
+        travelStyles: [{ styleCode: 'healing' }],
+      })
+      const createdId = created?.id ?? created?.tripId
+      if (createdId) {
+        saveActiveTripPlan({
+          destination: { country: dest.country, countryCode: dest.countryCode, city: dest.city, iata: dest.iata },
+          tripStartDate: today,
+          tripEndDate: nextWeek,
+          companion: '혼자',
+          travelStyles: ['힐링'],
+          companionIds: ['alone'],
+          travelStyleIds: ['healing'],
+        })
+        saveActiveTripId(String(createdId))
+        navigate(`/trips/${createdId}/search`, { state: { fromCuration: true } })
+      } else {
+        navigate('/trips/guest/search')
+      }
+    } catch (err) {
+      console.warn('[CurationArticlePage] createTrip 실패:', err?.message)
+      navigate('/trips/guest/search')
+    } finally {
+      setCurationSaving(false)
+    }
+  }, [curationSaving, checked, flatItems, data, navigate, user])
 
   return (
     <>
@@ -881,6 +948,7 @@ function CurationArticleContent({ data }) {
           shake={shake}
           setShake={setShake}
           onSave={handleCurationSave}
+          saving={curationSaving}
         />
 
         <CtaBanner data={data} />
@@ -897,6 +965,6 @@ function CurationArticleContent({ data }) {
 export default function CurationArticlePage() {
   const { country } = useParams()
   const data = DATA_MAP[country]
-  if (!data) return <Navigate to="/guide/vietnam" replace />
+  if (!data) return <Navigate to="/curation/vietnam" replace />
   return <CurationArticleContent key={data.code} data={data} />
 }

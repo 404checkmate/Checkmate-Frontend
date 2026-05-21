@@ -93,24 +93,24 @@ const thailand = {
     },
     {
       "name": "ViaBus",
-      "iconUrl": "https://www.google.com/s2/favicons?domain=viabus.com&sz=128",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=viabus.co&sz=128",
       "emoji": "🚌",
       "desc": "여러 도시의 실시간 대중교통 정보를 확인할 수 있는 뚜벅이 여행자 필수 앱입니다.",
-      "storeUrl": ""
+      "storeUrl": "https://www.viabus.co/"
     },
     {
       "name": "GrabFood & foodpanda",
       "iconUrl": "https://www.google.com/s2/favicons?domain=foodpanda.co.th&sz=128",
       "emoji": "🍜",
       "desc": "현지 음식 배달 주문 시 많이 사용하는 대표 앱입니다.",
-      "storeUrl": ""
+      "storeUrl": "https://food.grab.com/"
     },
     {
       "name": "GLN",
-      "iconUrl": "https://www.google.com/s2/favicons?domain=gln.com&sz=128",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=glninternational.com&sz=128",
       "emoji": "💳",
       "desc": "글로벌 모바일 결제 서비스로, 야시장·마켓·식당·호텔·면세점 등 다양한 곳에서 QR 결제를 지원합니다. 환전 걱정을 덜어주는 필수 앱입니다.",
-      "storeUrl": ""
+      "storeUrl": "https://www.glninternational.com/"
     }
   ],
   "checklist": [
