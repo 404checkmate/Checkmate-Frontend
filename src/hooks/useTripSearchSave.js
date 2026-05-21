@@ -33,6 +33,7 @@ export function useTripSearchSave({
   )
 
   const markItemsSelectedOnServer = (items) => {
+    const VALID_SOURCES = ['template', 'llm', 'user_added']
     const payload = items
       .filter((i) => i.title)
       .map((item, idx) => ({
@@ -40,7 +41,7 @@ export function useTripSearchSave({
         categoryCode: item.subCategory || 'ai_recommend',
         prepType: item.prepType || 'item',
         baggageType: item.baggageType || 'none',
-        source: item.source || 'template',
+        source: VALID_SOURCES.includes(item.source) ? item.source : 'user_added',
         orderIndex: idx,
       }))
     if (payload.length === 0) return
