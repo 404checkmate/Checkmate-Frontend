@@ -175,7 +175,7 @@ function TripSearchInner({ tripId }) {
       const plan = loadActiveTripPlan()
       const hasPet = pending.companionId === 'pets' || pending.companionId === 'withPet'
       const payload = buildCreateTripPayload(plan, {
-        companionId: pending.companionId,
+        companionIds: [pending.companionId],
         hasPet,
         travelStyleIds: pending.travelStyleIds,
       })
