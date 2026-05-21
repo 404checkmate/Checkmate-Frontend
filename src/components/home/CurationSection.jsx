@@ -34,7 +34,7 @@ function CurationCard({ country, index }) {
       }}
     >
       <Link
-        to={`/guide/${country.id}`}
+        to={`/curation/${country.id}`}
         className="block w-full bg-white rounded-2xl p-2 pb-3 shadow-lg shadow-gray-300/50 border border-gray-100 transition-transform active:scale-[0.97]"
       >
         <div className="overflow-hidden rounded-xl aspect-[4/3]">
