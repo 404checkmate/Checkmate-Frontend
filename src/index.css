@@ -138,6 +138,13 @@ body {
 }
 
 /* 온보딩 생년월일 캘린더 — 선택일 (react-day-picker) 틸·시안 그라데이션 (로그인/플로우와 통일) */
+/* 큐레이션 아티클 페이지 — 데스크탑 80% 축소 */
+@media (min-width: 1024px) {
+  html.curation-page {
+    zoom: 0.8;
+  }
+}
+
 .onboarding-birth-calendar-wrap .rdp-selected .rdp-day_button {
   background: linear-gradient(135deg, #14b8a6, #0d9488);
   color: #fff;

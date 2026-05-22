@@ -15,7 +15,7 @@ const thailand = {
       "https://images.unsplash.com/photo-1641209678123-940c6e0f7814?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1624948465027-6f9b51067557?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=900&q=85",
-      "https://plus.unsplash.com/premium_photo-1661766081482-adc2a9ef9535?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1565116314774-29a49764a53d?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1513568720563-6a5b8c6caab3?q=80&w=1444&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://media.istockphoto.com/id/507913346/ko/%EC%82%AC%EC%A7%84/%EC%99%93-%EC%95%84%EB%A3%AC-%EC%82%AC%EC%9B%90-%EC%9D%BC%EB%AA%B0-%EB%B0%A9%EC%BD%95-%ED%83%9C%EA%B5%AD.jpg?s=1024x1024&w=is&k=20&c=AVcGAGYMVMGGagMaiQG-uG3evPr2ddDJDf5PGKQ51xg="
     ]
@@ -68,7 +68,7 @@ const thailand = {
       "icon": "💬",
       "title": "기본 회화",
       "body": "태국어도 성조 언어라 정확한 발음이 어렵지만, 몇 마디만 알아도 현지인이 환하게 웃어줍니다. 문장 끝에 남성은 '크랍(krap)', 여성은 '카(ka)'를 붙이면 공손한 표현이 됩니다.<br/><br/>• 안녕하세요 → สวัสดีครับ/ค่ะ (사왓디 크랍/카)<br/>• 감사합니다 → ขอบคุณครับ/ค่ะ (콥쿤 크랍/카)<br/>• 실례합니다 → ขอโทษครับ/ค่ะ (코 토 크랍/카)<br/>• 얼마예요? → เท่าไหร่ครับ/ค่ะ? (타오 라이 크랍/카?)<br/>• 고수 빼주세요 → ไม่ใส่ผักชีครับ/ค่ะ (마이 사이 팍 치 크랍/카)<br/>• 화장실 어디예요? → ห้องน้ำอยู่ที่ไหน (헝남 유 티 나이 크랍/카?)<br/>• 괜찮습니다 (단호한 거절) → ไม่เอา, ขอบคุณครับ/ค่ะ (마이 아오, 껍 쿤 크랍/카)",
-      "photo": "https://plus.unsplash.com/premium_photo-1661766081482-adc2a9ef9535?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "photo": "https://images.unsplash.com/photo-1565116314774-29a49764a53d?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": null
     },
     {
@@ -120,9 +120,9 @@ const thailand = {
         "notes"
       ],
       "items": [
-        "비자 확인 (한국인 무비자 최대 30일)",
+        "비자 확인",
         "여권 사진 여분 지참",
-        "태국 입국신고서 TDAC 작성 — 출국 3일 전부터 작성 가능, QR 캡쳐 후 저장"
+        "태국 입국신고서 TDAC 작성"
       ]
     },
     {
@@ -131,8 +131,8 @@ const thailand = {
         "apps"
       ],
       "items": [
-        "공항→숙소 교통 수단 확인 (리무진, BTS, 택시 등)",
-        "교통카드 준비 — 래빗카드 구매 또는 현장 일회권 (현금 또는 GLN 결제)",
+        "공항→숙소 교통 수단 확인",
+        "교통카드 준비",
         "그랩(Grab) 앱 설치"
       ]
     },
@@ -162,7 +162,7 @@ const thailand = {
         "money"
       ],
       "items": [
-        "GLN 앱 설치 및 계좌 연결 — 야시장·마켓 QR 결제 필수",
+        "GLN 앱 설치 및 계좌 연결",
         "비상금 별도 보관"
       ]
     },
@@ -172,8 +172,8 @@ const thailand = {
         "health"
       ],
       "items": [
-        "모기 기피제 (뎅기열 주의) ⚠️ 필수",
-        "개인 처방약 충분히 챙기기 (영문 처방전 지참 권장)",
+        "모기 기피제",
+        "개인 처방약 (영문 처방전 지참 권장)",
         "식수는 반드시 생수 구매"
       ]
     },
@@ -184,8 +184,8 @@ const thailand = {
       ],
       "items": [
         "얇고 통기성 좋은 옷 위주로 준비",
-        "사원 방문용 긴 옷 (어깨·무릎 가리는 복장) ⚠️ 필수",
-        "수영 관련 물품 (수영복, 비치웨어, 아쿠아슈즈, 방수팩 등)"
+        "사원 방문용 긴 옷",
+        "수영 용품"
       ]
     },
     {
@@ -195,7 +195,7 @@ const thailand = {
       ],
       "items": [
         "구글 지도 오프라인 저장",
-        "번역 앱 설치 (파파고, 구글 번역)"
+        "번역 앱 설치"
       ]
     },
     {
@@ -204,10 +204,10 @@ const thailand = {
         "notes"
       ],
       "items": [
-        "왕실·종교 관련 예절 숙지 ⚠️ 필수 (왕실 불경죄는 형사처벌 대상)",
+        "왕실·종교 관련 예절 숙지",
         "긴급전화 저장 (경찰 191 / 관광경찰 1155)",
         "한국 대사관 연락처 저장 (+66-2-247-7537)",
-        "주요 태국어 인사말 익히기 (사왓디 크랍/카, 콥쿤 크랍/카)"
+        "주요 태국어 인사말 익히기"
       ]
     }
   ],

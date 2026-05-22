@@ -799,6 +799,11 @@ function CurationArticleContent({ data }) {
     window.scrollTo(0, 0)
   }, [data.code])
 
+  useEffect(() => {
+    document.documentElement.classList.add('curation-page')
+    return () => document.documentElement.classList.remove('curation-page')
+  }, [])
+
   const toggle = useCallback((id) => {
     setChecked((c) => ({ ...c, [id]: !c[id] }))
   }, [])

@@ -122,7 +122,7 @@ const usa = {
   ],
   "checklist": [
     {
-      "cat": "✈️ 입국 · 비자",
+      "cat": "사전 예약 / 신청",
       "section": [
         "notes"
       ],
