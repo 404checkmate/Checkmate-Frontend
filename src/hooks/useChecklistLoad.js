@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import {
   generateChecklist,
   generateChecklistFromContext,
-  getGlobalTemplates,
   listChecklistCandidates,
 } from '@/api/checklists'
 import { adaptGeneratedChecklist } from '@/utils/checklistAdapter'
@@ -52,37 +51,19 @@ export function useChecklistLoad(tripId, retryTick, prefetchedItems = null) {
       if (rawCuration) {
         try {
           const { items: curationItems, countryName } = JSON.parse(rawCuration)
-          const templateGroups = await getGlobalTemplates()
 
-          const builtItems = [
-            // 큐레이션에서 체크한 항목 — AI 추천 탭에 pre-selected 상태로 표시
-            ...curationItems.map((item, i) => ({
-              id: `curation-${i}`,
-              title: item.label,
-              categoryCode: 'ai_recommend',
-              categoryLabel: item.cat,
-              prepType: 'item',
-              baggageType: 'none',
-              source: 'curation',
-              isEssential: false,
-              isSelected: true,
-              isChecked: false,
-            })),
-            // 공통 기본 템플릿 항목 — 추가 선택 가능 상태로 표시
-            ...templateGroups.flatMap((group) =>
-              group.items.map((item) => ({
-                title: item.title,
-                categoryCode: group.categoryCode,
-                categoryLabel: group.categoryLabel,
-                prepType: item.prepType,
-                baggageType: item.baggageType,
-                source: 'template',
-                isEssential: item.isEssential,
-                isSelected: false,
-                isChecked: false,
-              }))
-            ),
-          ]
+          const builtItems = curationItems.map((item, i) => ({
+            id: `curation-${i}`,
+            title: item.label,
+            categoryCode: 'ai_recommend',
+            categoryLabel: item.cat,
+            prepType: 'item',
+            baggageType: 'none',
+            source: 'curation',
+            isEssential: false,
+            isSelected: true,
+            isChecked: false,
+          }))
 
           applyAdapted(
             {
@@ -90,7 +71,7 @@ export function useChecklistLoad(tripId, retryTick, prefetchedItems = null) {
               sections: [],
               summary: {
                 total: builtItems.length,
-                fromTemplate: templateGroups.reduce((s, g) => s + g.items.length, 0),
+                fromTemplate: 0,
                 fromLlm: 0,
                 duplicatesRemoved: 0,
                 llmTokensUsed: 0,
