@@ -418,7 +418,7 @@ function InlineCheckItem({ item, checked, onToggle }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+        <span className={'font-medium text-base leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
           {item.label}
         </span>
       </span>
@@ -588,7 +588,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
+                          <span className={'font-medium text-base leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
                             <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
                           </span>
                         </span>
