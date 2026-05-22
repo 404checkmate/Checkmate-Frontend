@@ -39,7 +39,7 @@ const vietnam = {
       "id": "money",
       "icon": "💰",
       "title": "환전 & 결제",
-      "body": "베트남 화폐는 <strong>동(VND)</strong>입니다. <strong>1만 동</strong>은 <strong>한화 약 550원</strong>입니다.(환율은 수시로 바뀌므로 그때그때 확인이 필요합니다)<br/>베트남은 <strong>현금 사용 비중이 높은 편</strong>입니다. 대형 마트, 쇼핑몰, 호텔은 카드 결제가 가능하지만, 로컬 식당이나 버스, 시장 등은 현금만 받는 경우가 대부분입니다. <strong>소액권(1만 동, 2만 동, 5만 동권)을 넉넉히</strong> 챙겨두면 편리합니다. 환전은 <strong>한국에서 달러로 환전한 뒤 현지에서 동으로 바꾸는 방법</strong>이 가장 환율이 좋습니다. 호치민·하노이 시내의 금은방(골드샵)이나 사설 환전소가 은행보다 환율을 더 잘 쳐줍니다. <br/>카드로는 <strong>트래블월렛, 트래블로그(하나은행), 토스뱅크</strong>가 환전 수수료 없이 편리하게 사용 가능하며, 현지 VPBank·TPBank ATM에서 인출 수수료 없이 사용할 수 있습니다.<br/>  • <strong>트래블로그</strong>: 하나은행 주거래, ATM 출금이 메인<br/>  • <strong>트래블월렛:</strong> 여러 은행 사용, 그랩 및 카드 결제가 많은 경우<br/>  • <strong>토스뱅크</strong>: 별도 환전 과정 없이 결제 캐시백을 중요시하는 경우",
+      "body": "베트남 화폐는 <strong>동(VND)</strong>입니다. <strong>1만 동</strong>은 <strong>한화 약 550원</strong>입니다.(환율은 수시로 바뀌므로 그때그때 확인이 필요합니다) 베트남은 <strong>현금 사용 비중이 높은 편</strong>입니다. 대형 마트, 쇼핑몰, 호텔은 카드 결제가 가능하지만, 로컬 식당이나 버스, 시장 등은 현금만 받는 경우가 대부분입니다. <strong>소액권(1만 동, 2만 동, 5만 동권)을 넉넉히</strong> 챙겨두면 편리합니다. 환전은 <strong>한국에서 달러로 환전한 뒤 현지에서 동으로 바꾸는 방법</strong>이 가장 환율이 좋습니다. 호치민·하노이 시내의 금은방(골드샵)이나 사설 환전소가 은행보다 환율을 더 잘 쳐줍니다. <br/>카드로는 <strong>트래블월렛, 트래블로그(하나은행), 토스뱅크</strong>가 환전 수수료 없이 편리하게 사용 가능하며, 현지 VPBank·TPBank ATM에서 인출 수수료 없이 사용할 수 있습니다.<br/>  • <strong>트래블로그</strong>: 하나은행 주거래, ATM 출금이 메인<br/>  • <strong>트래블월렛:</strong> 여러 은행 사용, 그랩 및 카드 결제가 많은 경우<br/>  • <strong>토스뱅크</strong>: 별도 환전 과정 없이 결제 캐시백을 중요시하는 경우",
       "photo": "https://images.unsplash.com/photo-1495245495572-e43e6db5a478?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",

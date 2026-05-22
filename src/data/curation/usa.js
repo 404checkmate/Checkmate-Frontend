@@ -41,7 +41,7 @@ const usa = {
       "id": "money",
       "icon": "💰",
       "title": "환전 & 결제",
-      "body": "미국 화폐는 <strong>달러(USD)</strong>입니다. 1달러는 한화 약 1,500원입니다. (환율은 수시로 바뀌므로 그때그때 확인이 필요합니다.)<br/>미국은 대부분의 식당, 마트, 쇼핑몰, 주유소에서 <strong>신용·체크카드 결제가 기본</strong>이며, 심지어 길거리 노점상도 카드 단말기를 들고 다니는 경우가 많습니다. <strong>현금</strong>은 팁이나 일부 소규모 상점 이용 시 사용할 정도로 <strong>소액</strong>만 준비해도 충분합니다.<br/>카드는 <strong>트래블월렛</strong>, <strong>트래블로그</strong>(하나은행), <strong>토스뱅크</strong>가 환전 수수료 없이 편리하게 사용 가능합니다. 주거래 은행과 사용 성향에 따라 선택하시면 되며, <strong>환전</strong>이 꼭 필요하다면 <strong>국내 은행에서 달러로 환전</strong>해 가는 것이 미국 현지 환전보다 낫습니다.",
+      "body": "미국 화폐는 <strong>달러(USD)</strong>입니다. 1달러는 한화 약 1,500원입니다. (환율은 수시로 바뀌므로 그때그때 확인이 필요합니다.) 미국은 대부분의 식당, 마트, 쇼핑몰, 주유소에서 <strong>신용·체크카드 결제가 기본</strong>이며, 심지어 길거리 노점상도 카드 단말기를 들고 다니는 경우가 많습니다. <strong>현금</strong>은 팁이나 일부 소규모 상점 이용 시 사용할 정도로 <strong>소액</strong>만 준비해도 충분합니다.<br/>카드는 <strong>트래블월렛</strong>, <strong>트래블로그</strong>(하나은행), <strong>토스뱅크</strong>가 환전 수수료 없이 편리하게 사용 가능합니다. 주거래 은행과 사용 성향에 따라 선택하시면 되며, <strong>환전</strong>이 꼭 필요하다면 <strong>국내 은행에서 달러로 환전</strong>해 가는 것이 미국 현지 환전보다 낫습니다.",
       "photo": "https://images.unsplash.com/photo-1604689598793-b8bf1dc445a1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",
