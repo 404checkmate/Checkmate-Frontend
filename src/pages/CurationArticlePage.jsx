@@ -156,11 +156,11 @@ function Caption({ children }) {
 function Kicker({ idx, label }) {
   return (
     <div className="cur-reveal flex items-center gap-3 mb-5">
-      <span className="text-[10.5px] font-bold tracking-[0.24em] uppercase text-amber-600">
+      <span className="text-xs font-bold tracking-[0.24em] uppercase text-amber-600">
         № {idx}
       </span>
       <span className="h-px flex-1 max-w-[64px] bg-slate-300" />
-      <span className="text-[10.5px] font-bold tracking-[0.22em] uppercase text-slate-500">
+      <span className="text-xs font-bold tracking-[0.22em] uppercase text-slate-500">
         {label}
       </span>
     </div>
@@ -218,6 +218,7 @@ function Hero({ data }) {
         alt=""
         aria-hidden
         className="absolute inset-0 -z-10 h-full w-full object-cover will-change-transform"
+        onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
         style={{
           transform: 'scale(1.08)',
           WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 55%, transparent 100%)',
@@ -238,7 +239,7 @@ function Hero({ data }) {
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 pt-24 pb-36 md:pt-32 md:pb-44 lg:pt-40 lg:pb-52 text-white">
         <div ref={titleRef} className="will-change-transform max-w-3xl">
           <div className="cur-reveal flex flex-wrap items-center gap-3 mb-7">
-            <span className="text-[10.5px] font-bold tracking-[0.24em] uppercase text-amber-300">
+            <span className="text-xs font-bold tracking-[0.24em] uppercase text-amber-300">
               여행 가이드 · {data.name}
             </span>
             <span className="h-px w-10 bg-amber-300/70" />
@@ -285,7 +286,7 @@ function TableOfContents({ sections, activeSection }) {
   return (
     <aside className="w-52 shrink-0 sticky top-24">
       <div className="space-y-1">
-        <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">
           In This Guide
         </div>
         {sections.map((s, i) => (
@@ -303,7 +304,7 @@ function TableOfContents({ sections, activeSection }) {
                 : 'border-slate-100 text-slate-400 hover:text-slate-700'
             }`}
           >
-            <span className="mr-1.5 text-[10px] text-slate-300">
+            <span className="mr-1.5 text-xs text-slate-300">
               {String(i + 1).padStart(2, '0')}
             </span>
             {s.title}
@@ -354,10 +355,10 @@ function AppCard({ a, i }) {
             <div className="text-[17px] font-extrabold leading-tight text-slate-900">{a.name}</div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[11px] font-bold text-slate-400">
+            <span className="text-xs font-bold text-slate-400">
               {open ? '닫기' : '상세보기'}
             </span>
-            <span className={'text-slate-400 transition-transform duration-200 inline-block text-[11px] ' + (open ? 'rotate-180' : '')}>
+            <span className={'text-slate-400 transition-transform duration-200 inline-block text-xs ' + (open ? 'rotate-180' : '')}>
               ▾
             </span>
           </div>
@@ -373,7 +374,7 @@ function AppCard({ a, i }) {
                 href={a.storeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-teal-700 hover:text-teal-500"
+                className="inline-flex items-center gap-1.5 text-xs font-extrabold tracking-wide text-teal-700 hover:text-teal-500"
               >
                 <span>설치하러 가기</span>
                 <span aria-hidden className="text-amber-500">→</span>
@@ -485,7 +486,7 @@ function Article({ data, checked, toggle }) {
                       const gi = data.checklist.findIndex((g) => g.cat === group.cat)
                       return (
                         <div key={group.cat} className="mb-3 last:mb-0">
-                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10.5px] font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
+                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
                           {group.items.map((label, ii) => {
                             const id = `${gi}-${ii}`
                             return (
@@ -557,7 +558,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
           <div className="px-5 md:px-7 mt-6 pb-7">
             {allGroups.map((group) => (
               <div key={group.cat} className="mb-6 last:mb-0">
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10.5px] font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">
                   {group.cat}
                 </div>
                 <ul>
@@ -624,7 +625,7 @@ function CtaBanner({ data }) {
   const bgImg = data.photos.sections[data.photos.sections.length - 1] || data.photos.hero
   return (
     <section className="relative overflow-hidden">
-      <img src={bgImg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+      <img src={bgImg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
       <div
         className="absolute inset-0"
         style={{ background: 'linear-gradient(135deg, rgba(17,94,89,0.88) 0%, rgba(15,118,110,0.78) 50%, rgba(7,89,133,0.88) 100%)' }}
@@ -633,7 +634,7 @@ function CtaBanner({ data }) {
       <div className="relative mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-20 md:py-28 text-white">
         <div className="cur-reveal grid md:grid-cols-12 gap-10 items-end">
           <div className="md:col-span-8">
-            <div className="text-[10.5px] font-bold tracking-[0.26em] uppercase text-amber-300 mb-5">
+            <div className="text-xs font-bold tracking-[0.26em] uppercase text-amber-300 mb-5">
               나만의 {data.name}, 메이트가 함께
             </div>
             <h2 className="font-extrabold text-[2rem] md:text-[3.4rem] leading-[1.1] tracking-tight max-w-[16ch]">
@@ -674,7 +675,7 @@ function Related({ currentCode }) {
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-20 md:py-28">
         <div className="cur-reveal flex items-end justify-between mb-10 md:mb-14 gap-6">
           <div>
-            <div className="text-[10.5px] font-bold tracking-[0.26em] uppercase text-amber-600 mb-3">
+            <div className="text-xs font-bold tracking-[0.26em] uppercase text-amber-600 mb-3">
               Keep reading · 함께 보면 좋은 글
             </div>
             <h2 className="font-extrabold text-[1.9rem] md:text-[2.6rem] leading-[1.1] tracking-tight text-slate-900 max-w-[20ch]">
@@ -709,7 +710,7 @@ function Related({ currentCode }) {
                 <h3 className="text-[14.5px] md:text-[16px] leading-tight font-extrabold text-slate-900 group-hover:text-teal-700 transition">
                   {d.hero.title}
                 </h3>
-                <div className="mt-1 text-[11.5px] font-semibold text-slate-500">
+                <div className="mt-1 text-xs font-semibold text-slate-500">
                   {d.cities.slice(0, 3).join(' · ')}
                 </div>
               </Link>
@@ -742,7 +743,7 @@ function PageFooter() {
             </p>
           </div>
           <div className="md:col-span-4">
-            <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
+            <div className="text-xs font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
               국가별 여행 가이드
             </div>
             <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5">
@@ -757,7 +758,7 @@ function PageFooter() {
             </ul>
           </div>
           <div className="md:col-span-3">
-            <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
+            <div className="text-xs font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
               About
             </div>
             <ul className="space-y-2.5 text-[13px] text-gray-700">
@@ -767,7 +768,7 @@ function PageFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-[11.5px] text-slate-500">
+        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
           <span>© 2026 CHECKMATE</span>
           <span className="font-medium">Travel Guide · 2026.05</span>
         </div>
