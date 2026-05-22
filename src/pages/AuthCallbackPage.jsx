@@ -87,16 +87,7 @@ export default function AuthCallbackPage() {
       const pending = loadPendingTripSubmit()
       if (pending) {
         clearPendingTripSubmit()
-        navigate('/trips/new/step5', {
-          replace: true,
-          state: {
-            ...pending.locationState,
-            step5Restored: {
-              companionId: pending.companionId,
-              styleIds: pending.styleIds,
-            },
-          },
-        })
+        navigate('/', { replace: true })
         return
       }
 

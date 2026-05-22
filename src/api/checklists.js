@@ -49,6 +49,19 @@ export async function getGenerateStatus(tripId) {
   return res.data
 }
 
+/**
+ * 전세계 공통 기본 템플릿 목록 조회.
+ *
+ *   GET /api/checklists/templates/global
+ *
+ * 응답: [{ categoryCode, categoryLabel, items: [{ id, title, prepType, baggageType, isEssential }] }]
+ * 비로그인 허용 — 큐레이션 페이지 저장하기 흐름에서 사용.
+ */
+export async function getGlobalTemplates() {
+  const res = await apiClient.get('/checklists/templates/global')
+  return res.data
+}
+
 export async function generateChecklistFromContext(ctx) {
   const res = await apiClient.post('/checklists/generate-from-context', ctx, { timeout: 35000 })
   return res.data

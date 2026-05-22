@@ -1,5 +1,6 @@
 import SearchResultItem from './SearchResultItem'
 import { buildSuppliesSubsections } from '@/utils/tripSearchUtils'
+import { isInExistingArchive } from '@/hooks/useArchiveEntry'
 
 function LoadingSkeleton() {
   return (
@@ -19,7 +20,7 @@ function LoadingSkeleton() {
 }
 
 function CategoryGroupCard({ group, selectedForSave, existingArchiveItemIds, onToggleSelectAllInGroup, onToggleItem }) {
-  const selectableInGroup = group.items.filter((i) => !existingArchiveItemIds.has(String(i.id)))
+  const selectableInGroup = group.items.filter((i) => !isInExistingArchive(i, existingArchiveItemIds))
   const allInGroupSelected =
     selectableInGroup.length > 0 &&
     selectableInGroup.every((i) => selectedForSave.has(String(i.id)))
@@ -54,7 +55,7 @@ function CategoryGroupCard({ group, selectedForSave, existingArchiveItemIds, onT
                     item={item}
                     aiRecommended={Boolean(item.isAiRecommended)}
                     selected={selectedForSave.has(String(item.id))}
-                    inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+                    inArchiveAlready={isInExistingArchive(item, existingArchiveItemIds)}
                     onToggle={() => onToggleItem(item)}
                   />
                 ))}
@@ -70,7 +71,7 @@ function CategoryGroupCard({ group, selectedForSave, existingArchiveItemIds, onT
               item={item}
               aiRecommended={Boolean(item.isAiRecommended)}
               selected={selectedForSave.has(String(item.id))}
-              inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+              inArchiveAlready={isInExistingArchive(item, existingArchiveItemIds)}
               onToggle={() => onToggleItem(item)}
             />
           ))}
@@ -144,7 +145,7 @@ export default function TripSearchItemsList({
                     item={item}
                     aiRecommended={Boolean(item.isAiRecommended)}
                     selected={selectedForSave.has(String(item.id))}
-                    inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+                    inArchiveAlready={isInExistingArchive(item, existingArchiveItemIds)}
                     onToggle={() => onToggleItem(item)}
                   />
                 ))}
@@ -160,7 +161,7 @@ export default function TripSearchItemsList({
               item={item}
               aiRecommended={Boolean(item.isAiRecommended)}
               selected={selectedForSave.has(String(item.id))}
-              inArchiveAlready={existingArchiveItemIds.has(String(item.id))}
+              inArchiveAlready={isInExistingArchive(item, existingArchiveItemIds)}
               onToggle={() => onToggleItem(item)}
             />
           ))}

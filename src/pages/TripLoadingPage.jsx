@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { generateChecklist, getGenerateStatus } from '@/api/checklists'
+import { generateChecklist, getGenerateStatus, generateChecklistFromContext } from '@/api/checklists'
+import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { buildContextInputFromPlan } from '@/utils/tripSearchUtils'
 import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
@@ -9,7 +11,6 @@ import {
   TIPS,
   LOADING_ICON_PATHS,
   BLUR_ORBS,
-  BRAND_DOTS,
 } from '@/mocks/loadingData'
 import loadingWordMatePng from '@/assets/loading-word-mate-user-latest.png'
 import loadingWordChecklistPng from '@/assets/loading-word-checklist-user-latest.png'
@@ -56,24 +57,75 @@ function TripLoadingPage() {
       return
     }
 
-    // guest 흐름: generateChecklist 호출 없이 애니메이션만 완료 후 이동
+    // guest 흐름: generateChecklistFromContext를 애니메이션과 병렬 실행 후 이동
     if (isGuest) {
+      // curationSave 흐름은 templates를 직접 구성하므로 generate 불필요
+      const hasCuration = !!sessionStorage.getItem('curationSave')
+
+      if (hasCuration) {
+        const interval = setInterval(() => {
+          setProgress((prev) => {
+            const next = prev + (prev < 70 ? 1.2 : 0.7)
+            if (next >= 100) {
+              clearInterval(interval)
+              setProgress(100)
+              setTimeout(() => {
+                navigate('/trips/guest/search', { state: location.state, replace: true })
+              }, 600)
+            }
+            return Math.min(next, 100)
+          })
+        }, 50)
+        return () => clearInterval(interval)
+      }
+
+      let cancelled = false
+      let progressDone = false
+      let generateDone = false
+      let generatedData = null
+
+      const tryNavigate = () => {
+        if (progressDone && generateDone) {
+          navigate('/trips/guest/search', {
+            state: { ...location.state, prefetchedItems: generatedData },
+            replace: true,
+          })
+        }
+      }
+
       const interval = setInterval(() => {
         setProgress((prev) => {
-          const next = prev + (prev < 70 ? 1.2 : 0.7)
+          const cap = generateDone ? 100 : 95
+          const speed = prev < 70 ? 1.2 : prev < 90 ? 0.7 : 0.15
+          const next = Math.min(prev + speed, cap)
           if (next >= 100) {
             clearInterval(interval)
-            setProgress(100)
-            setTimeout(() => {
-              navigate('/trips/guest/search', { state: location.state, replace: true })
-            }, 600)
+            setTimeout(() => { progressDone = true; tryNavigate() }, 600)
           }
-          return Math.min(next, 100)
+          return next
         })
       }, 50)
-      return () => clearInterval(interval)
+
+      const runGuestGenerate = async () => {
+        try {
+          const plan = loadActiveTripPlan()
+          const contextInput = buildContextInputFromPlan(plan)
+          if (contextInput) {
+            const data = await generateChecklistFromContext(contextInput)
+            if (!cancelled) generatedData = data
+          }
+        } catch {
+          // 실패 시 prefetch 없이 이동 — guest/search에서 자체 재시도
+        } finally {
+          if (!cancelled) { generateDone = true; tryNavigate() }
+        }
+      }
+
+      runGuestGenerate()
+      return () => { clearInterval(interval); cancelled = true }
     }
 
+    let cancelled = false
     let progressDone = false
     let generateDone = false
 
@@ -86,50 +138,46 @@ function TripLoadingPage() {
 
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + (prev < 70 ? 1.2 : 0.7)
+        // 95% 이후로는 generateDone 될 때까지 천천히 대기
+        const cap = generateDone ? 100 : 95
+        const speed = prev < 70 ? 1.2 : prev < 90 ? 0.7 : 0.15
+        const next = Math.min(prev + speed, cap)
         if (next >= 100) {
           clearInterval(interval)
-          setProgress(100)
-          setTimeout(() => {
-            progressDone = true
-            tryNavigate()
-          }, 600)
+          setTimeout(() => { progressDone = true; tryNavigate() }, 600)
         }
-        return Math.min(next, 100)
+        return next
       })
     }, 50)
 
-    generateChecklist(id).catch((err) => {
-      console.error('[TripLoadingPage] generate 킥오프 실패:', err)
-      setGenerateError(true)
-    })
-
-    const pollStatus = async () => {
-      const MAX_WAIT = 30000
-      const INTERVAL = 2000
-      const startTime = Date.now()
-
-      while (Date.now() - startTime < MAX_WAIT) {
-        try {
-          const res = await getGenerateStatus(id)
-          if (res.status === 'completed') {
-            generateDone = true
-            tryNavigate()
-            return
+    const runGenerate = async () => {
+      try {
+        await generateChecklist(id)  // 202: 백그라운드 생성 트리거
+        // 생성 완료까지 폴링 (최대 32s, 2s 간격)
+        const MAX_WAIT = 32000
+        const POLL_MS = 2000
+        const started = Date.now()
+        while (!cancelled && Date.now() - started < MAX_WAIT) {
+          await new Promise((r) => setTimeout(r, POLL_MS))
+          if (cancelled) break
+          try {
+            const status = await getGenerateStatus(id)
+            if (status?.status === 'completed') break
+          } catch {
+            break
           }
-        } catch {
-          // polling 에러 무시 — 타임아웃까지 계속 시도
         }
-        await new Promise(r => setTimeout(r, INTERVAL))
+      } catch (err) {
+        console.error('[TripLoadingPage] generate 실패:', err)
+        setGenerateError(true)
+      } finally {
+        if (!cancelled) { generateDone = true; tryNavigate() }
       }
-      // 30초 초과 시 TripSearchPage에서 재시도 가능하도록 그냥 이동
-      generateDone = true
-      tryNavigate()
     }
 
-    pollStatus()
+    runGenerate()
 
-    return () => clearInterval(interval)
+    return () => { clearInterval(interval); cancelled = true }
   }, [id, isGuest, navigate, location.state])
 
   const pct = Math.round(progress)
@@ -160,11 +208,6 @@ function TripLoadingPage() {
           }}
         />
       ))}
-      {/* 모바일 데코 아이콘 (온도계 실루엣) */}
-      <div className="md:hidden absolute top-6 left-4 opacity-10 pointer-events-none">
-        <SvgIcon name="thermometer" className="w-24 h-24 text-cyan-400" />
-      </div>
-
       {/* ══════════════════════════════════
           본문 컨텐츠 (relative z-10)
       ══════════════════════════════════ */}
@@ -277,15 +320,7 @@ function TripLoadingPage() {
       </div>
 
       {/* ── 하단 브랜딩 ── */}
-      <div className="absolute bottom-8 flex flex-col items-center gap-2 z-10">
-        <div className="flex items-center gap-1.5">
-          {BRAND_DOTS.map((dot) => (
-            <span
-              key={dot.id}
-              className={`w-1.5 h-1.5 rounded-full ${dot.color} ${dot.desktopOnly ? 'hidden md:block' : ''}`}
-            />
-          ))}
-        </div>
+      <div className="absolute bottom-8 flex flex-col items-center z-10">
         <BrandLogo className="h-5 w-auto opacity-95" />
       </div>
 

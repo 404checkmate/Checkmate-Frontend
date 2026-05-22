@@ -33,7 +33,7 @@ export function saveItemForTrip(tripId, item) {
     id: item.id,
     category: item.category,
     title: item.title,
-    subtitle: item.subtitle ?? item.description ?? '',
+    subtitle: item.subtitle ?? '',
     checked: false,
     savedAt: new Date().toISOString(),
   }
@@ -130,7 +130,7 @@ export function saveItemsForTrip(tripId, items) {
       id: item.id,
       category: item.category,
       title: item.title,
-      subtitle: item.detail || item.description || '',
+      subtitle: '',
     })
   })
 
@@ -138,7 +138,7 @@ export function saveItemsForTrip(tripId, items) {
     .filter((i) => i.subCategory && i.prepType && i.baggageType && i.source && i.title)
     .map((i, idx) => ({
       title: i.title,
-      description: i.description || undefined,
+      description: undefined,
       categoryCode: i.subCategory,
       prepType: i.prepType,
       baggageType: i.baggageType,
