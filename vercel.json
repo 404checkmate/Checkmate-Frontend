@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://api.checkmate-v.com/:path*" },
+    { "source": "/api/:path*", "destination": "https://api.checkmate-v.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
