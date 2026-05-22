@@ -185,7 +185,6 @@ async function main() {
     const data = {
       code,
       flag:   getText(p.flag),
-      // Title 타입은 rich_text와 다르게 파싱
       name:   p['Name']?.title?.[0]?.plain_text
            ?? p['이름']?.title?.[0]?.plain_text
            ?? '',

@@ -479,7 +479,6 @@ function Article({ data, checked, toggle }) {
 
                 {relatedGroups.length > 0 && (
                   <div className="mt-3 rounded-xl bg-white border border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-400 mb-3">이 섹션 체크리스트</div>
                     {relatedGroups.map((group) => {
                       const gi = data.checklist.findIndex((g) => g.cat === group.cat)
                       return (
