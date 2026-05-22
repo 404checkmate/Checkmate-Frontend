@@ -696,8 +696,8 @@ function Related({ currentCode }) {
                     src={d.photos.hero}
                     alt={d.name}
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                      e.currentTarget.parentElement?.classList.add('img-error')
+                      e.target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&q=85'
+                      e.target.onerror = null
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />

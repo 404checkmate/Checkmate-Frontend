@@ -64,10 +64,17 @@ body {
   font-family: 'SeoulNotice', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  text-rendering: geometricPrecision;
   font-synthesis: none;
   color: #111827;
   background-color: #ffffff;
+}
+
+*,
+*::before,
+*::after {
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
 }
 
 /*
