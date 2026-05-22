@@ -35,6 +35,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 웹(데스크탑)에서 전체 화면 80% 비율로 표시 */
+@media (min-width: 1024px) {
+  html {
+    zoom: 0.8;
+  }
+}
+
 /*
  * 홈(/) 랜딩 전용 — HomePage 에서 documentElement 에 `home-page-scroll-snap` 클래스를 붙일 때만 적용.
  * 휠/스와이프 시 한 번에 한 섹션 단위로 멈춤 (scroll-snap-stop: always 는 섹션에 지정).

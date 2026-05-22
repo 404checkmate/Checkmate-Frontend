@@ -178,13 +178,13 @@ function SectionH2({ children }) {
 function TipBox({ icon, body }) {
   return (
     <aside className="cur-reveal relative my-5 rounded-2xl border border-sky-200 bg-sky-50/80 px-6 py-5">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-        <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-1.5">
           <span className="text-xl">{icon}</span>
           <span className="text-xs font-extrabold text-teal-600">Mate Tip!</span>
         </div>
         <p
-          className="font-extrabold text-[17px] md:text-[19px] leading-[1.55] text-sky-900"
+          className="font-medium text-[16px] md:text-[17px] leading-[1.65] text-sky-900"
           dangerouslySetInnerHTML={{ __html: body }}
         />
       </div>
@@ -246,9 +246,11 @@ function Hero({ data }) {
           </div>
 
           <h1 className="cur-reveal font-extrabold leading-[1.1] tracking-[-0.01em] text-[2.4rem] sm:text-[3rem] md:text-[4.4rem] lg:text-[5.2rem]">
-            {data.hero.title.replace(/[🌴🗼🐘🗽]/gu, '').trim()}
+            {data.hero.title.replace(/[🌴🗼🐘🗽]/gu, '').trim().split('\n').map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            ))}
           </h1>
-          <p className="cur-reveal mt-6 max-w-2xl font-medium text-[16px] md:text-[19px] leading-relaxed text-white/90">
+          <p className="cur-reveal mt-6 max-w-2xl lg:max-w-none font-medium text-[16px] md:text-[19px] leading-relaxed text-white/90">
             {data.hero.subtitle}
           </p>
         </div>

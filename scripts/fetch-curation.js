@@ -1,11 +1,41 @@
 import 'dotenv/config'
 import { Client } from '@notionhq/client'
-import { writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'fs'
-import { join, dirname } from 'path'
+import { writeFileSync, mkdirSync, readdirSync, unlinkSync, existsSync } from 'fs'
+import { join, dirname, extname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_DIR = join(__dirname, '../src/data/curation')
+const ICONS_DIR = join(__dirname, '../public/curation-icons')
+
+/* ── Notion 서명 URL 감지 (업로드 파일은 ~1시간 후 만료) ── */
+function isNotionHostedUrl(url) {
+  return (
+    url.includes('secure.notion-static.com') ||
+    url.includes('prod-files-secure.s3') ||
+    url.includes('s3.us-west-2.amazonaws.com')
+  )
+}
+
+/* ── Notion 파일 URL을 public/curation-icons/ 에 저장하고 로컬 경로 반환 ── */
+async function saveIconLocally(url, name) {
+  mkdirSync(ICONS_DIR, { recursive: true })
+  const slug = name.toLowerCase().replace(/[^a-z0-9가-힣]/g, '-').replace(/-+/g, '-')
+  const ext = extname(url.split('?')[0]) || '.png'
+  const filename = `${slug}${ext}`
+  const dest = join(ICONS_DIR, filename)
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const buf = await res.arrayBuffer()
+    writeFileSync(dest, Buffer.from(buf))
+    console.log(`   🖼  Saved icon → public/curation-icons/${filename}`)
+    return `/curation-icons/${filename}`
+  } catch (err) {
+    console.warn(`   ⚠️  아이콘 다운로드 실패 (${name}): ${err.message} — 원본 URL 유지`)
+    return url
+  }
+}
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY })
 
@@ -153,16 +183,21 @@ async function main() {
 
     /* ── apps ── */
     const appPages = await fetchRelated(DB.apps, page.id)
-    const apps = appPages.map((ap) => {
+    const apps = await Promise.all(appPages.map(async (ap) => {
       const a = ap.properties
+      const name = getText(a.Name)
+      let iconUrl = getUrl(a.iconUrl)
+      if (iconUrl && isNotionHostedUrl(iconUrl)) {
+        iconUrl = await saveIconLocally(iconUrl, name)
+      }
       return {
-        name:     getText(a.Name),
-        iconUrl:  getUrl(a.iconUrl),
+        name,
+        iconUrl,
         emoji:    getText(a.emoji),
         desc:     getText(a.desc),
         storeUrl: getUrl(a.storeUrl),
       }
-    })
+    }))
 
     /* ── checklist ── */
     const checklistPages = await fetchRelated(DB.checklist, page.id)
