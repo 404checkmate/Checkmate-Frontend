@@ -589,7 +589,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={'font-medium text-base leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
+                          <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
                             <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
                           </span>
                         </span>
@@ -912,6 +912,8 @@ function CurationArticleContent({ data }) {
 
         .cur-strike-line { background-image: linear-gradient(currentColor, currentColor); background-position: 0 50%; background-size: 0% 1.5px; background-repeat: no-repeat; transition: background-size .35s ease; }
         .cur-strike-on { background-size: 100% 1.5px; }
+
+        .cur-checklist-item { word-break: break-word; overflow-wrap: break-word; }
 
 .cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; word-break: normal; overflow-wrap: break-word; }
         @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
