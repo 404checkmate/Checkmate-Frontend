@@ -61,7 +61,7 @@ html {
 body {
   margin: 0;
   overflow-x: hidden;
-  font-family: 'SeoulNotice', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'SeoulNotice', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
