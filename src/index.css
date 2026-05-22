@@ -5,24 +5,28 @@
   src: url('/fonts/SeoulAlrimTTF-Medium.woff2') format('woff2');
   font-weight: 500;
   font-display: swap;
+  font-synthesis: none;
 }
 @font-face {
   font-family: 'SeoulNotice';
   src: url('/fonts/SeoulAlrimTTF-Bold.woff2') format('woff2');
   font-weight: 700;
   font-display: swap;
+  font-synthesis: none;
 }
 @font-face {
   font-family: 'SeoulNotice';
   src: url('/fonts/SeoulAlrimTTF-ExtraBold.woff2') format('woff2');
   font-weight: 800;
   font-display: swap;
+  font-synthesis: none;
 }
 @font-face {
   font-family: 'SeoulNotice';
   src: url('/fonts/SeoulAlrimTTF-Heavy.woff2') format('woff2');
   font-weight: 900;
   font-display: swap;
+  font-synthesis: none;
 }
 
 *,
@@ -66,6 +70,8 @@ body {
   font-family: 'SeoulNotice', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
   color: #111827;
   background-color: #ffffff;
 }
