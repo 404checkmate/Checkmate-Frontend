@@ -1,61 +1,23 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  COUNTRY_ARRIVAL_OPTIONS,
   filterArrivalsByQuery,
   getArrivalsForCountry,
   sanitizeCountryInput,
   sanitizeArrivalInput,
 } from '@/mocks/tripNewDestinationData'
 import {
-  COMPANIONS,
-  TRAVEL_STYLES,
   STEP5_ICON_PATHS,
   STEP5_ICON_COMPOSITE,
 } from '@/mocks/tripNewStep5Data'
-import { listCountries, listCities, listCompanionTypes, listTravelStyles } from '@/api/master'
 import DestinationMobileRangeCalendar from '@/components/trip/DestinationMobileRangeCalendar'
-import { saveActiveTripPlan, loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
-import { saveActiveTripId, clearActiveTripId } from '@/utils/activeTripIdStorage'
-import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
-import { createTrip } from '@/api/trips'
-import { resolveAccessToken } from '@/api/client'
-import { trackEvent } from '@/utils/analyticsTracker'
+import { useDesktopSearchSubmit } from '@/hooks/useDesktopSearchSubmit'
+import { useSearchBarMasterData } from '@/hooks/useSearchBarMasterData'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function getLocalDateYYYYMMDD() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-function buildCountryArrivalOptions(countries, cities) {
-  const citiesByCountryId = {}
-  for (const city of cities) {
-    const key = String(city.countryId)
-    if (!citiesByCountryId[key]) citiesByCountryId[key] = []
-    citiesByCountryId[key].push(city)
-  }
-  return countries.map((country) => {
-    const mockEntry = COUNTRY_ARRIVAL_OPTIONS.find((m) => m.countryCode === country.code)
-    const countryCities = (citiesByCountryId[String(country.id)] ?? []).filter((c) => c.iataCode)
-    const primaryCity = countryCities[0]
-    return {
-      name: country.nameKo,
-      aliases: mockEntry?.aliases ?? [],
-      iata: primaryCity?.iataCode ?? mockEntry?.iata ?? '',
-      city: primaryCity?.nameKo ?? mockEntry?.city ?? '',
-      country: country.nameKo,
-      countryCode: country.code,
-      arrivals: countryCities.length > 0
-        ? countryCities.map((c) => ({
-            city: c.nameKo,
-            iata: c.iataCode,
-            aliases: mockEntry?.arrivals?.find((a) => a.iata === c.iataCode)?.aliases ?? [],
-          }))
-        : (mockEntry?.arrivals ?? []),
-    }
-  })
 }
 
 function countryRowWithoutArrivals(row) {
@@ -465,7 +427,6 @@ const POPULAR_CITY_DESTINATIONS = [
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function DesktopHomeSearchBar() {
-  const navigate = useNavigate()
   const containerRef = useRef(null)
   const [activeSection, setActiveSection] = useState(null)
 
@@ -474,7 +435,6 @@ export default function DesktopHomeSearchBar() {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [pickerPhase, setPickerPhase] = useState('country')
   const [draftCountry, setDraftCountry] = useState(null)
-  const [countryOptions, setCountryOptions] = useState(COUNTRY_ARRIVAL_OPTIONS)
 
   // Dates
   const [startDate, setStartDate] = useState('')
@@ -485,46 +445,19 @@ export default function DesktopHomeSearchBar() {
   const [additionalDests, setAdditionalDests] = useState([])
   const [additionalInput, setAdditionalInput] = useState('')
 
-  // Companion
+  // Companion / style selection
   const [companionIds, setCompanionIds] = useState([])
-  const [companions, setCompanions] = useState(COMPANIONS)
-
-  // Travel style
   const [styleIds, setStyleIds] = useState([])
-  const [travelStyles, setTravelStyles] = useState(TRAVEL_STYLES)
 
-  // Submit
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState('')
+  // Master data (countries, companions, travel styles) from API
+  const { countryOptions, companions, travelStyles } = useSearchBarMasterData()
 
-  useEffect(() => {
-    let cancelled = false
-    Promise.all([listCountries(), listCities({ onlyServed: true })])
-      .then(([countries, cities]) => {
-        if (cancelled) return
-        setCountryOptions(buildCountryArrivalOptions(countries, cities))
-      })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    Promise.all([listCompanionTypes(), listTravelStyles()])
-      .then(([apiCompanions, apiStyles]) => {
-        if (cancelled) return
-        setCompanions(apiCompanions.map((c) => {
-          const mock = COMPANIONS.find((m) => m.id === c.code)
-          return { id: c.code, label: c.labelKo, description: mock?.description ?? '', icon: mock?.icon ?? 'person' }
-        }))
-        setTravelStyles(apiStyles.map((s) => {
-          const mock = TRAVEL_STYLES.find((m) => m.id === s.code)
-          return { id: s.code, label: s.labelKo, iconSrc: mock?.iconSrc }
-        }))
-      })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [])
+  // Submit logic
+  const { handleSearch: _handleSearch, submitting, submitError, canSubmit } = useDesktopSearchSubmit({
+    selectedCountry, startDate, endDate, additionalDests,
+    companionIds, companions, styleIds, travelStyles,
+  })
+  const handleSearch = () => { setActiveSection(null); return _handleSearch() }
 
   useEffect(() => {
     function handlePointerDown(e) {
@@ -650,88 +583,6 @@ export default function DesktopHomeSearchBar() {
   const confirmExtraDests = () => {
     setAdditionalInput('')
     setActiveSection(null)
-  }
-
-  const canSubmit = Boolean(selectedCountry) && startDate && endDate && companionIds.length >= 1 && styleIds.length >= 1 && !submitting
-
-  const handleSearch = async () => {
-    if (!canSubmit || !selectedCountry) return
-    setSubmitError('')
-    setActiveSection(null)
-    setSubmitting(true)
-
-    try {
-      trackEvent('cta_click', { button: 'desktop_home_search', destination: selectedCountry.city })
-
-      const hasPet = companionIds.some((id) => id === 'pets' || id === 'withPet')
-      const companionLabel = companions.filter((c) => companionIds.includes(c.id)).map((c) => c.label).join(', ') || null
-      const travelStyleLabels = travelStyles.filter((s) => styleIds.includes(s.id)).map((s) => s.label)
-
-      saveActiveTripPlan({
-        destination: {
-          iata: selectedCountry.iata,
-          city: selectedCountry.city,
-          country: selectedCountry.country,
-          countryCode: selectedCountry.countryCode,
-        },
-        tripStartDate: startDate,
-        tripEndDate: endDate,
-        additionalDestinations: additionalDests,
-        companion: companionLabel,
-        hasPet,
-        travelStyles: travelStyleLabels,
-        companionIds,
-        travelStyleIds: styleIds,
-      })
-
-      const step5State = { companionIds, travelStyleIds: styleIds }
-      const baseState = {
-        destination: {
-          iata: selectedCountry.iata,
-          city: selectedCountry.city,
-          country: selectedCountry.country,
-          countryCode: selectedCountry.countryCode,
-        },
-        fromDestinationPage: true,
-        tripStartDate: startDate,
-        tripEndDate: endDate,
-        additionalDestinations: additionalDests,
-        step5: step5State,
-      }
-
-      const token = await resolveAccessToken()
-      if (!token) {
-        navigate('/trips/guest/loading', { state: baseState })
-        return
-      }
-
-      const plan = loadActiveTripPlan()
-      const payload = buildCreateTripPayload(plan, { companionIds, hasPet, travelStyleIds: styleIds })
-
-      if (!payload) {
-        setSubmitError('여행 정보를 모두 입력한 뒤 다시 시도해 주세요.')
-        return
-      }
-
-      const created = await createTrip(payload)
-      const rawId = created?.id ?? created?.tripId
-      const createdTripId = rawId != null ? String(rawId) : null
-
-      if (createdTripId) {
-        saveActiveTripId(createdTripId)
-        trackEvent('trip_creation_completed', { trip_id: createdTripId })
-        navigate(`/trips/${createdTripId}/loading`, { state: { ...baseState, createdTripId } })
-      } else {
-        navigate('/guide-archives', { replace: true })
-      }
-    } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || '여행 계획을 저장하지 못했어요.'
-      console.warn('[DesktopHomeSearchBar] createTrip 실패:', msg)
-      setSubmitError('여행 계획 저장 중 문제가 발생했습니다.')
-      clearActiveTripId()
-    } finally {
-      setSubmitting(false)
-    }
   }
 
   // Display values
