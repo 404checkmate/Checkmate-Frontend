@@ -52,6 +52,10 @@ function CurationCard({ country, index }) {
             }}
             loading="lazy"
             draggable={false}
+            onError={(e) => {
+              e.currentTarget.style.visibility = 'hidden'
+              e.currentTarget.parentElement.style.background = 'linear-gradient(135deg, #e2e8f0, #cbd5e1)'
+            }}
           />
         </div>
         <div
@@ -64,7 +68,7 @@ function CurationCard({ country, index }) {
           }}
         >
           <p className="text-sm font-extrabold leading-tight text-[#04384a]">{country.name}</p>
-          <p className="mt-0.5 text-[10px] leading-snug text-gray-400">{country.sub}</p>
+          <p className="mt-0.5 text-xs leading-snug text-gray-400">{country.sub}</p>
         </div>
       </Link>
     </div>
