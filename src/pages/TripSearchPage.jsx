@@ -156,7 +156,104 @@ function TripSearchInner({ tripId }) {
   const [apiSummary, setApiSummary] = useState(null)
   const [retryTick, setRetryTick] = useState(0)
 
-  // guest 모드 + 로그인 상태: 실제 trip 생성 후 replace 이동
+  // guest trip 생성 + 아이템 저장 + 아카이브 생성 공유 함수
+  // useEffect(로그인 복귀 시)와 handleSaveButtonClick(이미 로그인된 경우) 양쪽에서 호출
+  const executeGuestTripSave = async (selectedItems) => {
+    const pending = loadPendingGuestSearch()
+    if (!pending?.companionId || !pending?.travelStyleIds?.length) {
+      setSaveError('여행 정보가 없습니다. 처음부터 다시 시작해 주세요.')
+      setSaveConfirmModalOpen(true)
+      return
+    }
+
+    const plan = loadActiveTripPlan()
+    const hasPet = pending.companionId === 'pets' || pending.companionId === 'withPet'
+    const payload = buildCreateTripPayload(plan, {
+      companionIds: [pending.companionId],
+      hasPet,
+      travelStyleIds: pending.travelStyleIds,
+    })
+    if (!payload) {
+      setLoadState({ status: 'fallback', fromApi: false, errorMessage: '여행 정보가 부족합니다. 처음부터 다시 시도해 주세요.' })
+      return
+    }
+
+    try {
+      const created = await createTrip(payload)
+      if (guestTripCancelledRef.current) return
+      const rawId = created?.id ?? created?.tripId
+      const realId = rawId != null ? String(rawId) : null
+      if (!realId) return
+
+      const items = selectedItems ?? []
+      clearPendingGuestSearch()
+      saveActiveTripId(realId)
+
+      if (items.length > 0) {
+        const upsertPayload = items
+          .filter((i) => i.title)
+          .map((item, idx) => ({
+            title: item.title,
+            ...(item.description ? { description: item.description } : {}),
+            categoryCode: item.subCategory || 'ai_recommend',
+            prepType: item.prepType || 'item',
+            baggageType: item.baggageType || 'none',
+            source: item.source || 'template',
+            orderIndex: idx,
+          }))
+        if (upsertPayload.length > 0) {
+          await upsertChecklistItems(realId, upsertPayload).catch((err) => {
+            console.error('[TripSearchPage] upsertChecklistItems 실패:', err)
+          })
+        }
+
+        const dest = plan?.destination
+        const ts = plan?.tripStartDate
+        const te = plan?.tripEndDate
+        const fromDestination = Boolean(dest && ts && te)
+        const snapshot = {
+          pageTitle: fromDestination ? `${dest.country} · ${dest.city} 여행 준비` : TRIP_SEARCH_CONTEXT.title,
+          pageSubtitle: '',
+          destination: fromDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
+          country: fromDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
+          tripWindowLabel: fromDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
+          tripStartDate: fromDestination ? ts : '',
+          tripEndDate: fromDestination ? te : '',
+          countryCode: fromDestination ? dest.countryCode : '',
+          iata: fromDestination ? dest.iata : '',
+          weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
+          temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
+          rainChance: TRIP_SEARCH_CONTEXT.rainChance,
+          environmentTags: TRIP_SEARCH_CONTEXT.environmentTags.map((t) => ({ ...t })),
+          phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
+          items: items.map(mapMockItemToArchiveItem),
+          dailySummaries: [],
+          dailyGuidesFull: [],
+        }
+        const archiveCreated = await createGuideArchive(realId, {
+          name: snapshot.pageTitle,
+          snapshot,
+        })
+        if (guestTripCancelledRef.current) return
+        if (archiveCreated?.id) {
+          sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
+        }
+        navigate('/guide-archives', { replace: true })
+        return
+      }
+
+      navigate(`/trips/${realId}/search`, { replace: true })
+    } catch (err) {
+      if (guestTripCancelledRef.current) return
+      setLoadState({
+        status: 'fallback',
+        fromApi: false,
+        errorMessage: err?.response?.data?.message || err?.message || '여행 계획 저장에 실패했습니다. 다시 시도해 주세요.',
+      })
+    }
+  }
+
+  // guest 모드 + 로그인 상태: 로그인 복귀 후 실제 trip 생성 후 replace 이동
   useEffect(() => {
     if (tripId !== 'guest') return
     guestTripCancelledRef.current = false
@@ -172,91 +269,7 @@ function TripSearchInner({ tripId }) {
       const pending = loadPendingGuestSearch()
       if (!pending?.companionId || !pending?.travelStyleIds?.length) return
 
-      const plan = loadActiveTripPlan()
-      const hasPet = pending.companionId === 'pets' || pending.companionId === 'withPet'
-      const payload = buildCreateTripPayload(plan, {
-        companionIds: [pending.companionId],
-        hasPet,
-        travelStyleIds: pending.travelStyleIds,
-      })
-      if (!payload) {
-        setLoadState({ status: 'fallback', fromApi: false, errorMessage: '여행 정보가 부족합니다. 처음부터 다시 시도해 주세요.' })
-        return
-      }
-
-      try {
-        const created = await createTrip(payload)
-        if (guestTripCancelledRef.current) return
-        const rawId = created?.id ?? created?.tripId
-        const realId = rawId != null ? String(rawId) : null
-        if (!realId) return
-
-        const selectedItems = pending.selectedItems ?? []
-        clearPendingGuestSearch()
-        saveActiveTripId(realId)
-
-        if (selectedItems.length > 0) {
-          const upsertPayload = selectedItems
-            .filter((i) => i.title)
-            .map((item, idx) => ({
-              title: item.title,
-              ...(item.description ? { description: item.description } : {}),
-              categoryCode: item.subCategory || 'ai_recommend',
-              prepType: item.prepType || 'item',
-              baggageType: item.baggageType || 'none',
-              source: item.source || 'template',
-              orderIndex: idx,
-            }))
-          if (upsertPayload.length > 0) {
-            await upsertChecklistItems(realId, upsertPayload).catch((err) => {
-              console.error('[TripSearchPage] upsertChecklistItems 실패:', err)
-            })
-          }
-
-          const dest = plan?.destination
-          const ts = plan?.tripStartDate
-          const te = plan?.tripEndDate
-          const fromDestination = Boolean(dest && ts && te)
-          const snapshot = {
-            pageTitle: fromDestination ? `${dest.country} · ${dest.city} 여행 준비` : TRIP_SEARCH_CONTEXT.title,
-            pageSubtitle: '',
-            destination: fromDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
-            country: fromDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
-            tripWindowLabel: fromDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
-            tripStartDate: fromDestination ? ts : '',
-            tripEndDate: fromDestination ? te : '',
-            countryCode: fromDestination ? dest.countryCode : '',
-            iata: fromDestination ? dest.iata : '',
-            weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
-            temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
-            rainChance: TRIP_SEARCH_CONTEXT.rainChance,
-            environmentTags: TRIP_SEARCH_CONTEXT.environmentTags.map((t) => ({ ...t })),
-            phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
-            items: selectedItems.map(mapMockItemToArchiveItem),
-            dailySummaries: [],
-            dailyGuidesFull: [],
-          }
-          const archiveCreated = await createGuideArchive(realId, {
-            name: snapshot.pageTitle,
-            snapshot,
-          })
-          if (guestTripCancelledRef.current) return
-          if (archiveCreated?.id) {
-            sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
-          }
-          navigate('/guide-archives', { replace: true })
-          return
-        }
-
-        navigate(`/trips/${realId}/search`, { replace: true })
-      } catch (err) {
-        if (guestTripCancelledRef.current) return
-        setLoadState({
-          status: 'fallback',
-          fromApi: false,
-          errorMessage: err?.response?.data?.message || err?.message || '여행 계획 저장에 실패했습니다. 다시 시도해 주세요.',
-        })
-      }
+      await executeGuestTripSave(pending.selectedItems ?? [])
     })()
     return () => { guestTripCancelledRef.current = true }
   }, [tripId]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -701,19 +714,18 @@ function TripSearchInner({ tripId }) {
         return
       }
       // 로그인 상태인데 guest 페이지에 남아있는 경우 — trip 생성이 완료되지 않은 상태.
-      // pendingGuestSearch가 있으면 선택 항목만 갱신 후 페이지 풀리로드해서 효과 재실행
+      // 선택 항목을 pending에 갱신하고 trip 생성 로직을 직접 실행 (풀리로드 없이)
       const pending = loadPendingGuestSearch()
-      if (pending?.companionId) {
-        savePendingGuestSearch({
-          ...pending,
-          selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
-        })
-        window.location.reload()
-        return
+      const selectedItems = sourceItems.filter((i) => selectedForSave.has(String(i.id)))
+      if (pending) {
+        savePendingGuestSearch({ ...pending, selectedItems })
       }
-      // pending이 없거나 companionId가 없으면 복구 불가 → 처음부터 재시작 안내
-      setSaveError('여행 정보가 없습니다. 처음부터 다시 시작해 주세요.')
-      setSaveConfirmModalOpen(true)
+      setSaving(true)
+      try {
+        await executeGuestTripSave(selectedItems)
+      } finally {
+        setSaving(false)
+      }
       return
     }
     const supabase = getSupabaseClient()
@@ -884,10 +896,10 @@ function TripSearchInner({ tripId }) {
             <button
               type="button"
               onClick={handleSaveButtonClick}
-              disabled={selectedForSave.size === 0}
+              disabled={selectedForSave.size === 0 || saving}
               className="min-w-0 flex-1 basis-0 rounded-2xl bg-amber-400 px-4 py-3.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
             >
-              {mergeToArchive ? '추가' : '저장'}
+              {saving && tripId === 'guest' ? '저장 중…' : mergeToArchive ? '추가' : '저장'}
             </button>
           </div>
         </div>
