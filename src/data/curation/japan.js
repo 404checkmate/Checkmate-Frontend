@@ -72,7 +72,7 @@ const japan = {
       "kicker": "Language & Culture",
       "icon": "💬",
       "title": "기본 회화",
-      "body": "일본인은 외국인이 일본어로 말을 걸면 굉장히 기뻐하고 도우려는 마음을 적극적으로 보입니다. 짧은 한마디라도 일본어로 시도해보세요.<br/><br/>• <strong>안녕하세요(아침): </strong>おはようございます (<strong>오하요 고자이마스</strong>)<br/>• <strong>안녕하세요(낮, 오후):</strong> こんにちは (<strong>곤니찌와</strong>)<br/>• <strong>감사합니다:</strong> ありがとうございます (<strong>아리가토 고자이마스</strong>)<br/>• <strong>실례합니다 / 저기요:</strong> すみません (<strong>스미마센</strong>)<br/>   (직원을 부를 때, 길을 물어볼 때 모두 사용)<br/>• <strong>~는 어디에 있나요?:</strong> ~はどこですか？(___<strong>와 도코 데스카?</strong>)<br/>• <strong>이것 주세요:</strong> これをください (<strong>코레 오 쿠다사이</strong>)",
+      "body": "일본인은 외국인이 일본어로 말을 걸면 굉장히 기뻐하고 도우려는 마음을 적극적으로 보입니다. 짧은 한마디라도 일본어로 시도해보세요.<br/><br/>• <strong>안녕하세요(아침): </strong>おはようございます (<strong>오하요 고자이마스</strong>)<br/>• <strong>안녕하세요(낮, 오후):</strong> こんにちは (<strong>곤니찌와</strong>)<br/>• <strong>감사합니다:</strong> ありがとうございます (<strong>아리가토 고자이마스</strong>)<br/>• <strong>실례합니다 / 저기요</strong>(직원을 부를 때, 길을 물어볼 때 모두 사용)<strong>:</strong> すみません (<strong>스미마센</strong>)<br/>• <strong>~는 어디에 있나요?:</strong> ~はどこですか？(___<strong>와 도코 데스카?</strong>)<br/>• <strong>이것 주세요:</strong> これをください (<strong>코레 오 쿠다사이</strong>)",
       "photo": "https://plus.unsplash.com/premium_photo-1722944969837-25bf2385056a?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": null
     },
@@ -115,6 +115,7 @@ const japan = {
   "checklist": [
     {
       "cat": "📋 입국 준비",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -125,6 +126,7 @@ const japan = {
     },
     {
       "cat": "🚃 교통 준비",
+      "prepType": "item",
       "section": [
         "money"
       ],
@@ -136,6 +138,7 @@ const japan = {
     },
     {
       "cat": "📱 통신 & 앱",
+      "prepType": "item",
       "section": [
         "apps"
       ],
@@ -146,6 +149,7 @@ const japan = {
     },
     {
       "cat": "💳 금융 & 환전",
+      "prepType": "item",
       "section": [
         "money"
       ],
@@ -155,6 +159,7 @@ const japan = {
     },
     {
       "cat": "🏥 건강 & 안전",
+      "prepType": "item",
       "section": [
         "health"
       ],
@@ -164,6 +169,7 @@ const japan = {
     },
     {
       "cat": "👟 의류 & 짐",
+      "prepType": "item",
       "section": [
         "climate"
       ],
@@ -174,6 +180,7 @@ const japan = {
     },
     {
       "cat": "🗺️ 현지 예절",
+      "prepType": "item",
       "section": [
         "notes"
       ],

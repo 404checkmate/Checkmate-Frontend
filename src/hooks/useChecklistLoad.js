@@ -55,9 +55,9 @@ export function useChecklistLoad(tripId, retryTick, prefetchedItems = null) {
           const builtItems = curationItems.map((item, i) => ({
             id: `curation-${i}`,
             title: item.label,
-            categoryCode: 'ai_recommend',
+            categoryCode: item.prepType || 'item',
             categoryLabel: item.cat,
-            prepType: 'item',
+            prepType: item.prepType || 'item',
             baggageType: 'none',
             source: 'curation',
             isEssential: false,

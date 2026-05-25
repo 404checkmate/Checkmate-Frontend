@@ -30,6 +30,7 @@ const SUB_CATEGORY_TO_TAB = {
   booking: 'prebooking',
   pre_departure: 'predeparture',
   ai_recommend: 'ai_recommend',
+  etc: 'etc',
 }
 
 const TAB_CATEGORIES = [
@@ -66,6 +67,7 @@ function mapPrepTypeToTab(prepType) {
   if (prepType === 'pre_booking') return 'prebooking'
   if (prepType === 'pre_departure_check') return 'predeparture'
   if (prepType === 'ai_recommend') return 'ai_recommend'
+  if (prepType === 'etc') return 'etc'
   return null
 }
 

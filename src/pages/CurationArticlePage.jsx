@@ -28,7 +28,7 @@ const DATA_MAP = Object.fromEntries(
 /* ─── flat checklist items ─── */
 function buildFlatItems(checklist) {
   return checklist.flatMap((group, gi) =>
-    group.items.map((label, ii) => ({ id: `${gi}-${ii}`, cat: group.cat, label }))
+    group.items.map((label, ii) => ({ id: `${gi}-${ii}`, cat: group.cat, prepType: group.prepType || 'item', label }))
   )
 }
 
@@ -779,7 +779,7 @@ function CurationArticleContent({ data }) {
     if (curationSaving) return
     const checkedItems = flatItems.filter((it) => checked[it.id])
     sessionStorage.setItem('curationSave', JSON.stringify({
-      items: checkedItems.map((it) => ({ label: it.label, cat: it.cat })),
+      items: checkedItems.map((it) => ({ label: it.label, cat: it.cat, prepType: it.prepType })),
       country: data.code,
       countryName: data.name,
       timestamp: Date.now(),

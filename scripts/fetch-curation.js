@@ -207,9 +207,10 @@ async function main() {
       const c = cp.properties
       const rawItems = getText(c.items)
       return {
-        cat:     getText(c.Name),
-        section: getRelationIds(c.section).map((uuid) => sectionIdMap[uuid]).filter(Boolean),
-        items:   rawItems.split('\n').map((s) => s.trim()).filter(Boolean),
+        cat:      getText(c.Name),
+        prepType: c.prepType?.select?.name || 'item',
+        section:  getRelationIds(c.section).map((uuid) => sectionIdMap[uuid]).filter(Boolean),
+        items:    rawItems.split('\n').map((s) => s.trim()).filter(Boolean),
       }
     })
 

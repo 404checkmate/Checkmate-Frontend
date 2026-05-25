@@ -14,6 +14,7 @@ export const CATEGORIES = [
   { value: 'supplies', label: '준비물' },
   { value: 'prebooking', label: '사전 예약/신청' },
   { value: 'predeparture', label: '출국 전 확인사항' },
+  { value: 'etc', label: '기타' },
   /** 추후 AI 연동 시 이 탭에 추천 항목만 표시 (목은 MOCK으로 대체) */
   { value: 'ai_recommend', label: 'AI 맞춤 추천' },
 ]
