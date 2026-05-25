@@ -76,7 +76,7 @@ const usa = {
       "kicker": "Language & Culture",
       "icon": "💬",
       "title": "기본 회화",
-      "body": "미국에서는 영어가 기본이지만, 처음 가는 여행자라면 아래 표현을 자연스럽게 구사할 수 있으면 충분합니다.<br/><br/>• <strong>안녕하세요:</strong> Hi! / Hello!<br/>   (편의점·식당에서는 \"Hi, how are you?\"가 일반적인 인사)<br/>• <strong>감사합니다:</strong> Thank you / Thanks<br/>• <strong>실례합니다:</strong> Excuse me<br/>• <strong>~는 어디에 있나요?</strong> → Where is the ___?<br/>• <strong>고수 빼주세요:</strong> No cilantro, please <br/>   (멕시칸 음식·버거 계열에서 자주 필요)<br/>• <strong>이거 포장해주세요:</strong> Can I get this to go?<br/>• <strong>계산서 주세요:</strong> Can I get the check, please?",
+      "body": "미국에서는 영어가 기본이지만, 처음 가는 여행자라면 아래 표현을 자연스럽게 구사할 수 있으면 충분합니다.<br/><br/>• <strong>안녕하세요:</strong> Hi! / Hello!<br/>   (편의점·식당에서는 \"Hi, how are you?\"가 일반적인 인사)<br/>• <strong>감사합니다:</strong> Thank you / Thanks<br/>• <strong>실례합니다:</strong> Excuse me<br/>• <strong>~는 어디에 있나요?</strong> → Where is the ___?<br/>• <strong>고수 빼주세요</strong>(멕시칸 음식·버거 계열에서 자주 필요)<strong>:</strong> No cilantro, please <br/>• <strong>이거 포장해주세요:</strong> Can I get this to go?<br/>• <strong>계산서 주세요:</strong> Can I get the check, please?",
       "photo": "https://images.unsplash.com/photo-1532153432275-818ef462eb1c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",
@@ -129,6 +129,7 @@ const usa = {
   "checklist": [
     {
       "cat": "사전 예약 / 신청",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -138,6 +139,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
+      "prepType": "item",
       "section": [
         "apps"
       ],
@@ -150,13 +152,17 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
-      "section": [],
+      "prepType": "item",
+      "section": [
+        "health"
+      ],
       "items": [
         "국제 운전면허증 발급 (건강&안전 - 사전예약)"
       ]
     },
     {
       "cat": "입을 옷",
+      "prepType": "item",
       "section": [
         "climate"
       ],
@@ -166,6 +172,7 @@ const usa = {
     },
     {
       "cat": "기타",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -176,6 +183,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
+      "prepType": "item",
       "section": [
         "money"
       ],
@@ -185,6 +193,7 @@ const usa = {
     },
     {
       "cat": "상비약",
+      "prepType": "item",
       "section": [
         "health"
       ],
@@ -194,6 +203,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -203,6 +213,7 @@ const usa = {
     },
     {
       "cat": "🛂 입국 시 주의",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -213,6 +224,7 @@ const usa = {
     },
     {
       "cat": "🆘 비상 대비",
+      "prepType": "item",
       "section": [
         "notes"
       ],

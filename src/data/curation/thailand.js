@@ -72,7 +72,7 @@ const thailand = {
       "kicker": "Language & Culture",
       "icon": "💬",
       "title": "기본 회화",
-      "body": "태국어도 성조 언어라 정확한 발음이 어렵지만, 몇 마디만 알아도 현지인이 환하게 웃어줍니다. 문장 끝에 남성은 '크랍(krap)', 여성은 '카(ka)'를 붙이면 공손한 표현이 됩니다.<br/><br/>• 안녕하세요: สวัสดีครับ/ค่ะ (사왓디 크랍/카)<br/>• 감사합니다: ขอบคุณครับ/ค่ะ (콥쿤 크랍/카)<br/>• 실례합니다: ขอโทษครับ/ค่ะ (코 토 크랍/카)<br/>• 얼마예요?: เท่าไหร่ครับ/ค่ะ? (타오 라이 크랍/카?)<br/>• 고수 빼주세요: ไม่ใส่ผักชีครับ/ค่ะ (마이 사이 팍 치 크랍/카)<br/>• 화장실 어디예요?: ห้องน้ำอยู่ที่ไหน (헝남 유 티 나이 크랍/카?)<br/>• 괜찮습니다 (단호한 거절): ไม่เอา, ขอบคุณครับ/ค่ะ (마이 아오, 껍 쿤 크랍/카)",
+      "body": "태국어도 성조 언어라 정확한 발음이 어렵지만, 몇 마디만 알아도 현지인이 환하게 웃어줍니다. 문장 끝에 남성은 '크랍(krap)', 여성은 '카(ka)'를 붙이면 공손한 표현이 됩니다.<br/><br/>• <strong>안녕하세요:</strong> สวัสดีครับ/ค่ะ (사왓디 크랍/카)<br/>• <strong>감사합니다:</strong> ขอบคุณครับ/ค่ะ (콥쿤 크랍/카)<br/>• <strong>실례합니다:</strong> ขอโทษครับ/ค่ะ (코 토 크랍/카)<br/>• <strong>얼마예요?:</strong> เท่าไหร่ครับ/ค่ะ? (타오 라이 크랍/카?)<br/>• <strong>고수 빼주세요:</strong> ไม่ใส่ผักชีครับ/ค่ะ (마이 사이 팍 치 크랍/카)<br/>• <strong>화장실 어디예요?:</strong> ห้องน้ำอยู่ที่ไหน (헝남 유 티 나이 크랍/카?)<br/>• <strong>괜찮습니다 (단호한 거절):</strong> ไม่เอา, ขอบคุณครับ/ค่ะ (마이 아오, 껍 쿤 크랍/카)",
       "photo": "https://images.unsplash.com/photo-1565116314774-29a49764a53d?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": null
     },
@@ -122,6 +122,7 @@ const thailand = {
   "checklist": [
     {
       "cat": "📋 여권 & 비자",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -133,6 +134,7 @@ const thailand = {
     },
     {
       "cat": "✈️ 항공 & 교통",
+      "prepType": "item",
       "section": [
         "apps"
       ],
@@ -144,6 +146,7 @@ const thailand = {
     },
     {
       "cat": "🏨 숙소",
+      "prepType": "item",
       "section": [
         "notes"
       ],
@@ -154,6 +157,7 @@ const thailand = {
     },
     {
       "cat": "🛡️ 여행자 보험",
+      "prepType": "item",
       "section": [
         "health"
       ],
@@ -164,6 +168,7 @@ const thailand = {
     },
     {
       "cat": "💳 금융 & 환전",
+      "prepType": "item",
       "section": [
         "money"
       ],
@@ -174,6 +179,7 @@ const thailand = {
     },
     {
       "cat": "💊 건강 & 의약품",
+      "prepType": "item",
       "section": [
         "health"
       ],
@@ -185,6 +191,7 @@ const thailand = {
     },
     {
       "cat": "👕 의류 & 짐",
+      "prepType": "item",
       "section": [
         "climate"
       ],
@@ -196,6 +203,7 @@ const thailand = {
     },
     {
       "cat": "📱 통신",
+      "prepType": "item",
       "section": [
         "apps"
       ],
@@ -206,6 +214,7 @@ const thailand = {
     },
     {
       "cat": "🗺️ 현지 정보 & 예절",
+      "prepType": "item",
       "section": [
         "notes"
       ],

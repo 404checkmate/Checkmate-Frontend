@@ -114,6 +114,7 @@ const vietnam = {
   "checklist": [
     {
       "cat": "서류 및 입국 준비",
+      "prepType": "pre_departure_check",
       "section": [
         "notes"
       ],
@@ -124,6 +125,7 @@ const vietnam = {
     },
     {
       "cat": "앱 및 사전 예약",
+      "prepType": "pre_booking",
       "section": [
         "apps"
       ],
@@ -136,6 +138,7 @@ const vietnam = {
     },
     {
       "cat": "투어 및 액티비티 예약",
+      "prepType": "pre_booking",
       "section": [
         "notes"
       ],
@@ -150,6 +153,7 @@ const vietnam = {
     },
     {
       "cat": "건강 및 위생",
+      "prepType": "item",
       "section": [
         "health"
       ],
@@ -160,6 +164,7 @@ const vietnam = {
     },
     {
       "cat": "의류 및 수영용품",
+      "prepType": "item",
       "section": [
         "climate"
       ],
@@ -177,6 +182,7 @@ const vietnam = {
     },
     {
       "cat": "뷰티 및 용품",
+      "prepType": "item",
       "section": [
         "climate"
       ],
@@ -187,6 +193,7 @@ const vietnam = {
     },
     {
       "cat": "기타 준비물",
+      "prepType": "etc",
       "section": [
         "notes"
       ],
