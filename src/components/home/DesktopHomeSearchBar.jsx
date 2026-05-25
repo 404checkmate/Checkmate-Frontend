@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   filterArrivalsByQuery,
   getArrivalsForCountry,
@@ -428,6 +429,7 @@ const POPULAR_CITY_DESTINATIONS = [
 
 export default function DesktopHomeSearchBar() {
   const containerRef = useRef(null)
+  const location = useLocation()
   const [activeSection, setActiveSection] = useState(null)
 
   // Country
@@ -466,6 +468,30 @@ export default function DesktopHomeSearchBar() {
     document.addEventListener('mousedown', handlePointerDown)
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [])
+
+  // CurationArticlePage에서 preselectedCountry로 진입 시 국가 자동 선택
+  useEffect(() => {
+    const country = location.state?.preselectedCountry
+    if (!country || !countryOptions.length) return
+
+    const nameMap = {
+      vietnam: '베트남', japan: '일본',
+      thailand: '태국', usa: '미국',
+      indonesia: '인도네시아',
+    }
+    const name = nameMap[country]
+    if (!name) return
+
+    const found = countryOptions.find((c) =>
+      c.name?.includes(name) || c.label?.includes(name) || c.nameKo?.includes(name)
+    )
+    if (found) {
+      confirmCountry(found)
+    } else {
+      setCountryQuery(name)
+      setActiveSection('country')
+    }
+  }, [countryOptions, location.state]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset downstream fields when country is cleared
   useEffect(() => {

@@ -171,8 +171,10 @@ async function main() {
       const s = sp.properties
       const tipIcon = getText(s.tip_icon)
       const tipBody = richTextToHtml(s.tip_body?.rich_text)
+      const kicker = getText(s.kicker)
       return {
         id:    getText(s.id) || getText(s.Name),
+        kicker: kicker || undefined,
         icon:  getText(s.icon),
         title: getText(s.Name),
         body:  richTextToHtml(s.body?.rich_text),

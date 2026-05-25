@@ -177,16 +177,16 @@ function SectionH2({ children }) {
 
 function TipBox({ icon, body }) {
   return (
-    <aside className="cur-reveal relative my-5 rounded-2xl border border-sky-200 bg-sky-50/80 px-6 py-5">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xl">{icon}</span>
-          <span className="text-xs font-extrabold text-teal-600">Mate Tip!</span>
+    <aside className="cur-reveal relative my-5 rounded-2xl border border-sky-200 bg-sky-50/80 px-5 py-4">
+      <div className="flex items-start gap-1.5">
+        <span className="text-xl shrink-0 mt-0.5">{icon}</span>
+        <div className="flex flex-col gap-1">
+          <span className="text-[16px] font-extrabold text-teal-600 leading-none">Mate Tip!</span>
+          <p
+            className="font-medium text-[6px] md:text-[15px] leading-[1.65] text-sky-900"
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
         </div>
-        <p
-          className="font-medium text-[16px] md:text-[17px] leading-[1.65] text-sky-900"
-          dangerouslySetInnerHTML={{ __html: body }}
-        />
       </div>
     </aside>
   )
@@ -243,7 +243,6 @@ function Hero({ data }) {
               여행 가이드 · {data.name}
             </span>
             <span className="h-px w-10 bg-amber-300/70" />
-            <span className="font-bold text-[14px] text-white/85">{data.name.toUpperCase()}</span>
           </div>
 
           <h1 className="cur-reveal font-extrabold leading-[1.1] tracking-[-0.01em] text-[2.4rem] sm:text-[3rem] md:text-[4.4rem] lg:text-[5.2rem]">
@@ -448,7 +447,7 @@ function Article({ data, checked, toggle }) {
         return (
           <div key={section.id}>
             <section id={`section-${section.id}`} data-toc className={idx > 0 ? 'mt-20 md:mt-28' : ''}>
-              <Kicker idx={String(idx + 1).padStart(2, '0')} label={KICKER_LABELS[idx] || 'Guide'} />
+              <Kicker idx={String(idx + 1).padStart(2, '0')} label={section.kicker || KICKER_LABELS[idx] || 'Guide'} />
               <SectionH2>
                 {section.icon} {mainTitle}
               </SectionH2>
@@ -537,11 +536,10 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
             <div className="cur-reveal">
               <Kicker idx={String(data.sections.length + 1).padStart(2, '0')} label="The Checklist" />
               <h2 className="font-extrabold text-[2rem] md:text-[2.6rem] leading-[1.15] tracking-tight text-slate-900 max-w-[18ch]">
-                {total}가지,{' '}
-                <span style={{ color: '#3db4dd' }}>완벽한 짐 하나</span>로
+                여행 준비, 한 번에 체크하세요
               </h2>
               <p className="mt-5 font-medium text-[15px] leading-relaxed text-gray-700 max-w-[50ch]">
-                필요한 것만, 빠짐없이. 카테고리별로 골라 체크하고 저장해두면 출발 전 마지막 점검도 같은 곳에서 이어집니다.
+                준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
               </p>
               <div className="mt-5 flex justify-end">
                 <button
@@ -622,7 +620,25 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
    CTA Banner
 ════════════════════════════════════════════ */
 function CtaBanner({ data }) {
+  const navigate = useNavigate()
   const bgImg = data.photos.sections[data.photos.sections.length - 1] || data.photos.hero
+
+  const handleCtaClick = () => {
+    const isMobile = window.innerWidth < 768
+    if (isMobile) {
+      const dest = CURATION_COUNTRY_MAP[data.code]
+      navigate('/trips/new/destination', {
+        state: {
+          preselectedCountry: dest
+            ? { name: dest.country, country: dest.country, countryCode: dest.countryCode, iata: dest.iata, city: dest.city }
+            : { name: data.name, country: data.name, countryCode: data.code?.toUpperCase() },
+        },
+      })
+    } else {
+      navigate('/', { state: { preselectedCountry: data.code } })
+    }
+  }
+
   return (
     <section className="relative overflow-hidden">
       <img src={bgImg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
@@ -637,27 +653,22 @@ function CtaBanner({ data }) {
             <div className="text-xs font-bold tracking-[0.26em] uppercase text-amber-300 mb-5">
               나만의 {data.name}, 메이트가 함께
             </div>
-            <h2 className="font-extrabold text-[2rem] md:text-[3.4rem] leading-[1.1] tracking-tight max-w-[16ch]">
+            <h2 className="font-extrabold text-[1.5rem] md:text-[2.4rem] leading-[1.1] tracking-tight max-w-none">
               나만의 {data.name} 여행 체크리스트,<br />
               지금 바로 만들어보세요 🗺️
             </h2>
             <p className="mt-5 font-medium text-[15px] md:text-[16.5px] leading-relaxed text-white/85 max-w-[44ch]">
-              {data.footerCta.subtitle}
+              {(data.footerCta.subtitle || '').replace(/AI/g, 'MATE')}
             </p>
           </div>
           <div className="md:col-span-4 flex flex-col gap-3 md:items-end">
-            <Link
-              to="/trips/new/destination"
+            <button
+              type="button"
+              onClick={handleCtaClick}
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[14px] tracking-wide px-7 py-3.5 shadow-md shadow-amber-900/20 transition w-full md:w-auto active:scale-[0.98]"
             >
               여행 준비 시작하기 →
-            </Link>
-            <Link
-              to="/"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border-2 border-white/40 hover:border-white text-white font-bold text-[13px] tracking-wide px-7 py-3.5 transition w-full md:w-auto"
-            >
-              다른 가이드 보기
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -719,61 +730,6 @@ function Related({ currentCode }) {
         </ul>
       </div>
     </section>
-  )
-}
-
-/* ════════════════════════════════════════════
-   Footer
-════════════════════════════════════════════ */
-function PageFooter() {
-  return (
-    <footer className="bg-white/60 backdrop-blur border-t border-slate-100">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-16 md:py-20">
-        <div className="grid md:grid-cols-12 gap-10">
-          <div className="md:col-span-5">
-            <Link to="/" className="font-extrabold text-[24px] tracking-tight text-teal-700">
-              CHECKMATE
-            </Link>
-            <p className="mt-4 font-extrabold text-[18px] leading-snug text-slate-800 max-w-[26ch]">
-              준비는 <span style={{ color: '#FFB901' }}>가볍게</span>, 여행은{' '}
-              <span style={{ color: '#3db4dd' }}>완벽하게</span>.
-            </p>
-            <p className="mt-2 font-medium text-[13px] text-gray-600 max-w-[36ch] leading-relaxed">
-              저장부터 체크까지 이어지는 여행 준비. CHECKMATE가 동행합니다.
-            </p>
-          </div>
-          <div className="md:col-span-4">
-            <div className="text-xs font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
-              국가별 여행 가이드
-            </div>
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-              {Object.values(DATA_MAP).map((d) => (
-                <li key={d.code}>
-                  <Link to={`/curation/${d.code}`} className="group inline-flex items-baseline gap-2">
-                    <span className="text-base">{d.flag}</span>
-                    <span className="font-extrabold text-[15px] text-slate-800 group-hover:text-teal-700 transition">{d.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="md:col-span-3">
-            <div className="text-xs font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
-              About
-            </div>
-            <ul className="space-y-2.5 text-[13px] text-gray-700">
-              <li><Link to="/" className="hover:text-gray-900">서비스 소개</Link></li>
-              <li><Link to="/trips/new/destination" className="hover:text-gray-900">여행 준비 시작</Link></li>
-              <li><Link to="/privacy" className="hover:text-gray-900">개인정보 처리방침</Link></li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-          <span>© 2026 CHECKMATE</span>
-          <span className="font-medium">Travel Guide · 2026.05</span>
-        </div>
-      </div>
-    </footer>
   )
 }
 
@@ -920,13 +876,13 @@ function CurationArticleContent({ data }) {
 
         .cur-checklist-item { word-break: break-word; overflow-wrap: break-word; }
 
-.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; word-break: normal; overflow-wrap: break-word; }
+.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
         @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
         .cur-editorial p + p { margin-top: 1.15em; }
-        .cur-editorial aside p { text-align: left; }
+        .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
           .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; }
-          .cur-editorial aside p { font-size: inherit; letter-spacing: inherit; }
+          .cur-editorial aside p { font-size: 0.75rem; letter-spacing: inherit; }
         }
       `}</style>
 
@@ -961,7 +917,6 @@ function CurationArticleContent({ data }) {
 
         <CtaBanner data={data} />
         <Related currentCode={data.code} />
-        <PageFooter />
       </div>
     </>
   )

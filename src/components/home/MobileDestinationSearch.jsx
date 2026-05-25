@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const POPULAR_DESTINATION_TAGS = [
   { label: '도쿄',    name: '일본',       country: '일본',       countryCode: 'JP', iata: 'NRT', city: '도쿄(나리타)' },
@@ -12,7 +12,20 @@ const POPULAR_DESTINATION_TAGS = [
 
 export default function MobileDestinationSearch() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    const country = location.state?.preselectedCountry
+    if (!country) return
+    const nameMap = {
+      vietnam: '베트남', japan: '일본',
+      thailand: '태국', usa: '미국',
+      indonesia: '인도네시아',
+    }
+    const name = nameMap[country]
+    if (name) setQuery(name)
+  }, [location.state])
 
   const handleSubmit = (e) => {
     e.preventDefault()
