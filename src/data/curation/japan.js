@@ -115,7 +115,7 @@ const japan = {
   "checklist": [
     {
       "cat": "📋 입국 준비",
-      "prepType": "item",
+      "prepType": "pre_departure_check",
       "section": [
         "notes"
       ],
@@ -126,7 +126,7 @@ const japan = {
     },
     {
       "cat": "🚃 교통 준비",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "money"
       ],
@@ -138,7 +138,7 @@ const japan = {
     },
     {
       "cat": "📱 통신 & 앱",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "apps"
       ],
@@ -149,7 +149,7 @@ const japan = {
     },
     {
       "cat": "💳 금융 & 환전",
-      "prepType": "item",
+      "prepType": "pre_departure_check",
       "section": [
         "money"
       ],
@@ -159,7 +159,7 @@ const japan = {
     },
     {
       "cat": "🏥 건강 & 안전",
-      "prepType": "item",
+      "prepType": "pre_departure_check",
       "section": [
         "health"
       ],
@@ -180,7 +180,7 @@ const japan = {
     },
     {
       "cat": "🗺️ 현지 예절",
-      "prepType": "item",
+      "prepType": "etc",
       "section": [
         "notes"
       ],

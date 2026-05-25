@@ -129,7 +129,7 @@ const usa = {
   "checklist": [
     {
       "cat": "사전 예약 / 신청",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "notes"
       ],
@@ -139,7 +139,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "apps"
       ],
@@ -152,7 +152,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "health"
       ],
@@ -172,7 +172,7 @@ const usa = {
     },
     {
       "cat": "기타",
-      "prepType": "item",
+      "prepType": "etc",
       "section": [
         "notes"
       ],
@@ -183,7 +183,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "money"
       ],
@@ -193,7 +193,7 @@ const usa = {
     },
     {
       "cat": "상비약",
-      "prepType": "item",
+      "prepType": "pre_departure_check",
       "section": [
         "health"
       ],
@@ -203,7 +203,7 @@ const usa = {
     },
     {
       "cat": "사전 예약 / 신청",
-      "prepType": "item",
+      "prepType": "pre_booking",
       "section": [
         "notes"
       ],
@@ -213,7 +213,7 @@ const usa = {
     },
     {
       "cat": "🛂 입국 시 주의",
-      "prepType": "item",
+      "prepType": "pre_departure_check",
       "section": [
         "notes"
       ],
@@ -224,7 +224,7 @@ const usa = {
     },
     {
       "cat": "🆘 비상 대비",
-      "prepType": "item",
+      "prepType": "pre_departure_check",
       "section": [
         "notes"
       ],
