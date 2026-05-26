@@ -77,7 +77,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const [directAddModalOpen, setDirectAddModalOpen] = useState(false)
   const [deleteItemConfirm, setDeleteItemConfirm] = useState(null)
   const [directAddDraft, setDirectAddDraft] = useState({
-    title: '', memo: '', prepType: '', baggageType: 'carry_on',
+    title: '', memo: '', prepType: '', subCategory: 'essentials', baggageType: 'none',
   })
 
   // ── 보기 필터 상태 ────────────────────────────────────
@@ -208,11 +208,12 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     if (!title) { window.alert('제목을 입력해 주세요.'); return }
     if (!directAddDraft.prepType) { window.alert('준비물 유형을 선택해주세요.'); return }
     const memo = (directAddDraft.memo ?? '').trim()
-    const baggageType = directAddDraft.prepType === 'item' ? directAddDraft.baggageType : 'none'
     const id = `ga-direct-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
     const resolvedCategory = resolveDirectAddCategory(directAddDraft.prepType)
     const resolvedCategoryLabel = CATEGORIES.find((c) => c.value === resolvedCategory)?.label ?? resolvedCategory
-    const newItem = { id, category: resolvedCategory, categoryLabel: resolvedCategoryLabel, title, memo, prepType: directAddDraft.prepType, baggageType }
+    const subCategory = directAddDraft.prepType === 'item' ? (directAddDraft.subCategory || 'essentials') : undefined
+    const baggageType = directAddDraft.baggageType || 'none'
+    const newItem = { id, category: resolvedCategory, categoryLabel: resolvedCategoryLabel, title, memo, prepType: directAddDraft.prepType, baggageType, subCategory }
     const newItems = [...items, newItem]
     setLocalItems(newItems)
     const idStr = String(id)
@@ -332,6 +333,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       for (const it of items) setSavedItemChecked(tripId, String(it.id), Boolean(checks[String(it.id)]))
       await patchGuideArchiveEntry(tripId, entry.id, {
         items,
+        checksState: persisted,
         checklistProgressPercent: progress,
         checklistSavedAt: new Date().toISOString(),
       })
@@ -351,8 +353,10 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const handleTempSave = useCallback(async () => {
     setIsSaving(true)
     try {
+      saveEntryChecklistChecks(tripId, entry.id, checks)
       await patchGuideArchiveEntry(tripId, entry.id, {
         items,
+        checksState: checks,
         checklistProgressPercent: progress,
         checklistSavedAt: new Date().toISOString(),
       })
@@ -363,7 +367,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     } finally {
       setIsSaving(false)
     }
-  }, [tripId, entry.id, items, progress])
+  }, [tripId, entry.id, items, checks, progress])
 
   // ── 공통 리스트 props ─────────────────────────────────
   const checklistListProps = {
