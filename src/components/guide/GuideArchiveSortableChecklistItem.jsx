@@ -19,6 +19,17 @@ function AiRecommendedBadge() {
   )
 }
 
+function DirectAddBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/90 px-2 py-0.5 text-[10px] font-bold leading-none tracking-wide text-teal-700">
+      <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+      </svg>
+      직접 추가
+    </span>
+  )
+}
+
 /**
  * DragOverlay용 — 목록 카드와 동일 레이아웃(포인터 이벤트 없음)
  */
@@ -29,6 +40,7 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
   const isAiOrigin =
     (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ||
     item?.prepType === 'ai_recommend'
+  const isUserAdded = item?.source === 'user_added' || String(item?.id ?? '').startsWith('ga-direct-')
 
   const cardToneClass = on
     ? 'border-amber-400 bg-amber-200 shadow-sm ring-1 ring-amber-300/70'
@@ -56,6 +68,8 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
               <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
               MATE추천
             </span>
+          ) : isUserAdded ? (
+            <span className="mb-1 inline-flex sm:hidden"><DirectAddBadge /></span>
           ) : null}
           <span className="flex items-start justify-between gap-2">
             <span
@@ -71,6 +85,8 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
               <span className="hidden sm:inline-flex">
                 <AiRecommendedBadge />
               </span>
+            ) : isUserAdded ? (
+              <span className="hidden sm:inline-flex"><DirectAddBadge /></span>
             ) : null}
           </span>
           {item.description ? (
@@ -236,6 +252,7 @@ export default function GuideArchiveSortableChecklistItem({
   const isAiOrigin =
     (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ||
     item?.prepType === 'ai_recommend'
+  const isUserAdded = item?.source === 'user_added' || String(item?.id ?? '').startsWith('ga-direct-')
 
   const dragHandleProps = !sortableDisabled ? { ...listeners, ...attributes } : {}
   const stop = (e) => e.stopPropagation()
@@ -340,12 +357,18 @@ export default function GuideArchiveSortableChecklistItem({
             <div className="min-w-0 flex-1 py-1.5">
               {isAiOrigin ? (
                 <span className="mb-1 block sm:hidden"><AiRecommendedBadge /></span>
+              ) : isUserAdded ? (
+                <span className="mb-1 block sm:hidden"><DirectAddBadge /></span>
               ) : null}
               <span className="flex items-start justify-between gap-2">
                 <span className={`block text-sm font-semibold ${showCheckedStyle ? 'text-gray-900 line-through decoration-amber-700/45' : 'text-gray-900'}`}>
                   {item.title}
                 </span>
-                {isAiOrigin ? <span className="hidden sm:inline-flex"><AiRecommendedBadge /></span> : null}
+                {isAiOrigin ? (
+                  <span className="hidden sm:inline-flex"><AiRecommendedBadge /></span>
+                ) : isUserAdded ? (
+                  <span className="hidden sm:inline-flex"><DirectAddBadge /></span>
+                ) : null}
               </span>
               {item.description ? (
                 <span className={`mt-1 block text-xs leading-relaxed ${showCheckedStyle ? 'text-gray-700' : 'text-gray-600'}`}>

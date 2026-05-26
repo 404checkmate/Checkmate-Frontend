@@ -190,7 +190,7 @@ const thailand = {
       ]
     },
     {
-      "cat": "👕 의류 & 짐",
+      "cat": "👕 의류",
       "prepType": "item",
       "section": [
         "climate"
@@ -202,7 +202,7 @@ const thailand = {
       ]
     },
     {
-      "cat": "📱 통신",
+      "cat": "📱 앱",
       "prepType": "item",
       "section": [
         "apps"
@@ -213,7 +213,7 @@ const thailand = {
       ]
     },
     {
-      "cat": "🗺️ 현지 정보 & 예절",
+      "cat": "🤝 현지 문화",
       "prepType": "item",
       "section": [
         "notes"

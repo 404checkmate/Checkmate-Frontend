@@ -113,27 +113,113 @@ const vietnam = {
   ],
   "checklist": [
     {
-      "cat": "서류 및 입국 준비",
-      "prepType": "pre_departure_check",
+      "cat": "서류 및 입국 준비 (1)",
+      "prepType": "pre_booking",
       "section": [
         "notes"
       ],
       "items": [
-        "베트남 전자비자(E-visa) 신청",
         "패스트트랙 입국 서비스 예약"
       ]
     },
     {
-      "cat": "앱 및 사전 예약",
+      "cat": "📋 여권 & 비자",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "베트남 전자비자(E-visa) 신청"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "트래블월렛 앱 설치"
+      ]
+    },
+    {
+      "cat": "앱 및 사전 예약 (1)",
       "prepType": "pre_booking",
       "section": [
         "apps"
       ],
       "items": [
-        "그랩(Grab) 앱 설치 및 결제 수단 등록",
-        "푸고(Fugo) 앱 설치",
-        "공항 라운지 예약",
-        "트래블월렛 앱 설치"
+        "공항 라운지 예약"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "푸고(Fugo) 앱 설치"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "그랩(Grab) 앱 설치"
+      ]
+    },
+    {
+      "cat": "투어 및 액티비티 예약 (3)",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "오토바이 렌트 또는 시클로 투어 확인"
+      ]
+    },
+    {
+      "cat": "투어 및 액티비티 예약 (2)",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "하노이 하롱베이 크루즈 예약"
+      ]
+    },
+    {
+      "cat": "투어 및 액티비티 예약 (2)",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "마사지·스파 예약"
+      ]
+    },
+    {
+      "cat": "투어 및 액티비티 예약 (1)",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "호이안 야시장 & 등불 유람선 예약"
+      ]
+    },
+    {
+      "cat": "투어 및 액티비티 예약 (1)",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "다낭 참섬(Cham Island) 스노클링 투어 예약"
       ]
     },
     {
@@ -143,23 +229,107 @@ const vietnam = {
         "notes"
       ],
       "items": [
-        "다낭 바나힐 입장권 예약",
-        "다낭 참섬(Cham Island) 스노클링 투어 예약",
-        "호이안 야시장 & 등불 유람선 예약",
-        "마사지·스파 예약",
-        "하노이 하롱베이 크루즈 예약",
-        "오토바이 렌트 또는 시클로 투어 확인"
+        "다낭 바나힐 입장권 예약"
       ]
     },
     {
-      "cat": "건강 및 위생",
+      "cat": "건강 및 위생 (1)",
       "prepType": "item",
       "section": [
         "health"
       ],
       "items": [
-        "벌레 기피제 (모기 스프레이/패치)",
         "정수 필터 또는 생수 구매 계획"
+      ]
+    },
+    {
+      "cat": "💊 건강 & 의약품",
+      "prepType": "health",
+      "section": [
+        "health"
+      ],
+      "items": [
+        "벌레 기피제 (모기 스프레이/패치)"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "슬리퍼 및 편한 운동화"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "사원·종교 시설 방문용 긴바지/스카프"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "얇은 긴소매 또는 가디건"
+      ]
+    },
+    {
+      "cat": "의류 및 수영용품 (2)",
+      "prepType": "item",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "우산 또는 우비"
+      ]
+    },
+    {
+      "cat": "의류 및 수영용품 (1)",
+      "prepType": "item",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "방수팩"
+      ]
+    },
+    {
+      "cat": "의류 및 수영용품 (2)",
+      "prepType": "item",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "비치타올"
+      ]
+    },
+    {
+      "cat": "의류 및 수영용품 (1)",
+      "prepType": "item",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "스노클링 장비"
+      ]
+    },
+    {
+      "cat": "의류 및 수영용품 (1)",
+      "prepType": "item",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "아쿠아슈즈"
       ]
     },
     {
@@ -169,38 +339,57 @@ const vietnam = {
         "climate"
       ],
       "items": [
-        "수영복",
-        "아쿠아슈즈",
-        "스노클링 장비",
-        "비치타올",
-        "방수팩",
-        "우산 또는 우비",
-        "얇은 긴소매 또는 가디건",
-        "사원·종교 시설 방문용 긴바지/스카프",
-        "슬리퍼 및 편한 운동화"
+        "수영복"
       ]
     },
     {
-      "cat": "뷰티 및 용품",
+      "cat": "🎸기타",
       "prepType": "item",
       "section": [
         "climate"
       ],
       "items": [
-        "메이크업 픽서 스프레이",
         "여분 비닐봉지"
       ]
     },
     {
-      "cat": "기타 준비물",
+      "cat": "뷰티 및 용품",
+      "prepType": "beauty",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "메이크업 픽서 스프레이"
+      ]
+    },
+    {
+      "cat": "🛡️ 안전",
       "prepType": "etc",
       "section": [
         "notes"
       ],
       "items": [
-        "이어플러그 및 안대",
-        "여행용 잠금장치 (자물쇠)",
         "긴급 연락처 메모 (한국 대사관 등)"
+      ]
+    },
+    {
+      "cat": "🎸기타",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "여행용 잠금장치 (자물쇠)"
+      ]
+    },
+    {
+      "cat": "🎸기타",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "이어플러그 및 안대"
       ]
     }
   ],

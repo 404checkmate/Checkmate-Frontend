@@ -140,7 +140,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     setEditingSection(null)
     setSectionEditDraft(null)
     setDirectAddModalOpen(false)
-    setDirectAddDraft({ title: '', memo: '', prepType: '', baggageType: 'carry_on' })
+    setDirectAddDraft({ title: '', memo: '', prepType: '', subCategory: 'essentials', baggageType: 'none' })
   }, [])
 
   useEffect(() => {
@@ -163,7 +163,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   // ── 모달 취소 핸들러 ─────────────────────────────────
   const cancelDirectAdd = useCallback(() => {
     setDirectAddModalOpen(false)
-    setDirectAddDraft({ title: '', memo: '', prepType: '', baggageType: 'carry_on' })
+    setDirectAddDraft({ title: '', memo: '', prepType: '', subCategory: 'essentials', baggageType: 'none' })
   }, [])
 
   const cancelSectionEditor = useCallback(() => {
@@ -179,7 +179,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
 
   // ── 핸들러 ────────────────────────────────────────────
   const openDirectAddModal = useCallback(() => {
-    setDirectAddDraft({ title: '', memo: '', prepType: '', baggageType: 'carry_on' })
+    setDirectAddDraft({ title: '', memo: '', prepType: '', subCategory: 'essentials', baggageType: 'none' })
     setDirectAddModalOpen(true)
   }, [])
 
@@ -207,17 +207,25 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     const title = (directAddDraft.title ?? '').trim()
     if (!title) { window.alert('제목을 입력해 주세요.'); return }
     if (!directAddDraft.prepType) { window.alert('준비물 유형을 선택해주세요.'); return }
-    const memo = (directAddDraft.memo ?? '').trim()
+    const description = (directAddDraft.memo ?? '').trim()
     const id = `ga-direct-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
     const resolvedCategory = resolveDirectAddCategory(directAddDraft.prepType)
     const resolvedCategoryLabel = CATEGORIES.find((c) => c.value === resolvedCategory)?.label ?? resolvedCategory
     const subCategory = directAddDraft.prepType === 'item' ? (directAddDraft.subCategory || 'essentials') : undefined
     const baggageType = directAddDraft.baggageType || 'none'
-    const newItem = { id, category: resolvedCategory, categoryLabel: resolvedCategoryLabel, title, memo, prepType: directAddDraft.prepType, baggageType, subCategory }
+    const newItem = {
+      id, category: resolvedCategory, categoryLabel: resolvedCategoryLabel,
+      title, description, prepType: directAddDraft.prepType, baggageType, subCategory,
+      source: 'user_added',
+    }
     const newItems = [...items, newItem]
+    // 즉시 UI에 반영 — 서버 응답을 기다리지 않음
     setLocalItems(newItems)
-    const idStr = String(id)
-    const nextChecks = { ...checks, [idStr]: false }
+    setChecks((prev) => ({ ...prev, [String(id)]: false }))
+    setDirectAddModalOpen(false)
+    setDirectAddDraft({ title: '', memo: '', prepType: '', subCategory: 'essentials', baggageType: 'none' })
+    // 서버/로컬 저장 (비동기, refetch 트리거 없음 — race condition 방지)
+    const nextChecks = { ...checks, [String(id)]: false }
     const progressN = calcProgress(newItems, nextChecks)
     saveEntryChecklistChecks(tripId, entry.id, nextChecks)
     patchGuideArchiveEntry(tripId, entry.id, {
@@ -225,13 +233,9 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
       checklistProgressPercent: progressN,
       checklistSavedAt: new Date().toISOString(),
     })
-    saveItemForTrip(tripId, { id, category: GUIDE_USER_DIRECT_SECTION_LABEL, title, subtitle: memo || title })
-    setChecks(nextChecks)
-    setDirectAddModalOpen(false)
-    setDirectAddDraft({ title: '', memo: '', prepType: '', baggageType: 'carry_on' })
+    saveItemForTrip(tripId, { id, category: GUIDE_USER_DIRECT_SECTION_LABEL, title, subtitle: description || title })
     trackEvent('edit_add', { trip_id: tripId, category: GUIDE_USER_DIRECT_CATEGORY })
-    onArchiveMutated?.()
-  }, [directAddDraft, items, checks, setChecks, tripId, entry.id, onArchiveMutated])
+  }, [directAddDraft, items, checks, setChecks, tripId, entry.id])
 
   const openSectionEditorForSingleItem = useCallback((item) => {
     const bagKey = resolveBaggageSection(item)
