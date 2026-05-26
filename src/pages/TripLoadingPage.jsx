@@ -9,24 +9,10 @@ import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import {
   LOADING_VARIANTS,
   TIPS,
-  LOADING_ICON_PATHS,
   BLUR_ORBS,
 } from '@/mocks/loadingData'
 import loadingWordMatePng from '@/assets/loading-word-mate-user-latest.png'
 import loadingWordChecklistPng from '@/assets/loading-word-checklist-user-latest.png'
-
-/* ─────────────────────────────────────────────
-   범용 SVG 아이콘 — LOADING_ICON_PATHS 데이터 기반
-   diamond 아이콘만 중앙에 원형 포인트가 추가됩니다.
-───────────────────────────────────────────── */
-function SvgIcon({ name, className = 'w-5 h-5 text-white' }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d={LOADING_ICON_PATHS[name]} />
-      {name === 'diamond' && <circle cx="12" cy="12" r="2" fill="white" />}
-    </svg>
-  )
-}
 
 /* ─────────────────────────────────────────────
    메인 컴포넌트
@@ -300,18 +286,19 @@ function TripLoadingPage() {
         {/* TIP 영역 */}
         {/* 데스크탑: 황색 pill */}
         <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm">
-          <span className="text-amber-700">✦</span>
+          <span className="text-amber-700 font-extrabold tracking-widest">MATE TIP</span>
+          <span className="text-amber-800/60">·</span>
           {TIPS[tipIndex]}
         </div>
 
-        {/* 모바일: Editor's Tip 카드 */}
+        {/* 모바일: MATE TIP 카드 */}
         <div className="md:hidden w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm px-4 py-4 text-left flex items-start gap-3">
           <div className="w-9 h-9 bg-amber-400 rounded-xl flex items-center justify-center flex-shrink-0">
-            <SvgIcon name="bulb" />
+            <span className="text-[9px] font-extrabold tracking-tight text-amber-900 leading-none text-center">MATE<br/>TIP</span>
           </div>
           <div>
             <p className="text-[10px] font-bold tracking-widest text-amber-500 uppercase mb-1">
-              Editor&apos;s Tip
+              MATE TIP
             </p>
             <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
           </div>
@@ -319,8 +306,8 @@ function TripLoadingPage() {
 
       </div>
 
-      {/* ── 하단 브랜딩 ── */}
-      <div className="absolute bottom-8 flex flex-col items-center z-10">
+      {/* ── 하단 브랜딩 (데스크탑만) ── */}
+      <div className="absolute bottom-8 hidden md:flex flex-col items-center z-10">
         <BrandLogo className="h-5 w-auto opacity-95" />
       </div>
 

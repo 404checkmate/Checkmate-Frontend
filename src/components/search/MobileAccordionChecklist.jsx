@@ -82,19 +82,32 @@ function AccordionSection({
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-4 text-left"
+        onKeyDown={(e) => e.key === 'Enter' && setOpen((v) => !v)}
+        className="flex w-full cursor-pointer items-center gap-2 px-4 py-3.5 text-left"
       >
         <span className="flex-1 min-w-0 font-extrabold text-[#0a3d3d] text-base tracking-tight">
           {group.categoryLabel}
         </span>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onToggleSelectAllInGroup(group) }}
+          disabled={selectableInGroup.length === 0}
+          className="shrink-0 rounded-lg border border-sky-200 bg-white px-2.5 py-1.5 text-xs font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50 disabled:pointer-events-none disabled:opacity-40"
+        >
+          {allInGroupSelected ? '전체 해제' : '전체 선택'}
+          <span className="ml-1 font-semibold text-sky-600 tabular-nums">
+            ({selectableInGroup.length})
+          </span>
+        </button>
         <span className="shrink-0 text-xs font-semibold text-slate-400 tabular-nums">
           {selectedCount}/{group.items.length}
         </span>
         <ChevronIcon open={open} />
-      </button>
+      </div>
 
       <div
         style={{
@@ -105,19 +118,6 @@ function AccordionSection({
       >
         <div style={{ overflow: 'hidden' }}>
           <div className="border-t border-teal-100/90 px-4 pb-4 pt-3">
-            <div className="mb-3 flex justify-end">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onToggleSelectAllInGroup(group) }}
-                disabled={selectableInGroup.length === 0}
-                className="rounded-lg border border-sky-200 bg-white px-2.5 py-1.5 text-xs font-bold text-sky-800 shadow-sm transition-colors hover:bg-sky-50 disabled:pointer-events-none disabled:opacity-40"
-              >
-                {allInGroupSelected ? '전체 해제' : '전체 선택'}
-                <span className="ml-1 font-semibold text-sky-600 tabular-nums">
-                  ({selectableInGroup.length})
-                </span>
-              </button>
-            </div>
 
             {group.categoryValue === 'supplies' ? (
               <div className="flex flex-col gap-2">
