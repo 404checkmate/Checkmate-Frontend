@@ -438,9 +438,9 @@ function Article({ data, checked, toggle }) {
         const isAppsSection = section.id === 'apps'
         const imageLeft = idx % 2 === 0
         const paragraphs = (section.body.includes('<br/>')
-          ? section.body.split('<br/><br/>')
-          : section.body.split('\n\n')
-        ).filter(Boolean)
+          ? section.body.split('<br/>').map((s) => s.trim()).filter(Boolean)
+          : section.body.split('\n\n').filter(Boolean)
+        )
         const mainTitle = section.title.split('—')[0].trim()
         // section에 연결된 그룹을 원본 인덱스 보존 후 cat으로 병합
         const relatedGroups = (() => {
@@ -948,7 +948,7 @@ function CurationArticleContent({ data }) {
 
         .cur-checklist-item { word-break: break-word; overflow-wrap: break-word; }
 
-.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
+.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; word-break: keep-all; overflow-wrap: break-word; }
         @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
