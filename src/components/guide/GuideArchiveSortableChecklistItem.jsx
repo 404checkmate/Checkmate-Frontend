@@ -257,7 +257,7 @@ export default function GuideArchiveSortableChecklistItem({
   const dragHandleProps = !sortableDisabled ? { ...listeners, ...attributes } : {}
   const stop = (e) => e.stopPropagation()
 
-  const gripColor = isAi ? 'text-violet-300' : 'text-slate-300'
+  const gripColor = isAi ? 'text-violet-400' : 'text-slate-400'
   const gripBorderMd = isAi
     ? 'md:border md:border-violet-100 md:bg-violet-50/50 md:rounded-lg md:text-violet-500'
     : 'md:border md:border-slate-100 md:bg-slate-50/80 md:rounded-lg md:text-slate-400'
