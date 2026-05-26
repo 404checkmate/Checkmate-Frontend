@@ -100,12 +100,9 @@ function AccordionSection({
         >
           {allInGroupSelected ? '전체 해제' : '전체 선택'}
           <span className="ml-1 font-semibold text-sky-600 tabular-nums">
-            ({selectableInGroup.length})
+            {selectedCount}/{group.items.length}
           </span>
         </button>
-        <span className="shrink-0 text-xs font-semibold text-slate-400 tabular-nums">
-          {selectedCount}/{group.items.length}
-        </span>
         <ChevronIcon open={open} />
       </div>
 
