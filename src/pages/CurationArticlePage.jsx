@@ -948,7 +948,7 @@ function CurationArticleContent({ data }) {
 
         .cur-checklist-item { word-break: break-word; overflow-wrap: break-word; }
 
-.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
+.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; word-break: keep-all; overflow-wrap: break-word; }
         @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
