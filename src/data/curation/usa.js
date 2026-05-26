@@ -134,7 +134,37 @@ const usa = {
         "notes"
       ],
       "items": [
-        "ESTA 신청 (기타 주의사항 - 사전예약)"
+        "ESTA 신청"
+      ]
+    },
+    {
+      "cat": "사전 예약 / 신청 (3)",
+      "prepType": "pre_booking",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "트래블월렛 앱 설치"
+      ]
+    },
+    {
+      "cat": "사전 예약 / 신청 (2)",
+      "prepType": "pre_booking",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "DoorDash·Uber Eats 앱 설치"
+      ]
+    },
+    {
+      "cat": "사전 예약 / 신청 (1)",
+      "prepType": "pre_booking",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "OpenTable·Resy 앱 설치"
       ]
     },
     {
@@ -144,10 +174,7 @@ const usa = {
         "apps"
       ],
       "items": [
-        "Uber·Lyft 앱 설치 & 카드 등록 (필수 앱 - 사전예약)",
-        "OpenTable·Resy 앱 설치 (필수 앱 - 사전예약)",
-        "DoorDash·Uber Eats 앱 설치(필수 앱 - 사전예약)",
-        "트래블월렛 앱 설치(필수 앱 - 사전예약)"
+        "Uber·Lyft 앱 설치 & 카드 등록"
       ]
     },
     {
@@ -157,17 +184,27 @@ const usa = {
         "health"
       ],
       "items": [
-        "국제 운전면허증 발급 (건강&안전 - 사전예약)"
+        "국제 운전면허증 발급"
       ]
     },
     {
       "cat": "입을 옷",
-      "prepType": "item",
+      "prepType": "clothing",
       "section": [
         "climate"
       ],
       "items": [
-        "레이어드용 얇은 겉옷 (기후-입을 옷)"
+        "레이어드용 얇은 겉옷"
+      ]
+    },
+    {
+      "cat": "기타 (1)",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "세금(Tax) 별도 부과 확인"
       ]
     },
     {
@@ -177,8 +214,7 @@ const usa = {
         "notes"
       ],
       "items": [
-        "팁 문화 숙지(기타 - 기타)",
-        "세금(Tax) 별도 부과 확인 (기타 - 기타)"
+        "팁 문화 숙지"
       ]
     },
     {
@@ -202,6 +238,16 @@ const usa = {
       ]
     },
     {
+      "cat": "🛂 입국 시 주의 (1)",
+      "prepType": "pre_departure_check",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "TSA 보안검색 대비"
+      ]
+    },
+    {
       "cat": "사전 예약 / 신청",
       "prepType": "pre_booking",
       "section": [
@@ -218,8 +264,17 @@ const usa = {
         "notes"
       ],
       "items": [
-        "세관 신고서(CBP) 작성 준비",
-        "TSA 보안검색 대비"
+        "세관 신고서(CBP) 작성 준비"
+      ]
+    },
+    {
+      "cat": "🆘 비상 대비 (1)",
+      "prepType": "pre_departure_check",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "외교부 해외안전여행 앱 설치 및 여행 등록"
       ]
     },
     {
@@ -229,8 +284,7 @@ const usa = {
         "notes"
       ],
       "items": [
-        "긴급 연락처 저장",
-        "외교부 해외안전여행 앱 설치 및 여행 등록"
+        "긴급 연락처 저장"
       ]
     }
   ],

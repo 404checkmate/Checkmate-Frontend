@@ -4,7 +4,7 @@ import {
   generateChecklistFromContext,
   listChecklistCandidates,
 } from '@/api/checklists'
-import { adaptGeneratedChecklist } from '@/utils/checklistAdapter'
+import { adaptGeneratedChecklist, SUPPLIES_SUB_CATEGORIES } from '@/utils/checklistAdapter'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildContextInputFromPlan } from '@/utils/tripSearchUtils'
 import { trackEvent } from '@/utils/analyticsTracker'
@@ -55,9 +55,10 @@ export function useChecklistLoad(tripId, retryTick, prefetchedItems = null) {
           const builtItems = curationItems.map((item, i) => ({
             id: `curation-${i}`,
             title: item.label,
-            categoryCode: item.prepType || 'item',
+            categoryCode: item.prepType || 'essentials',
             categoryLabel: item.cat,
-            prepType: item.prepType || 'item',
+            prepType: item.prepType || 'essentials',
+            subCategory: SUPPLIES_SUB_CATEGORIES.has(item.prepType) ? item.prepType : undefined,
             baggageType: 'none',
             source: 'curation',
             isEssential: false,
