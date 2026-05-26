@@ -496,25 +496,19 @@ function Article({ data, checked, toggle }) {
 
                 {relatedGroups.length > 0 && (
                   <div className="mt-3 rounded-xl bg-white border border-slate-100 p-4">
-                    {relatedGroups.map((group) => {
-                      const gi = data.checklist.findIndex((g) => g.cat === group.cat)
-                      return (
-                        <div key={group.cat} className="mb-3 last:mb-0">
-                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
-                          {group.items.map((label, ii) => {
-                            const id = `${gi}-${ii}`
-                            return (
-                              <InlineCheckItem
-                                key={ii}
-                                item={{ label }}
-                                checked={!!checked[id]}
-                                onToggle={() => toggle(id)}
-                              />
-                            )
-                          })}
-                        </div>
-                      )
-                    })}
+                    {relatedGroups.map((group) => (
+                      <div key={group.cat} className="mb-3 last:mb-0">
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
+                        {group.items.map((it) => (
+                          <InlineCheckItem
+                            key={it.id}
+                            item={{ label: it.label }}
+                            checked={!!checked[it.id]}
+                            onToggle={() => toggle(it.id)}
+                          />
+                        ))}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
