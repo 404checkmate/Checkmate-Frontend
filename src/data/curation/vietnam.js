@@ -233,16 +233,6 @@ const vietnam = {
       ]
     },
     {
-      "cat": "건강 및 위생 (1)",
-      "prepType": "item",
-      "section": [
-        "health"
-      ],
-      "items": [
-        "정수 필터 또는 생수 구매 계획"
-      ]
-    },
-    {
       "cat": "💊 건강 & 의약품",
       "prepType": "health",
       "section": [
@@ -283,8 +273,8 @@ const vietnam = {
       ]
     },
     {
-      "cat": "의류 및 수영용품 (2)",
-      "prepType": "item",
+      "cat": "🎸 기타",
+      "prepType": "travel_goods",
       "section": [
         "climate"
       ],
@@ -293,8 +283,8 @@ const vietnam = {
       ]
     },
     {
-      "cat": "의류 및 수영용품 (1)",
-      "prepType": "item",
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
       "section": [
         "climate"
       ],
@@ -303,8 +293,8 @@ const vietnam = {
       ]
     },
     {
-      "cat": "의류 및 수영용품 (2)",
-      "prepType": "item",
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
       "section": [
         "climate"
       ],
@@ -313,8 +303,8 @@ const vietnam = {
       ]
     },
     {
-      "cat": "의류 및 수영용품 (1)",
-      "prepType": "item",
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
       "section": [
         "climate"
       ],
@@ -323,8 +313,8 @@ const vietnam = {
       ]
     },
     {
-      "cat": "의류 및 수영용품 (1)",
-      "prepType": "item",
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
       "section": [
         "climate"
       ],
@@ -333,8 +323,8 @@ const vietnam = {
       ]
     },
     {
-      "cat": "의류 및 수영용품",
-      "prepType": "item",
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
       "section": [
         "climate"
       ],
@@ -344,12 +334,12 @@ const vietnam = {
     },
     {
       "cat": "🎸기타",
-      "prepType": "item",
+      "prepType": "travel_goods",
       "section": [
         "climate"
       ],
       "items": [
-        "여분 비닐봉지"
+        "여분 비닐봉투 / 지퍼백"
       ]
     },
     {

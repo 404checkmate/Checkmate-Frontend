@@ -523,6 +523,17 @@ function Article({ data, checked, toggle }) {
 /* ════════════════════════════════════════════
    Checklist
 ════════════════════════════════════════════ */
+const PREP_TYPE_ORDER = [
+  'essentials', 'clothing', 'health', 'toiletries', 'beauty', 'electronics', 'travel_goods',
+  'item', 'pre_booking', 'pre_departure_check', 'etc',
+]
+const PREP_TYPE_LABEL = {
+  essentials: '필수 준비물', clothing: '입을 옷', health: '상비약',
+  toiletries: '세면도구', beauty: '미용용품', electronics: '전자제품',
+  travel_goods: '여행용품', item: '준비물', pre_booking: '사전 예약/신청',
+  pre_departure_check: '출국 전 확인사항', etc: '기타',
+}
+
 function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, onSave, saving }) {
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
   const total = flatItems.length
@@ -539,7 +550,8 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
     const merged = []
     const catIndex = {}
     data.checklist.forEach((group, gi) => {
-      const items = group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label }))
+      const prepType = group.prepType || 'item'
+      const items = group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label, prepType }))
       if (catIndex[group.cat] !== undefined) {
         merged[catIndex[group.cat]].items.push(...items)
       } else {
@@ -601,28 +613,23 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                {!isCollapsed && (
-                <ul>
-                  {group.items.map((it) => {
+                {!isCollapsed && (() => {
+                  const uniquePrepTypes = [...new Set(group.items.map((it) => it.prepType))]
+                  const hasSubGroups = uniquePrepTypes.length >= 4
+                  const orderedPrepTypes = PREP_TYPE_ORDER.filter((pt) => uniquePrepTypes.includes(pt))
+                    .concat(uniquePrepTypes.filter((pt) => !PREP_TYPE_ORDER.includes(pt)))
+
+                  const renderItem = (it) => {
                     const on = !!checked[it.id]
                     const isShaking = shake === it.id
                     return (
                       <li
                         key={it.id}
                         className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer ' + (isShaking ? 'cur-shake' : '')}
-                        onClick={() => {
-                          toggle(it.id)
-                          setShake(it.id)
-                          setTimeout(() => setShake(null), 320)
-                        }}
+                        onClick={() => { toggle(it.id); setShake(it.id); setTimeout(() => setShake(null), 320) }}
                         aria-label={it.label}
                       >
-                        <span
-                          className={
-                            'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' +
-                            (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')
-                          }
-                        >
+                        <span className={'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' + (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')}>
                           {on && (
                             <svg viewBox="0 0 24 24" className="absolute inset-0 m-auto h-3.5 w-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M5 12l5 5L20 7" />
@@ -636,9 +643,30 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                         </span>
                       </li>
                     )
-                  })}
-                </ul>
-                )}
+                  }
+
+                  if (!hasSubGroups) return <ul>{group.items.map(renderItem)}</ul>
+
+                  return (
+                    <div>
+                      {orderedPrepTypes.map((pt) => {
+                        const subItems = group.items.filter((it) => it.prepType === pt)
+                        if (subItems.length === 0) return null
+                        return (
+                          <div key={pt} className="mb-4 last:mb-0">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                                {PREP_TYPE_LABEL[pt] ?? pt}
+                              </span>
+                              <span className="h-px flex-1 bg-slate-100" />
+                            </div>
+                            <ul>{subItems.map(renderItem)}</ul>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
               </div>
             )})}
           </div>

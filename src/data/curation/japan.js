@@ -114,68 +114,163 @@ const japan = {
   ],
   "checklist": [
     {
+      "cat": "📋 입국 준비 (1)",
+      "prepType": "pre_departure_check",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "숙소 주소 및 연락처 저장"
+      ]
+    },
+    {
       "cat": "📋 입국 준비",
       "prepType": "pre_departure_check",
       "section": [
         "notes"
       ],
       "items": [
-        "Visit Japan Web 사전 등록",
-        "숙소 주소 및 연락처 저장"
+        "Visit Japan Web 사전 등록"
       ]
     },
     {
-      "cat": "🚃 교통 준비",
+      "cat": "✈️ 항공 & 교통",
       "prepType": "pre_booking",
       "section": [
         "money"
       ],
       "items": [
-        "Suica(스이카) 발급",
-        "JR패스 필요 여부 확인",
-        "공항↔숙소 이동 수단 확인"
+        "공항↔숙소 이동 수단 예약"
       ]
     },
     {
-      "cat": "📱 통신 & 앱",
+      "cat": "✈️ 항공 & 교통",
       "prepType": "pre_booking",
+      "section": [
+        "money"
+      ],
+      "items": [
+        "JR패스 필요 여부 확인"
+      ]
+    },
+    {
+      "cat": "✈️ 항공 & 교통",
+      "prepType": "pre_booking",
+      "section": [
+        "money"
+      ],
+      "items": [
+        "Suica(스이카) 발급"
+      ]
+    },
+    {
+      "cat": "📱 통신 & 앱 (1)",
+      "prepType": "essentials",
       "section": [
         "apps"
       ],
       "items": [
-        "Safety Tips 앱 설치",
         "타베로그 또는 구루나비 앱 설치"
       ]
     },
     {
-      "cat": "💳 금융 & 환전",
-      "prepType": "pre_departure_check",
+      "cat": "📱 통신 & 앱",
+      "prepType": "essentials",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "Safety Tips 앱 설치"
+      ]
+    },
+    {
+      "cat": "💳 금융 & 환전 (1)",
+      "prepType": "essentials",
       "section": [
         "money"
       ],
       "items": [
-        "동전 지갑 챙기기"
+        "여행용 카드 준비"
+      ]
+    },
+    {
+      "cat": "💳 금융 & 환전",
+      "prepType": "pre_booking",
+      "section": [
+        "money"
+      ],
+      "items": [
+        "현금(엔화) 환전"
+      ]
+    },
+    {
+      "cat": "💳 금융 & 환전",
+      "prepType": "travel_goods",
+      "section": [
+        "money"
+      ],
+      "items": [
+        "동전 지갑"
       ]
     },
     {
       "cat": "🏥 건강 & 안전",
-      "prepType": "pre_departure_check",
+      "prepType": "etc",
       "section": [
         "health"
       ],
       "items": [
-        "반입 금지 약품 성분 확인"
+        "국내 반입 금지 약품 성분 확인"
       ]
     },
     {
-      "cat": "👟 의류 & 짐",
-      "prepType": "item",
+      "cat": "🗺️ 현지 정보",
+      "prepType": "etc",
       "section": [
         "climate"
       ],
       "items": [
-        "계절별 레이어드 의상 준비",
+        "지역별 날씨 확인"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "etc",
+      "section": [
+        "climate"
+      ],
+      "items": [
         "작은 에코백 또는 봉투"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "계절별 레이어드 의상 준비"
+      ]
+    },
+    {
+      "cat": "🗺️ 현지 예절 (2)",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "곤약젤리 반입 규정 확인"
+      ]
+    },
+    {
+      "cat": "🗺️ 현지 예절 (1)",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "좌측통행 문화 인지"
       ]
     },
     {
@@ -185,9 +280,27 @@ const japan = {
         "notes"
       ],
       "items": [
-        "전철 내 통화 금지 숙지",
-        "좌측통행 문화 인지",
-        "곤약젤리 반입 규정 확인"
+        "전철 내 통화 금지 숙지"
+      ]
+    },
+    {
+      "cat": "🛡️ 안전",
+      "prepType": "pre_booking",
+      "section": [
+        "health"
+      ],
+      "items": [
+        "여행자 보험 가입"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "편한 신발"
       ]
     }
   ],

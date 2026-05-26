@@ -128,7 +128,7 @@ const usa = {
   ],
   "checklist": [
     {
-      "cat": "🗺️ 현지 정보 ",
+      "cat": "🗺️ 현지 정보",
       "prepType": "etc",
       "section": [
         "climate"
@@ -218,7 +218,7 @@ const usa = {
       ]
     },
     {
-      "cat": "💊 건강 & 의약품 ",
+      "cat": "💊 건강 & 의약품",
       "prepType": "health",
       "section": [
         "health"
@@ -238,7 +238,7 @@ const usa = {
       ]
     },
     {
-      "cat": "💊 건강 & 의약품 ",
+      "cat": "💊 건강 & 의약품",
       "prepType": "health",
       "section": [
         "health"
@@ -368,269 +368,35 @@ const usa = {
       ]
     },
     {
-      "cat": "😉 기본 준비물(4)",
-      "prepType": "item",
-      "section": [],
-      "items": []
-    },
-    {
-      "cat": "😉 기본 준비물(3)",
-      "prepType": "item",
-      "section": [],
-      "items": []
-    },
-    {
-      "cat": "😉 기본 준비물(3)",
-      "prepType": "item",
-      "section": [],
-      "items": []
-    },
-    {
-      "cat": "😉 기본 준비물(2)",
-      "prepType": "item",
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
       "section": [],
       "items": [
-        "수하물 규정"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물(3)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "캐리어 무게"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물(2)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "카운터 위치"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물(2)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "체크인 마감시간"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물 (1)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "온라인 체크인"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물(2)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "여권 만료일 (6개월 이상)"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물 (1)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "공항 픽업/샌딩"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물 (1)",
-      "prepType": "item",
-      "section": [],
-      "items": [
-        "숙소 예약"
+        "항공권 (e티켓 캡처·출력본)"
       ]
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "item",
+      "prepType": "essentials",
       "section": [],
       "items": [
-        "항공권 예약"
+        "여권 / 여권 복사본"
       ]
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "electronics",
+      "prepType": "essentials",
       "section": [],
       "items": [
-        "샤워기 필터"
+        "이심 / 유심 / 로밍 / 포켓 와이파이"
       ]
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "electronics",
+      "prepType": "essentials",
       "section": [],
       "items": [
-        "이어폰"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "electronics",
-      "section": [],
-      "items": [
-        "해외 멀티 어댑터"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "electronics",
-      "section": [],
-      "items": [
-        "충전기"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "electronics",
-      "section": [],
-      "items": [
-        "보조배터리"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "beauty",
-      "section": [],
-      "items": [
-        "헤어제품(에센스·오일·왁스·스프레이)"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "beauty",
-      "section": [],
-      "items": [
-        "헤어기기(헤어드라이기, 고데기)"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "beauty",
-      "section": [],
-      "items": [
-        "헤어용품(머리끈·머리핀·헤어롤)"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "beauty",
-      "section": [],
-      "items": [
-        "색조 화장품"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "beauty",
-      "section": [],
-      "items": [
-        "자외선 차단제"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "beauty",
-      "section": [],
-      "items": [
-        "스킨케어"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "toiletries",
-      "section": [],
-      "items": [
-        "면도기 / 제모기"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "toiletries",
-      "section": [],
-      "items": [
-        "면봉 / 화장솜"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "toiletries",
-      "section": [],
-      "items": [
-        "샤워용품 (샴푸·린스·바디워시)"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "toiletries",
-      "section": [],
-      "items": [
-        "세안용품 (클렌징폼·클렌징오일·립앤아이 리무버)"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "toiletries",
-      "section": [],
-      "items": [
-        "칫솔 / 치약"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
-        "선글라스"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
-        "모자"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
-        "편한 신발"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
-        "양말"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
-        "속옷"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
-        "잠옷"
+        "약간의 현금"
       ]
     },
     {
@@ -651,34 +417,274 @@ const usa = {
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "essentials",
+      "prepType": "clothing",
       "section": [],
       "items": [
-        "약간의 현금"
+        "잠옷"
       ]
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "essentials",
+      "prepType": "clothing",
       "section": [],
       "items": [
-        "이심 / 유심 / 로밍 / 포켓 와이파이"
+        "속옷"
       ]
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "essentials",
+      "prepType": "clothing",
       "section": [],
       "items": [
-        "여권 / 여권 복사본"
+        "양말"
       ]
     },
     {
       "cat": "😉 기본 준비물",
-      "prepType": "essentials",
+      "prepType": "clothing",
       "section": [],
       "items": [
-        "항공권 (e티켓 캡처·출력본)"
+        "편한 신발"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "모자"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "선글라스"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "칫솔 / 치약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "세안용품 (클렌징폼·클렌징오일·립앤아이 리무버)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "샤워용품 (샴푸·린스·바디워시)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "면봉 / 화장솜"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "면도기 / 제모기"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "스킨케어"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "자외선 차단제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "색조 화장품"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어용품(머리끈·머리핀·헤어롤)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어기기(헤어드라이기, 고데기)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어제품(에센스·오일·왁스·스프레이)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "보조배터리"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "충전기"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "이어폰"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "휴지/물티슈"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "양우산"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "보조가방"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "카운터 위치"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "샤워기 필터"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "항공권 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "숙소 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "공항 픽업/샌딩"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "여권 만료일 (6개월 이상)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "온라인 체크인"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "체크인 마감시간"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "카운터 위치"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "캐리어 무게"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "수하물 규정"
       ]
     }
   ],
