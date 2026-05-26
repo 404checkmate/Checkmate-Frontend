@@ -10,7 +10,7 @@ import {
 } from '@/mocks/tripNewDestinationData'
 import { COMPANIONS, TRAVEL_STYLES } from '@/mocks/tripNewStep5Data'
 import { useTodaySync } from '@/hooks/useTodaySync'
-import { useScrollDirection } from '@/hooks/useScrollDirection'
+import { useScrollChrome } from '@/contexts/scrollChromeContext'
 import { useCountryOptions } from '@/hooks/useCountryOptions'
 import {
   findExactCountryMatch,
@@ -46,7 +46,7 @@ function TripNewDestinationPageInner({ navState }) {
 
   // ─── 날짜·스크롤·나라 옵션 훅 ───────────────────────────────────────────────
   const today = useTodaySync()
-  const bottomNavVisible = useScrollDirection()
+  const bottomNavVisible = useScrollChrome()
   const countryOptions = useCountryOptions()
 
   // ─── 여행지 선택 상태 ──────────────────────────────────────────────────────
@@ -102,6 +102,13 @@ function TripNewDestinationPageInner({ navState }) {
   // ─── 초기화 ────────────────────────────────────────────────────────────────
   useEffect(() => {
     clearActiveTripId()
+  }, [])
+
+  // iOS 오버스크롤(rubber-band)로 헤더와 진행률바가 어긋나는 현상 방지
+  useEffect(() => {
+    const html = document.documentElement
+    html.style.setProperty('overscroll-behavior-y', 'none')
+    return () => html.style.removeProperty('overscroll-behavior-y')
   }, [])
 
   // ─── today 변경 시 과거 날짜 비움 ──────────────────────────────────────────
@@ -478,7 +485,7 @@ function TripNewDestinationPageInner({ navState }) {
         }}
       >
         {/* 상단 바: 뒤로가기 + 진행률 바 */}
-        <div className={`fixed left-0 right-0 z-[65] flex items-center justify-center px-5 pt-3 pb-2 lg:hidden transition-[top] duration-300 ease-out ${bottomNavVisible ? 'top-14' : 'top-0'}`}>
+        <div className={`fixed left-0 right-0 z-[55] flex items-center justify-center px-5 pt-3 pb-2 lg:hidden transition-[top] duration-300 ease-out ${bottomNavVisible ? 'top-14' : 'top-0'}`}>
           <button
             type="button"
             onClick={() => navigate(-1)}
