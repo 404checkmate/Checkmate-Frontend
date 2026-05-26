@@ -953,7 +953,7 @@ function CurationArticleContent({ data }) {
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
-          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; text-align: left; }
+          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; }
           .cur-editorial aside p { font-size: 0.75rem; letter-spacing: inherit; }
         }
       `}</style>
