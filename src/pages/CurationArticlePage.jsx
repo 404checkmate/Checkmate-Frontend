@@ -518,13 +518,28 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
   const total = flatItems.length
   const done = Object.values(checked).filter(Boolean).length
-  const allGroups = useMemo(
-    () => data.checklist.map((group, gi) => ({
-      cat: group.cat,
-      items: group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label })),
-    })),
-    [data],
-  )
+  const [collapsed, setCollapsed] = useState(() => new Set())
+  const toggleCollapse = useCallback((cat) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      next.has(cat) ? next.delete(cat) : next.add(cat)
+      return next
+    })
+  }, [])
+  const allGroups = useMemo(() => {
+    const merged = []
+    const catIndex = {}
+    data.checklist.forEach((group, gi) => {
+      const items = group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label }))
+      if (catIndex[group.cat] !== undefined) {
+        merged[catIndex[group.cat]].items.push(...items)
+      } else {
+        catIndex[group.cat] = merged.length
+        merged.push({ cat: group.cat, items })
+      }
+    })
+    return merged
+  }, [data])
 
   return (
     <section id="checklist" data-toc className="relative">
@@ -554,11 +569,30 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
 
           {/* Items */}
           <div className="px-5 md:px-7 mt-6 pb-7">
-            {allGroups.map((group) => (
-              <div key={group.cat} className="mb-6 last:mb-0">
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">
-                  {group.cat}
-                </div>
+            {allGroups.map((group) => {
+              const isCollapsed = collapsed.has(group.cat)
+              const groupDone = group.items.filter((it) => checked[it.id]).length
+              return (
+              <div key={group.cat} className="mb-4 last:mb-0">
+                <button
+                  type="button"
+                  onClick={() => toggleCollapse(group.cat)}
+                  className="flex w-full items-center gap-2 mb-3 group/hdr"
+                >
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700">
+                    {group.cat}
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium tabular-nums">
+                    {groupDone}/{group.items.length}
+                  </span>
+                  <svg
+                    className={`ml-auto h-4 w-4 shrink-0 text-amber-500 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {!isCollapsed && (
                 <ul>
                   {group.items.map((it) => {
                     const on = !!checked[it.id]
@@ -595,8 +629,9 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                     )
                   })}
                 </ul>
+                )}
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Bottom CTA */}
