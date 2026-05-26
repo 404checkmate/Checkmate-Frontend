@@ -442,7 +442,22 @@ function Article({ data, checked, toggle }) {
           : section.body.split('\n\n')
         ).filter(Boolean)
         const mainTitle = section.title.split('—')[0].trim()
-        const relatedGroups = data.checklist.filter((g) => g.section?.includes(section.id))
+        // section에 연결된 그룹을 원본 인덱스 보존 후 cat으로 병합
+        const relatedGroups = (() => {
+          const merged = []
+          const catIndex = {}
+          data.checklist.forEach((g, gi) => {
+            if (!g.section?.includes(section.id)) return
+            const items = g.items.map((label, ii) => ({ id: `${gi}-${ii}`, label }))
+            if (catIndex[g.cat] !== undefined) {
+              merged[catIndex[g.cat]].items.push(...items)
+            } else {
+              catIndex[g.cat] = merged.length
+              merged.push({ cat: g.cat, items })
+            }
+          })
+          return merged
+        })()
 
         return (
           <div key={section.id}>
