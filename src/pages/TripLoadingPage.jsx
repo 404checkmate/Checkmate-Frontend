@@ -306,8 +306,8 @@ function TripLoadingPage() {
 
       </div>
 
-      {/* ── 하단 브랜딩 ── */}
-      <div className="absolute bottom-8 flex flex-col items-center z-10">
+      {/* ── 하단 브랜딩 (데스크탑만) ── */}
+      <div className="absolute bottom-8 hidden md:flex flex-col items-center z-10">
         <BrandLogo className="h-5 w-auto opacity-95" />
       </div>
 
