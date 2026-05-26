@@ -24,7 +24,8 @@ export default function TripSearchSaveModal({ open, onConfirm, onClose, mergeToA
             <>
               저장하시겠습니까?
               <br />
-              확인 버튼을 클릭하면 체크리스트로 전환됩니다
+              <span className="md:hidden">확인을 클릭하면 체크리스트로 전환됩니다</span>
+              <span className="hidden md:inline">확인 버튼을 클릭하면 체크리스트로 전환됩니다</span>
             </>
           )}
         </h2>
