@@ -438,9 +438,9 @@ function Article({ data, checked, toggle }) {
         const isAppsSection = section.id === 'apps'
         const imageLeft = idx % 2 === 0
         const paragraphs = (section.body.includes('<br/>')
-          ? section.body.split('<br/>').map((s) => s.trim()).filter(Boolean)
-          : section.body.split('\n\n').filter(Boolean)
-        )
+          ? section.body.split('<br/><br/>')
+          : section.body.split('\n\n')
+        ).filter(Boolean)
         const mainTitle = section.title.split('—')[0].trim()
         // section에 연결된 그룹을 원본 인덱스 보존 후 cat으로 병합
         const relatedGroups = (() => {
@@ -953,7 +953,7 @@ function CurationArticleContent({ data }) {
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
-          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; }
+          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; text-align: left; }
           .cur-editorial aside p { font-size: 0.75rem; letter-spacing: inherit; }
         }
       `}</style>
