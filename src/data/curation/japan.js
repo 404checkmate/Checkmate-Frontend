@@ -114,113 +114,23 @@ const japan = {
   ],
   "checklist": [
     {
-      "cat": "📋 입국 준비 (1)",
-      "prepType": "pre_departure_check",
+      "cat": "👕 의류",
+      "prepType": "clothing",
       "section": [
-        "notes"
+        "climate"
       ],
       "items": [
-        "숙소 주소 및 연락처 저장"
+        "계절별 레이어드 의상 준비"
       ]
     },
     {
-      "cat": "📋 입국 준비",
-      "prepType": "pre_departure_check",
+      "cat": "👕 의류",
+      "prepType": "clothing",
       "section": [
-        "notes"
+        "climate"
       ],
       "items": [
-        "Visit Japan Web 사전 등록"
-      ]
-    },
-    {
-      "cat": "✈️ 항공 & 교통",
-      "prepType": "pre_booking",
-      "section": [
-        "money"
-      ],
-      "items": [
-        "공항↔숙소 이동 수단 예약"
-      ]
-    },
-    {
-      "cat": "✈️ 항공 & 교통",
-      "prepType": "pre_booking",
-      "section": [
-        "money"
-      ],
-      "items": [
-        "JR패스 필요 여부 확인"
-      ]
-    },
-    {
-      "cat": "✈️ 항공 & 교통",
-      "prepType": "pre_booking",
-      "section": [
-        "money"
-      ],
-      "items": [
-        "Suica(스이카) 발급"
-      ]
-    },
-    {
-      "cat": "📱 통신 & 앱 (1)",
-      "prepType": "essentials",
-      "section": [
-        "apps"
-      ],
-      "items": [
-        "타베로그 또는 구루나비 앱 설치"
-      ]
-    },
-    {
-      "cat": "📱 통신 & 앱",
-      "prepType": "essentials",
-      "section": [
-        "apps"
-      ],
-      "items": [
-        "Safety Tips 앱 설치"
-      ]
-    },
-    {
-      "cat": "💳 금융 & 환전 (1)",
-      "prepType": "essentials",
-      "section": [
-        "money"
-      ],
-      "items": [
-        "여행용 카드 준비"
-      ]
-    },
-    {
-      "cat": "💳 금융 & 환전",
-      "prepType": "pre_booking",
-      "section": [
-        "money"
-      ],
-      "items": [
-        "현금(엔화) 환전"
-      ]
-    },
-    {
-      "cat": "💳 금융 & 환전",
-      "prepType": "travel_goods",
-      "section": [
-        "money"
-      ],
-      "items": [
-        "동전 지갑"
-      ]
-    },
-    {
-      "cat": "🏥 건강 & 안전",
-      "prepType": "etc",
-      "section": [
-        "health"
-      ],
-      "items": [
-        "국내 반입 금지 약품 성분 확인"
+        "편한 신발"
       ]
     },
     {
@@ -234,53 +144,53 @@ const japan = {
       ]
     },
     {
-      "cat": "👕 의류",
-      "prepType": "etc",
+      "cat": "✈️ 항공 & 교통",
+      "prepType": "pre_booking",
       "section": [
-        "climate"
+        "money"
       ],
       "items": [
-        "작은 에코백 또는 봉투"
+        "Suica(스이카) 발급"
       ]
     },
     {
-      "cat": "👕 의류",
-      "prepType": "clothing",
+      "cat": "💳 금융 & 환전",
+      "prepType": "travel_goods",
       "section": [
-        "climate"
+        "money"
       ],
       "items": [
-        "계절별 레이어드 의상 준비"
+        "동전 지갑"
       ]
     },
     {
-      "cat": "🗺️ 현지 예절 (2)",
-      "prepType": "etc",
+      "cat": "💳 금융 & 환전",
+      "prepType": "pre_booking",
       "section": [
-        "notes"
+        "money"
       ],
       "items": [
-        "곤약젤리 반입 규정 확인"
+        "현금(엔화) 환전"
       ]
     },
     {
-      "cat": "🗺️ 현지 예절 (1)",
-      "prepType": "etc",
+      "cat": "💳 금융 & 환전 (1)",
+      "prepType": "essentials",
       "section": [
-        "notes"
+        "money"
       ],
       "items": [
-        "좌측통행 문화 인지"
+        "여행용 카드 준비"
       ]
     },
     {
-      "cat": "🗺️ 현지 예절",
+      "cat": "🏥 건강 & 안전",
       "prepType": "etc",
       "section": [
-        "notes"
+        "health"
       ],
       "items": [
-        "전철 내 통화 금지 숙지"
+        "국내 반입 금지 약품 성분 확인"
       ]
     },
     {
@@ -294,13 +204,465 @@ const japan = {
       ]
     },
     {
-      "cat": "👕 의류",
-      "prepType": "clothing",
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
       "section": [
-        "climate"
+        "apps"
       ],
       "items": [
+        "Safety Tips 앱 설치"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "타베로그 또는 구루나비 앱 설치"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "트래블월렛 앱 설치"
+      ]
+    },
+    {
+      "cat": "📋 여권 & 비자",
+      "prepType": "pre_departure_check",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "Visit Japan Web 사전 등록"
+      ]
+    },
+    {
+      "cat": "🤝 현지 문화",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "전철 내 통화 금지 숙지"
+      ]
+    },
+    {
+      "cat": "🤝 현지 문화",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "좌측통행 문화 인지"
+      ]
+    },
+    {
+      "cat": "🤝 현지 문화",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "곤약젤리 반입 규정 확인"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "electronics",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "110V 어댑터"
+      ]
+    },
+    {
+      "cat": "🛡️ 안전",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "외교부 해외안전여행 앱 설치 및 여행 등록"
+      ]
+    },
+    {
+      "cat": "✈️ 항공 & 교통",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "JR패스 필요 여부 확인"
+      ]
+    },
+    {
+      "cat": "✈️ 항공 & 교통",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "공항↔숙소 이동 수단 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
+      "items": [
+        "항공권 (e티켓 캡처·출력본)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
+      "items": [
+        "여권 / 여권 복사본"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
+      "items": [
+        "이심 / 유심 / 로밍 / 포켓 와이파이"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
+      "items": [
+        "볼펜"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "여벌옷"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "잠옷"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "속옷"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "양말"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
         "편한 신발"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "모자"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "선글라스"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "감기약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "해열진통제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "지사제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "소화제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "연고/소독약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "알코올 스왑"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "밴드"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "칫솔 / 치약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "세안용품 (클렌징폼·클렌징오일·립앤아이 리무버)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "샤워용품 (샴푸·린스·바디워시)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "면봉 / 화장솜"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "면도기 / 제모기"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "스킨케어"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "자외선 차단제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "색조 화장품"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어용품(머리끈·머리핀·헤어롤)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어기기(헤어드라이기, 고데기)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어제품(에센스·오일·왁스·스프레이)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "보조배터리"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "충전기"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "이어폰"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "휴지/물티슈"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "양우산"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "보조가방"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "샤워기 필터"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "항공권 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "숙소 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "여권 만료일 (6개월 이상)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "온라인 체크인"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "체크인 마감시간"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "카운터 위치"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "캐리어 무게"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "수하물 규정"
       ]
     }
   ],

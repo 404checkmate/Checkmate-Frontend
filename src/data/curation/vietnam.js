@@ -113,203 +113,13 @@ const vietnam = {
   ],
   "checklist": [
     {
-      "cat": "서류 및 입국 준비 (1)",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "패스트트랙 입국 서비스 예약"
-      ]
-    },
-    {
-      "cat": "📋 여권 & 비자",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "베트남 전자비자(E-visa) 신청"
-      ]
-    },
-    {
-      "cat": "📱 앱 & 전자기기",
-      "prepType": "etc",
-      "section": [
-        "apps"
-      ],
-      "items": [
-        "트래블월렛 앱 설치"
-      ]
-    },
-    {
-      "cat": "앱 및 사전 예약 (1)",
-      "prepType": "pre_booking",
-      "section": [
-        "apps"
-      ],
-      "items": [
-        "공항 라운지 예약"
-      ]
-    },
-    {
-      "cat": "📱 앱 & 전자기기",
-      "prepType": "etc",
-      "section": [
-        "apps"
-      ],
-      "items": [
-        "푸고(Fugo) 앱 설치"
-      ]
-    },
-    {
-      "cat": "📱 앱 & 전자기기",
-      "prepType": "etc",
-      "section": [
-        "apps"
-      ],
-      "items": [
-        "그랩(Grab) 앱 설치"
-      ]
-    },
-    {
-      "cat": "투어 및 액티비티 예약 (3)",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "오토바이 렌트 또는 시클로 투어 확인"
-      ]
-    },
-    {
-      "cat": "투어 및 액티비티 예약 (2)",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "하노이 하롱베이 크루즈 예약"
-      ]
-    },
-    {
-      "cat": "투어 및 액티비티 예약 (2)",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "마사지·스파 예약"
-      ]
-    },
-    {
-      "cat": "투어 및 액티비티 예약 (1)",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "호이안 야시장 & 등불 유람선 예약"
-      ]
-    },
-    {
-      "cat": "투어 및 액티비티 예약 (1)",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "다낭 참섬(Cham Island) 스노클링 투어 예약"
-      ]
-    },
-    {
-      "cat": "투어 및 액티비티 예약",
-      "prepType": "pre_booking",
-      "section": [
-        "notes"
-      ],
-      "items": [
-        "다낭 바나힐 입장권 예약"
-      ]
-    },
-    {
-      "cat": "💊 건강 & 의약품",
-      "prepType": "health",
-      "section": [
-        "health"
-      ],
-      "items": [
-        "벌레 기피제 (모기 스프레이/패치)"
-      ]
-    },
-    {
-      "cat": "👕 의류",
-      "prepType": "clothing",
-      "section": [
-        "climate"
-      ],
-      "items": [
-        "슬리퍼 및 편한 운동화"
-      ]
-    },
-    {
-      "cat": "👕 의류",
-      "prepType": "clothing",
-      "section": [
-        "climate"
-      ],
-      "items": [
-        "사원·종교 시설 방문용 긴바지/스카프"
-      ]
-    },
-    {
-      "cat": "👕 의류",
-      "prepType": "clothing",
-      "section": [
-        "climate"
-      ],
-      "items": [
-        "얇은 긴소매 또는 가디건"
-      ]
-    },
-    {
-      "cat": "🎸 기타",
-      "prepType": "travel_goods",
-      "section": [
-        "climate"
-      ],
-      "items": [
-        "우산 또는 우비"
-      ]
-    },
-    {
       "cat": "🏊‍♀️ 수영용품",
       "prepType": "etc",
       "section": [
         "climate"
       ],
       "items": [
-        "방수팩"
-      ]
-    },
-    {
-      "cat": "🏊‍♀️ 수영용품",
-      "prepType": "etc",
-      "section": [
-        "climate"
-      ],
-      "items": [
-        "비치타올"
-      ]
-    },
-    {
-      "cat": "🏊‍♀️ 수영용품",
-      "prepType": "etc",
-      "section": [
-        "climate"
-      ],
-      "items": [
-        "스노클링 장비"
+        "수영복"
       ]
     },
     {
@@ -329,27 +139,187 @@ const vietnam = {
         "climate"
       ],
       "items": [
-        "수영복"
+        "스노클링 장비"
       ]
     },
     {
-      "cat": "🎸기타",
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "비치타올"
+      ]
+    },
+    {
+      "cat": "🏊‍♀️ 수영용품",
+      "prepType": "etc",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "방수팩"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "얇은 긴소매 또는 가디건"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "사원·종교 시설 방문용 긴바지/스카프"
+      ]
+    },
+    {
+      "cat": "👕 의류",
+      "prepType": "clothing",
+      "section": [
+        "climate"
+      ],
+      "items": [
+        "슬리퍼 및 편한 운동화"
+      ]
+    },
+    {
+      "cat": "🎸 기타",
       "prepType": "travel_goods",
       "section": [
         "climate"
       ],
       "items": [
-        "여분 비닐봉투 / 지퍼백"
+        "우산 또는 우비"
       ]
     },
     {
-      "cat": "뷰티 및 용품",
-      "prepType": "beauty",
+      "cat": "💳 금융 & 환전",
+      "prepType": "pre_booking",
       "section": [
-        "climate"
+        "money"
       ],
       "items": [
-        "메이크업 픽서 스프레이"
+        "현금(동) 환전"
+      ]
+    },
+    {
+      "cat": "💳 금융 & 환전 (1)",
+      "prepType": "essentials",
+      "section": [
+        "money"
+      ],
+      "items": [
+        "여행용 카드 준비"
+      ]
+    },
+    {
+      "cat": "💊 건강 & 의약품",
+      "prepType": "health",
+      "section": [
+        "health"
+      ],
+      "items": [
+        "벌레 기피제 (모기 스프레이/패치)"
+      ]
+    },
+    {
+      "cat": "💊 건강 & 의약품",
+      "prepType": "health",
+      "section": [
+        "health"
+      ],
+      "items": [
+        "지사제"
+      ]
+    },
+    {
+      "cat": "💊 건강 & 의약품",
+      "prepType": "health",
+      "section": [
+        "health"
+      ],
+      "items": [
+        "소화제"
+      ]
+    },
+    {
+      "cat": "🎸 기타",
+      "prepType": "travel_goods",
+      "section": [
+        "health"
+      ],
+      "items": [
+        "샤워 필터기"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "그랩(Grab) 앱 설치"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "푸고(Fugo) 앱 설치"
+      ]
+    },
+    {
+      "cat": "📱 앱 & 전자기기",
+      "prepType": "etc",
+      "section": [
+        "apps"
+      ],
+      "items": [
+        "트래블월렛 앱 설치"
+      ]
+    },
+    {
+      "cat": "📋 여권 & 비자",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "베트남 전자비자(E-visa) 신청"
+      ]
+    },
+    {
+      "cat": "🤝 현지 문화",
+      "prepType": "etc",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "팁 문화 숙지"
+      ]
+    },
+    {
+      "cat": "🗺️ 현지 정보 ",
+      "prepType": "pre_booking",
+      "section": [
+        "notes"
+      ],
+      "items": [
+        "패스트트랙 입국 서비스 예약"
       ]
     },
     {
@@ -359,27 +329,343 @@ const vietnam = {
         "notes"
       ],
       "items": [
-        "긴급 연락처 메모 (한국 대사관 등)"
+        "외교부 해외안전여행 앱 설치 및 여행 등록"
       ]
     },
     {
-      "cat": "🎸기타",
-      "prepType": "etc",
-      "section": [
-        "notes"
-      ],
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
       "items": [
-        "여행용 잠금장치 (자물쇠)"
+        "항공권 (e티켓 캡처·출력본)"
       ]
     },
     {
-      "cat": "🎸기타",
-      "prepType": "etc",
-      "section": [
-        "notes"
-      ],
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
       "items": [
-        "이어플러그 및 안대"
+        "여권 / 여권 복사본"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
+      "items": [
+        "이심 / 유심 / 로밍 / 포켓 와이파이"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "essentials",
+      "section": [],
+      "items": [
+        "볼펜"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "여벌옷"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "잠옷"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "속옷"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "양말"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "모자"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "clothing",
+      "section": [],
+      "items": [
+        "선글라스"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "감기약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "해열진통제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "연고/소독약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "알코올 스왑"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "health",
+      "section": [],
+      "items": [
+        "밴드"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "칫솔 / 치약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "세안용품 (클렌징폼·클렌징오일·립앤아이 리무버)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "샤워용품 (샴푸·린스·바디워시)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "면봉 / 화장솜"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "toiletries",
+      "section": [],
+      "items": [
+        "면도기 / 제모기"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "스킨케어"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "자외선 차단제"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어제품(에센스·오일·왁스·스프레이)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어기기(헤어드라이기, 고데기)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "헤어용품(머리끈·머리핀·헤어롤)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "beauty",
+      "section": [],
+      "items": [
+        "색조 화장품"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "이어폰"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "충전기"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "electronics",
+      "section": [],
+      "items": [
+        "보조배터리"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "휴지/물티슈"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "양우산"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "보조가방"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "travel_goods",
+      "section": [],
+      "items": [
+        "비닐봉투 / 지퍼백"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "공항 픽업/샌딩"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "숙소 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_booking",
+      "section": [],
+      "items": [
+        "항공권 예약"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "여권 만료일 (6개월 이상)"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "온라인 체크인"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "체크인 마감시간"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "카운터 위치"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "캐리어 무게"
+      ]
+    },
+    {
+      "cat": "😉 기본 준비물",
+      "prepType": "pre_departure_check",
+      "section": [],
+      "items": [
+        "수하물 규정"
       ]
     }
   ],
