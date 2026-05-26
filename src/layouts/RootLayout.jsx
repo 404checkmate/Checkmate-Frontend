@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
+import { ScrollChromeContext } from '@/contexts/scrollChromeContext'
 import Header from '@/components/common/Header'
 import AiPlannerFab from '@/components/common/AiPlannerFab'
 import HomeFooter from '@/components/home/HomeFooter'
@@ -74,6 +75,7 @@ function RootLayout() {
   const showFooter = pathname !== '/' && pathname !== '/about'
 
   return (
+    <ScrollChromeContext.Provider value={scrollChromeVisible}>
     <div className="min-h-screen bg-white flex flex-col">
       <div
         className={
@@ -131,6 +133,7 @@ function RootLayout() {
 
       {showAiPlannerFab ? <AiPlannerFab /> : null}
     </div>
+    </ScrollChromeContext.Provider>
   )
 }
 
