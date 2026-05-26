@@ -36,7 +36,10 @@ export function buildCountryArrivalOptions(countries, cities) {
             aliases: mockEntry?.arrivals?.find((a) => a.city === c.nameKo)?.aliases ?? [],
           }))
           const apiCityNames = new Set(apiArrivals.map((a) => a.city))
-          const mockExtras = (mockEntry?.arrivals ?? []).filter((a) => !apiCityNames.has(a.city))
+          const apiIataCodes = new Set(apiArrivals.map((a) => a.iata).filter(Boolean))
+          const mockExtras = (mockEntry?.arrivals ?? []).filter(
+            (a) => !apiCityNames.has(a.city) && !(a.iata && apiIataCodes.has(a.iata))
+          )
           return [...apiArrivals, ...mockExtras]
         })(),
     }
