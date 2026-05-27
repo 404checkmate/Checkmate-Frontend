@@ -285,7 +285,7 @@ function TripLoadingPage() {
 
         {/* TIP 영역 */}
         {/* 데스크탑: 황색 pill */}
-        <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm">
+        <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm whitespace-nowrap">
           <span className="text-amber-700 font-extrabold tracking-widest">MATE TIP</span>
           <span className="text-amber-800/60">·</span>
           {TIPS[tipIndex]}
