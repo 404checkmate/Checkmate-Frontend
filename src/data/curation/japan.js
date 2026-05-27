@@ -28,9 +28,9 @@ const japan = {
     {
       "id": "climate",
       "kicker": "Climate & Packing",
-      "icon": "☀️",
+      "icon": "",
       "title": "기후 & 옷차림",
-      "body": "",
+      "body": "일본은 한국과 비슷하게 <strong>사계절이 뚜렷</strong>합니다.<br/><strong>봄(3~5월)</strong>은 벚꽃 시즌으로 일본 여행의 <strong>최대 성수기</strong>입니다. <strong>꽃 구경</strong>을 원한다면 도쿄 기준 3월 말~4월 초가 절정이지만, 이 시기는 숙소·항공권이 일찍 마감되므로 최소 2~3개월 전 예약이 필수입니다. <strong>여름(6~8월)</strong>은 <strong>고온다습</strong>하고 <strong>태풍</strong>도 오며, 6~7월 장마철에는 비가 자주 옵니다. <strong>가을(9~11월)</strong>은 <strong>단풍과 선선한 날씨</strong>가 어우러져 여행하기 매우 좋습니다. <strong>겨울(12~2월)</strong>은 도쿄 기준 영상이지만 습하고 바람이 강해 <strong>체감 온도가 낮습니다</strong>. 홋카이도나 니가타 같은 북쪽·산간 지역은 한국보다 훨씬 많은 눈이 쌓이므로 <strong>방한 준비를 철저히</strong> 하세요.<br/>일본은 하루에 걷는 거리가 매우 많습니다. <strong>편한 운동화</strong>는 필수이며, 굽이 높은 신발은 피하는 것이 좋습니다. 계절에 맞게 레이어드 복장을 기본으로 준비하세요.",
       "photo": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=900&q=85",
       "tip": {
         "icon": "💡",
@@ -40,9 +40,9 @@ const japan = {
     {
       "id": "money",
       "kicker": "Money & Pay",
-      "icon": "💰",
+      "icon": "",
       "title": "환전 & 결제",
-      "body": "",
+      "body": "일본 화폐는 <strong>엔(JPY)</strong>으로, 1엔이 한화 약 9~10원 수준입니다. 일본은 아직 <strong>현금 중심 사회로,</strong> 일부 음식점과 관광지는 여전히 현금만 받는 곳이 많습니다. 생각보다 현금이 많이 필요하니 충분히 준비하세요! 특히 동전이 많이 생기니 동전지갑을 챙기면 편리합니다. 환전은 국내 은행에서 <strong>환율 우대(최대 90%)를 받아 환전하는 방법</strong>이 무난합니다.<br/><strong>트래블월렛, 트래블로그</strong> 카드를 준비해가면 <strong>세븐일레븐 내 세븐뱅크 ATM</strong> 또는 <strong>이온(AEON) ATM</strong>에서 적은 환율로 엔화 인출이 가능해 편리합니다. 교통카드인 <strong>Suica(스이카)</strong>를 만들어두면 교통·편의점·자판기까지 편리하게 사용할 수 있습니다. 애플페이가 되는 아이폰 사용자라면 지갑 앱에서 수수료없이 바로 발급받아 충전 후 사용할 수 있습니다.<br/>최근 <strong>네이버, 카카오를 활용한 QR 결제</strong>가 가능한 곳(편의점, 마트, 돈키호테)이 많이 늘어서 미리 준비해가면 편리합니다.",
       "photo": "https://images.unsplash.com/photo-1638879706487-646f8631b0a2?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",
@@ -52,36 +52,36 @@ const japan = {
     {
       "id": "health",
       "kicker": "Health & Safety ",
-      "icon": "🏥",
+      "icon": "",
       "title": "건강 & 안전",
-      "body": "",
+      "body": "일본은 치안이 좋은 나라이지만, 최근 소매치기 및 도난 사고가 종종 발생하니 주의가 필요합니다. <strong>지진</strong>은 일본 여행에서 특별히 고려해야 할 사항입니다. 체감 지진이 일어날 수 있으며, 숙소 체크인 시 비상 대피 안내문을 확인해두는 것이 좋습니다. 일본 관광청 공식 앱 Safety Tips는 지진 경보를 즉시 알려주므로 미리 설치해두세요.<br/>일본에서 흔하게 판매되는 <strong>일부 약품은 국내 마약류 관리법상 반입이 엄격히 금지</strong>되어 있습니다. '알릴이소프로필아세틸우레아', '디히드로코데인', '슈도에페드린' 성분이 포함된 약품은 절대 반입하지 마세요. 대표적으로 감기약 '파브론 골드'와 진통제 'EVE 시리즈'가 해당됩니다.",
       "photo": "https://images.unsplash.com/photo-1779378375154-6ae0d149518a?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": null
     },
     {
       "id": "apps",
       "kicker": "Must-Have Apps",
-      "icon": "📱",
+      "icon": "",
       "title": "필수 앱",
-      "body": "",
+      "body": "일본은 전철과 지하철 중심의 대중교통이 잘 발달해 있어 이동 전 필수 앱을 미리 준비하는 것이 좋습니다.<br/><br/>교통, 맛집 검색, 번역, 예약 앱만 잘 활용해도 여행이 훨씬 편리해집니다.",
       "photo": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=900&q=85",
       "tip": null
     },
     {
       "id": "phrasebook",
       "kicker": "Language & Culture",
-      "icon": "💬",
+      "icon": "",
       "title": "기본 회화",
-      "body": "",
+      "body": "일본인은 외국인이 일본어로 말을 걸면 굉장히 기뻐하고 도우려는 마음을 적극적으로 보입니다. 짧은 한마디라도 일본어로 시도해보세요.<br/><br/>• <strong>안녕하세요(아침): </strong>おはようございます (오하요 고자이마스)<br/>• <strong>안녕하세요(낮, 오후):</strong> こんにちは (곤니찌와)<br/>• <strong>감사합니다:</strong> ありがとうございます (아리가토 고자이마스)<br/>• <strong>실례합니다 / 저기요:</strong> すみません (스미마센)<br/>• <strong>~는 어디에 있나요?:</strong> ~はどこですか？(___와 도코 데스카?)<br/>• <strong>이것 주세요:</strong> これをください (코레 오 쿠다사이)",
       "photo": "https://plus.unsplash.com/premium_photo-1722944969837-25bf2385056a?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": null
     },
     {
       "id": "notes",
       "kicker": "What to Know",
-      "icon": "📋",
+      "icon": "",
       "title": "기타 주의사항",
-      "body": "",
+      "body": "<strong>비자</strong>: 한국인은 일본을 <strong>최대 90일간 무비자</strong>로 방문할 수 있습니다. 여권만 있으면 되며, 입국 시 체류 목적과 숙소 주소를 물어보는 경우가 있으니 미리 확인해두세요.<br/><br/><strong>쓰레기통</strong>: 일본은 길거리 쓰레기통이 많지 않은 편입니다. 쓰레기통을 발견하면 바로 버리거나, 작은 봉투를 들고 다니며 직접 보관하는 것을 추천합니다.<br/><br/><strong>문신 주의</strong>: 문신이 있으면 온천(오센), 대중목욕탕(센토), 일부 수영장에서 <strong>입장이 거부</strong>될 수 있습니다. 방문 전에 해당 시설의 정책을 반드시 확인하세요.<br/><br/><strong>공공장소 예절</strong>: 전철 내 통화는 기본적으로 금지이며, 음식이나 음료도 신칸센 외에는 먹지 않는 것이 매너입니다. 일본은 <strong>좌측통행 문화</strong>로 에스컬레이터나 계단에서도 왼쪽으로 이동하는 경우가 많으니 주의하세요.<br/><br/><strong>기념품</strong>: 곤약젤리는 위탁 수하물 반입이 불가하며, 기내 수하물 액체 반입 기준에 따라야 합니다. 최근 한국 세관의 곤약젤리 반입 규정이 강화됐으니 주의하세요.",
       "photo": "https://images.unsplash.com/photo-1542052125323-e69ad37a47c2?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",

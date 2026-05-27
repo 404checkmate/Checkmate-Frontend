@@ -654,7 +654,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                     return (
                       <li
                         key={it.id}
-                        className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer ' + (isShaking ? 'cur-shake' : '')}
+                        className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer md:odd:border-r md:odd:pr-4 md:even:pl-4 ' + (isShaking ? 'cur-shake' : '')}
                         onClick={() => { toggle(it.id); setShake(it.id); setTimeout(() => setShake(null), 320) }}
                         aria-label={it.label}
                       >
@@ -674,7 +674,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                     )
                   }
 
-                  if (!hasSubGroups) return <ul>{group.items.map(renderItem)}</ul>
+                  if (!hasSubGroups) return <ul className="md:grid md:grid-cols-2">{group.items.map(renderItem)}</ul>
 
                   return (
                     <div>
@@ -689,7 +689,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                               </span>
                               <span className="h-px flex-1 bg-slate-100" />
                             </div>
-                            <ul>{subItems.map(renderItem)}</ul>
+                            <ul className="md:grid md:grid-cols-2">{subItems.map(renderItem)}</ul>
                           </div>
                         )
                       })}
