@@ -12,6 +12,7 @@ export default function TripSearchPageHeader({
   apiSummary,
   aiRecommendCount,
   totalItemCount,
+  via,
 }) {
   return (
     <header className="mb-6">
@@ -26,7 +27,16 @@ export default function TripSearchPageHeader({
         {headerDateLine}
       </p>
 
-      {(companions.length > 0 || travelStyles.length > 0) && (
+      {via === 'curation' ? (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-400/30">
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+            </svg>
+            큐레이션
+          </span>
+        </div>
+      ) : (companions.length > 0 || travelStyles.length > 0) ? (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {companions.map((label) => (
             <span
@@ -45,7 +55,7 @@ export default function TripSearchPageHeader({
             </span>
           ))}
         </div>
-      )}
+      ) : null}
 
       <p className="mt-4 text-sm leading-relaxed text-gray-600">{headerDescription}</p>
 

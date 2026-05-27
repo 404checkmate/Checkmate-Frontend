@@ -208,6 +208,7 @@ function TripSearchInner({ tripId }) {
             apiSummary={apiSummary}
             aiRecommendCount={aiRecommendCount}
             totalItemCount={totalItemCount}
+            via={loadState.via}
           />
 
           {loadState.status === 'loading' ? (
