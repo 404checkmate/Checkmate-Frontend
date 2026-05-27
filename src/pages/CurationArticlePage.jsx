@@ -158,11 +158,11 @@ function Caption({ children }) {
 function Kicker({ idx, label }) {
   return (
     <div className="cur-reveal flex items-center gap-3 mb-5">
-      <span className="text-xs font-bold tracking-[0.24em] uppercase text-amber-600">
+      <span className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-600">
         № {idx}
       </span>
       <span className="h-px flex-1 max-w-[64px] bg-slate-300" />
-      <span className="text-xs font-bold tracking-[0.22em] uppercase text-slate-500">
+      <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-slate-500">
         {label}
       </span>
     </div>
@@ -171,7 +171,7 @@ function Kicker({ idx, label }) {
 
 function SectionH2({ children }) {
   return (
-    <h2 className="cur-reveal text-[1.9rem] md:text-[2.6rem] leading-[1.18] font-extrabold tracking-tight text-slate-900 mb-6">
+    <h2 className="cur-reveal text-[1.6rem] md:text-[2.1rem] leading-[1.2] font-extrabold tracking-[-0.02em] text-slate-900 mb-6">
       {children}
     </h2>
   )
@@ -179,13 +179,40 @@ function SectionH2({ children }) {
 
 function TipBox({ icon, body }) {
   return (
-    <aside className="cur-reveal relative my-5 rounded-2xl border border-sky-200 bg-sky-50/80 px-5 py-4">
-      <div className="flex items-start gap-1.5">
-        <span className="text-xl shrink-0 mt-0.5">{icon}</span>
-        <div className="flex flex-col gap-1">
-          <span className="text-[16px] font-extrabold text-teal-600 leading-none">Mate Tip!</span>
+    <aside
+      className="cur-reveal cur-tipbox my-5 rounded-2xl border bg-white"
+      style={{ borderColor: '#e0ede6' }}
+    >
+      <div
+        className="flex items-center gap-3 px-3.5 py-3 min-[480px]:gap-4 min-[480px]:px-4 min-[480px]:py-3.5 md:gap-5 md:px-5 md:py-4"
+        style={{ minHeight: '44px' }}
+      >
+        {/* Icon badge */}
+        <div
+          className="flex shrink-0 items-center justify-center rounded-xl"
+          style={{
+            background: '#e6f9f0',
+            width: 'clamp(32px, 8vw, 48px)',
+            height: 'clamp(32px, 8vw, 48px)',
+          }}
+        >
+          <span style={{ fontSize: 'clamp(16px, 4vw, 22px)' }}>{icon}</span>
+        </div>
+
+        {/* Vertical divider */}
+        <div className="self-stretch" style={{ width: '1px', background: '#e0ede6', flexShrink: 0 }} />
+
+        {/* Text */}
+        <div>
+          <span
+            className="block font-extrabold uppercase tracking-[0.16em] mb-1"
+            style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#2dba76' }}
+          >
+            Mate Tip
+          </span>
           <p
-            className="font-medium text-[6px] md:text-[15px] leading-[1.65] text-sky-900"
+            className="font-medium leading-[1.65]"
+            style={{ fontSize: 'clamp(10px, 3.5vw, 15px)', color: '#3a4a40' }}
             dangerouslySetInnerHTML={{ __html: body }}
           />
         </div>
@@ -241,18 +268,18 @@ function Hero({ data }) {
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 pt-24 pb-36 md:pt-32 md:pb-44 lg:pt-40 lg:pb-52 text-white">
         <div ref={titleRef} className="will-change-transform max-w-3xl">
           <div className="cur-reveal flex flex-wrap items-center gap-3 mb-7">
-            <span className="text-xs font-bold tracking-[0.24em] uppercase text-amber-300">
+            <span className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-300">
               여행 가이드 · {data.name}
             </span>
             <span className="h-px w-10 bg-amber-300/70" />
           </div>
 
-          <h1 className="cur-reveal font-extrabold leading-[1.1] tracking-[-0.01em] text-[2.4rem] sm:text-[3rem] md:text-[4.4rem] lg:text-[5.2rem]">
+          <h1 className="cur-reveal font-extrabold leading-[1.1] tracking-[-0.02em] text-[2rem] sm:text-[2.6rem] md:text-[3.4rem] lg:text-[4rem]">
             {data.hero.title.replace(/[🌴🗼🐘🗽]/gu, '').trim().split('\n').map((line, i, arr) => (
               <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
             ))}
           </h1>
-          <p className="cur-reveal mt-6 max-w-2xl lg:max-w-none font-medium text-[16px] md:text-[19px] leading-relaxed text-white/90">
+          <p className="cur-reveal mt-6 max-w-2xl lg:max-w-none font-medium text-[15px] md:text-[17px] leading-relaxed text-white/90">
             {data.hero.subtitle}
           </p>
         </div>
@@ -267,7 +294,7 @@ function Hero({ data }) {
               {data.cities.map((city) => (
                 <span
                   key={city}
-                  className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-semibold text-gray-900 backdrop-blur-sm"
+                  className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[13px] font-semibold text-gray-900 backdrop-blur-sm"
                 >
                   {city}
                 </span>
@@ -287,7 +314,7 @@ function TableOfContents({ sections, activeSection }) {
   return (
     <aside className="w-52 shrink-0 sticky top-24">
       <div className="space-y-1">
-        <div className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">
           In This Guide
         </div>
         {sections.map((s, i) => (
@@ -299,13 +326,13 @@ function TableOfContents({ sections, activeSection }) {
               document.getElementById(`section-${s.id}`)
                 ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className={`block border-l-2 pl-3 py-1.5 text-sm transition-colors ${
+            className={`block border-l-2 pl-3 py-1.5 text-[13px] transition-colors ${
               activeSection === s.id
                 ? 'border-teal-500 font-bold text-teal-600'
                 : 'border-slate-100 text-slate-400 hover:text-slate-700'
             }`}
           >
-            <span className="mr-1.5 text-xs text-slate-300">
+            <span className="mr-1.5 text-[11px] text-slate-300">
               {String(i + 1).padStart(2, '0')}
             </span>
             {s.title}
@@ -317,7 +344,7 @@ function TableOfContents({ sections, activeSection }) {
             document.getElementById('checklist')
               ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }}
-          className="block border-l-2 border-teal-300 pl-3 pt-3 text-sm font-bold text-teal-500 hover:text-teal-600 cursor-pointer"
+          className="block border-l-2 border-teal-300 pl-3 pt-3 text-[13px] font-bold text-teal-500 hover:text-teal-600 cursor-pointer"
         >
           → 체크리스트 저장
         </a>
@@ -353,13 +380,13 @@ function AppCard({ a, i }) {
             }
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[17px] font-extrabold leading-tight text-slate-900">{a.name}</div>
+            <div className="text-[15px] font-extrabold leading-tight text-slate-900">{a.name}</div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-xs font-bold text-slate-400">
+            <span className="text-[11px] font-bold text-slate-400">
               {open ? '닫기' : '상세보기'}
             </span>
-            <span className={'text-slate-400 transition-transform duration-200 inline-block text-xs ' + (open ? 'rotate-180' : '')}>
+            <span className={'text-slate-400 transition-transform duration-200 inline-block text-[11px] ' + (open ? 'rotate-180' : '')}>
               ▾
             </span>
           </div>
@@ -420,7 +447,7 @@ function InlineCheckItem({ item, checked, onToggle }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className={'font-medium text-base leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+        <span className={'font-medium text-[14px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
           {item.label}
         </span>
       </span>
@@ -573,10 +600,10 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
           <div className="px-5 md:px-7 pt-10 pb-2">
             <div className="cur-reveal">
               <Kicker idx={String(data.sections.length + 1).padStart(2, '0')} label="The Checklist" />
-              <h2 className="font-extrabold text-[2rem] md:text-[2.6rem] leading-[1.15] tracking-tight text-slate-900 max-w-[18ch]">
+              <h2 className="font-extrabold text-[1.6rem] md:text-[2rem] leading-[1.2] tracking-[-0.02em] text-slate-900 max-w-[18ch]">
                 여행 준비, 한 번에 체크하세요
               </h2>
-              <p className="mt-5 font-medium text-[13px] md:text-[15px] leading-relaxed text-gray-700 whitespace-nowrap">
+              <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700 whitespace-nowrap">
                 준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
               </p>
               <div className="mt-5 flex justify-end">
@@ -602,10 +629,10 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                   onClick={() => toggleCollapse(group.cat)}
                   className="flex w-full items-center gap-2 mb-3 group/hdr"
                 >
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[11px] font-extrabold tracking-[0.15em] uppercase text-amber-700">
                     {group.cat}
                   </span>
-                  <span className="text-xs text-slate-400 font-medium tabular-nums">
+                  <span className="text-[11px] text-slate-400 font-medium tabular-nums">
                     {groupDone}/{group.items.length}
                   </span>
                   <svg
@@ -639,7 +666,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
+                          <span className={'font-medium text-[14px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
                             <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
                           </span>
                         </span>
@@ -657,7 +684,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                         return (
                           <div key={pt} className="mb-4 last:mb-0">
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                              <span className="text-[11px] font-bold tracking-[0.12em] text-slate-400 uppercase">
                                 {PREP_TYPE_LABEL[pt] ?? pt}
                               </span>
                               <span className="h-px flex-1 bg-slate-100" />
@@ -679,7 +706,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
               type="button"
               onClick={onSave}
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[13px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
               {saving ? '저장 중...' : '저장하기'}
             </button>
@@ -724,14 +751,14 @@ function CtaBanner({ data }) {
       <div className="relative mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-20 md:py-28 text-white">
         <div className="cur-reveal grid md:grid-cols-12 gap-10 items-end">
           <div className="md:col-span-8">
-            <div className="text-xs font-bold tracking-[0.26em] uppercase text-amber-300 mb-5">
+            <div className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-300 mb-5">
               나만의 {data.name}, 메이트가 함께
             </div>
-            <h2 className="font-extrabold text-[1.5rem] md:text-[2.4rem] leading-[1.1] tracking-tight max-w-none">
+            <h2 className="font-extrabold text-[1.4rem] md:text-[2.1rem] leading-[1.1] tracking-[-0.02em] max-w-none">
               나만의 {data.name} 여행 체크리스트,<br />
               지금 바로 만들어보세요 🗺️
             </h2>
-            <p className="mt-5 font-medium text-[15px] md:text-[16.5px] leading-relaxed text-white/85 max-w-[44ch]">
+            <p className="mt-5 font-medium text-[14px] md:text-[16px] leading-relaxed text-white/85 max-w-[44ch]">
               {(data.footerCta.subtitle || '').replace(/AI/g, 'MATE')}
             </p>
           </div>
@@ -760,10 +787,10 @@ function Related({ currentCode }) {
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-20 md:py-28">
         <div className="cur-reveal flex items-end justify-between mb-10 md:mb-14 gap-6">
           <div>
-            <div className="text-xs font-bold tracking-[0.26em] uppercase text-amber-600 mb-3">
+            <div className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-600 mb-3">
               Keep reading · 함께 보면 좋은 글
             </div>
-            <h2 className="font-extrabold text-[1.9rem] md:text-[2.6rem] leading-[1.1] tracking-tight text-slate-900 max-w-[20ch]">
+            <h2 className="font-extrabold text-[1.6rem] md:text-[2.1rem] leading-[1.1] tracking-[-0.02em] text-slate-900 max-w-[20ch]">
               다른 여행지도 같이 준비해볼까요? ✈️
             </h2>
           </div>
@@ -792,10 +819,10 @@ function Related({ currentCode }) {
                     <span className="font-extrabold text-white text-[15px]">{d.name}</span>
                   </div>
                 </div>
-                <h3 className="text-[14.5px] md:text-[16px] leading-tight font-extrabold text-slate-900 group-hover:text-teal-700 transition">
+                <h3 className="text-[14px] md:text-[15px] leading-tight font-extrabold text-slate-900 group-hover:text-teal-700 transition">
                   {d.hero.title}
                 </h3>
-                <div className="mt-1 text-xs font-semibold text-slate-500">
+                <div className="mt-1 text-[11px] font-semibold text-slate-500">
                   {d.cities.slice(0, 3).join(' · ')}
                 </div>
               </Link>
@@ -957,13 +984,19 @@ function CurationArticleContent({ data }) {
 
         .cur-checklist-item { word-break: break-word; overflow-wrap: break-word; }
 
-.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
-        @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
+        @media (hover: hover) and (pointer: fine) {
+          .cur-tipbox { transition: border-color .2s ease, box-shadow .2s ease; }
+          .cur-tipbox:hover { border-color: #2dba76; box-shadow: 0 4px 16px rgba(45,186,118,0.10); }
+        }
+
+.cur-editorial p { font-weight: 500; font-size: 1rem; line-height: 1.8; letter-spacing: -0.02em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
+        @media (min-width: 768px) { .cur-editorial p { font-size: 1.0625rem; line-height: 1.9; } }
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
-          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; }
+          .cur-editorial p { font-size: 14px; letter-spacing: -0.025em; }
           .cur-editorial aside p { font-size: 0.75rem; letter-spacing: inherit; }
+          .cur-tipbox p { font-size: 14px !important; }
         }
       `}</style>
 
