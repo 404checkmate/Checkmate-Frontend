@@ -989,9 +989,9 @@ function CurationArticleContent({ data }) {
           .cur-tipbox:hover { border-color: #2dba76; box-shadow: 0 4px 16px rgba(45,186,118,0.10); }
         }
 
-.cur-editorial p { font-weight: 500; font-size: 1rem; line-height: 1.8; letter-spacing: -0.02em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
-        @media (min-width: 768px) { .cur-editorial p { font-size: 1.0625rem; line-height: 1.9; } }
-        .cur-editorial p + p { margin-top: 1.15em; }
+.cur-editorial p { font-weight: 500; font-size: 1rem; line-height: 1.5; letter-spacing: -0.02em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
+        @media (min-width: 768px) { .cur-editorial p { font-size: 1.0625rem; line-height: 1.6; } }
+        .cur-editorial p + p { margin-top: 1.4em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
           .cur-editorial p { font-size: 16px; letter-spacing: -0.025em; }
