@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link, useParams, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { createTrip } from '@/api/trips'
+import { createGuideArchive } from '@/api/guideArchives'
 import { saveActiveTripId } from '@/utils/activeTripIdStorage'
-import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { buildCurationArchiveSnapshot } from '@/utils/tripSearchUtils'
+import { saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 
 // 큐레이션 코드 → 여행 자동생성에 쓸 기본 목적지 정보
 const CURATION_COUNTRY_MAP = {
@@ -28,7 +30,7 @@ const DATA_MAP = Object.fromEntries(
 /* ─── flat checklist items ─── */
 function buildFlatItems(checklist) {
   return checklist.flatMap((group, gi) =>
-    group.items.map((label, ii) => ({ id: `${gi}-${ii}`, cat: group.cat, label }))
+    group.items.map((label, ii) => ({ id: `${gi}-${ii}`, cat: group.cat, prepType: group.prepType || 'item', label }))
   )
 }
 
@@ -156,11 +158,11 @@ function Caption({ children }) {
 function Kicker({ idx, label }) {
   return (
     <div className="cur-reveal flex items-center gap-3 mb-5">
-      <span className="text-[10.5px] font-bold tracking-[0.24em] uppercase text-amber-600">
+      <span className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-600">
         № {idx}
       </span>
       <span className="h-px flex-1 max-w-[64px] bg-slate-300" />
-      <span className="text-[10.5px] font-bold tracking-[0.22em] uppercase text-slate-500">
+      <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-slate-500">
         {label}
       </span>
     </div>
@@ -169,7 +171,7 @@ function Kicker({ idx, label }) {
 
 function SectionH2({ children }) {
   return (
-    <h2 className="cur-reveal text-[1.9rem] md:text-[2.6rem] leading-[1.18] font-extrabold tracking-tight text-slate-900 mb-6">
+    <h2 className="cur-reveal text-[1.6rem] md:text-[2.1rem] leading-[1.2] font-extrabold tracking-[-0.02em] text-slate-900 mb-6">
       {children}
     </h2>
   )
@@ -177,16 +179,43 @@ function SectionH2({ children }) {
 
 function TipBox({ icon, body }) {
   return (
-    <aside className="cur-reveal relative my-5 rounded-2xl border border-sky-200 bg-sky-50/80 px-6 py-5">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-xl">{icon}</span>
-          <span className="text-xs font-extrabold text-teal-600">Mate Tip!</span>
+    <aside
+      className="cur-reveal cur-tipbox my-5 rounded-2xl border bg-white"
+      style={{ borderColor: '#e0ede6' }}
+    >
+      <div
+        className="flex items-center gap-3 px-3.5 py-3 min-[480px]:gap-4 min-[480px]:px-4 min-[480px]:py-3.5 md:gap-5 md:px-5 md:py-4"
+        style={{ minHeight: '44px' }}
+      >
+        {/* Icon badge */}
+        <div
+          className="flex shrink-0 items-center justify-center rounded-xl"
+          style={{
+            background: '#e6f9f0',
+            width: 'clamp(32px, 8vw, 48px)',
+            height: 'clamp(32px, 8vw, 48px)',
+          }}
+        >
+          <span style={{ fontSize: 'clamp(16px, 4vw, 22px)' }}>{icon}</span>
         </div>
-        <p
-          className="font-extrabold text-[17px] md:text-[19px] leading-[1.55] text-sky-900"
-          dangerouslySetInnerHTML={{ __html: body }}
-        />
+
+        {/* Vertical divider */}
+        <div className="self-stretch" style={{ width: '1px', background: '#e0ede6', flexShrink: 0 }} />
+
+        {/* Text */}
+        <div>
+          <span
+            className="block font-extrabold uppercase tracking-[0.16em] mb-1"
+            style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#2dba76' }}
+          >
+            Mate Tip
+          </span>
+          <p
+            className="font-medium leading-[1.65]"
+            style={{ fontSize: 'clamp(10px, 3.5vw, 15px)', color: '#3a4a40' }}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        </div>
       </div>
     </aside>
   )
@@ -218,6 +247,7 @@ function Hero({ data }) {
         alt=""
         aria-hidden
         className="absolute inset-0 -z-10 h-full w-full object-cover will-change-transform"
+        onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
         style={{
           transform: 'scale(1.08)',
           WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 55%, transparent 100%)',
@@ -238,17 +268,18 @@ function Hero({ data }) {
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 pt-24 pb-36 md:pt-32 md:pb-44 lg:pt-40 lg:pb-52 text-white">
         <div ref={titleRef} className="will-change-transform max-w-3xl">
           <div className="cur-reveal flex flex-wrap items-center gap-3 mb-7">
-            <span className="text-[10.5px] font-bold tracking-[0.24em] uppercase text-amber-300">
+            <span className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-300">
               여행 가이드 · {data.name}
             </span>
             <span className="h-px w-10 bg-amber-300/70" />
-            <span className="font-bold text-[14px] text-white/85">{data.name.toUpperCase()}</span>
           </div>
 
-          <h1 className="cur-reveal font-extrabold leading-[1.1] tracking-[-0.01em] text-[2.4rem] sm:text-[3rem] md:text-[4.4rem] lg:text-[5.2rem]">
-            {data.hero.title.replace(/[🌴🗼🐘🗽]/gu, '').trim()}
+          <h1 className="cur-reveal font-extrabold leading-[1.1] tracking-[-0.02em] text-[2rem] sm:text-[2.6rem] md:text-[3.4rem] lg:text-[4rem]">
+            {data.hero.title.replace(/[🌴🗼🐘🗽]/gu, '').trim().split('\n').map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            ))}
           </h1>
-          <p className="cur-reveal mt-6 max-w-2xl font-medium text-[16px] md:text-[19px] leading-relaxed text-white/90">
+          <p className="cur-reveal mt-6 max-w-2xl lg:max-w-none font-medium text-[15px] md:text-[17px] leading-relaxed text-white/90">
             {data.hero.subtitle}
           </p>
         </div>
@@ -263,7 +294,7 @@ function Hero({ data }) {
               {data.cities.map((city) => (
                 <span
                   key={city}
-                  className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-semibold text-gray-900 backdrop-blur-sm"
+                  className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[13px] font-semibold text-gray-900 backdrop-blur-sm"
                 >
                   {city}
                 </span>
@@ -283,7 +314,7 @@ function TableOfContents({ sections, activeSection }) {
   return (
     <aside className="w-52 shrink-0 sticky top-24">
       <div className="space-y-1">
-        <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">
           In This Guide
         </div>
         {sections.map((s, i) => (
@@ -295,13 +326,13 @@ function TableOfContents({ sections, activeSection }) {
               document.getElementById(`section-${s.id}`)
                 ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className={`block border-l-2 pl-3 py-1.5 text-sm transition-colors ${
+            className={`block border-l-2 pl-3 py-1.5 text-[13px] transition-colors ${
               activeSection === s.id
                 ? 'border-teal-500 font-bold text-teal-600'
                 : 'border-slate-100 text-slate-400 hover:text-slate-700'
             }`}
           >
-            <span className="mr-1.5 text-[10px] text-slate-300">
+            <span className="mr-1.5 text-[11px] text-slate-300">
               {String(i + 1).padStart(2, '0')}
             </span>
             {s.title}
@@ -313,7 +344,7 @@ function TableOfContents({ sections, activeSection }) {
             document.getElementById('checklist')
               ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }}
-          className="block border-l-2 border-teal-300 pl-3 pt-3 text-sm font-bold text-teal-500 hover:text-teal-600 cursor-pointer"
+          className="block border-l-2 border-teal-300 pl-3 pt-3 text-[13px] font-bold text-teal-500 hover:text-teal-600 cursor-pointer"
         >
           → 체크리스트 저장
         </a>
@@ -349,7 +380,7 @@ function AppCard({ a, i }) {
             }
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[17px] font-extrabold leading-tight text-slate-900">{a.name}</div>
+            <div className="text-[15px] font-extrabold leading-tight text-slate-900">{a.name}</div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-[11px] font-bold text-slate-400">
@@ -371,7 +402,7 @@ function AppCard({ a, i }) {
                 href={a.storeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11.5px] font-extrabold tracking-wide text-teal-700 hover:text-teal-500"
+                className="inline-flex items-center gap-1.5 text-xs font-extrabold tracking-wide text-teal-700 hover:text-teal-500"
               >
                 <span>설치하러 가기</span>
                 <span aria-hidden className="text-amber-500">→</span>
@@ -416,7 +447,7 @@ function InlineCheckItem({ item, checked, onToggle }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+        <span className={'font-medium text-[16px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
           {item.label}
         </span>
       </span>
@@ -440,12 +471,27 @@ function Article({ data, checked, toggle }) {
           : section.body.split('\n\n')
         ).filter(Boolean)
         const mainTitle = section.title.split('—')[0].trim()
-        const relatedGroups = data.checklist.filter((g) => g.section?.includes(section.id))
+        // section에 연결된 그룹을 원본 인덱스 보존 후 cat으로 병합
+        const relatedGroups = (() => {
+          const merged = []
+          const catIndex = {}
+          data.checklist.forEach((g, gi) => {
+            if (!g.section?.includes(section.id)) return
+            const items = g.items.map((label, ii) => ({ id: `${gi}-${ii}`, label }))
+            if (catIndex[g.cat] !== undefined) {
+              merged[catIndex[g.cat]].items.push(...items)
+            } else {
+              catIndex[g.cat] = merged.length
+              merged.push({ cat: g.cat, items })
+            }
+          })
+          return merged
+        })()
 
         return (
           <div key={section.id}>
             <section id={`section-${section.id}`} data-toc className={idx > 0 ? 'mt-20 md:mt-28' : ''}>
-              <Kicker idx={String(idx + 1).padStart(2, '0')} label={KICKER_LABELS[idx] || 'Guide'} />
+              <Kicker idx={String(idx + 1).padStart(2, '0')} label={section.kicker || KICKER_LABELS[idx] || 'Guide'} />
               <SectionH2>
                 {section.icon} {mainTitle}
               </SectionH2>
@@ -479,26 +525,19 @@ function Article({ data, checked, toggle }) {
 
                 {relatedGroups.length > 0 && (
                   <div className="mt-3 rounded-xl bg-white border border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-400 mb-3">이 섹션 체크리스트</div>
-                    {relatedGroups.map((group) => {
-                      const gi = data.checklist.findIndex((g) => g.cat === group.cat)
-                      return (
-                        <div key={group.cat} className="mb-3 last:mb-0">
-                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10.5px] font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
-                          {group.items.map((label, ii) => {
-                            const id = `${gi}-${ii}`
-                            return (
-                              <InlineCheckItem
-                                key={ii}
-                                item={{ label }}
-                                checked={!!checked[id]}
-                                onToggle={() => toggle(id)}
-                              />
-                            )
-                          })}
-                        </div>
-                      )
-                    })}
+                    {relatedGroups.map((group) => (
+                      <div key={group.cat} className="mb-3 last:mb-0">
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
+                        {group.items.map((it) => (
+                          <InlineCheckItem
+                            key={it.id}
+                            item={{ label: it.label }}
+                            checked={!!checked[it.id]}
+                            onToggle={() => toggle(it.id)}
+                          />
+                        ))}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -513,17 +552,44 @@ function Article({ data, checked, toggle }) {
 /* ════════════════════════════════════════════
    Checklist
 ════════════════════════════════════════════ */
+const PREP_TYPE_ORDER = [
+  'essentials', 'clothing', 'health', 'toiletries', 'beauty', 'electronics', 'travel_goods',
+  'item', 'pre_booking', 'pre_departure_check', 'etc',
+]
+const PREP_TYPE_LABEL = {
+  essentials: '필수 준비물', clothing: '입을 옷', health: '상비약',
+  toiletries: '세면도구', beauty: '미용용품', electronics: '전자제품',
+  travel_goods: '여행용품', item: '준비물', pre_booking: '사전 예약/신청',
+  pre_departure_check: '출국 전 확인사항', etc: '기타',
+}
+
 function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, onSave, saving }) {
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
   const total = flatItems.length
   const done = Object.values(checked).filter(Boolean).length
-  const allGroups = useMemo(
-    () => data.checklist.map((group, gi) => ({
-      cat: group.cat,
-      items: group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label })),
-    })),
-    [data],
-  )
+  const [collapsed, setCollapsed] = useState(() => new Set())
+  const toggleCollapse = useCallback((cat) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      next.has(cat) ? next.delete(cat) : next.add(cat)
+      return next
+    })
+  }, [])
+  const allGroups = useMemo(() => {
+    const merged = []
+    const catIndex = {}
+    data.checklist.forEach((group, gi) => {
+      const prepType = group.prepType || 'item'
+      const items = group.items.map((label, ii) => ({ id: `${gi}-${ii}`, label, prepType }))
+      if (catIndex[group.cat] !== undefined) {
+        merged[catIndex[group.cat]].items.push(...items)
+      } else {
+        catIndex[group.cat] = merged.length
+        merged.push({ cat: group.cat, items })
+      }
+    })
+    return merged
+  }, [data])
 
   return (
     <section id="checklist" data-toc className="relative">
@@ -534,12 +600,11 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
           <div className="px-5 md:px-7 pt-10 pb-2">
             <div className="cur-reveal">
               <Kicker idx={String(data.sections.length + 1).padStart(2, '0')} label="The Checklist" />
-              <h2 className="font-extrabold text-[2rem] md:text-[2.6rem] leading-[1.15] tracking-tight text-slate-900 max-w-[18ch]">
-                {total}가지,{' '}
-                <span style={{ color: '#3db4dd' }}>완벽한 짐 하나</span>로
+              <h2 className="font-extrabold text-[1.6rem] md:text-[2rem] leading-[1.2] tracking-[-0.02em] text-slate-900 max-w-[18ch]">
+                여행 준비, 한 번에 체크하세요
               </h2>
-              <p className="mt-5 font-medium text-[15px] leading-relaxed text-gray-700 max-w-[50ch]">
-                필요한 것만, 빠짐없이. 카테고리별로 골라 체크하고 저장해두면 출발 전 마지막 점검도 같은 곳에서 이어집니다.
+              <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700 whitespace-nowrap">
+                준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
               </p>
               <div className="mt-5 flex justify-end">
                 <button
@@ -554,32 +619,46 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
 
           {/* Items */}
           <div className="px-5 md:px-7 mt-6 pb-7">
-            {allGroups.map((group) => (
-              <div key={group.cat} className="mb-6 last:mb-0">
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10.5px] font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">
-                  {group.cat}
-                </div>
-                <ul>
-                  {group.items.map((it) => {
+            {allGroups.map((group) => {
+              const isCollapsed = collapsed.has(group.cat)
+              const groupDone = group.items.filter((it) => checked[it.id]).length
+              return (
+              <div key={group.cat} className="mb-4 last:mb-0">
+                <button
+                  type="button"
+                  onClick={() => toggleCollapse(group.cat)}
+                  className="flex w-full items-center gap-2 mb-3 group/hdr"
+                >
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[11px] font-extrabold tracking-[0.15em] uppercase text-amber-700">
+                    {group.cat}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-medium tabular-nums">
+                    {groupDone}/{group.items.length}
+                  </span>
+                  <svg
+                    className={`ml-auto h-4 w-4 shrink-0 text-amber-500 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {!isCollapsed && (() => {
+                  const uniquePrepTypes = [...new Set(group.items.map((it) => it.prepType))]
+                  const hasSubGroups = uniquePrepTypes.length >= 4
+                  const orderedPrepTypes = PREP_TYPE_ORDER.filter((pt) => uniquePrepTypes.includes(pt))
+                    .concat(uniquePrepTypes.filter((pt) => !PREP_TYPE_ORDER.includes(pt)))
+
+                  const renderItem = (it) => {
                     const on = !!checked[it.id]
                     const isShaking = shake === it.id
                     return (
                       <li
                         key={it.id}
                         className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer ' + (isShaking ? 'cur-shake' : '')}
-                        onClick={() => {
-                          toggle(it.id)
-                          setShake(it.id)
-                          setTimeout(() => setShake(null), 320)
-                        }}
+                        onClick={() => { toggle(it.id); setShake(it.id); setTimeout(() => setShake(null), 320) }}
                         aria-label={it.label}
                       >
-                        <span
-                          className={
-                            'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' +
-                            (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')
-                          }
-                        >
+                        <span className={'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' + (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')}>
                           {on && (
                             <svg viewBox="0 0 24 24" className="absolute inset-0 m-auto h-3.5 w-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M5 12l5 5L20 7" />
@@ -587,16 +666,38 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={'font-medium text-[14.5px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
+                          <span className={'font-medium text-[14px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
                             <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
                           </span>
                         </span>
                       </li>
                     )
-                  })}
-                </ul>
+                  }
+
+                  if (!hasSubGroups) return <ul>{group.items.map(renderItem)}</ul>
+
+                  return (
+                    <div>
+                      {orderedPrepTypes.map((pt) => {
+                        const subItems = group.items.filter((it) => it.prepType === pt)
+                        if (subItems.length === 0) return null
+                        return (
+                          <div key={pt} className="mb-4 last:mb-0">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-[11px] font-bold tracking-[0.12em] text-slate-400 uppercase">
+                                {PREP_TYPE_LABEL[pt] ?? pt}
+                              </span>
+                              <span className="h-px flex-1 bg-slate-100" />
+                            </div>
+                            <ul>{subItems.map(renderItem)}</ul>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Bottom CTA */}
@@ -605,7 +706,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
               type="button"
               onClick={onSave}
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[14px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[13px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
               {saving ? '저장 중...' : '저장하기'}
             </button>
@@ -620,10 +721,28 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
    CTA Banner
 ════════════════════════════════════════════ */
 function CtaBanner({ data }) {
+  const navigate = useNavigate()
   const bgImg = data.photos.sections[data.photos.sections.length - 1] || data.photos.hero
+
+  const handleCtaClick = () => {
+    const isMobile = window.innerWidth < 768
+    if (isMobile) {
+      const dest = CURATION_COUNTRY_MAP[data.code]
+      navigate('/trips/new/destination', {
+        state: {
+          preselectedCountry: dest
+            ? { name: dest.country, country: dest.country, countryCode: dest.countryCode, iata: dest.iata, city: dest.city }
+            : { name: data.name, country: data.name, countryCode: data.code?.toUpperCase() },
+        },
+      })
+    } else {
+      navigate('/', { state: { preselectedCountry: data.code } })
+    }
+  }
+
   return (
     <section className="relative overflow-hidden">
-      <img src={bgImg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+      <img src={bgImg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
       <div
         className="absolute inset-0"
         style={{ background: 'linear-gradient(135deg, rgba(17,94,89,0.88) 0%, rgba(15,118,110,0.78) 50%, rgba(7,89,133,0.88) 100%)' }}
@@ -632,30 +751,25 @@ function CtaBanner({ data }) {
       <div className="relative mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-20 md:py-28 text-white">
         <div className="cur-reveal grid md:grid-cols-12 gap-10 items-end">
           <div className="md:col-span-8">
-            <div className="text-[10.5px] font-bold tracking-[0.26em] uppercase text-amber-300 mb-5">
+            <div className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-300 mb-5">
               나만의 {data.name}, 메이트가 함께
             </div>
-            <h2 className="font-extrabold text-[2rem] md:text-[3.4rem] leading-[1.1] tracking-tight max-w-[16ch]">
+            <h2 className="font-extrabold text-[1.4rem] md:text-[2.1rem] leading-[1.1] tracking-[-0.02em] max-w-none">
               나만의 {data.name} 여행 체크리스트,<br />
               지금 바로 만들어보세요 🗺️
             </h2>
-            <p className="mt-5 font-medium text-[15px] md:text-[16.5px] leading-relaxed text-white/85 max-w-[44ch]">
-              {data.footerCta.subtitle}
+            <p className="mt-5 font-medium text-[14px] md:text-[16px] leading-relaxed text-white/85 max-w-[44ch]">
+              {(data.footerCta.subtitle || '').replace(/AI/g, 'MATE')}
             </p>
           </div>
           <div className="md:col-span-4 flex flex-col gap-3 md:items-end">
-            <Link
-              to="/trips/new/destination"
+            <button
+              type="button"
+              onClick={handleCtaClick}
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#6a4a00] font-bold text-[14px] tracking-wide px-7 py-3.5 shadow-md shadow-amber-900/20 transition w-full md:w-auto active:scale-[0.98]"
             >
               여행 준비 시작하기 →
-            </Link>
-            <Link
-              to="/"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border-2 border-white/40 hover:border-white text-white font-bold text-[13px] tracking-wide px-7 py-3.5 transition w-full md:w-auto"
-            >
-              다른 가이드 보기
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -673,10 +787,10 @@ function Related({ currentCode }) {
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-20 md:py-28">
         <div className="cur-reveal flex items-end justify-between mb-10 md:mb-14 gap-6">
           <div>
-            <div className="text-[10.5px] font-bold tracking-[0.26em] uppercase text-amber-600 mb-3">
+            <div className="text-[11px] font-bold tracking-[0.20em] uppercase text-amber-600 mb-3">
               Keep reading · 함께 보면 좋은 글
             </div>
-            <h2 className="font-extrabold text-[1.9rem] md:text-[2.6rem] leading-[1.1] tracking-tight text-slate-900 max-w-[20ch]">
+            <h2 className="font-extrabold text-[1.6rem] md:text-[2.1rem] leading-[1.1] tracking-[-0.02em] text-slate-900 max-w-[20ch]">
               다른 여행지도 같이 준비해볼까요? ✈️
             </h2>
           </div>
@@ -705,10 +819,10 @@ function Related({ currentCode }) {
                     <span className="font-extrabold text-white text-[15px]">{d.name}</span>
                   </div>
                 </div>
-                <h3 className="text-[14.5px] md:text-[16px] leading-tight font-extrabold text-slate-900 group-hover:text-teal-700 transition">
+                <h3 className="text-[14px] md:text-[15px] leading-tight font-extrabold text-slate-900 group-hover:text-teal-700 transition">
                   {d.hero.title}
                 </h3>
-                <div className="mt-1 text-[11.5px] font-semibold text-slate-500">
+                <div className="mt-1 text-[11px] font-semibold text-slate-500">
                   {d.cities.slice(0, 3).join(' · ')}
                 </div>
               </Link>
@@ -717,61 +831,6 @@ function Related({ currentCode }) {
         </ul>
       </div>
     </section>
-  )
-}
-
-/* ════════════════════════════════════════════
-   Footer
-════════════════════════════════════════════ */
-function PageFooter() {
-  return (
-    <footer className="bg-white/60 backdrop-blur border-t border-slate-100">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-16 md:py-20">
-        <div className="grid md:grid-cols-12 gap-10">
-          <div className="md:col-span-5">
-            <Link to="/" className="font-extrabold text-[24px] tracking-tight text-teal-700">
-              CHECKMATE
-            </Link>
-            <p className="mt-4 font-extrabold text-[18px] leading-snug text-slate-800 max-w-[26ch]">
-              준비는 <span style={{ color: '#FFB901' }}>가볍게</span>, 여행은{' '}
-              <span style={{ color: '#3db4dd' }}>완벽하게</span>.
-            </p>
-            <p className="mt-2 font-medium text-[13px] text-gray-600 max-w-[36ch] leading-relaxed">
-              저장부터 체크까지 이어지는 여행 준비. CHECKMATE가 동행합니다.
-            </p>
-          </div>
-          <div className="md:col-span-4">
-            <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
-              국가별 여행 가이드
-            </div>
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-              {Object.values(DATA_MAP).map((d) => (
-                <li key={d.code}>
-                  <Link to={`/curation/${d.code}`} className="group inline-flex items-baseline gap-2">
-                    <span className="text-base">{d.flag}</span>
-                    <span className="font-extrabold text-[15px] text-slate-800 group-hover:text-teal-700 transition">{d.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="md:col-span-3">
-            <div className="text-[10px] font-bold tracking-[0.24em] uppercase text-slate-500 mb-4">
-              About
-            </div>
-            <ul className="space-y-2.5 text-[13px] text-gray-700">
-              <li><Link to="/" className="hover:text-gray-900">서비스 소개</Link></li>
-              <li><Link to="/trips/new/destination" className="hover:text-gray-900">여행 준비 시작</Link></li>
-              <li><Link to="/privacy" className="hover:text-gray-900">개인정보 처리방침</Link></li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-[11.5px] text-slate-500">
-          <span>© 2026 CHECKMATE</span>
-          <span className="font-medium">Travel Guide · 2026.05</span>
-        </div>
-      </div>
-    </footer>
   )
 }
 
@@ -797,6 +856,11 @@ function CurationArticleContent({ data }) {
     window.scrollTo(0, 0)
   }, [data.code])
 
+  useEffect(() => {
+    document.documentElement.classList.add('curation-page')
+    return () => document.documentElement.classList.remove('curation-page')
+  }, [])
+
   const toggle = useCallback((id) => {
     setChecked((c) => ({ ...c, [id]: !c[id] }))
   }, [])
@@ -815,25 +879,33 @@ function CurationArticleContent({ data }) {
   const handleCurationSave = useCallback(async () => {
     if (curationSaving) return
     const checkedItems = flatItems.filter((it) => checked[it.id])
-    sessionStorage.setItem('curationSave', JSON.stringify({
-      items: checkedItems.map((it) => ({ label: it.label, cat: it.cat })),
-      country: data.code,
-      countryName: data.name,
-      timestamp: Date.now(),
-    }))
+    const dest = CURATION_COUNTRY_MAP[data.code]
 
     if (!user) {
+      sessionStorage.setItem('curationSave', JSON.stringify({
+        items: checkedItems.map((it) => ({ label: it.label, cat: it.cat, prepType: it.prepType })),
+        country: data.code,
+        countryName: data.name,
+        dest: dest || null,
+        timestamp: Date.now(),
+      }))
       navigate('/trips/guest/search')
       return
     }
 
-    // 로그인 → 여행 자동 생성 후 search 페이지 직행 (AI 없이 큐레이션 항목 로드)
-    const dest = CURATION_COUNTRY_MAP[data.code]
     if (!dest) {
+      sessionStorage.setItem('curationSave', JSON.stringify({
+        items: checkedItems.map((it) => ({ label: it.label, cat: it.cat, prepType: it.prepType })),
+        country: data.code,
+        countryName: data.name,
+        dest: null,
+        timestamp: Date.now(),
+      }))
       navigate('/trips/guest/search')
       return
     }
 
+    // 로그인 → 여행 자동생성 + 보관함 바로 생성 → 나의 체크리스트 페이지 이동
     setCurationSaving(true)
     try {
       const today = new Date().toISOString().slice(0, 10)
@@ -851,23 +923,22 @@ function CurationArticleContent({ data }) {
         travelStyles: [{ styleCode: 'healing' }],
       })
       const createdId = created?.id ?? created?.tripId
-      if (createdId) {
-        saveActiveTripPlan({
-          destination: { country: dest.country, countryCode: dest.countryCode, city: dest.city, iata: dest.iata },
-          tripStartDate: today,
-          tripEndDate: nextWeek,
-          companion: '혼자',
-          travelStyles: ['힐링'],
-          companionIds: ['alone'],
-          travelStyleIds: ['healing'],
-        })
-        saveActiveTripId(String(createdId))
-        navigate(`/trips/${createdId}/search`, { state: { fromCuration: true } })
-      } else {
-        navigate('/trips/guest/search')
+      if (!createdId) throw new Error('여행 생성 실패')
+
+      saveActiveTripId(String(createdId))
+
+      const snapshot = buildCurationArchiveSnapshot(checkedItems, dest)
+      const archiveCreated = await createGuideArchive(createdId, { name: snapshot.pageTitle, snapshot })
+
+      if (archiveCreated?.id) {
+        const checksInit = Object.fromEntries(snapshot.items.map((it) => [String(it.id), false]))
+        saveEntryChecklistChecks(String(createdId), archiveCreated.id, checksInit)
+        sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
       }
+      sessionStorage.removeItem('curationSave')
+      navigate('/guide-archives')
     } catch (err) {
-      console.warn('[CurationArticlePage] createTrip 실패:', err?.message)
+      console.warn('[CurationArticlePage] save 실패:', err?.message)
       navigate('/trips/guest/search')
     } finally {
       setCurationSaving(false)
@@ -911,13 +982,21 @@ function CurationArticleContent({ data }) {
         .cur-strike-line { background-image: linear-gradient(currentColor, currentColor); background-position: 0 50%; background-size: 0% 1.5px; background-repeat: no-repeat; transition: background-size .35s ease; }
         .cur-strike-on { background-size: 100% 1.5px; }
 
-.cur-editorial p { font-weight: 500; font-size: 1.0625rem; line-height: 1.85; letter-spacing: -0.03em; color: #1f2937; text-align: justify; word-break: normal; overflow-wrap: break-word; }
-        @media (min-width: 768px) { .cur-editorial p { font-size: 1.125rem; line-height: 1.9; } }
-        .cur-editorial p + p { margin-top: 1.15em; }
-        .cur-editorial aside p { text-align: left; }
+        .cur-checklist-item { word-break: break-word; overflow-wrap: break-word; }
+
+        @media (hover: hover) and (pointer: fine) {
+          .cur-tipbox { transition: border-color .2s ease, box-shadow .2s ease; }
+          .cur-tipbox:hover { border-color: #2dba76; box-shadow: 0 4px 16px rgba(45,186,118,0.10); }
+        }
+
+.cur-editorial p { font-weight: 500; font-size: 1rem; line-height: 1.5; letter-spacing: -0.02em; color: #1f2937; text-align: justify; text-justify: inter-character; word-break: keep-all; overflow-wrap: break-word; }
+        @media (min-width: 768px) { .cur-editorial p { font-size: 1.0625rem; line-height: 1.6; } }
+        .cur-editorial p + p { margin-top: 1.4em; }
+        .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
-          .cur-editorial p { font-size: 0.9rem; letter-spacing: -0.04em; }
-          .cur-editorial aside p { font-size: inherit; letter-spacing: inherit; }
+          .cur-editorial p { font-size: 16px; letter-spacing: -0.025em; }
+          .cur-editorial aside p { font-size: 0.75rem; letter-spacing: inherit; }
+          .cur-tipbox p { font-size: 16px !important; }
         }
       `}</style>
 
@@ -952,7 +1031,6 @@ function CurationArticleContent({ data }) {
 
         <CtaBanner data={data} />
         <Related currentCode={data.code} />
-        <PageFooter />
       </div>
     </>
   )

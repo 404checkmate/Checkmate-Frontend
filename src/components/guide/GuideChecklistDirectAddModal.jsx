@@ -74,11 +74,23 @@ const PREP_TYPE_OPTIONS = [
   { value: 'item', label: '준비물' },
   { value: 'pre_booking', label: '사전 예약/신청' },
   { value: 'pre_departure_check', label: '출국 전 확인사항' },
+  { value: 'etc', label: '기타' },
 ]
 
 const BAGGAGE_TYPE_OPTIONS = [
+  { value: 'none', label: '해당 없음' },
   { value: 'carry_on', label: '기내 반입' },
   { value: 'checked', label: '위탁 수하물' },
+]
+
+const SUPPLIES_SUB_OPTIONS = [
+  { value: 'essentials', label: '필수 준비물' },
+  { value: 'clothing', label: '입을 옷' },
+  { value: 'health', label: '상비약' },
+  { value: 'toiletries', label: '세면도구' },
+  { value: 'beauty', label: '미용용품' },
+  { value: 'electronics', label: '전자제품' },
+  { value: 'travel_goods', label: '여행용품' },
 ]
 
 export default function GuideChecklistDirectAddModal({
@@ -138,7 +150,19 @@ export default function GuideChecklistDirectAddModal({
 
         {draft.prepType === 'item' && (
           <div className="mb-3">
-            <label className="mb-1 block text-xs font-semibold text-gray-600">수하물 구분</label>
+            <label className="mb-1 block text-xs font-semibold text-gray-600">준비물 구분</label>
+            <CustomSelect
+              value={draft.subCategory}
+              onChange={(val) => onDraftChange((d) => ({ ...d, subCategory: val }))}
+              options={SUPPLIES_SUB_OPTIONS}
+              placeholder="선택해주세요"
+            />
+          </div>
+        )}
+
+        {draft.prepType && (
+          <div className="mb-3">
+            <label className="mb-1 block text-xs font-semibold text-gray-600">수하물 유형</label>
             <CustomSelect
               value={draft.baggageType}
               onChange={(val) => onDraftChange((d) => ({ ...d, baggageType: val }))}

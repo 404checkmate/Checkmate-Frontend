@@ -20,8 +20,8 @@ export default function SearchResultItem({
 
   if (inArchiveAlready) {
     const archivedShellClass = aiRecommended
-      ? 'w-full rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-4 text-left shadow-sm'
-      : 'w-full rounded-2xl border-2 border-gray-200 bg-white p-4 text-left shadow-sm'
+      ? 'w-full rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-3 lg:p-4 text-left shadow-sm'
+      : 'w-full rounded-2xl border-2 border-gray-200 bg-white p-3 lg:p-4 text-left shadow-sm'
     const archivedCheckClass = aiRecommended
       ? 'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-violet-300 bg-violet-100'
       : 'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-amber-300 bg-amber-100'
@@ -32,14 +32,14 @@ export default function SearchResultItem({
         role="group"
         aria-label="이미 이 체크리스트에 담긴 항목"
       >
-        <div className="flex gap-3">
+        <div className="flex gap-2.5 lg:gap-3">
           <span className={archivedCheckClass} aria-hidden>
             <CheckIcon className={archivedCheckIconClass} />
           </span>
           <div className="min-w-0 flex-1">
             {aiRecommended ? (
               <>
-                <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                <div className="mb-0.5 lg:mb-1 flex flex-wrap items-center gap-1.5">
                   <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
                     <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
                     MATE 추천
@@ -59,7 +59,7 @@ export default function SearchResultItem({
               </p>
             )}
             {subtitleText ? (
-              <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{subtitleText}</p>
+              <p className={`mt-1 lg:mt-1.5 text-sm leading-relaxed text-gray-600${aiRecommended ? '' : ' hidden lg:block'}`}>{subtitleText}</p>
             ) : null}
           </div>
         </div>
@@ -69,11 +69,11 @@ export default function SearchResultItem({
 
   const btnShell = selected
     ? aiRecommended
-      ? 'w-full cursor-pointer rounded-2xl border-2 border-violet-400 bg-violet-100/95 p-4 text-left shadow-sm ring-1 ring-violet-300/70 transition-all duration-200'
-      : 'w-full cursor-pointer rounded-2xl border-2 border-amber-400 bg-amber-200/95 p-4 text-left shadow-sm ring-1 ring-amber-300/70 transition-all duration-200'
+      ? 'w-full cursor-pointer rounded-2xl border-2 border-violet-400 bg-violet-100/95 p-3 lg:p-4 text-left shadow-sm ring-1 ring-violet-300/70 transition-all duration-200'
+      : 'w-full cursor-pointer rounded-2xl border-2 border-amber-400 bg-amber-200/95 p-3 lg:p-4 text-left shadow-sm ring-1 ring-amber-300/70 transition-all duration-200'
     : aiRecommended
-      ? 'w-full cursor-pointer rounded-2xl border-2 border-violet-100 bg-violet-50/50 p-4 text-left shadow-sm transition-all duration-200 hover:bg-violet-50'
-      : 'w-full cursor-pointer rounded-2xl border-2 border-gray-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:bg-gray-50'
+      ? 'w-full cursor-pointer rounded-2xl border-2 border-violet-100 bg-violet-50/50 p-3 lg:p-4 text-left shadow-sm transition-all duration-200 hover:bg-violet-50'
+      : 'w-full cursor-pointer rounded-2xl border-2 border-gray-100 bg-white p-3 lg:p-4 text-left shadow-sm transition-all duration-200 hover:bg-gray-50'
 
   const checkShell = selected
     ? aiRecommended ? 'border-violet-600 bg-violet-600' : 'border-amber-600 bg-amber-600'
@@ -81,7 +81,7 @@ export default function SearchResultItem({
 
   return (
     <button type="button" onClick={onToggle} aria-pressed={selected} className={`${btnShell} ${className}`.trim()}>
-      <div className="flex gap-3">
+      <div className="flex gap-2.5 lg:gap-3">
         <span
           className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${checkShell}`}
           aria-hidden
@@ -90,16 +90,16 @@ export default function SearchResultItem({
         </span>
         <div className="min-w-0 flex-1">
           {aiRecommended ? (
-            <div className="mb-1">
+            <div className="mb-0.5 lg:mb-1">
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
                 <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
                 MATE 추천
               </span>
             </div>
           ) : null}
-          <p className="text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
+          <p className="text-sm lg:text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
           {subtitleText ? (
-            <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{subtitleText}</p>
+            <p className={`mt-1 lg:mt-1.5 text-xs lg:text-sm leading-relaxed text-gray-600${aiRecommended ? '' : ' hidden lg:block'}`}>{subtitleText}</p>
           ) : null}
         </div>
       </div>

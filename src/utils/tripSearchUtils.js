@@ -1,3 +1,6 @@
+import { TRIP_SEARCH_CONTEXT } from '@/mocks/searchData'
+import { buildTripWindowLabelFromRange } from '@/utils/tripDateFormat'
+
 export const SEARCH_CATEGORY_ORDER = ['supplies', 'prebooking', 'predeparture']
 export const SEARCH_CATEGORY_LABEL = {
   supplies: '준비물',
@@ -103,8 +106,8 @@ export function mapMockItemToArchiveItem(i) {
     prepType: i.prepType ?? '',
     source: i.source ?? '',
     title: i.title,
-    description: i.description,
-    detail: i.detail,
+    description: undefined,
+    detail: undefined,
   }
 }
 
@@ -129,5 +132,76 @@ export function buildContextInputFromPlan(plan) {
     tripStart: plan.tripStartDate,
     companions,
     purposes: Array.isArray(plan.travelStyles) ? plan.travelStyles : [],
+  }
+}
+
+const CURATION_CATEGORY_LABEL = { supplies: '준비물', prebooking: '사전 예약/신청', predeparture: '출국 전 확인사항', etc: '기타' }
+
+export function buildCurationArchiveSnapshot(checkedItems, dest) {
+  const archiveItems = checkedItems.map((it, i) => {
+    const prepType = it.prepType || 'item'
+    let category = 'supplies'
+    if (prepType === 'pre_booking') category = 'prebooking'
+    else if (prepType === 'pre_departure_check') category = 'predeparture'
+    else if (prepType === 'etc') category = 'etc'
+    return {
+      id: `curation-${i}`,
+      serverId: null,
+      baggageType: 'none',
+      category,
+      categoryLabel: CURATION_CATEGORY_LABEL[category] ?? '준비물',
+      subCategory: prepType,
+      subCategoryLabel: it.cat || '',
+      prepType,
+      source: 'curation',
+      title: it.label,
+    }
+  })
+  const countryName = dest?.country || ''
+  return {
+    pageTitle: countryName ? `${countryName} 큐레이션 체크리스트` : '큐레이션 체크리스트',
+    pageSubtitle: '',
+    destination: dest?.city || '',
+    country: countryName,
+    tripWindowLabel: '',
+    tripStartDate: '',
+    tripEndDate: '',
+    countryCode: dest?.countryCode || '',
+    iata: dest?.iata || '',
+    via: 'curation',
+    weatherSummary: '',
+    temperatureRange: '',
+    rainChance: 0,
+    environmentTags: [],
+    phaseHints: [],
+    items: archiveItems,
+    dailySummaries: [],
+    dailyGuidesFull: [],
+  }
+}
+
+export function buildArchiveSnapshot(plan, items) {
+  const dest = plan?.destination
+  const ts = plan?.tripStartDate
+  const te = plan?.tripEndDate
+  const hasDestination = Boolean(dest && ts && te)
+  return {
+    pageTitle: hasDestination ? `${dest.country} · ${dest.city} 여행 준비` : TRIP_SEARCH_CONTEXT.title,
+    pageSubtitle: '',
+    destination: hasDestination ? dest.city : TRIP_SEARCH_CONTEXT.destination,
+    country: hasDestination ? dest.country : TRIP_SEARCH_CONTEXT.country,
+    tripWindowLabel: hasDestination ? buildTripWindowLabelFromRange(ts, te) : TRIP_SEARCH_CONTEXT.tripWindowLabel,
+    tripStartDate: hasDestination ? ts : '',
+    tripEndDate: hasDestination ? te : '',
+    countryCode: hasDestination ? dest.countryCode : '',
+    iata: hasDestination ? dest.iata : '',
+    weatherSummary: TRIP_SEARCH_CONTEXT.weatherSummary,
+    temperatureRange: TRIP_SEARCH_CONTEXT.temperatureRange,
+    rainChance: TRIP_SEARCH_CONTEXT.rainChance,
+    environmentTags: TRIP_SEARCH_CONTEXT.environmentTags.map((t) => ({ ...t })),
+    phaseHints: TRIP_SEARCH_CONTEXT.phaseHints.map((p) => ({ ...p })),
+    items: items.map(mapMockItemToArchiveItem),
+    dailySummaries: [],
+    dailyGuidesFull: [],
   }
 }

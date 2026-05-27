@@ -12,6 +12,11 @@
  *                 AI 추천 섹션은 맨 앞으로 올린다.
  */
 
+export const SUPPLIES_SUB_CATEGORIES = new Set([
+  'essentials', 'clothing', 'health',
+  'toiletries', 'beauty', 'electronics', 'travel_goods',
+])
+
 /**
  * 백엔드 세부 카테고리 코드 → 프론트 탭 코드 매핑.
  * 백엔드 seed (`checklist_categories`) 와 1:1 로 맞춰 둔다.
@@ -30,6 +35,7 @@ const SUB_CATEGORY_TO_TAB = {
   booking: 'prebooking',
   pre_departure: 'predeparture',
   ai_recommend: 'ai_recommend',
+  etc: 'etc',
 }
 
 const TAB_CATEGORIES = [
@@ -63,10 +69,15 @@ function makeItemId(raw, categoryCode, idx) {
 }
 
 function mapPrepTypeToTab(prepType) {
-  if (prepType === 'pre_booking') return 'prebooking'
-  if (prepType === 'pre_departure_check') return 'predeparture'
-  if (prepType === 'ai_recommend') return 'ai_recommend'
-  return null
+  if (SUPPLIES_SUB_CATEGORIES.has(prepType)) return 'supplies'
+  switch (prepType) {
+    case 'item': return 'supplies'
+    case 'pre_booking': return 'prebooking'
+    case 'pre_departure_check': return 'predeparture'
+    case 'etc': return 'etc'
+    case 'ai_recommend': return null
+    default: return 'supplies'
+  }
 }
 
 function mapItem(raw, idx) {

@@ -8,11 +8,12 @@ import defaultProfileImg from '@/assets/default-profile.png'
 
 const NAV_ITEMS = [
   { label: '홈', path: '/', match: (p) => p === '/' },
-  { label: '여행 준비', path: '/trips/new/destination', match: (p) => p.startsWith('/trips/new') },
+  { label: '서비스 소개', path: '/about', match: (p) => p === '/about' },
   {
-    label: '체크리스트',
+    label: '나의 체크리스트',
     path: '/guide-archives',
     match: (p) => p.includes('/guide-archive'),
+    requiresLogin: true,
   },
 ]
 
@@ -72,7 +73,7 @@ function Header() {
     setLogoutConfirmOpen(false)
     /** 웹(md+): 현재 페이지 유지, 헤더만 비로그인 UI로 전환. 모바일: 로그인 페이지로 이동 */
     const isDesktop =
-      typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+      typeof window !== 'undefined' && window.matchMedia('(min-width: 1280px)').matches
     if (!isDesktop) {
       navigate('/login', { replace: true })
     }
@@ -139,27 +140,25 @@ function Header() {
           </Link>
         </div>
 
-        {/* 데스크톱: 로그인 시에만 중앙 네비 표시 — 비로그인은 하단 푸터 등에서 진입 */}
-        {isWebLoggedIn ? (
-          <nav
-            className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 md:flex"
-            aria-label="주요 메뉴"
-          >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
-                  item.match(pathname)
-                    ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        ) : null}
+        {/* 데스크톱: 항상 중앙 네비 표시. 로그인 필요 항목(체크리스트)은 로그인 시에만 노출 */}
+        <nav
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-12 lg:flex"
+          aria-label="주요 메뉴"
+        >
+          {NAV_ITEMS.filter((item) => !item.requiresLogin || isWebLoggedIn).map((item) => (
+            <Link
+              key={item.label}
+              to={item.path}
+              className={`whitespace-nowrap pb-0.5 text-sm transition-colors ${
+                item.match(pathname)
+                  ? 'border-b-2 border-teal-600 font-semibold text-teal-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
           {isWebLoggedIn ? (
@@ -167,14 +166,14 @@ function Header() {
               <button
                 type="button"
                 onClick={openLogoutConfirm}
-                className="hidden shrink-0 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 md:inline-flex"
+                className="hidden shrink-0 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 lg:inline-flex"
               >
                 로그아웃
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/mypage')}
-                className="hidden h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-100 transition-colors hover:bg-gray-200 md:flex"
+                className="hidden h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-100 transition-colors hover:bg-gray-200 lg:flex"
                 aria-label="마이페이지"
               >
                 <img src={defaultProfileImg} alt="" className="h-full w-full object-cover" aria-hidden />
@@ -184,7 +183,7 @@ function Header() {
             <>
               <Link
                 to="/login"
-                className={`hidden rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors md:inline-flex ${
+                className={`hidden rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors lg:inline-flex ${
                   pathname === '/login' || pathname === '/signup'
                     ? 'text-teal-700'
                     : 'text-gray-700 hover:text-gray-900'
@@ -195,44 +194,52 @@ function Header() {
             </>
           )}
 
-          {/* 모바일: 비로그인 — 간단 진입 / 로그인 — 햄버거 */}
-          {!isWebLoggedIn ? (
-            <div className="flex items-center gap-2 md:hidden">
-              <Link
-                to="/login"
-                className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-bold text-gray-800"
-              >
-                로그인
-              </Link>
-            </div>
-          ) : (
-            <div ref={menuRef} className="relative md:hidden">
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
-                aria-expanded={mobileMenuOpen}
-                aria-controls={menuId}
-                aria-haspopup="true"
-                aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-                onClick={() => setMobileMenuOpen((o) => !o)}
-              >
-                {mobileMenuOpen ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
-                  </svg>
-                )}
-              </button>
-
+          {/* 모바일/태블릿: 항상 햄버거 버튼 표시 */}
+          <div ref={menuRef} className="relative lg:hidden">
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-teal-200 hover:bg-teal-50/50"
+              aria-expanded={mobileMenuOpen}
+              aria-controls={menuId}
+              aria-haspopup="true"
+              aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              onClick={() => setMobileMenuOpen((o) => !o)}
+            >
               {mobileMenuOpen ? (
-                <div
-                  id={menuId}
-                  className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
-                  role="menu"
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              )}
+            </button>
+
+            {mobileMenuOpen ? (
+              <div
+                id={menuId}
+                className="absolute right-0 top-full z-[70] mt-2 w-56 max-w-[85vw] overflow-hidden rounded-2xl border border-gray-100 bg-white py-2 shadow-xl"
+                role="menu"
+              >
+                <Link
+                  to="/about"
+                  role="menuitem"
+                  className="block w-full px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-teal-50/80"
+                  onClick={closeMobileMenu}
                 >
+                  서비스 소개
+                </Link>
+                {isWebLoggedIn ? (
+                  <>
+                    <Link
+                      to="/guide-archives"
+                      role="menuitem"
+                      className="block w-full px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-teal-50/80"
+                      onClick={closeMobileMenu}
+                    >
+                      나의 체크리스트
+                    </Link>
                     <button
                       type="button"
                       role="menuitem"
@@ -244,6 +251,7 @@ function Header() {
                     >
                       프로필
                     </button>
+                    <div className="mx-4 my-1 border-t border-gray-100" role="separator" />
                     <button
                       type="button"
                       role="menuitem"
@@ -252,10 +260,20 @@ function Header() {
                     >
                       로그아웃
                     </button>
-                  </div>
-              ) : null}
-            </div>
-          )}
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    role="menuitem"
+                    className="block w-full px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-teal-50/80"
+                    onClick={closeMobileMenu}
+                  >
+                    로그인
+                  </Link>
+                )}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

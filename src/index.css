@@ -2,27 +2,31 @@
 
 @font-face {
   font-family: 'SeoulNotice';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-Medium.woff2') format('woff2');
+  src: url('/fonts/SeoulAlrimTTF-Medium.woff2') format('woff2');
   font-weight: 500;
   font-display: swap;
+  font-synthesis: none;
 }
 @font-face {
   font-family: 'SeoulNotice';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-Bold.woff2') format('woff2');
+  src: url('/fonts/SeoulAlrimTTF-Bold.woff2') format('woff2');
   font-weight: 700;
   font-display: swap;
+  font-synthesis: none;
 }
 @font-face {
   font-family: 'SeoulNotice';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-ExtraBold.woff2') format('woff2');
+  src: url('/fonts/SeoulAlrimTTF-ExtraBold.woff2') format('woff2');
   font-weight: 800;
   font-display: swap;
+  font-synthesis: none;
 }
 @font-face {
   font-family: 'SeoulNotice';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-Heavy.woff2') format('woff2');
+  src: url('/fonts/SeoulAlrimTTF-Heavy.woff2') format('woff2');
   font-weight: 900;
   font-display: swap;
+  font-synthesis: none;
 }
 
 *,
@@ -34,6 +38,7 @@
 html {
   scroll-behavior: smooth;
 }
+
 
 /*
  * 홈(/) 랜딩 전용 — HomePage 에서 documentElement 에 `home-page-scroll-snap` 클래스를 붙일 때만 적용.
@@ -56,11 +61,20 @@ html {
 body {
   margin: 0;
   overflow-x: hidden;
-  font-family: 'SeoulNotice', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'SeoulNotice', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  font-synthesis: none;
   color: #111827;
   background-color: #ffffff;
+}
+
+*,
+*::before,
+*::after {
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
 }
 
 /*
@@ -124,6 +138,13 @@ body {
 }
 
 /* 온보딩 생년월일 캘린더 — 선택일 (react-day-picker) 틸·시안 그라데이션 (로그인/플로우와 통일) */
+/* 큐레이션 아티클 페이지 — 데스크탑 80% 축소 */
+@media (min-width: 1024px) {
+  html.curation-page {
+    zoom: 0.8;
+  }
+}
+
 .onboarding-birth-calendar-wrap .rdp-selected .rdp-day_button {
   background: linear-gradient(135deg, #14b8a6, #0d9488);
   color: #fff;

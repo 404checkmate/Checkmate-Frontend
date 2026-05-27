@@ -1,31 +1,18 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { generateChecklist, getGenerateStatus } from '@/api/checklists'
+import { generateChecklist, getGenerateStatus, generateChecklistFromContext } from '@/api/checklists'
+import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { buildContextInputFromPlan } from '@/utils/tripSearchUtils'
 import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import {
   LOADING_VARIANTS,
   TIPS,
-  LOADING_ICON_PATHS,
   BLUR_ORBS,
-  BRAND_DOTS,
 } from '@/mocks/loadingData'
 import loadingWordMatePng from '@/assets/loading-word-mate-user-latest.png'
 import loadingWordChecklistPng from '@/assets/loading-word-checklist-user-latest.png'
-
-/* ─────────────────────────────────────────────
-   범용 SVG 아이콘 — LOADING_ICON_PATHS 데이터 기반
-   diamond 아이콘만 중앙에 원형 포인트가 추가됩니다.
-───────────────────────────────────────────── */
-function SvgIcon({ name, className = 'w-5 h-5 text-white' }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d={LOADING_ICON_PATHS[name]} />
-      {name === 'diamond' && <circle cx="12" cy="12" r="2" fill="white" />}
-    </svg>
-  )
-}
 
 /* ─────────────────────────────────────────────
    메인 컴포넌트
@@ -56,24 +43,75 @@ function TripLoadingPage() {
       return
     }
 
-    // guest 흐름: generateChecklist 호출 없이 애니메이션만 완료 후 이동
+    // guest 흐름: generateChecklistFromContext를 애니메이션과 병렬 실행 후 이동
     if (isGuest) {
+      // curationSave 흐름은 templates를 직접 구성하므로 generate 불필요
+      const hasCuration = !!sessionStorage.getItem('curationSave')
+
+      if (hasCuration) {
+        const interval = setInterval(() => {
+          setProgress((prev) => {
+            const next = prev + (prev < 70 ? 1.2 : 0.7)
+            if (next >= 100) {
+              clearInterval(interval)
+              setProgress(100)
+              setTimeout(() => {
+                navigate('/trips/guest/search', { state: location.state, replace: true })
+              }, 600)
+            }
+            return Math.min(next, 100)
+          })
+        }, 50)
+        return () => clearInterval(interval)
+      }
+
+      let cancelled = false
+      let progressDone = false
+      let generateDone = false
+      let generatedData = null
+
+      const tryNavigate = () => {
+        if (progressDone && generateDone) {
+          navigate('/trips/guest/search', {
+            state: { ...location.state, prefetchedItems: generatedData },
+            replace: true,
+          })
+        }
+      }
+
       const interval = setInterval(() => {
         setProgress((prev) => {
-          const next = prev + (prev < 70 ? 1.2 : 0.7)
+          const cap = generateDone ? 100 : 95
+          const speed = prev < 70 ? 1.2 : prev < 90 ? 0.7 : 0.15
+          const next = Math.min(prev + speed, cap)
           if (next >= 100) {
             clearInterval(interval)
-            setProgress(100)
-            setTimeout(() => {
-              navigate('/trips/guest/search', { state: location.state, replace: true })
-            }, 600)
+            setTimeout(() => { progressDone = true; tryNavigate() }, 600)
           }
-          return Math.min(next, 100)
+          return next
         })
       }, 50)
-      return () => clearInterval(interval)
+
+      const runGuestGenerate = async () => {
+        try {
+          const plan = loadActiveTripPlan()
+          const contextInput = buildContextInputFromPlan(plan)
+          if (contextInput) {
+            const data = await generateChecklistFromContext(contextInput)
+            if (!cancelled) generatedData = data
+          }
+        } catch {
+          // 실패 시 prefetch 없이 이동 — guest/search에서 자체 재시도
+        } finally {
+          if (!cancelled) { generateDone = true; tryNavigate() }
+        }
+      }
+
+      runGuestGenerate()
+      return () => { clearInterval(interval); cancelled = true }
     }
 
+    let cancelled = false
     let progressDone = false
     let generateDone = false
 
@@ -86,50 +124,46 @@ function TripLoadingPage() {
 
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + (prev < 70 ? 1.2 : 0.7)
+        // 95% 이후로는 generateDone 될 때까지 천천히 대기
+        const cap = generateDone ? 100 : 95
+        const speed = prev < 70 ? 1.2 : prev < 90 ? 0.7 : 0.15
+        const next = Math.min(prev + speed, cap)
         if (next >= 100) {
           clearInterval(interval)
-          setProgress(100)
-          setTimeout(() => {
-            progressDone = true
-            tryNavigate()
-          }, 600)
+          setTimeout(() => { progressDone = true; tryNavigate() }, 600)
         }
-        return Math.min(next, 100)
+        return next
       })
     }, 50)
 
-    generateChecklist(id).catch((err) => {
-      console.error('[TripLoadingPage] generate 킥오프 실패:', err)
-      setGenerateError(true)
-    })
-
-    const pollStatus = async () => {
-      const MAX_WAIT = 30000
-      const INTERVAL = 2000
-      const startTime = Date.now()
-
-      while (Date.now() - startTime < MAX_WAIT) {
-        try {
-          const res = await getGenerateStatus(id)
-          if (res.status === 'completed') {
-            generateDone = true
-            tryNavigate()
-            return
+    const runGenerate = async () => {
+      try {
+        await generateChecklist(id)  // 202: 백그라운드 생성 트리거
+        // 생성 완료까지 폴링 (최대 32s, 2s 간격)
+        const MAX_WAIT = 32000
+        const POLL_MS = 2000
+        const started = Date.now()
+        while (!cancelled && Date.now() - started < MAX_WAIT) {
+          await new Promise((r) => setTimeout(r, POLL_MS))
+          if (cancelled) break
+          try {
+            const status = await getGenerateStatus(id)
+            if (status?.status === 'completed') break
+          } catch {
+            break
           }
-        } catch {
-          // polling 에러 무시 — 타임아웃까지 계속 시도
         }
-        await new Promise(r => setTimeout(r, INTERVAL))
+      } catch (err) {
+        console.error('[TripLoadingPage] generate 실패:', err)
+        setGenerateError(true)
+      } finally {
+        if (!cancelled) { generateDone = true; tryNavigate() }
       }
-      // 30초 초과 시 TripSearchPage에서 재시도 가능하도록 그냥 이동
-      generateDone = true
-      tryNavigate()
     }
 
-    pollStatus()
+    runGenerate()
 
-    return () => clearInterval(interval)
+    return () => { clearInterval(interval); cancelled = true }
   }, [id, isGuest, navigate, location.state])
 
   const pct = Math.round(progress)
@@ -160,11 +194,6 @@ function TripLoadingPage() {
           }}
         />
       ))}
-      {/* 모바일 데코 아이콘 (온도계 실루엣) */}
-      <div className="md:hidden absolute top-6 left-4 opacity-10 pointer-events-none">
-        <SvgIcon name="thermometer" className="w-24 h-24 text-cyan-400" />
-      </div>
-
       {/* ══════════════════════════════════
           본문 컨텐츠 (relative z-10)
       ══════════════════════════════════ */}
@@ -256,36 +285,24 @@ function TripLoadingPage() {
 
         {/* TIP 영역 */}
         {/* 데스크탑: 황색 pill */}
-        <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm">
-          <span className="text-amber-700">✦</span>
+        <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm whitespace-nowrap">
+          <span className="text-amber-700 font-extrabold tracking-widest">MATE TIP</span>
+          <span className="text-amber-800/60">·</span>
           {TIPS[tipIndex]}
         </div>
 
-        {/* 모바일: Editor's Tip 카드 */}
-        <div className="md:hidden w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm px-4 py-4 text-left flex items-start gap-3">
-          <div className="w-9 h-9 bg-amber-400 rounded-xl flex items-center justify-center flex-shrink-0">
-            <SvgIcon name="bulb" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold tracking-widest text-amber-500 uppercase mb-1">
-              Editor&apos;s Tip
-            </p>
-            <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
-          </div>
+        {/* 모바일: MATE TIP 카드 */}
+        <div className="md:hidden w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm px-4 py-4 text-left">
+          <p className="text-[10px] font-bold tracking-widest text-amber-500 uppercase mb-1">
+            MATE TIP
+          </p>
+          <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
         </div>
 
       </div>
 
-      {/* ── 하단 브랜딩 ── */}
-      <div className="absolute bottom-8 flex flex-col items-center gap-2 z-10">
-        <div className="flex items-center gap-1.5">
-          {BRAND_DOTS.map((dot) => (
-            <span
-              key={dot.id}
-              className={`w-1.5 h-1.5 rounded-full ${dot.color} ${dot.desktopOnly ? 'hidden md:block' : ''}`}
-            />
-          ))}
-        </div>
+      {/* ── 하단 브랜딩 (데스크탑만) ── */}
+      <div className="absolute bottom-8 hidden md:flex flex-col items-center z-10">
         <BrandLogo className="h-5 w-auto opacity-95" />
       </div>
 

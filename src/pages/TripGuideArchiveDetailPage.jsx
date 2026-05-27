@@ -139,8 +139,8 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
       <GuideArchiveChecklistView
         tripId={tripId}
         entry={entry}
-        companions={tripCompanions}
-        travelStyles={tripStyles}
+        companions={entry?.via === 'curation' ? [] : tripCompanions}
+        travelStyles={entry?.via === 'curation' ? [] : tripStyles}
         onArchiveMutated={() => setArchiveRevision((n) => n + 1)}
       />
     </div>

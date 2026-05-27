@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import { TripFlowMobileBar } from '@/components/common/TripFlowTopBar'
 import notFoundMascotUrl from '@/assets/not-found-mascot.png'
 
 /** 끝까지 민트·화이트 톤으로 이어지도록 100% 구간 유지 (하단 흰 띠 방지) */
@@ -25,11 +24,10 @@ function NotFoundPage() {
 
   return (
     <div className="flex min-h-full w-full flex-1 flex-col" style={PAGE_BG}>
-      <TripFlowMobileBar showBack={false} />
 
       {/* 모바일 */}
-      <div className="flex min-h-0 flex-1 flex-col items-center px-5 pb-28 pt-6 md:hidden">
-        <div className="mb-5 flex w-full max-w-[240px] items-center justify-center">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5 py-10 md:hidden">
+        <div className="mb-5 flex self-start ml-8 max-w-[240px] items-center justify-start">
           <NotFoundMascotImage className="max-h-[200px] w-full object-contain" />
         </div>
         <h1 className="mb-2 text-center text-2xl font-extrabold leading-snug text-gray-900">
