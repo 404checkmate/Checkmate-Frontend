@@ -289,7 +289,6 @@ function Hero({ data }) {
       <div className="absolute bottom-8 left-0 right-0 px-4 md:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="cur-reveal flex items-start gap-3">
-            <span className="text-4xl shrink-0 leading-none mt-1">{data.flag}</span>
             <div className="flex flex-wrap gap-2">
               {data.cities.map((city) => (
                 <span
@@ -815,7 +814,6 @@ function Related({ currentCode }) {
                   />
                   <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-900/40 to-transparent" />
                   <div className="absolute bottom-3 left-3 pointer-events-none flex items-center gap-2">
-                    <span className="text-2xl">{d.flag}</span>
                     <span className="font-extrabold text-white text-[15px]">{d.name}</span>
                   </div>
                 </div>
