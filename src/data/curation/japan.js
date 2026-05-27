@@ -174,7 +174,7 @@ const japan = {
       ]
     },
     {
-      "cat": "💳 금융 & 환전 (1)",
+      "cat": "💳 금융 & 환전",
       "prepType": "essentials",
       "section": [
         "money"
