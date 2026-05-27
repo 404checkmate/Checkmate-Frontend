@@ -574,7 +574,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
               <h2 className="font-extrabold text-[2rem] md:text-[2.6rem] leading-[1.15] tracking-tight text-slate-900 max-w-[18ch]">
                 여행 준비, 한 번에 체크하세요
               </h2>
-              <p className="mt-5 font-medium text-[15px] leading-relaxed text-gray-700 max-w-[50ch]">
+              <p className="mt-5 font-medium text-[13px] md:text-[15px] leading-relaxed text-gray-700 whitespace-nowrap">
                 준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
               </p>
               <div className="mt-5 flex justify-end">
