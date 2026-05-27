@@ -5,7 +5,7 @@ import { upsertChecklistItems } from '@/api/checklists'
 import { createGuideArchive } from '@/api/guideArchives'
 import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
-import { buildArchiveSnapshot } from '@/utils/tripSearchUtils'
+import { buildArchiveSnapshot, buildCurationArchiveSnapshot } from '@/utils/tripSearchUtils'
 import { loadPendingGuestSearch, clearPendingGuestSearch } from '@/utils/pendingGuestSearch'
 import { saveActiveTripId } from '@/utils/activeTripIdStorage'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -32,31 +32,39 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
       if (!data?.session?.access_token) return
       if (cancelledRef.current) return
 
-      // curationSave가 있으면 저장된 플랜으로 여행 자동 생성 후 search 직행
+      // curationSave가 있으면 보관함 바로 생성 후 나의 체크리스트로 이동
       const rawCuration = sessionStorage.getItem('curationSave')
       if (rawCuration) {
-        const plan = loadActiveTripPlan()
-        const payload = buildCreateTripPayload(plan, {
-          companionIds: ['alone'],
-          hasPet: false,
-          travelStyleIds: ['healing'],
-        })
-        if (payload) {
-          try {
+        try {
+          const { items: curationItems, dest } = JSON.parse(rawCuration)
+          const plan = loadActiveTripPlan()
+          const payload = buildCreateTripPayload(plan, {
+            companionIds: ['alone'],
+            hasPet: false,
+            travelStyleIds: ['healing'],
+          })
+          if (payload && Array.isArray(curationItems)) {
             const created = await createTrip(payload)
             if (cancelledRef.current) return
             const rawId = created?.id ?? created?.tripId
             const realId = rawId != null ? String(rawId) : null
             if (realId) {
               saveActiveTripId(realId)
+              const snapshot = buildCurationArchiveSnapshot(curationItems, dest)
+              const archiveCreated = await createGuideArchive(realId, { name: snapshot.pageTitle, snapshot })
+              if (cancelledRef.current) return
               clearPendingGuestSearch()
-              navigate(`/trips/${realId}/search`, { replace: true })
+              sessionStorage.removeItem('curationSave')
+              if (archiveCreated?.id) {
+                sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
+              }
+              navigate('/guide-archives', { replace: true })
               return
             }
-          } catch (err) {
-            if (cancelledRef.current) return
-            console.warn('[useGuestTripUpgrade] curation trip 생성 실패:', err?.message)
           }
+        } catch (err) {
+          if (cancelledRef.current) return
+          console.warn('[useGuestTripUpgrade] curation archive 생성 실패:', err?.message)
         }
       }
 

@@ -135,6 +135,51 @@ export function buildContextInputFromPlan(plan) {
   }
 }
 
+const CURATION_CATEGORY_LABEL = { supplies: '준비물', prebooking: '사전 예약/신청', predeparture: '출국 전 확인사항', etc: '기타' }
+
+export function buildCurationArchiveSnapshot(checkedItems, dest) {
+  const archiveItems = checkedItems.map((it, i) => {
+    const prepType = it.prepType || 'item'
+    let category = 'supplies'
+    if (prepType === 'pre_booking') category = 'prebooking'
+    else if (prepType === 'pre_departure_check') category = 'predeparture'
+    else if (prepType === 'etc') category = 'etc'
+    return {
+      id: `curation-${i}`,
+      serverId: null,
+      baggageType: 'none',
+      category,
+      categoryLabel: CURATION_CATEGORY_LABEL[category] ?? '준비물',
+      subCategory: prepType,
+      subCategoryLabel: it.cat || '',
+      prepType,
+      source: 'curation',
+      title: it.label,
+    }
+  })
+  const countryName = dest?.country || ''
+  return {
+    pageTitle: countryName ? `${countryName} 큐레이션 체크리스트` : '큐레이션 체크리스트',
+    pageSubtitle: '',
+    destination: dest?.city || '',
+    country: countryName,
+    tripWindowLabel: '',
+    tripStartDate: '',
+    tripEndDate: '',
+    countryCode: dest?.countryCode || '',
+    iata: dest?.iata || '',
+    via: 'curation',
+    weatherSummary: '',
+    temperatureRange: '',
+    rainChance: 0,
+    environmentTags: [],
+    phaseHints: [],
+    items: archiveItems,
+    dailySummaries: [],
+    dailyGuidesFull: [],
+  }
+}
+
 export function buildArchiveSnapshot(plan, items) {
   const dest = plan?.destination
   const ts = plan?.tripStartDate

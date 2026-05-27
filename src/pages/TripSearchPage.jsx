@@ -121,7 +121,7 @@ function TripSearchInner({ tripId }) {
   // ── 파생 카운트 ────────────────────────────────────────
   const totalItemCount = sourceItems.length
   const aiRecommendCount = sourceItemsRaw.filter(
-    (i) => i.category === 'ai_recommend' || i.prepType === 'ai_recommend' || i.source === 'llm',
+    (i) => i.category === 'ai_recommend' || i.prepType === 'ai_recommend' || i.source === 'llm' || i.source === 'curation',
   ).length
   const visibleItemCount = selectedCategory === 'all' ? sourceItems.length : singleCategoryItems.length
 
@@ -197,17 +197,12 @@ function TripSearchInner({ tripId }) {
       <div className="mx-auto w-full max-w-7xl px-3 pb-36 pt-5 md:px-6 md:pb-28 md:pt-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
           <TripSearchPageHeader
-            mergeToArchive={mergeToArchive}
             pageMainTitle={pageMainTitle}
             headerDateLine={headerDateLine}
             companions={tripCompanions}
             travelStyles={tripStyles}
-            headerDescription={headerDescription}
             archiveTargetMissing={archiveTargetMissing}
             loadState={loadState}
-            apiSummary={apiSummary}
-            aiRecommendCount={aiRecommendCount}
-            totalItemCount={totalItemCount}
             via={loadState.via}
           />
 

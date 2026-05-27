@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link, useParams, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { createTrip } from '@/api/trips'
+import { createGuideArchive } from '@/api/guideArchives'
 import { saveActiveTripId } from '@/utils/activeTripIdStorage'
-import { saveActiveTripPlan } from '@/utils/tripPlanContextStorage'
+import { buildCurationArchiveSnapshot } from '@/utils/tripSearchUtils'
+import { saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
 
 // 큐레이션 코드 → 여행 자동생성에 쓸 기본 목적지 정보
 const CURATION_COUNTRY_MAP = {
@@ -850,25 +852,33 @@ function CurationArticleContent({ data }) {
   const handleCurationSave = useCallback(async () => {
     if (curationSaving) return
     const checkedItems = flatItems.filter((it) => checked[it.id])
-    sessionStorage.setItem('curationSave', JSON.stringify({
-      items: checkedItems.map((it) => ({ label: it.label, cat: it.cat, prepType: it.prepType })),
-      country: data.code,
-      countryName: data.name,
-      timestamp: Date.now(),
-    }))
+    const dest = CURATION_COUNTRY_MAP[data.code]
 
     if (!user) {
+      sessionStorage.setItem('curationSave', JSON.stringify({
+        items: checkedItems.map((it) => ({ label: it.label, cat: it.cat, prepType: it.prepType })),
+        country: data.code,
+        countryName: data.name,
+        dest: dest || null,
+        timestamp: Date.now(),
+      }))
       navigate('/trips/guest/search')
       return
     }
 
-    // 로그인 → 여행 자동 생성 후 search 페이지 직행 (AI 없이 큐레이션 항목 로드)
-    const dest = CURATION_COUNTRY_MAP[data.code]
     if (!dest) {
+      sessionStorage.setItem('curationSave', JSON.stringify({
+        items: checkedItems.map((it) => ({ label: it.label, cat: it.cat, prepType: it.prepType })),
+        country: data.code,
+        countryName: data.name,
+        dest: null,
+        timestamp: Date.now(),
+      }))
       navigate('/trips/guest/search')
       return
     }
 
+    // 로그인 → 여행 자동생성 + 보관함 바로 생성 → 나의 체크리스트 페이지 이동
     setCurationSaving(true)
     try {
       const today = new Date().toISOString().slice(0, 10)
@@ -886,23 +896,22 @@ function CurationArticleContent({ data }) {
         travelStyles: [{ styleCode: 'healing' }],
       })
       const createdId = created?.id ?? created?.tripId
-      if (createdId) {
-        saveActiveTripPlan({
-          destination: { country: dest.country, countryCode: dest.countryCode, city: dest.city, iata: dest.iata },
-          tripStartDate: today,
-          tripEndDate: nextWeek,
-          companion: '혼자',
-          travelStyles: ['힐링'],
-          companionIds: ['alone'],
-          travelStyleIds: ['healing'],
-        })
-        saveActiveTripId(String(createdId))
-        navigate(`/trips/${createdId}/search`, { state: { fromCuration: true } })
-      } else {
-        navigate('/trips/guest/search')
+      if (!createdId) throw new Error('여행 생성 실패')
+
+      saveActiveTripId(String(createdId))
+
+      const snapshot = buildCurationArchiveSnapshot(checkedItems, dest)
+      const archiveCreated = await createGuideArchive(createdId, { name: snapshot.pageTitle, snapshot })
+
+      if (archiveCreated?.id) {
+        const checksInit = Object.fromEntries(snapshot.items.map((it) => [String(it.id), false]))
+        saveEntryChecklistChecks(String(createdId), archiveCreated.id, checksInit)
+        sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
       }
+      sessionStorage.removeItem('curationSave')
+      navigate('/guide-archives')
     } catch (err) {
-      console.warn('[CurationArticlePage] createTrip 실패:', err?.message)
+      console.warn('[CurationArticlePage] save 실패:', err?.message)
       navigate('/trips/guest/search')
     } finally {
       setCurationSaving(false)

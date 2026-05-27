@@ -132,7 +132,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const progress = total > 0 ? Math.round((checkedCount / total) * 100) : 0
 
   const title = buildGuideArchiveListTitle(entry)
-  const dateLine = buildGuideArchiveDateLine(entry)
+  const dateLine = entry?.via === 'curation' ? '' : buildGuideArchiveDateLine(entry)
 
   // ── 모달/필터 효과 ─────────────────────────────────────
   const closeAllModals = useCallback(() => {

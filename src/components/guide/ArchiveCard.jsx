@@ -40,7 +40,8 @@ export function SkeletonCard() {
 
 export default function ArchiveCard({ archive, deleteMode, isSelected, onToggleSelect, isHighlighted }) {
   const progress = archive.snapshot?.checklistProgressPercent ?? archive.completionRate ?? 0
-  const dateLine = formatDateRange(archive.trip?.tripStart, archive.trip?.tripEnd)
+  const isCuration = archive.snapshot?.via === 'curation'
+  const dateLine = isCuration ? '' : formatDateRange(archive.trip?.tripStart, archive.trip?.tripEnd)
 
   const cardContent = (
     <div

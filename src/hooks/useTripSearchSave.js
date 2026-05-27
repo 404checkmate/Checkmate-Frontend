@@ -15,6 +15,9 @@ import { trackEvent } from '@/utils/analyticsTracker'
 import { getSupabaseClient } from '@/lib/supabase'
 import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
 
+const BACKEND_PREP_TYPES = new Set(['item', 'pre_booking', 'pre_departure_check', 'ai_recommend', 'etc'])
+const toBackendPrepType = (v) => (v && BACKEND_PREP_TYPES.has(v) ? v : 'item')
+
 export function useTripSearchSave({
   tripId,
   archiveEntryId,
@@ -43,7 +46,7 @@ export function useTripSearchSave({
         title: item.title,
         ...(item.description ? { description: item.description } : {}),
         categoryCode: item.subCategory || 'ai_recommend',
-        prepType: item.prepType || 'item',
+        prepType: toBackendPrepType(item.prepType),
         baggageType: item.baggageType || 'none',
         source: VALID_SOURCES.includes(item.source) ? item.source : 'user_added',
         orderIndex: idx,
@@ -252,7 +255,7 @@ export function useTripSearchSave({
               title: item.title,
               ...(item.description ? { description: item.description } : {}),
               categoryCode: item.subCategory || 'ai_recommend',
-              prepType: item.prepType || 'item',
+              prepType: toBackendPrepType(item.prepType),
               baggageType: item.baggageType || 'none',
               source: item.source || 'template',
               orderIndex: idx,
