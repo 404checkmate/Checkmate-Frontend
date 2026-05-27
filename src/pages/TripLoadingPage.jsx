@@ -285,23 +285,18 @@ function TripLoadingPage() {
 
         {/* TIP 영역 */}
         {/* 데스크탑: 황색 pill */}
-        <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm">
+        <div className="hidden md:flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-semibold px-5 py-2.5 rounded-full shadow-sm whitespace-nowrap">
           <span className="text-amber-700 font-extrabold tracking-widest">MATE TIP</span>
           <span className="text-amber-800/60">·</span>
           {TIPS[tipIndex]}
         </div>
 
         {/* 모바일: MATE TIP 카드 */}
-        <div className="md:hidden w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm px-4 py-4 text-left flex items-start gap-3">
-          <div className="w-9 h-9 bg-amber-400 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-[9px] font-extrabold tracking-tight text-amber-900 leading-none text-center">MATE<br/>TIP</span>
-          </div>
-          <div>
-            <p className="text-[10px] font-bold tracking-widest text-amber-500 uppercase mb-1">
-              MATE TIP
-            </p>
-            <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
-          </div>
+        <div className="md:hidden w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm px-4 py-4 text-left">
+          <p className="text-[10px] font-bold tracking-widest text-amber-500 uppercase mb-1">
+            MATE TIP
+          </p>
+          <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
         </div>
 
       </div>
