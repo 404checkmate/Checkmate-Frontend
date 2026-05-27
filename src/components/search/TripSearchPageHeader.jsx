@@ -1,17 +1,10 @@
-import AiSparkleMaskIcon from './AiSparkleMaskIcon'
-
 export default function TripSearchPageHeader({
-  mergeToArchive,
   pageMainTitle,
   headerDateLine,
   companions = [],
   travelStyles = [],
-  headerDescription,
   archiveTargetMissing,
   loadState,
-  apiSummary,
-  aiRecommendCount,
-  totalItemCount,
   via,
 }) {
   return (
@@ -28,20 +21,20 @@ export default function TripSearchPageHeader({
       </p>
 
       {via === 'curation' ? (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-400/30">
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3.5 py-1.5 text-sm font-bold text-amber-900 shadow-sm">
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
             </svg>
             큐레이션
           </span>
         </div>
       ) : (companions.length > 0 || travelStyles.length > 0) ? (
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-2">
           {companions.map((label) => (
             <span
               key={label}
-              className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-600/20"
+              className="inline-flex items-center rounded-full bg-teal-500 px-3.5 py-1.5 text-sm font-bold text-white shadow-sm"
             >
               {label}
             </span>
@@ -49,15 +42,13 @@ export default function TripSearchPageHeader({
           {travelStyles.map((label) => (
             <span
               key={label}
-              className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600"
+              className="inline-flex items-center rounded-full bg-slate-700 px-3.5 py-1.5 text-sm font-bold text-white shadow-sm"
             >
               {label}
             </span>
           ))}
         </div>
       ) : null}
-
-      <p className="mt-4 text-sm leading-relaxed text-gray-600">{headerDescription}</p>
 
       {archiveTargetMissing ? (
         <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
@@ -71,17 +62,6 @@ export default function TripSearchPageHeader({
         </p>
       ) : null}
 
-      {loadState.status === 'ready' && apiSummary ? (
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600 md:text-sm">
-          <span className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 font-semibold text-violet-800">
-            <AiSparkleMaskIcon selected={false} className="h-3.5 w-3.5" />
-            MATE 추천 <span className="tabular-nums">{aiRecommendCount}</span>개
-          </span>
-          <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 font-semibold text-cyan-800">
-            카테고리 필수품 <span className="ml-1 tabular-nums">{Math.max(0, totalItemCount - aiRecommendCount)}</span>개
-          </span>
-        </div>
-      ) : null}
     </header>
   )
 }
