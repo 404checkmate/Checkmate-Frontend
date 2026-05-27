@@ -447,7 +447,7 @@ function InlineCheckItem({ item, checked, onToggle }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className={'font-medium text-[14px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+        <span className={'font-medium text-[16px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
           {item.label}
         </span>
       </span>
@@ -994,9 +994,9 @@ function CurationArticleContent({ data }) {
         .cur-editorial p + p { margin-top: 1.15em; }
         .cur-editorial aside p { text-align: left; font-size: 0.9375rem; }
         @media (max-width: 767px) {
-          .cur-editorial p { font-size: 14px; letter-spacing: -0.025em; }
+          .cur-editorial p { font-size: 16px; letter-spacing: -0.025em; }
           .cur-editorial aside p { font-size: 0.75rem; letter-spacing: inherit; }
-          .cur-tipbox p { font-size: 14px !important; }
+          .cur-tipbox p { font-size: 16px !important; }
         }
       `}</style>
 
