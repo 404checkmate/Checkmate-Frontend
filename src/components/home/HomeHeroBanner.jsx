@@ -1,4 +1,4 @@
-import mascotLuggageUrl from '@/assets/home-cta-mascot-luggage.png'
+import mascotLuggageUrl from '@/assets/carryonmay.png'
 
 export default function HomeHeroBanner() {
   return (
@@ -13,19 +13,21 @@ export default function HomeHeroBanner() {
       />
       <div className="relative z-10 flex items-end justify-between">
         <div>
-          <p className="text-xs font-semibold text-teal-100 lg:text-sm xl:text-base">오늘도 설레는 여행 준비 ✨</p>
-          <h1 className="mt-1 text-xl font-extrabold leading-tight text-white lg:text-3xl xl:text-4xl xl:mt-2">
+          <p className="hero-text-1 text-xs font-semibold text-teal-100 lg:text-sm xl:text-base">설레는 여행 준비 ✨</p>
+          <h1 className="hero-text-2 mt-1 text-xl font-extrabold leading-tight text-white lg:text-3xl xl:text-4xl xl:mt-2">
             떠나기 전, 놓치는 건 없도록
           </h1>
-          <p className="mt-1 text-[11px] font-medium text-teal-100/80 lg:mt-2 lg:text-sm xl:text-base xl:mt-3">
+          <p className="hero-text-3 mt-1 text-[11px] font-medium text-teal-100/80 lg:mt-2 lg:text-sm xl:text-base xl:mt-3">
             여행 준비 리스트를 빠짐없이 함께 체크해요
           </p>
         </div>
-        <img
-          src={mascotLuggageUrl}
-          alt="여행 가방을 든 메이트 마스코트"
-          className="h-20 w-20 shrink-0 object-contain drop-shadow-md lg:h-28 lg:w-28 xl:h-36 xl:w-36"
-        />
+        <div className="hero-mascot-slide shrink-0">
+          <img
+            src={mascotLuggageUrl}
+            alt="여행 가방을 든 메이트 마스코트"
+            className="hero-mascot-bob h-28 w-28 object-contain drop-shadow-md lg:h-40 lg:w-40 xl:h-52 xl:w-52"
+          />
+        </div>
       </div>
     </div>
   )
