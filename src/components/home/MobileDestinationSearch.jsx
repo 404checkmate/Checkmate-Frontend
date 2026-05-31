@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { ga4Event } from '@/utils/ga4'
 
 const POPULAR_DESTINATION_TAGS = [
   { label: '도쿄',    name: '일본',       country: '일본',       countryCode: 'JP', iata: 'NRT', city: '도쿄(나리타)' },
@@ -29,6 +30,7 @@ export default function MobileDestinationSearch() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    ga4Event('search_button_click', { source: 'mobile' })
     navigate('/trips/new/destination')
   }
 
@@ -39,6 +41,7 @@ export default function MobileDestinationSearch() {
         <form onSubmit={handleSubmit}>
           <button
             type="submit"
+            onClick={() => ga4Event('search_section_click', { source: 'mobile' })}
             className="flex w-full items-center gap-2 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3 text-left transition-colors focus-within:border-teal-400 focus-within:ring-2 focus-within:ring-teal-400/20 hover:border-teal-300 lg:py-3.5"
           >
             <svg

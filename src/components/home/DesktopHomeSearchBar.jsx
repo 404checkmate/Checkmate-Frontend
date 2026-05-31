@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
+import { ga4Event } from '@/utils/ga4'
 import {
   filterArrivalsByQuery,
   getArrivalsForCountry,
@@ -459,7 +460,7 @@ export default function DesktopHomeSearchBar() {
     selectedCountry, startDate, endDate, additionalDests,
     companionIds, companions, styleIds, travelStyles,
   })
-  const handleSearch = () => { setActiveSection(null); return _handleSearch() }
+  const handleSearch = () => { setActiveSection(null); ga4Event('search_button_click'); return _handleSearch() }
 
   useEffect(() => {
     function handlePointerDown(e) {
@@ -583,7 +584,10 @@ export default function DesktopHomeSearchBar() {
   }
 
   const toggleSection = (name) => {
-    setActiveSection((prev) => (prev === name ? null : name))
+    setActiveSection((prev) => {
+      if (prev !== name) ga4Event('search_section_click', { section: name })
+      return prev === name ? null : name
+    })
   }
 
   const toggleCompanion = (id) => {

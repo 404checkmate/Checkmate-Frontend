@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link, useParams, Navigate, useNavigate } from 'react-router-dom'
+import { ga4Event } from '@/utils/ga4'
 import { useAuth } from '@/hooks/useAuth'
 import { createTrip } from '@/api/trips'
 import { createGuideArchive } from '@/api/guideArchives'
@@ -724,6 +725,7 @@ function CtaBanner({ data }) {
   const bgImg = data.photos.sections[data.photos.sections.length - 1] || data.photos.hero
 
   const handleCtaClick = () => {
+    ga4Event('curation_cta_click', { country: data.code })
     const isMobile = window.innerWidth < 768
     if (isMobile) {
       const dest = CURATION_COUNTRY_MAP[data.code]
@@ -876,6 +878,7 @@ function CurationArticleContent({ data }) {
 
   const handleCurationSave = useCallback(async () => {
     if (curationSaving) return
+    ga4Event('curation_save_click', { country: data.code })
     const checkedItems = flatItems.filter((it) => checked[it.id])
     const dest = CURATION_COUNTRY_MAP[data.code]
 
