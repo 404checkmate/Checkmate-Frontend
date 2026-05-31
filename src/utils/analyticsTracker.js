@@ -1,5 +1,6 @@
 import { ingestEvents } from '@/api/analytics'
 import { getMe } from '@/api/auth'
+import env from '@/config/env'
 
 const SESSION_ID_KEY = 'cm_analytics_sid'
 const USER_ID_CACHE_KEY = 'cm_analytics_uid'
@@ -97,6 +98,8 @@ function isNumericId(val) {
   return val != null && /^\d+$/.test(String(val))
 }
 
+const ANALYTICS_ENDPOINT = `${env.API_BASE_URL}/analytics/events`
+
 let queue = []
 let flushTimer = null
 
@@ -123,6 +126,54 @@ function scheduleFlush() {
     flushTimer = null
     flush()
   }, FLUSH_INTERVAL_MS)
+}
+
+/**
+ * 페이지 종료 직전 동기 flush.
+ * async Axios는 unload 시 취소될 수 있으므로 sendBeacon(우선) → fetch keepalive(폴백) 사용.
+ * resolvedUserId는 이미 캐시된 값만 사용 (unload 중 await 불가).
+ */
+function flushWithBeacon() {
+  if (!queue.length) return
+  const batch = queue.splice(0)
+  const sessionId = getSessionId()
+  const events = batch.map((item) => ({
+    ...(resolvedUserId != null && { userId: resolvedUserId }),
+    sessionId,
+    eventType: item.eventType,
+    ...(item.tripId != null && { tripId: item.tripId }),
+    ...(item.itemId != null && { itemId: item.itemId }),
+    metadata: item.metadata,
+    occurredAt: item.occurredAt,
+  }))
+  const body = JSON.stringify(events)
+  const sent =
+    typeof navigator !== 'undefined' &&
+    typeof navigator.sendBeacon === 'function' &&
+    navigator.sendBeacon(ANALYTICS_ENDPOINT, new Blob([body], { type: 'application/json' }))
+  if (!sent) {
+    fetch(ANALYTICS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {})
+  }
+}
+
+// 탭 숨김·페이지 이탈 시 큐 강제 전송
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      if (flushTimer) { clearTimeout(flushTimer); flushTimer = null }
+      flushWithBeacon()
+    }
+  })
+  // iOS Safari는 visibilitychange 전에 pagehide가 발생
+  window.addEventListener('pagehide', () => {
+    if (flushTimer) { clearTimeout(flushTimer); flushTimer = null }
+    flushWithBeacon()
+  })
 }
 
 export function trackEvent(eventName, properties = {}) {
