@@ -460,7 +460,7 @@ export default function DesktopHomeSearchBar() {
     selectedCountry, startDate, endDate, additionalDests,
     companionIds, companions, styleIds, travelStyles,
   })
-  const handleSearch = () => { setActiveSection(null); ga4Event('search_button_click'); return _handleSearch() }
+  const handleSearch = () => { setActiveSection(null); ga4Event('search_button_click', { source: 'desktop' }); return _handleSearch() }
 
   useEffect(() => {
     function handlePointerDown(e) {
