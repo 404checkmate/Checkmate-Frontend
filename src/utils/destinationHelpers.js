@@ -19,8 +19,8 @@ export function buildCountryArrivalOptions(countries, cities) {
   }
   return countries.map((country) => {
     const mockEntry = COUNTRY_ARRIVAL_OPTIONS.find((m) => m.countryCode === country.code)
-    const countryCities = (citiesByCountryId[String(country.id)] ?? []).filter((c) => c.iataCode)
-    const primaryCity = countryCities[0]
+    const countryCities = citiesByCountryId[String(country.id)] ?? []
+    const primaryCity = countryCities.find((c) => c.iataCode) ?? countryCities[0]
     return {
       name: country.nameKo,
       aliases: mockEntry?.aliases ?? [],
