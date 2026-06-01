@@ -30,6 +30,7 @@ import { buildCreateTripPayload } from '@/utils/tripPlanToCreatePayload'
 import { createTrip } from '@/api/trips'
 import { resolveAccessToken } from '@/api/client'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { ga4Event } from '@/utils/ga4'
 
 /** 이미지 히어로 없이 — CHECKMATE 플로우 틸·민트·시안 톤 */
 const TRIP_FLOW_PAGE_BG_STYLE = {
@@ -387,6 +388,7 @@ function TripNewDestinationPageInner({ navState }) {
     setSubmitting(true)
 
     try {
+      ga4Event('search_button_click', { source: 'mobile' })
       trackEvent('step_complete', { step: 'destination_mobile', destination: selectedCountry.city })
 
       const hasPet = companionIds.some((id) => id === 'pets' || id === 'withPet')

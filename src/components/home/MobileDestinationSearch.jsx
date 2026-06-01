@@ -30,7 +30,6 @@ export default function MobileDestinationSearch() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    ga4Event('search_button_click', { source: 'mobile' })
     navigate('/trips/new/destination')
   }
 
