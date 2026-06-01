@@ -138,11 +138,16 @@ body {
 }
 
 /* 온보딩 생년월일 캘린더 — 선택일 (react-day-picker) 틸·시안 그라데이션 (로그인/플로우와 통일) */
-/* 큐레이션 아티클 페이지 — 데스크탑 80% 축소 */
+/* 큐레이션 아티클 페이지 — 데스크탑 80% 축소 + Pretendard 폰트 */
 @media (min-width: 1024px) {
   html.curation-page {
     zoom: 0.8;
   }
+}
+
+html.curation-page,
+html.curation-page * {
+  font-family: 'PretendardVariable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 }
 
 .onboarding-birth-calendar-wrap .rdp-selected .rdp-day_button {
