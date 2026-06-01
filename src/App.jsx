@@ -3,12 +3,27 @@ import { BrowserRouter } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import AppRoutes from '@/router'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { ga4SetUserId, ga4SetUserProperty } from '@/utils/ga4'
+import { useAuth } from '@/hooks/useAuth'
 import { isInAppBrowser, isAndroid, openInExternalBrowser } from '@/utils/browserUtils'
 
 const SESSION_START_KEY = 'cm_session_start_fired'
 const EXTERNAL_BROWSER_TRIED_KEY = 'external_browser_tried'
 
 function App() {
+  const { user, loading } = useAuth()
+
+  useEffect(() => {
+    if (loading) return
+    if (user) {
+      ga4SetUserId(user.id)
+      ga4SetUserProperty({ login_status: 'logged_in' })
+    } else {
+      ga4SetUserId(null)
+      ga4SetUserProperty({ login_status: 'guest' })
+    }
+  }, [user, loading])
+
   useEffect(() => {
     if (isInAppBrowser() && isAndroid()) {
       try {

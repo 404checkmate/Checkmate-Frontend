@@ -10,3 +10,7 @@ export function ga4Event(eventName, params = {}) {
 export function ga4SetUserId(userId) {
   gtag('set', { user_id: userId })
 }
+
+export function ga4SetUserProperty(properties) {
+  gtag('set', 'user_properties', properties)
+}
