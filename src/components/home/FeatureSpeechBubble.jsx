@@ -32,7 +32,7 @@ export default function FeatureSpeechBubble({ text, tone = 'light', tail = 'left
       />
       <p
         className={`text-base font-bold leading-tight md:text-xl lg:text-[2rem] ${textClass} ${textLayoutClass}`}
-        style={{ fontFamily: "'SeoulNotice', system-ui, sans-serif" }}
+        style={{ fontFamily: "'PretendardVariable', 'Pretendard', sans-serif" }}
       >
         {text}
       </p>

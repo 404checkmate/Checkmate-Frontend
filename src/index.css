@@ -1,33 +1,5 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: 'SeoulNotice';
-  src: url('/fonts/SeoulAlrimTTF-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-display: swap;
-  font-synthesis: none;
-}
-@font-face {
-  font-family: 'SeoulNotice';
-  src: url('/fonts/SeoulAlrimTTF-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-  font-synthesis: none;
-}
-@font-face {
-  font-family: 'SeoulNotice';
-  src: url('/fonts/SeoulAlrimTTF-ExtraBold.woff2') format('woff2');
-  font-weight: 800;
-  font-display: swap;
-  font-synthesis: none;
-}
-@font-face {
-  font-family: 'SeoulNotice';
-  src: url('/fonts/SeoulAlrimTTF-Heavy.woff2') format('woff2');
-  font-weight: 900;
-  font-display: swap;
-  font-synthesis: none;
-}
 
 *,
 *::before,
@@ -61,7 +33,7 @@ html {
 body {
   margin: 0;
   overflow-x: hidden;
-  font-family: 'SeoulNotice', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'PretendardVariable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
@@ -138,16 +110,11 @@ body {
 }
 
 /* 온보딩 생년월일 캘린더 — 선택일 (react-day-picker) 틸·시안 그라데이션 (로그인/플로우와 통일) */
-/* 큐레이션 아티클 페이지 — 데스크탑 80% 축소 + Pretendard 폰트 */
+/* 큐레이션 아티클 페이지 — 데스크탑 80% 축소 */
 @media (min-width: 1024px) {
   html.curation-page {
     zoom: 0.8;
   }
-}
-
-html.curation-page,
-html.curation-page * {
-  font-family: 'PretendardVariable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 }
 
 .onboarding-birth-calendar-wrap .rdp-selected .rdp-day_button {
