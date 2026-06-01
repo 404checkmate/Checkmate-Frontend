@@ -42,7 +42,7 @@ export default function HomeCatchphraseSection({ catchphraseRef, catchphraseReve
       <div
         ref={catchphraseRef}
         className="relative z-10 mx-auto w-full max-w-3xl px-5 md:max-w-4xl md:px-6"
-        style={{ fontFamily: "'SeoulNotice', system-ui, sans-serif" }}
+        style={{ fontFamily: "'PretendardVariable', 'Pretendard', sans-serif" }}
       >
         <RevealBlock show={catchphraseRevealed}>
           <p className="text-center text-xl font-extrabold leading-snug text-teal-900 md:text-2xl md:leading-snug lg:text-[1.7rem]">
