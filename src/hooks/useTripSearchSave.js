@@ -12,6 +12,7 @@ import { mapMockItemToArchiveItem, buildArchiveSnapshot } from '@/utils/tripSear
 import { isInExistingArchive } from '@/hooks/useArchiveEntry'
 import { savePendingGuestSearch } from '@/utils/pendingGuestSearch'
 import { trackEvent } from '@/utils/analyticsTracker'
+import { ga4Event } from '@/utils/ga4'
 import { getSupabaseClient } from '@/lib/supabase'
 import { AUTH_TOKEN_STORAGE_KEY } from '@/api/client'
 
@@ -199,6 +200,7 @@ export function useTripSearchSave({
 
   const handleSaveButtonClick = async () => {
     if (selectedForSave.size === 0) return
+    ga4Event('checklist_save_click', { item_count: selectedForSave.size })
 
     // 로그인 여부를 먼저 확인 (guest 여부와 무관)
     const supabase = getSupabaseClient()
