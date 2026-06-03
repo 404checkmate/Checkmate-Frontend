@@ -626,8 +626,8 @@ function TripNewDestinationPageInner({ navState }) {
                     type="text"
                     value={additionalInput}
                     onChange={(e) => { setAdditionalInput(e.target.value); setAdditionalDropOpen(true) }}
-                    onFocus={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
-                    onClick={() => { setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
+                    onFocus={() => { if (!additionalDropOpen) setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
+                    onClick={() => { if (!additionalDropOpen) setDraftDests([...additionalDests]); setAdditionalDropOpen(true) }}
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') { setAdditionalDropOpen(false); return }
                       if (e.key === 'Enter' && additionalArrivalSuggestions.length > 0) {
