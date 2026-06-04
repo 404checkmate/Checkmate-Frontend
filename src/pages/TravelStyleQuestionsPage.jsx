@@ -74,9 +74,8 @@ export default function TravelStyleQuestionsPage() {
 
         {/* 진행률 바 */}
         <div className="mb-7">
-          <div className="mb-1.5 flex items-center justify-between">
+          <div className="mb-1.5">
             <span className="text-[11px] font-semibold text-gray-400">{current + 1} / {TOTAL}</span>
-            <span className="text-[11px] font-semibold text-amber-400">{progress}%</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
             <div
