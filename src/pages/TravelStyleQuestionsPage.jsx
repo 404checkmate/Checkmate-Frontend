@@ -41,24 +41,24 @@ export default function TravelStyleQuestionsPage() {
         `,
       }}
     >
-      {/* 진행률 — 상단 고정 */}
-      <div className="mx-auto w-full max-w-lg px-4 pt-6 lg:px-6 lg:pt-10">
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-xs font-semibold text-gray-400">{current + 1} / {TOTAL}</span>
-          <span className="text-xs font-semibold text-teal-600">{progress}%</span>
-        </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-teal-400 to-[#3db4dd] transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
+      <div className="mx-auto w-full max-w-lg flex-1 flex flex-col px-4 pb-10 pt-6 lg:px-6 lg:pt-10">
 
-      {/* 질문 + 선택지 + 버튼 — 화면 중앙 정렬 */}
-      <div className="flex flex-1 items-center justify-center px-4 py-8 lg:px-6">
-        <div className="w-full max-w-lg">
+        {/* 진행률 */}
+        <div className="mb-6">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs font-semibold text-gray-400">{current + 1} / {TOTAL}</span>
+            <span className="text-xs font-semibold text-teal-600">{progress}%</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-teal-400 to-[#3db4dd] transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
 
+        {/* 질문 */}
+        <div className="mb-6 flex-1">
           <p className="mb-1 text-xs font-semibold text-amber-500 tracking-wide">Q{current + 1}</p>
           <h2 className="text-lg font-extrabold leading-snug text-[#04384a] lg:text-2xl break-keep">
             {question.question}
@@ -86,22 +86,22 @@ export default function TravelStyleQuestionsPage() {
               </li>
             ))}
           </ul>
-
-          {/* 다음 버튼 — D 항목 바로 아래 */}
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={selected === null}
-            className={`mt-4 w-full rounded-2xl py-4 text-base font-extrabold transition-all
-              ${selected !== null
-                ? 'bg-amber-400 text-amber-900 shadow-md shadow-amber-200 hover:bg-amber-500 active:scale-95'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              }`}
-          >
-            {current + 1 === TOTAL ? '결과 보기 →' : '다음 →'}
-          </button>
-
         </div>
+
+        {/* 다음 버튼 */}
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={selected === null}
+          className={`w-full rounded-2xl py-4 text-base font-extrabold transition-all
+            ${selected !== null
+              ? 'bg-amber-400 text-amber-900 shadow-md shadow-amber-200 hover:bg-amber-500 active:scale-95'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+        >
+          {current + 1 === TOTAL ? '결과 보기 →' : '다음 →'}
+        </button>
+
       </div>
     </div>
   )
