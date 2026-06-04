@@ -90,18 +90,33 @@ export default function TravelStyleResultPage() {
         <section className="mb-6">
           <h2 className="mb-3 text-base font-extrabold text-[#04384a] lg:text-lg">여행 궁합</h2>
           <div className="grid grid-cols-2 gap-3">
-            <div className={`rounded-2xl border px-4 py-4 ${bestMeta.bgLight} ${bestMeta.border}`}>
-              <p className="mb-1 text-[10px] font-bold text-emerald-500 tracking-wide">✅ BEST</p>
-              <div className="text-2xl">{bestMeta.emoji}</div>
-              <p className={`mt-1 text-sm font-extrabold ${bestMeta.text}`}>{bestMeta.label}</p>
+
+            {/* BEST */}
+            <div className={`relative overflow-hidden rounded-2xl border px-4 pb-4 pt-8 ${bestMeta.bgLight} ${bestMeta.border}`}>
+              <div className="absolute left-0 top-0 w-full">
+                <div className="flex items-center justify-center gap-1 rounded-t-2xl bg-gradient-to-r from-emerald-400 to-teal-400 py-1.5">
+                  <span className="text-sm">🍀</span>
+                  <span className="text-[11px] font-extrabold text-white tracking-wide">찰떡궁합</span>
+                </div>
+              </div>
+              <div className="mt-1 text-3xl">{bestMeta.emoji}</div>
+              <p className={`mt-2 text-sm font-extrabold ${bestMeta.text}`}>{bestMeta.label}</p>
               <p className="text-xs text-gray-500">{bestMeta.name}</p>
             </div>
-            <div className={`rounded-2xl border px-4 py-4 ${worstMeta.bgLight} ${worstMeta.border}`}>
-              <p className="mb-1 text-[10px] font-bold text-rose-400 tracking-wide">⚠️ 주의</p>
-              <div className="text-2xl">{worstMeta.emoji}</div>
-              <p className={`mt-1 text-sm font-extrabold ${worstMeta.text}`}>{worstMeta.label}</p>
+
+            {/* 주의 */}
+            <div className={`relative overflow-hidden rounded-2xl border px-4 pb-4 pt-8 ${worstMeta.bgLight} ${worstMeta.border}`}>
+              <div className="absolute left-0 top-0 w-full">
+                <div className="flex items-center justify-center gap-1 rounded-t-2xl bg-gradient-to-r from-rose-400 to-orange-400 py-1.5">
+                  <span className="text-sm">💦</span>
+                  <span className="text-[11px] font-extrabold text-white tracking-wide">조심조심</span>
+                </div>
+              </div>
+              <div className="mt-1 text-3xl">{worstMeta.emoji}</div>
+              <p className={`mt-2 text-sm font-extrabold ${worstMeta.text}`}>{worstMeta.label}</p>
               <p className="text-xs text-gray-500">{worstMeta.name}</p>
             </div>
+
           </div>
         </section>
 
