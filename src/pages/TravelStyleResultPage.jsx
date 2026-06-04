@@ -35,17 +35,14 @@ export default function TravelStyleResultPage() {
   const worstMeta = STYLE_META[meta.worstMatch]
 
   const handleChecklist = (dest) => {
-    sessionStorage.setItem('travelStyleResult', JSON.stringify({
-      styleKey: meta.key,
-      styleLabel: meta.label,
-      destination: dest,
-    }))
-    navigate('/trips/new/destination', {
-      state: {
-        prefilledDestination: dest,
-        prefilledTravelStyle: meta.key,
-      },
-    })
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+    if (isDesktop) {
+      navigate('/', { state: { prefilledDestination: dest } })
+    } else {
+      navigate('/trips/new/destination', {
+        state: { prefilledDestination: dest, prefilledTravelStyle: meta.key },
+      })
+    }
   }
 
   return (
