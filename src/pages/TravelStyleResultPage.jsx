@@ -71,8 +71,12 @@ export default function TravelStyleResultPage() {
               <p className="mt-2 text-sm opacity-75 lg:text-base">"{meta.tagline}"</p>
             </div>
           </div>
-          <div className={`mt-3 rounded-2xl border px-5 py-4 ${meta.bgLight} ${meta.border}`}>
-            <p className={`text-sm leading-relaxed lg:text-base ${meta.text}`}>{meta.desc}</p>
+          <div className={`mt-3 rounded-2xl border ${meta.bgLight} ${meta.border} overflow-hidden`}>
+            <div className={`flex items-center gap-2 border-b ${meta.border} px-5 py-2.5`}>
+              <span className="text-base">💬</span>
+              <span className={`text-xs font-extrabold tracking-wide ${meta.text}`}>이런 여행자예요</span>
+            </div>
+            <p className={`px-5 py-4 text-sm leading-relaxed lg:text-base ${meta.text}`}>{meta.desc}</p>
           </div>
         </section>
 
@@ -92,29 +96,27 @@ export default function TravelStyleResultPage() {
           <div className="grid grid-cols-2 gap-3">
 
             {/* BEST */}
-            <div className={`relative overflow-hidden rounded-2xl border px-4 pb-4 pt-8 ${bestMeta.bgLight} ${bestMeta.border}`}>
-              <div className="absolute left-0 top-0 w-full">
-                <div className="flex items-center justify-center gap-1 rounded-t-2xl bg-gradient-to-r from-emerald-400 to-teal-400 py-1.5">
-                  <span className="text-sm">🍀</span>
-                  <span className="text-[11px] font-extrabold text-white tracking-wide">찰떡궁합</span>
-                </div>
+            <div className={`overflow-hidden rounded-2xl border ${bestMeta.bgLight} ${bestMeta.border}`}>
+              <div className={`flex items-center justify-center gap-1 bg-gradient-to-r ${bestMeta.color} py-2`}>
+                <span className="text-[11px] font-extrabold text-white tracking-wide">🍀 찰떡궁합</span>
               </div>
-              <div className="mt-1 text-3xl">{bestMeta.emoji}</div>
-              <p className={`mt-2 text-sm font-extrabold ${bestMeta.text}`}>{bestMeta.label}</p>
-              <p className="text-xs text-gray-500">{bestMeta.name}</p>
+              <div className="px-4 py-3">
+                <p className={`text-sm font-extrabold ${bestMeta.text}`}>{bestMeta.label}</p>
+                <p className={`text-xs ${bestMeta.text} opacity-70`}>{bestMeta.name}</p>
+                <p className={`mt-2 text-[10px] leading-snug text-gray-500`}>{bestMeta.tagline}</p>
+              </div>
             </div>
 
             {/* 주의 */}
-            <div className={`relative overflow-hidden rounded-2xl border px-4 pb-4 pt-8 ${worstMeta.bgLight} ${worstMeta.border}`}>
-              <div className="absolute left-0 top-0 w-full">
-                <div className="flex items-center justify-center gap-1 rounded-t-2xl bg-gradient-to-r from-rose-400 to-orange-400 py-1.5">
-                  <span className="text-sm">💦</span>
-                  <span className="text-[11px] font-extrabold text-white tracking-wide">조심조심</span>
-                </div>
+            <div className={`overflow-hidden rounded-2xl border ${worstMeta.bgLight} ${worstMeta.border}`}>
+              <div className={`flex items-center justify-center gap-1 bg-gradient-to-r ${worstMeta.color} py-2`}>
+                <span className="text-[11px] font-extrabold text-white tracking-wide">💦 조심조심</span>
               </div>
-              <div className="mt-1 text-3xl">{worstMeta.emoji}</div>
-              <p className={`mt-2 text-sm font-extrabold ${worstMeta.text}`}>{worstMeta.label}</p>
-              <p className="text-xs text-gray-500">{worstMeta.name}</p>
+              <div className="px-4 py-3">
+                <p className={`text-sm font-extrabold ${worstMeta.text}`}>{worstMeta.label}</p>
+                <p className={`text-xs ${worstMeta.text} opacity-70`}>{worstMeta.name}</p>
+                <p className={`mt-2 text-[10px] leading-snug text-gray-500`}>{worstMeta.tagline}</p>
+              </div>
             </div>
 
           </div>
