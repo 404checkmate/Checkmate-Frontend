@@ -216,6 +216,16 @@ export function useTripSearchSave({
     }
 
     if (!isLoggedIn) {
+      if (tripId === 'guest') {
+        const step5 = location.state?.step5
+        savePendingGuestSearch({
+          companionIds: step5?.companionIds ?? [],
+          travelStyleIds: step5?.travelStyleIds ?? [],
+          selectedItems: sourceItems.filter((i) => selectedForSave.has(String(i.id))),
+        })
+        navigate('/trips/guest/guide-archive/preview')
+        return
+      }
       setLoginGateOpen(true)
       return
     }

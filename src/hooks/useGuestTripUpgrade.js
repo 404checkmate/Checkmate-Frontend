@@ -99,7 +99,7 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
         const realId = rawId != null ? String(rawId) : null
         if (!realId) return
 
-        const selectedItems = pending.selectedItems ?? []
+        const selectedItems = pending.editedItems ?? pending.selectedItems ?? []
         clearPendingGuestSearch()
         saveActiveTripId(realId)
 

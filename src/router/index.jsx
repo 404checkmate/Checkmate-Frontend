@@ -15,6 +15,7 @@ const TripNewDestinationPage = lazy(() => import('@/pages/TripNewDestinationPage
 const TripLoadingPage = lazy(() => import('@/pages/TripLoadingPage'))
 const TripSearchPage = lazy(() => import('@/pages/TripSearchPage'))
 const TripGuideArchiveDetailPage = lazy(() => import('@/pages/TripGuideArchiveDetailPage'))
+const GuestGuideArchivePreviewPage = lazy(() => import('@/pages/GuestGuideArchivePreviewPage'))
 const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const MyPage = lazy(() => import('@/pages/MyPage'))
@@ -83,6 +84,7 @@ const AppRoutes = () => {
         { path: '/trips/new/step4',       element: <Navigate to="/" replace /> },
         { path: '/trips/new/step5',       element: <Navigate to="/" replace /> },
         { path: '/trips/guest/search',                element: withSuspense(<TripSearchPage />) },
+        { path: '/trips/guest/guide-archive/preview', element: withSuspense(<GuestGuideArchivePreviewPage />) },
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
         { path: '/trips/:id/guide-archive/:entryId',  element: <ProtectedRoute>{withSuspense(<TripGuideArchiveDetailPage />)}</ProtectedRoute> },
