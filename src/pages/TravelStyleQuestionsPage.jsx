@@ -58,7 +58,7 @@ export default function TravelStyleQuestionsPage() {
         </div>
 
         {/* 질문 */}
-        <div className="mb-6 flex-1">
+        <div className="mb-6 lg:flex-1">
           <p className="mb-1 text-xs font-semibold text-amber-500 tracking-wide">Q{current + 1}</p>
           <h2 className="text-lg font-extrabold leading-snug text-[#04384a] lg:text-2xl break-keep">
             {question.question}
