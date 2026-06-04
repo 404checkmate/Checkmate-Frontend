@@ -28,7 +28,12 @@ function MobileHomePage() {
 
         <MobileDestinationSearch />
 
-        <TravelStyleTestBanner />
+        <section>
+          <h2 className="mb-3 text-[1.1rem] font-extrabold leading-snug text-[#04384a] lg:text-xl">
+            나는 어떤 <span className="text-amber-500">여행자</span>일까?
+          </h2>
+          <TravelStyleTestBanner />
+        </section>
 
         <MyChecklistsSection />
 
