@@ -379,8 +379,8 @@ export function getArrivalsForCountry(entry) {
 }
 
 function arrivalMatchesQuery(a, q) {
-  if (a.city.includes(q)) return true
-  if (a.iata.toLowerCase().includes(q.toLowerCase())) return true
+  if (a.city?.includes(q)) return true
+  if (a.iata?.toLowerCase().includes(q.toLowerCase())) return true
   if (a.aliases?.some((x) => x.includes(q))) return true
   return false
 }

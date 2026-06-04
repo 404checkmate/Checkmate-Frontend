@@ -147,6 +147,10 @@ function TripSearchInner({ tripId }) {
 
   // ── 분석 추적 ──────────────────────────────────────────
   useEffect(() => {
+    trackEvent('page_view', { page: 'checklist', trip_id: tripId, is_merge: mergeToArchive })
+  }, [tripId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     const t = Date.now()
     searchStartRef.current = t
     trackEvent('search_start', {
