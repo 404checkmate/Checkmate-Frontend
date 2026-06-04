@@ -2,6 +2,7 @@ import HomeFooter from '@/components/home/HomeFooter'
 import DesktopHomeSearchBar from '@/components/home/DesktopHomeSearchBar'
 import HomeHeroBanner from '@/components/home/HomeHeroBanner'
 import MobileDestinationSearch from '@/components/home/MobileDestinationSearch'
+import TravelStyleTestBanner from '@/components/home/TravelStyleTestBanner'
 import MyChecklistsSection from '@/components/home/MyChecklistsSection'
 import CurationSection from '@/components/home/CurationSection'
 
@@ -26,6 +27,8 @@ function MobileHomePage() {
         </section>
 
         <MobileDestinationSearch />
+
+        <TravelStyleTestBanner />
 
         <MyChecklistsSection />
 
