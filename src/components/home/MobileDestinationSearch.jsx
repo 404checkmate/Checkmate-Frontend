@@ -65,7 +65,7 @@ export default function MobileDestinationSearch() {
           </button>
         </form>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex gap-1.5 overflow-x-auto scrollbar-hide lg:flex-wrap">
           {POPULAR_DESTINATION_TAGS.map((tag) => (
             <button
               key={`${tag.countryCode}-${tag.label}`}
@@ -83,7 +83,7 @@ export default function MobileDestinationSearch() {
                   },
                 })
               }
-              className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-semibold text-teal-700 transition-colors active:bg-teal-200 hover:bg-teal-100 lg:text-xs"
+              className="shrink-0 rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-semibold text-teal-700 transition-colors active:bg-teal-200 hover:bg-teal-100 lg:text-xs"
             >
               {tag.label}
             </button>

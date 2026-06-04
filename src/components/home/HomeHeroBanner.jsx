@@ -15,7 +15,7 @@ export default function HomeHeroBanner() {
         <div>
           <p className="hero-text-1 text-xs font-semibold text-teal-100 lg:text-sm xl:text-base">설레는 여행 준비 ✨</p>
           <h1 className="hero-text-2 mt-1 text-xl font-extrabold leading-tight text-white lg:text-3xl xl:text-4xl xl:mt-2">
-            떠나기 전, 놓치는 건 없도록
+            떠나기 전,<br className="lg:hidden" /> 놓치는 건 없도록
           </h1>
           <p className="hero-text-3 mt-1 text-[11px] font-medium text-teal-100/80 lg:mt-2 lg:text-sm xl:text-base xl:mt-3">
             여행 준비 리스트를 빠짐없이 함께 체크해요
