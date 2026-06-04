@@ -1,62 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import mascotUrl from '@/assets/home-feature-mascot-question.png'
-
-const STYLE_TYPES = [
-  {
-    key: 'rook',
-    label: '룩',
-    emoji: '♖',
-    name: '감성 기록형',
-    desc: '인생샷과 감성 기록이 여행의 전부',
-    color: 'bg-pink-50 border-pink-200 text-pink-700',
-    chipColor: 'bg-pink-100 text-pink-700',
-  },
-  {
-    key: 'knight',
-    label: '나이트',
-    emoji: '♘',
-    name: '액티비티형',
-    desc: '몸으로 느끼는 짜릿한 경험 추구',
-    color: 'bg-orange-50 border-orange-200 text-orange-700',
-    chipColor: 'bg-orange-100 text-orange-700',
-  },
-  {
-    key: 'bishop',
-    label: '비숍',
-    emoji: '♗',
-    name: '문화 탐험형',
-    desc: '현지 문화와 역사를 깊이 파고드는 타입',
-    color: 'bg-violet-50 border-violet-200 text-violet-700',
-    chipColor: 'bg-violet-100 text-violet-700',
-  },
-  {
-    key: 'queen',
-    label: '퀸',
-    emoji: '♛',
-    name: '올라운더형',
-    desc: '계획도 즉흥도 완벽하게 소화하는 타입',
-    color: 'bg-teal-50 border-teal-200 text-teal-700',
-    chipColor: 'bg-teal-100 text-teal-700',
-  },
-  {
-    key: 'king',
-    label: '킹',
-    emoji: '♚',
-    name: '리더형',
-    desc: '일행을 이끌며 완벽한 여행을 설계',
-    color: 'bg-sky-50 border-sky-200 text-sky-700',
-    chipColor: 'bg-sky-100 text-sky-700',
-  },
-  {
-    key: 'pawn',
-    label: '폰',
-    emoji: '♙',
-    name: '여유 힐링형',
-    desc: '느긋하게 쉬는 것만으로도 충분한 타입',
-    color: 'bg-green-50 border-green-200 text-green-700',
-    chipColor: 'bg-green-100 text-green-700',
-  },
-]
+import { STYLE_TYPES } from '@/data/travelStyleMeta'
 
 export default function TravelStyleTestPage() {
   const navigate = useNavigate()
