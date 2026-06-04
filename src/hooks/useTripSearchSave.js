@@ -97,13 +97,15 @@ export function useTripSearchSave({
 
     const newAdditions = additions.filter((i) => !savedIds.has(String(i.id)))
     saveItemsForTrip(tripId, newAdditions)
-    newAdditions.forEach((item) => {
+    if (newAdditions.length > 0) {
       trackEvent('save_complete', {
-        trip_id: tripId, item_id: item.id, item_category: item.category,
-        mode: 'guide_archive_merge', archive_entry_id: archiveEntryId,
+        trip_id: tripId,
+        item_count: newAdditions.length,
+        mode: 'guide_archive_merge',
+        archive_entry_id: archiveEntryId,
         elapsed_ms: searchStartRef.current ? Date.now() - searchStartRef.current : null,
       })
-    })
+    }
     setSavedIds((prev) => {
       const next = new Set(prev)
       additions.forEach((i) => next.add(String(i.id)))
@@ -147,12 +149,13 @@ export function useTripSearchSave({
 
     const newItems = itemsToSave.filter((i) => !savedIds.has(String(i.id)))
     saveItemsForTrip(tripId, newItems)
-    newItems.forEach((item) => {
+    if (newItems.length > 0) {
       trackEvent('save_complete', {
-        trip_id: tripId, item_id: item.id, item_category: item.category,
+        trip_id: tripId,
+        item_count: newItems.length,
         elapsed_ms: searchStartRef.current ? Date.now() - searchStartRef.current : null,
       })
-    })
+    }
     setSavedIds((prev) => {
       const next = new Set(prev)
       itemsToSave.forEach((i) => next.add(String(i.id)))

@@ -4,6 +4,7 @@ import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
 import ArchiveCard, { SkeletonCard } from '@/components/guide/ArchiveCard'
 import ArchiveListControls from '@/components/guide/ArchiveListControls'
 import DeleteConfirmModal from '@/components/guide/DeleteConfirmModal'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 const PAGE_BG = {
   background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)',
@@ -32,6 +33,10 @@ export default function MyGuideArchivesPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    trackEvent('page_view', { page: 'guide_archives' })
+  }, [])
 
   useEffect(() => {
     if (archives.length === 0) {
