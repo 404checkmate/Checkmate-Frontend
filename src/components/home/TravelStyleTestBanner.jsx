@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 
 const STYLE_TYPES = [
-  { key: 'pawn',   label: '폰',   desc: '여유형' },
-  { key: 'rook',   label: '룩',   desc: '감성형' },
-  { key: 'knight', label: '나이트', desc: '액티브형' },
-  { key: 'bishop', label: '비숍',  desc: '문화형' },
-  { key: 'queen',  label: '퀸',   desc: '올라운더' },
-  { key: 'king',   label: '킹',   desc: '리더형' },
+  { key: 'rook',   label: '룩',    desc: '감성 기록형',  bg: 'bg-pink-100/80',   text: 'text-pink-700' },
+  { key: 'knight', label: '나이트', desc: '액티비티형',   bg: 'bg-orange-100/80', text: 'text-orange-700' },
+  { key: 'bishop', label: '비숍',  desc: '문화 탐험형',  bg: 'bg-violet-100/80', text: 'text-violet-700' },
+  { key: 'queen',  label: '퀸',    desc: '올라운더형',   bg: 'bg-teal-100/80',   text: 'text-teal-700' },
+  { key: 'king',   label: '킹',    desc: '리더형',       bg: 'bg-sky-100/80',    text: 'text-sky-700' },
+  { key: 'pawn',   label: '폰',    desc: '여유 힐링형',  bg: 'bg-green-100/80',  text: 'text-green-700' },
 ]
 
 export default function TravelStyleTestBanner() {
@@ -14,36 +14,47 @@ export default function TravelStyleTestBanner() {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl px-5 py-5 shadow-md shadow-amber-900/10 lg:px-8 lg:py-6 xl:rounded-3xl"
+      className="relative overflow-hidden rounded-2xl shadow-lg xl:rounded-3xl"
       style={{
         backgroundImage: `
-          radial-gradient(circle at 88% 18%, rgba(251, 191, 36, 0.28) 0%, transparent 42%),
-          radial-gradient(circle at 10% 82%, rgba(251, 146, 60, 0.15) 0%, transparent 36%),
-          linear-gradient(135deg, #fffbeb 0%, #fef3c7 55%, #fff7ed 100%)
+          radial-gradient(ellipse at 0% 0%, rgba(251, 191, 36, 0.55) 0%, transparent 50%),
+          radial-gradient(ellipse at 100% 100%, rgba(251, 146, 60, 0.45) 0%, transparent 50%),
+          radial-gradient(ellipse at 100% 0%, rgba(252, 211, 77, 0.35) 0%, transparent 40%),
+          linear-gradient(145deg, #fef3c7 0%, #fde68a 40%, #fcd34d 75%, #fbbf24 100%)
         `,
       }}
     >
-      <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-300/25 blur-2xl xl:h-40 xl:w-40" aria-hidden />
-      <div className="pointer-events-none absolute -bottom-3 left-1/3 h-16 w-16 rounded-full bg-orange-200/30 blur-xl" aria-hidden />
+      {/* 장식 오브 */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/20 blur-3xl xl:h-52 xl:w-52" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-6 left-1/4 h-24 w-24 rounded-full bg-amber-300/30 blur-2xl" aria-hidden />
+      <div className="pointer-events-none absolute right-1/4 top-1/2 h-16 w-16 rounded-full bg-orange-200/40 blur-xl" aria-hidden />
 
-      <div className="relative z-10">
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 lg:text-xs">
-          ✨ NEW
+      {/* 반짝이 장식 */}
+      <span className="pointer-events-none absolute right-6 top-4 text-base opacity-40 xl:text-xl" aria-hidden>✦</span>
+      <span className="pointer-events-none absolute right-14 top-8 text-xs opacity-30" aria-hidden>✦</span>
+      <span className="pointer-events-none absolute left-1/2 bottom-4 text-sm opacity-25" aria-hidden>✦</span>
+
+      <div className="relative z-10 px-5 py-5 lg:px-8 lg:py-6">
+        {/* 배지 */}
+        <span className="inline-flex items-center gap-1 rounded-full bg-white/50 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-800 backdrop-blur-sm lg:text-xs">
+          ✨ 여행 스타일 테스트
         </span>
 
-        <div className="mt-2 flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-base font-extrabold leading-tight text-[#04384a] lg:text-xl xl:text-2xl">
-              나는 어떤 여행자일까?
+        <div className="mt-2.5 flex items-start justify-between gap-4">
+
+          {/* 왼쪽: 텍스트 + CTA */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-[17px] font-extrabold leading-snug text-amber-950 lg:text-xl xl:text-2xl break-keep">
+              나는 어떤<br className="sm:hidden" /> 여행자일까?
             </h2>
-            <p className="mt-1 text-[11px] text-gray-500 lg:text-sm break-keep">
-              1분 만에 알아보는 여행 스타일 테스트
+            <p className="mt-1 text-[11px] font-medium text-amber-800/70 lg:text-sm break-keep">
+              1분 만에 알아보는 나만의 여행 스타일
             </p>
 
             <button
               type="button"
               onClick={() => navigate('/travel-style-test')}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-amber-900 shadow-sm transition-all hover:bg-amber-500 active:scale-95 lg:mt-4 lg:px-5 lg:py-2.5 lg:text-sm"
+              className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-amber-950/85 px-4 py-2 text-xs font-bold text-amber-100 shadow-md transition-all hover:bg-amber-900 active:scale-95 lg:mt-4 lg:px-5 lg:py-2.5 lg:text-sm"
             >
               테스트 시작하기
               <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
@@ -52,16 +63,19 @@ export default function TravelStyleTestBanner() {
             </button>
           </div>
 
-          <div className="flex flex-wrap justify-end gap-1.5 max-w-[148px] shrink-0 lg:max-w-[210px]">
+          {/* 오른쪽: 유형 태그 그리드 */}
+          <div className="grid grid-cols-2 gap-1.5 shrink-0 lg:gap-2">
             {STYLE_TYPES.map((s) => (
-              <span
+              <div
                 key={s.key}
-                className="rounded-full bg-white/75 px-2.5 py-0.5 text-[10px] font-semibold text-amber-800 shadow-sm lg:text-xs"
+                className={`rounded-xl px-2.5 py-1.5 backdrop-blur-sm ${s.bg}`}
               >
-                {s.label}
-              </span>
+                <p className={`text-[10px] font-extrabold leading-none ${s.text} lg:text-xs`}>{s.label}</p>
+                <p className={`mt-0.5 text-[9px] leading-none ${s.text} opacity-70 lg:text-[10px]`}>{s.desc}</p>
+              </div>
             ))}
           </div>
+
         </div>
       </div>
     </section>
