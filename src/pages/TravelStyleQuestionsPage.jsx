@@ -47,7 +47,6 @@ export default function TravelStyleQuestionsPage() {
         <div className="mb-6">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-semibold text-gray-400">{current + 1} / {TOTAL}</span>
-            <span className="text-xs font-semibold text-teal-600">{progress}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
             <div
@@ -58,7 +57,7 @@ export default function TravelStyleQuestionsPage() {
         </div>
 
         {/* 질문 */}
-        <div className="mb-6 lg:flex-1">
+        <div className="mb-6">
           <p className="mb-1 text-xs font-semibold text-amber-500 tracking-wide">Q{current + 1}</p>
           <h2 className="text-lg font-extrabold leading-snug text-[#04384a] lg:text-2xl break-keep">
             {question.question}
