@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 
 const STYLE_TYPES = [
-  { key: 'rook',   label: '룩',    desc: '감성 기록형',  bg: 'bg-pink-100/80',   text: 'text-pink-700' },
-  { key: 'knight', label: '나이트', desc: '액티비티형',   bg: 'bg-orange-100/80', text: 'text-orange-700' },
-  { key: 'bishop', label: '비숍',  desc: '문화 탐험형',  bg: 'bg-violet-100/80', text: 'text-violet-700' },
-  { key: 'queen',  label: '퀸',    desc: '올라운더형',   bg: 'bg-teal-100/80',   text: 'text-teal-700' },
-  { key: 'king',   label: '킹',    desc: '리더형',       bg: 'bg-sky-100/80',    text: 'text-sky-700' },
-  { key: 'pawn',   label: '폰',    desc: '여유 힐링형',  bg: 'bg-green-100/80',  text: 'text-green-700' },
+  { key: 'rook',   label: '룩',    desc: '감성 기록형',  dot: 'bg-pink-400',   text: 'text-pink-700' },
+  { key: 'knight', label: '나이트', desc: '액티비티형',   dot: 'bg-orange-400', text: 'text-orange-700' },
+  { key: 'bishop', label: '비숍',  desc: '문화 탐험형',  dot: 'bg-violet-400', text: 'text-violet-700' },
+  { key: 'queen',  label: '퀸',    desc: '올라운더형',   dot: 'bg-teal-400',   text: 'text-teal-700' },
+  { key: 'king',   label: '킹',    desc: '리더형',       dot: 'bg-sky-400',    text: 'text-sky-700' },
+  { key: 'pawn',   label: '폰',    desc: '여유 힐링형',  dot: 'bg-green-400',  text: 'text-green-700' },
 ]
 
 export default function TravelStyleTestBanner() {
@@ -63,15 +63,16 @@ export default function TravelStyleTestBanner() {
             </button>
           </div>
 
-          {/* 오른쪽: 유형 태그 그리드 */}
-          <div className="grid grid-cols-2 gap-1.5 shrink-0 lg:gap-2">
+          {/* 오른쪽: 유형 태그 pill 리스트 */}
+          <div className="flex flex-col gap-1.5 shrink-0">
             {STYLE_TYPES.map((s) => (
               <div
                 key={s.key}
-                className={`rounded-xl px-2.5 py-1.5 backdrop-blur-sm ${s.bg}`}
+                className="flex items-center gap-1.5 rounded-full bg-white/55 px-2.5 py-1 shadow-sm backdrop-blur-sm"
               >
-                <p className={`text-[10px] font-extrabold leading-none ${s.text} lg:text-xs`}>{s.label}</p>
-                <p className={`mt-0.5 text-[9px] leading-none ${s.text} opacity-70 lg:text-[10px]`}>{s.desc}</p>
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${s.dot}`} aria-hidden />
+                <span className={`text-[10px] font-bold leading-none ${s.text} lg:text-xs`}>{s.label}</span>
+                <span className="text-[9px] leading-none text-amber-800/50 lg:text-[10px]">{s.desc}</span>
               </div>
             ))}
           </div>
