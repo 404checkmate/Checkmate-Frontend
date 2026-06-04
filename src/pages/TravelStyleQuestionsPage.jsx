@@ -47,6 +47,18 @@ export default function TravelStyleQuestionsPage() {
 
   const handleSelect = (optionIndex) => setSelected(optionIndex)
 
+  const handleBack = () => {
+    if (current === 0) {
+      navigate('/travel-style-test')
+      return
+    }
+    const prevAnswers = answers.slice(0, -1)
+    const prevSelected = answers[answers.length - 1]?.optionIndex ?? null
+    setAnswers(prevAnswers)
+    setCurrent((c) => c - 1)
+    setSelected(prevSelected)
+  }
+
   const handleNext = () => {
     if (selected === null) return
     const newAnswers = [...answers, { questionId: question.id, optionIndex: selected }]
@@ -73,8 +85,18 @@ export default function TravelStyleQuestionsPage() {
       <div className="mx-auto w-full max-w-lg flex-1 flex flex-col px-4 pb-10 pt-6 lg:px-6 lg:pt-10">
 
         {/* 진행률 바 */}
-        <div className="mb-7">
-          <div className="mb-1.5">
+        <div className="mb-7 lg:mt-20">
+          <div className="mb-1.5 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center gap-1 text-[11px] font-semibold text-gray-400 transition-colors hover:text-gray-600 active:scale-95"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+              </svg>
+              {current === 0 ? '처음으로' : '이전'}
+            </button>
             <span className="text-[11px] font-semibold text-gray-400">{current + 1} / {TOTAL}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">

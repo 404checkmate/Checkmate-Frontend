@@ -19,7 +19,7 @@ function MobileHomePage() {
         `,
       }}
     >
-      <div className="flex flex-col gap-5 px-4 pb-6 pt-5 lg:mx-auto lg:w-full lg:gap-7 lg:px-6 lg:py-10 xl:max-w-6xl xl:gap-8 xl:px-8 xl:py-14">
+      <div className="flex flex-col gap-8 px-4 pb-6 pt-5 lg:mx-auto lg:w-full lg:gap-10 lg:px-6 lg:py-10 xl:max-w-6xl xl:gap-12 xl:px-8 xl:py-14">
         <HomeHeroBanner />
 
         <section className="hidden lg:block">

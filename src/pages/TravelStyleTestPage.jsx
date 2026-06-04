@@ -48,13 +48,17 @@ export default function TravelStyleTestPage() {
                 key={type.key}
                 className={`rounded-2xl border px-4 py-4 ${type.color}`}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xl">{type.emoji}</span>
+                <img
+                  src={type.imgSrc}
+                  alt={type.label}
+                  className="h-16 w-16 object-contain lg:h-20 lg:w-20"
+                />
+                <div className="mt-2 flex items-center gap-1.5">
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${type.chipColor}`}>
                     {type.label}
                   </span>
                 </div>
-                <p className="text-[13px] font-bold leading-snug lg:text-sm">{type.name}</p>
+                <p className="mt-1 text-[13px] font-bold leading-snug lg:text-sm">{type.name}</p>
                 <p className="mt-0.5 text-[11px] leading-snug opacity-80 lg:text-xs">{type.desc}</p>
               </div>
             ))}
