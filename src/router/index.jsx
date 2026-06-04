@@ -19,6 +19,7 @@ const GuestGuideArchivePreviewPage = lazy(() => import('@/pages/GuestGuideArchiv
 const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const MyPage = lazy(() => import('@/pages/MyPage'))
+const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'))
 const ErrorPage = lazy(() => import('@/pages/ErrorPage'))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
@@ -77,6 +78,7 @@ const AppRoutes = () => {
         },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <ProtectedRoute>{withSuspense(<MyPage />)}</ProtectedRoute> },
+        { path: '/admin/dashboard',     element: <ProtectedRoute>{withSuspense(<AdminDashboardPage />)}</ProtectedRoute> },
         { path: '/trips/new',             element: <Navigate to="/trips/new/destination" replace /> },
         { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },
         { path: '/trips/new/step2',       element: <Navigate to="/" replace /> },

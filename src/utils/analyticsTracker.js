@@ -46,6 +46,12 @@ const EVENT_TYPE_MAP = {
   backflow_trigger: 're_search',
   // Store Loop 진입 신호
   travel_fixed: 'trip_created',
+  // 게스트 프리뷰 (비로그인 저장 플로우) — 프리뷰 진입→완료→로그인 전환 퍼널 측정
+  guest_preview_opened: 'page_view',
+  guest_preview_complete_clicked: 'cta_click',
+  guest_preview_login_redirect: 'cta_click',
+  guest_preview_leave_guard_shown: 'page_view',
+  guest_preview_leave_anyway: 'cta_click',
 }
 
 let resolvedUserId = null
@@ -187,7 +193,8 @@ export function trackEvent(eventName, properties = {}) {
     eventType,
     tripId: isNumericId(trip_id) ? String(trip_id) : null,
     itemId: isNumericId(item_id) ? String(item_id) : null,
-    metadata: { ...meta, _ev: eventName },
+    // _dev: 로컬 dev 빌드 이벤트 표시 — 비로그인 세션은 팀원 이메일로 제외할 수 없으므로 쿼리에서 이 플래그로 거른다
+    metadata: { ...meta, _ev: eventName, ...(import.meta.env.DEV ? { _dev: true } : {}) },
     occurredAt: new Date().toISOString(),
   })
   if (queue.length >= FLUSH_BATCH_SIZE) {
