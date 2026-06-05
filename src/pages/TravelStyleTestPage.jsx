@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { STYLE_TYPES } from '@/data/travelStyleMeta'
+import { trackEvent } from '@/utils/analyticsTracker'
+import { ga4Event } from '@/utils/ga4'
 
 
 /* ─── 카드별 SVG 장식 ─────────────────────────────────────────────── */
@@ -201,6 +203,17 @@ export default function TravelStyleTestPage() {
     return () => window.removeEventListener('resize', measure)
   }, [])
 
+  // 퍼널 1단계: 테스트 소개 페이지 진입
+  useEffect(() => {
+    trackEvent('travel_test_landing_viewed', { page: 'travel_style_test' })
+  }, [])
+
+  const handleStart = () => {
+    trackEvent('travel_test_started', { button: 'travel_test_start' })
+    ga4Event('travel_test_started')
+    navigate('/travel-style-test/questions')
+  }
+
   const cardWidth  = containerWidth * CARD_W
   const cardHeight = cardWidth * 1.5  // 2:3 비율
 
@@ -276,7 +289,7 @@ export default function TravelStyleTestPage() {
         <section className="mt-8 flex flex-col items-center gap-3 lg:mt-10">
           <button
             type="button"
-            onClick={() => navigate('/travel-style-test/questions')}
+            onClick={handleStart}
             className="w-full max-w-sm rounded-2xl bg-amber-400 py-4 text-base font-extrabold text-amber-900 shadow-md shadow-amber-200 transition-all hover:bg-amber-500 active:scale-95 lg:text-lg"
           >
             테스트 시작하기 →

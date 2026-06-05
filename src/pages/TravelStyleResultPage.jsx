@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { PIECE_META, getComboResult, getComboImage } from '@/data/travelStyleResults'
 import TravelStyleStoryCard from '@/components/travelStyle/TravelStyleStoryCard'
 import { useTestResultChecklistCreate } from '@/hooks/useTestResultChecklistCreate'
+import { trackEvent } from '@/utils/analyticsTracker'
+import { ga4Event } from '@/utils/ga4'
 
 /* ─── 서브 컴포넌트 ─────────────────────────────────────────────────── */
 
@@ -167,9 +169,13 @@ function ShareSection({ result }) {
           text: `“${result.oneLiner}” — 너도 테스트하고 우리 여행 궁합 확인해봐 ✈️`,
           url: shareUrl,
         })
+        trackEvent('travel_test_share_link', { button: 'share_link', result: comboKey, method: 'native' })
+        ga4Event('travel_test_share', { method: 'link', result: comboKey })
         return
       }
       await navigator.clipboard.writeText(shareUrl)
+      trackEvent('travel_test_share_link', { button: 'share_link', result: comboKey, method: 'clipboard' })
+      ga4Event('travel_test_share', { method: 'link', result: comboKey })
       showNotice('링크를 복사했어요! 친구에게 공유해보세요 🙌')
     } catch (err) {
       if (err?.name === 'AbortError') return // 공유 시트 닫음
@@ -191,15 +197,21 @@ function ShareSection({ result }) {
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `checkmate-travel-style-${comboKey}.png`, { type: 'image/png' })
 
-      if (navigator.canShare?.({ files: [file] })) {
+      // 공유 시트는 터치 기기에서만 — 데스크탑(특히 Windows)은 navigator.share를
+      // 지원하더라도 OS 공유 다이얼로그가 떠서 어색하므로 항상 다운로드로 처리
+      const isTouch = window.matchMedia('(pointer: coarse)').matches
+      if (isTouch && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: `나의 여행 유형은 ${result.title}!` })
+        trackEvent('travel_test_share_image', { button: 'share_image', result: comboKey, method: 'native' })
       } else {
         const link = document.createElement('a')
         link.href = dataUrl
         link.download = file.name
         link.click()
+        trackEvent('travel_test_share_image', { button: 'share_image', result: comboKey, method: 'download' })
         showNotice('이미지를 저장했어요! 스토리에 공유해보세요 📸')
       }
+      ga4Event('travel_test_share', { method: 'image', result: comboKey })
     } catch (err) {
       if (err?.name !== 'AbortError') showNotice('이미지 저장에 실패했어요. 잠시 후 다시 시도해주세요')
     } finally {
@@ -286,6 +298,17 @@ export default function TravelStyleResultPage() {
     if (!result) navigate('/travel-style-test', { replace: true })
   }, [result, navigate])
 
+  // 퍼널 4단계: 결과 페이지 조회 (테스트 직후 vs 공유 링크 유입 구분)
+  useEffect(() => {
+    if (!result) return
+    trackEvent('travel_test_result_viewed', {
+      page: 'travel_style_result',
+      result: `${themeKey}_${pieceKey}`,
+      shared: isSharedView,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   if (!result) return null
 
   // 디폴트 값(한 달 뒤 출발 6박 7일 / 혼자 / 테스트 테마)으로 트립 생성 → 로딩 페이지 직행
@@ -305,7 +328,14 @@ export default function TravelStyleResultPage() {
       <div className="mx-auto max-w-lg px-4 pb-14 pt-8 lg:max-w-2xl lg:px-6 lg:pt-12">
 
         <HeroSection result={result} />
-        {isSharedView && <SharedViewCta onStart={() => navigate('/travel-style-test')} />}
+        {isSharedView && (
+          <SharedViewCta
+            onStart={() => {
+              trackEvent('travel_test_shared_cta_clicked', { button: 'shared_view_start' })
+              navigate('/travel-style-test')
+            }}
+          />
+        )}
         <PieceDescSection result={result} />
         <CompatibilitySection piece={result.piece} theme={result.theme} />
         <DestinationsSection

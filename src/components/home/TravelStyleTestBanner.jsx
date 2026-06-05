@@ -1,123 +1,8 @@
 import { useNavigate } from 'react-router-dom'
+import { STYLE_TYPES } from '@/data/travelStyleMeta'
 
-/* ─── 체스 기물 SVG 컴포넌트 ─────────────────────────────────────────── */
-// 각 기물: 20×26 artboard 기준
-
-function King() {
-  return (
-    <g>
-      {/* 십자가 */}
-      <rect x="8.5" y="0" width="3" height="7" rx="1"/>
-      <rect x="5.5" y="2.5" width="9" height="3" rx="1"/>
-      {/* 머리 구체 */}
-      <circle cx="10" cy="9.5" r="3"/>
-      {/* 목 */}
-      <rect x="8.5" y="12" width="3" height="2" rx="0.5"/>
-      {/* 어깨+몸통 */}
-      <path d="M3,14 Q10,18 17,14 L17.5,23 H2.5 Z"/>
-      {/* 기반 */}
-      <rect x="1" y="23" width="18" height="3" rx="1.2"/>
-    </g>
-  )
-}
-
-function Queen() {
-  return (
-    <g>
-      {/* 왕관 꼭지 5개 */}
-      <circle cx="10" cy="1.5" r="1.5"/>
-      <circle cx="5"  cy="3.5" r="1.3"/>
-      <circle cx="15" cy="3.5" r="1.3"/>
-      <circle cx="2"  cy="6"   r="1.1"/>
-      <circle cx="18" cy="6"   r="1.1"/>
-      {/* 왕관 몸체 */}
-      <path d="M1,8 L3.5,20 H16.5 L19,8 L15,12 L12,6 L10,10 L8,6 L5,12 Z"/>
-      {/* 기반 */}
-      <rect x="1" y="20" width="18" height="3" rx="1.2"/>
-    </g>
-  )
-}
-
-function Bishop() {
-  return (
-    <g>
-      {/* 상단 구체 */}
-      <circle cx="10" cy="2" r="2"/>
-      {/* 뾰족한 머리 */}
-      <ellipse cx="10" cy="7.5" rx="3.5" ry="5.5"/>
-      {/* 어깨 칼라 */}
-      <ellipse cx="10" cy="13" rx="6" ry="2"/>
-      {/* 몸통 */}
-      <path d="M4.5,15 L4,23 H16 L15.5,15 Z"/>
-      {/* 기반 */}
-      <rect x="1" y="23" width="18" height="3" rx="1.2"/>
-    </g>
-  )
-}
-
-function Rook() {
-  return (
-    <g>
-      {/* 흉벽 3개 */}
-      <rect x="1"   y="0" width="5.5" height="7" rx="0.8"/>
-      <rect x="7.5" y="0" width="5"   height="7" rx="0.8"/>
-      <rect x="13.5" y="0" width="5.5" height="7" rx="0.8"/>
-      {/* 흉벽 연결 */}
-      <rect x="3" y="7" width="14" height="2"/>
-      {/* 탑 몸통 */}
-      <rect x="4" y="9" width="12" height="13" rx="0.5"/>
-      {/* 기반 */}
-      <rect x="1" y="22" width="18" height="3" rx="1.2"/>
-    </g>
-  )
-}
-
-function Knight() {
-  return (
-    <g>
-      {/* 말 머리+목 실루엣 (오른쪽 방향) */}
-      <path d="
-        M 5,25
-        L 5,17
-        C 3,14 3,11 4,8
-        C 5,5 7,2 10,2
-        C 12,2 14,3 15,5
-        L 17,4
-        C 18,5 18,7 17,8
-        L 15,9
-        C 17,11 17,14 16,17
-        L 15,25 Z
-      "/>
-      {/* 눈 */}
-      <circle cx="13" cy="6.5" r="1.2" fill="rgba(254,243,199,0.55)"/>
-      {/* 콧구멍 */}
-      <circle cx="16.5" cy="8.5" r="0.7" fill="rgba(254,243,199,0.3)"/>
-      {/* 기반 */}
-      <rect x="3" y="25" width="14" height="3" rx="1.2"/>
-    </g>
-  )
-}
-
-function Pawn() {
-  return (
-    <g>
-      {/* 머리 구체 */}
-      <circle cx="10" cy="5" r="4.5"/>
-      {/* 목 */}
-      <rect x="8.5" y="9" width="3" height="2.5" rx="0.5"/>
-      {/* 어깨 확장 */}
-      <ellipse cx="10" cy="12" rx="5" ry="1.8"/>
-      {/* 몸통 */}
-      <path d="M5,13.5 L4,23 H16 L15,13.5 Z"/>
-      {/* 기반 */}
-      <rect x="2" y="23" width="16" height="3" rx="1.2"/>
-    </g>
-  )
-}
-
-/* ─── 체스 장식 SVG ────────────────────────────────────────────────── */
-function ChessDecoration() {
-  const pc = 'rgba(120,53,15,'
+/* ─── 배경: 체커보드 패턴 ───────────────────────────────────────────── */
+function CheckerboardDecoration() {
   return (
     <svg
       viewBox="0 0 200 110"
@@ -128,60 +13,98 @@ function ChessDecoration() {
     >
       <defs>
         <pattern id="cb" width="18" height="18" patternUnits="userSpaceOnUse">
-          <rect width="9" height="9" fill="rgba(120,53,15,0.10)"/>
-          <rect x="9" y="9" width="9" height="9" fill="rgba(120,53,15,0.10)"/>
+          <rect width="9" height="9" fill="rgba(120,53,15,0.10)" />
+          <rect x="9" y="9" width="9" height="9" fill="rgba(120,53,15,0.10)" />
         </pattern>
         <linearGradient id="lf" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"  stopColor="#fde68a" stopOpacity="1"/>
-          <stop offset="42%" stopColor="#fde68a" stopOpacity="0"/>
+          <stop offset="0%" stopColor="#fde68a" stopOpacity="1" />
+          <stop offset="42%" stopColor="#fde68a" stopOpacity="0" />
         </linearGradient>
-        <filter id="sh1" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="2" dy="3.5" stdDeviation="3" floodColor="#78350f" floodOpacity="0.50"/>
-        </filter>
-        <filter id="sh2" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="1.5" dy="2.5" stdDeviation="2.2" floodColor="#78350f" floodOpacity="0.38"/>
-        </filter>
-        <filter id="sh3" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="1" dy="2" stdDeviation="1.8" floodColor="#78350f" floodOpacity="0.28"/>
-        </filter>
       </defs>
-
-      {/* 체스판 */}
-      <rect width="200" height="110" fill="url(#cb)"/>
-      {/* 왼쪽 페이드 */}
-      <rect width="200" height="110" fill="url(#lf)"/>
-
-      {/* ── 킹 — 중앙 크게 ── */}
-      <g transform="translate(88,4) scale(1.85)" filter="url(#sh1)" fill={`${pc}0.65)`}>
-        <King/>
-      </g>
-
-      {/* ── 퀸 — 오른쪽 위 ── */}
-      <g transform="translate(145,8) scale(1.38)" filter="url(#sh1)" fill={`${pc}0.55)`}>
-        <Queen/>
-      </g>
-
-      {/* ── 나이트 — 킹 왼쪽 위 ── */}
-      <g transform="translate(62,5) scale(1.30)" filter="url(#sh2)" fill={`${pc}0.42)`}>
-        <Knight/>
-      </g>
-
-      {/* ── 비숍 — 오른쪽 하단 ── */}
-      <g transform="translate(150,55) scale(1.18)" filter="url(#sh2)" fill={`${pc}0.38)`}>
-        <Bishop/>
-      </g>
-
-      {/* ── 룩 — 왼쪽 하단 ── */}
-      <g transform="translate(58,52) scale(1.22)" filter="url(#sh2)" fill={`${pc}0.36)`}>
-        <Rook/>
-      </g>
-
-      {/* ── 폰 1 ── */}
-      <g transform="translate(112,52) scale(1.05)" filter="url(#sh3)" fill={`${pc}0.30)`}>
-        <Pawn/>
-      </g>
-
+      <rect width="200" height="110" fill="url(#cb)" />
+      <rect width="200" height="110" fill="url(#lf)" />
     </svg>
+  )
+}
+
+/* ─── 미니 타로 카드 (테스트 페이지 TarotCard 축소판) ──────────────── */
+function MiniTarotCard({ type }) {
+  return (
+    <div className={`relative h-full w-full overflow-hidden rounded-lg bg-gradient-to-b shadow-lg ${type.cardBg} lg:rounded-xl`}>
+      {/* 테두리 */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-lg lg:rounded-xl"
+        style={{ boxShadow: `inset 0 0 0 1.5px ${type.cardAccent}99, inset 0 0 0 3px #00000040` }}
+      />
+      {/* 스파클 */}
+      <span className="pointer-events-none absolute left-1 top-1 text-[7px] lg:text-[9px]" style={{ color: type.cardAccent, opacity: 0.7 }}>✦</span>
+      <span className="pointer-events-none absolute right-1 top-3 text-[5px] lg:text-[7px]" style={{ color: type.cardAccent, opacity: 0.5 }}>✦</span>
+      {/* 캐릭터 */}
+      <div className="flex h-[78%] items-center justify-center p-1.5 lg:p-2">
+        <img src={type.imgSrc} alt={type.label} className="h-full w-full object-contain drop-shadow-md" draggable={false} />
+      </div>
+      {/* 라벨 */}
+      <div
+        className="absolute bottom-0 left-0 right-0 flex items-center justify-center py-0.5 lg:py-1"
+        style={{ borderTop: `1px solid ${type.cardAccent}40`, background: 'rgba(0,0,0,0.35)' }}
+      >
+        <p className="text-[6px] font-extrabold tracking-widest lg:text-[8px]" style={{ color: type.cardAccent }}>
+          {type.label}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ─── 카드 세로 스크롤 (2컬럼 마퀴) ───────────────────────────────── */
+// 컬럼 내용을 2번 렌더 + translateY(-50%) 루프 → 끊김 없는 무한 스크롤
+function ScrollColumn({ types, direction, duration, delay }) {
+  const items = [...types, ...types]
+  return (
+    <div className="h-full overflow-hidden">
+      <div
+        className={`flex flex-col gap-2 lg:gap-2.5 ${direction === 'down' ? 'tst-col-down' : 'tst-col-up'}`}
+        style={{ '--col-duration': duration, animationDelay: delay }}
+      >
+        {items.map((type, i) => (
+          <div key={`${type.key}-${i}`} className="h-[84px] w-14 shrink-0 lg:h-[120px] lg:w-20">
+            <MiniTarotCard type={type} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const SCROLLER_MASK = {
+  maskImage: 'linear-gradient(to bottom, transparent, black 18%, black 82%, transparent)',
+  WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 18%, black 82%, transparent)',
+}
+
+function CardScroller() {
+  return (
+    <>
+      {/* 모바일: 2컬럼 */}
+      <div
+        className="pointer-events-none absolute inset-y-0 right-3 z-[5] flex gap-2 sm:right-6 lg:hidden"
+        style={SCROLLER_MASK}
+        aria-hidden
+      >
+        <ScrollColumn types={STYLE_TYPES.slice(0, 3)} direction="up" duration="20s" delay="0s" />
+        <ScrollColumn types={STYLE_TYPES.slice(3, 6)} direction="down" duration="26s" delay="-8s" />
+      </div>
+
+      {/* 데스크탑: 3컬럼 — 오른쪽 끝에서 살짝 안쪽으로 배치 */}
+      <div
+        className="pointer-events-none absolute inset-y-0 z-[5] hidden gap-2.5 lg:right-20 lg:flex xl:right-28"
+        style={SCROLLER_MASK}
+        aria-hidden
+      >
+        <ScrollColumn types={STYLE_TYPES.slice(0, 2)} direction="up" duration="22s" delay="0s" />
+        <ScrollColumn types={STYLE_TYPES.slice(2, 4)} direction="down" duration="27s" delay="-9s" />
+        <ScrollColumn types={STYLE_TYPES.slice(4, 6)} direction="up" duration="24s" delay="-15s" />
+      </div>
+    </>
   )
 }
 
@@ -201,12 +124,13 @@ export default function TravelStyleTestBanner() {
         `,
       }}
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/20 blur-3xl xl:h-52 xl:w-52" aria-hidden/>
-      <div className="pointer-events-none absolute -bottom-6 left-1/4 h-24 w-24 rounded-full bg-amber-300/30 blur-2xl" aria-hidden/>
+      <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/20 blur-3xl xl:h-52 xl:w-52" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-6 left-1/4 h-24 w-24 rounded-full bg-amber-300/30 blur-2xl" aria-hidden />
 
-      <ChessDecoration/>
+      <CheckerboardDecoration />
+      <CardScroller />
 
-      <div className="relative z-10 px-5 py-5 lg:px-8 lg:py-6">
+      <div className="relative z-10 px-5 py-5 pr-40 lg:px-8 lg:py-6 lg:pr-96">
         <span className="inline-flex items-center gap-1 rounded-full bg-white/50 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-800 backdrop-blur-sm lg:text-xs">
           ✨ 여행 스타일 테스트
         </span>
@@ -225,7 +149,7 @@ export default function TravelStyleTestBanner() {
           >
             테스트 시작하기
             <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-              <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd"/>
+              <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
             </svg>
           </button>
         </div>

@@ -174,3 +174,22 @@ body {
   .hero-mascot-bob   { animation: none; }
   .hero-text-1, .hero-text-2, .hero-text-3 { opacity: 1; animation: none; }
 }
+
+/* ── TravelStyleTestBanner 카드 세로 스크롤(마퀴) ── */
+/* 컬럼 내용을 2번 렌더하고 -50%까지 이동 → 끊김 없는 무한 루프 */
+@keyframes tst-col-scroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+.tst-col-up {
+  animation: tst-col-scroll var(--col-duration, 20s) linear infinite;
+}
+
+.tst-col-down {
+  animation: tst-col-scroll var(--col-duration, 24s) linear infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tst-col-up, .tst-col-down { animation: none; }
+}
