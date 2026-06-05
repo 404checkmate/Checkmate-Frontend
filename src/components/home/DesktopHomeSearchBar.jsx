@@ -494,6 +494,24 @@ export default function DesktopHomeSearchBar() {
     }
   }, [countryOptions, location.state]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 여행 스타일 테스트 결과에서 추천 여행지로 진입 시 국가 자동 선택 + 날짜 드롭다운 오픈
+  useEffect(() => {
+    const dest = location.state?.prefilledDestination
+    if (!dest || !countryOptions.length) return
+
+    const found = countryOptions.find((c) => c.countryCode === dest.countryCode)
+    if (!found) return
+
+    const arrivals = getArrivalsForCountry(found)
+    const arrival = arrivals.find((a) => a.iata === dest.iata) ?? arrivals[0]
+
+    confirmCountry({
+      ...countryRowWithoutArrivals(found),
+      city: arrival?.city ?? found.city,
+      iata: arrival?.iata ?? found.iata,
+    })
+  }, [countryOptions, location.state?.prefilledDestination]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Reset downstream fields when country is cleared
   useEffect(() => {
     if (!selectedCountry) {

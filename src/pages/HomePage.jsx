@@ -2,6 +2,7 @@ import HomeFooter from '@/components/home/HomeFooter'
 import DesktopHomeSearchBar from '@/components/home/DesktopHomeSearchBar'
 import HomeHeroBanner from '@/components/home/HomeHeroBanner'
 import MobileDestinationSearch from '@/components/home/MobileDestinationSearch'
+import TravelStyleTestBanner from '@/components/home/TravelStyleTestBanner'
 import MyChecklistsSection from '@/components/home/MyChecklistsSection'
 import CurationSection from '@/components/home/CurationSection'
 
@@ -18,7 +19,7 @@ function MobileHomePage() {
         `,
       }}
     >
-      <div className="flex flex-col gap-5 px-4 pb-6 pt-5 lg:mx-auto lg:w-full lg:gap-7 lg:px-6 lg:py-10 xl:max-w-6xl xl:gap-8 xl:px-8 xl:py-14">
+      <div className="flex flex-col gap-8 px-4 pb-6 pt-5 lg:mx-auto lg:w-full lg:gap-10 lg:px-6 lg:py-10 xl:max-w-6xl xl:gap-12 xl:px-8 xl:py-14">
         <HomeHeroBanner />
 
         <section className="hidden lg:block">
@@ -26,6 +27,13 @@ function MobileHomePage() {
         </section>
 
         <MobileDestinationSearch />
+
+        <section>
+          <h2 className="mb-3 text-[1.1rem] font-extrabold leading-snug text-[#04384a] lg:text-xl">
+            나는 어떤 <span className="text-amber-500">여행자</span>일까?
+          </h2>
+          <TravelStyleTestBanner />
+        </section>
 
         <MyChecklistsSection />
 
