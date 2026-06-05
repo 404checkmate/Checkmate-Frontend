@@ -52,6 +52,15 @@ const EVENT_TYPE_MAP = {
   guest_preview_login_redirect: 'cta_click',
   guest_preview_leave_guard_shown: 'page_view',
   guest_preview_leave_anyway: 'cta_click',
+  // 여행 스타일 테스트 — 진입→시작→완료→결과→공유/체크리스트 전환 퍼널 측정
+  travel_test_landing_viewed: 'page_view',     // 테스트 소개 페이지 진입
+  travel_test_started: 'cta_click',            // "테스트 시작하기" 클릭
+  travel_test_completed: 'step_complete',      // 10문항 완료 (meta: result)
+  travel_test_result_viewed: 'page_view',      // 결과 페이지 조회 (meta: result, shared)
+  travel_test_share_link: 'cta_click',         // 결과 링크 복사/공유
+  travel_test_share_image: 'cta_click',        // 스토리 이미지 저장/공유
+  travel_test_shared_cta_clicked: 'cta_click', // 공유받은 사람의 "나도 테스트하기" 클릭
+  travel_test_checklist_create: 'cta_click',   // 추천 여행지 → 체크리스트 생성 클릭
 }
 
 let resolvedUserId = null

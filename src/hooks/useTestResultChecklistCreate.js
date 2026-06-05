@@ -67,7 +67,12 @@ export function useTestResultChecklistCreate() {
 
     setCreatingCity(dest.city)
     try {
-      trackEvent('cta_click', { button: 'travel_style_result_checklist', destination: dest.city })
+      // 퍼널 5단계: 추천 여행지 → 체크리스트 생성 시도
+      trackEvent('travel_test_checklist_create', {
+        button: 'travel_style_result_checklist',
+        destination: dest.city,
+        style: themeKey,
+      })
 
       saveActiveTripPlan({
         destination,

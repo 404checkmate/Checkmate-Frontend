@@ -54,3 +54,15 @@ export async function fetchGuestPreview(range) {
   const res = await apiClient.get('/admin/metrics/guest-preview', { params: rangeParams(range) })
   return res.data
 }
+
+/** 쿼리 11. 여행 스타일 테스트 퍼널 (진입→시작→완료→공유/체크리스트) */
+export async function fetchTravelTest(range) {
+  const res = await apiClient.get('/admin/metrics/travel-test', { params: rangeParams(range) })
+  return res.data
+}
+
+/** 쿼리 12. 여행 스타일 테스트 결과 유형 분포 */
+export async function fetchTravelTestTypes(range) {
+  const res = await apiClient.get('/admin/metrics/travel-test-types', { params: rangeParams(range) })
+  return res.data
+}

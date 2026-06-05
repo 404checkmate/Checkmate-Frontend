@@ -22,6 +22,8 @@ import {
   fetchRetention,
   fetchSaveRetention,
   fetchGuestPreview,
+  fetchTravelTest,
+  fetchTravelTestTypes,
 } from '@/api/admin'
 
 const PAGE_BG = {
@@ -176,7 +178,7 @@ export default function AdminDashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview] =
+      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes] =
         await Promise.all([
           fetchFunnel(range),
           fetchLogins(range),
@@ -185,8 +187,10 @@ export default function AdminDashboardPage() {
           fetchRetention(range),
           fetchSaveRetention(),
           fetchGuestPreview(range),
+          fetchTravelTest(range),
+          fetchTravelTestTypes(range),
         ])
-      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview })
+      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes })
     } catch (err) {
       setError(err?.response?.status === 403
         ? '관리자 권한이 없습니다.'
@@ -247,6 +251,8 @@ export default function AdminDashboardPage() {
   const retention = data.retention ?? []
   const saveRetention = data.saveRetention ?? []
   const guestPreview = data.guestPreview ?? []
+  const travelTest = data.travelTest ?? []
+  const travelTestTypes = data.travelTestTypes ?? []
 
   return (
     <div className="min-h-screen pb-16" style={PAGE_BG}>
@@ -350,6 +356,24 @@ export default function AdminDashboardPage() {
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
+
+          {/* 쿼리 11 — 여행 스타일 테스트 퍼널 */}
+          <ChartCard title="여행 스타일 테스트 퍼널" note="진입 → 시작 → 완료 → 공유/체크리스트 세션 수 (2026-06-05 신설)">
+            <ResponsiveContainer>
+              <BarChart data={travelTest}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="day" fontSize={11} tickFormatter={(d) => d.slice(5)} />
+                <YAxis fontSize={11} allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="landing_viewed" name="진입" fill="#94a3b8" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="started" name="시작" fill="#0ea5e9" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="completed" name="완료" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="shared" name="공유" fill="#f59e0b" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="checklist_created" name="체크리스트" fill="#10b981" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -397,6 +421,21 @@ export default function AdminDashboardPage() {
                 <td className="py-2 pr-3">{r.dest}</td>
                 <td className="py-2 pr-3">{r.trips}</td>
                 <td className="py-2 pr-3">{r.has_article ? '✅' : <span className="font-semibold text-red-500">❌ 갭</span>}</td>
+              </tr>
+            )}
+          />
+
+          {/* 쿼리 12 — 여행 테스트 결과 유형 분포 */}
+          <TableCard
+            title="여행 테스트 결과 유형 분포"
+            note="travel_test_completed 기준 · 공유 유입(shared_inflow)은 퍼널 차트 참고"
+            columns={['결과 유형', '횟수', '비율']}
+            rows={travelTestTypes}
+            renderRow={(r) => (
+              <tr key={r.result_type} className="border-b border-gray-50 text-gray-700">
+                <td className="py-2 pr-3">{r.result_type}</td>
+                <td className="py-2 pr-3">{r.cnt}</td>
+                <td className="py-2 pr-3">{PCT(r.pct)}</td>
               </tr>
             )}
           />
