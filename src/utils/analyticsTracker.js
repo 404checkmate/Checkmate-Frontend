@@ -52,6 +52,15 @@ const EVENT_TYPE_MAP = {
   guest_preview_login_redirect: 'cta_click',
   guest_preview_leave_guard_shown: 'page_view',
   guest_preview_leave_anyway: 'cta_click',
+  // 친구·협업 퍼널 — 초대→수락→공동 편집 전환 측정
+  friend_invite_created: 'cta_click',        // 친구 초대 링크 생성
+  friend_invite_accepted: 'step_complete',   // 친구 초대 수락 (친구 성립)
+  collab_members_sheet_opened: 'page_view',  // "함께 준비하기" 시트 열람
+  trip_invite_link_created: 'cta_click',     // 트립 초대 링크 생성
+  trip_invite_sent: 'cta_click',             // 친구 바로 초대 발송
+  trip_invite_accepted: 'step_complete',     // 트립 합류 (meta.via: link|direct)
+  trip_invite_declined: 'cta_click',         // 트립 초대 거절
+  notification_opened: 'cta_click',          // 알림 벨 드롭다운 열람
   // 여행 스타일 테스트 — 진입→시작→완료→결과→공유/체크리스트 전환 퍼널 측정
   travel_test_landing_viewed: 'page_view',     // 테스트 소개 페이지 진입
   travel_test_started: 'cta_click',            // "테스트 시작하기" 클릭

@@ -12,6 +12,7 @@ export default function GuideArchiveSectionDndList({
   list,
   sortableDisabled,
   checks,
+  actors = {},
   handleToggle,
   onEditItem,
   onDeleteItem,
@@ -46,6 +47,7 @@ export default function GuideArchiveSectionDndList({
             item={it}
             sortableDisabled={sortableDisabled}
             checks={checks}
+            lastActor={actors[String(it.id)] ?? null}
             handleToggle={handleToggle}
             onEditItem={onEditItem}
             onDeleteItem={onDeleteItem}

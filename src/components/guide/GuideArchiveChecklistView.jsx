@@ -96,7 +96,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   }, [entryOrderSignature])
 
   // ── 체크 상태 ─────────────────────────────────────────
-  const { checks, setChecks, handleToggle } = useGuideArchiveChecks({ tripId, entry, syncTick })
+  const { checks, setChecks, handleToggle, actors } = useGuideArchiveChecks({ tripId, entry, syncTick })
 
   // ── 파생 필터 ─────────────────────────────────────────
   const dndLocked = sectionEditModalOpen || directAddModalOpen
@@ -397,6 +397,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const checklistListProps = {
     sortableDisabled: dndLocked,
     checks,
+    actors,
     handleToggle,
     onEditItem: openSectionEditorForSingleItem,
     onDeleteItem: confirmDeleteSingleItem,

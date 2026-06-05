@@ -45,3 +45,15 @@ export async function removeTripMember(tripId, userId) {
 export function buildTripInviteUrl(token) {
   return `${window.location.origin}/trips/invite/${token}`
 }
+
+/** 내가 받은 트립 초대(수락 대기) 목록 */
+export async function fetchReceivedTripInvites() {
+  const res = await apiClient.get('/trips/member-invites/received')
+  return res.data
+}
+
+/** 받은 초대 응답 — action: 'accept' | 'decline' */
+export async function respondTripInvite(tripId, action) {
+  const res = await apiClient.patch(`/trips/${tripId}/members/me`, { action })
+  return res.data
+}

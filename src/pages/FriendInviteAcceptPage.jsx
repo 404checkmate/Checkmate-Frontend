@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { previewFriendInvite, acceptFriendInvite } from '@/api/friends'
 import { savePendingFriendInvite, clearPendingFriendInvite } from '@/utils/pendingFriendInvite'
+import { trackEvent } from '@/utils/analyticsTracker'
 import defaultProfileImg from '@/assets/default-profile.png'
 
 const PAGE_BG = {
@@ -46,6 +47,7 @@ export default function FriendInviteAcceptPage() {
     setAcceptError('')
     try {
       const result = await acceptFriendInvite(token)
+      trackEvent('friend_invite_accepted', { step: 'friend_accept', already: Boolean(result.alreadyFriends) })
       clearPendingFriendInvite()
       setDone(result)
     } catch (err) {

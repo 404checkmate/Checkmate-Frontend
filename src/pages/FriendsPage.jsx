@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { createFriendInvite, listFriends, removeFriend, buildFriendInviteUrl } from '@/api/friends'
+import { trackEvent } from '@/utils/analyticsTracker'
 import defaultProfileImg from '@/assets/default-profile.png'
 
 const PAGE_BG = {
@@ -54,6 +55,7 @@ export default function FriendsPage() {
     setInviting(true)
     try {
       const { token } = await createFriendInvite()
+      trackEvent('friend_invite_created', { button: 'friend_invite' })
       const url = buildFriendInviteUrl(token)
       const isTouch = window.matchMedia('(pointer: coarse)').matches
       if (isTouch && navigator.share) {

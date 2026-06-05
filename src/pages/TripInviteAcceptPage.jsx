@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { previewTripInvite, acceptTripInvite } from '@/api/tripMembers'
 import { savePendingTripInvite, clearPendingTripInvite } from '@/utils/pendingTripInvite'
+import { trackEvent } from '@/utils/analyticsTracker'
 import defaultProfileImg from '@/assets/default-profile.png'
 
 const PAGE_BG = {
@@ -50,6 +51,7 @@ export default function TripInviteAcceptPage() {
     setAcceptError('')
     try {
       const result = await acceptTripInvite(token)
+      trackEvent('trip_invite_accepted', { step: 'trip_join', via: 'link', trip_id: result.tripId })
       clearPendingTripInvite()
       // 합류한 체크리스트로 바로 이동 (보관함 엔트리가 없으면 탐색 화면)
       if (result.archiveId) {

@@ -24,6 +24,7 @@ import {
   fetchGuestPreview,
   fetchTravelTest,
   fetchTravelTestTypes,
+  fetchCollab,
 } from '@/api/admin'
 
 const PAGE_BG = {
@@ -178,7 +179,7 @@ export default function AdminDashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes] =
+      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab] =
         await Promise.all([
           fetchFunnel(range),
           fetchLogins(range),
@@ -189,8 +190,9 @@ export default function AdminDashboardPage() {
           fetchGuestPreview(range),
           fetchTravelTest(range),
           fetchTravelTestTypes(range),
+          fetchCollab(range),
         ])
-      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes })
+      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab })
     } catch (err) {
       setError(err?.response?.status === 403
         ? '관리자 권한이 없습니다.'
@@ -253,6 +255,7 @@ export default function AdminDashboardPage() {
   const guestPreview = data.guestPreview ?? []
   const travelTest = data.travelTest ?? []
   const travelTestTypes = data.travelTestTypes ?? []
+  const collab = data.collab ?? []
 
   return (
     <div className="min-h-screen pb-16" style={PAGE_BG}>
@@ -371,6 +374,24 @@ export default function AdminDashboardPage() {
                 <Bar dataKey="completed" name="완료" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="shared" name="공유" fill="#f59e0b" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="checklist_created" name="체크리스트" fill="#10b981" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          {/* 쿼리 13 — 친구·협업 퍼널 */}
+          <ChartCard title="친구·협업 퍼널" note="초대 → 수락 일별 이벤트 수 (2026-06-05 신설)">
+            <ResponsiveContainer>
+              <BarChart data={collab}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="day" fontSize={11} tickFormatter={(d) => d.slice(5)} />
+                <YAxis fontSize={11} allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="friend_invites" name="친구초대" fill="#94a3b8" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="friends_made" name="친구성립" fill="#0ea5e9" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="trip_invites" name="트립초대" fill="#f59e0b" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="trip_joins" name="합류" fill="#10b981" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="trip_declines" name="거절" fill="#ef4444" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>

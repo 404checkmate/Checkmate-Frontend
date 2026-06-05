@@ -4,6 +4,7 @@ import { TRAVEL_STYLE_QUESTIONS } from '@/data/travelStyleQuestions'
 import { PIECE_TAG_TO_KEY, THEME_TAG_TO_KEY } from '@/data/travelStyleResults'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { ga4Event } from '@/utils/ga4'
+import { saveTravelStyleResult } from '@/utils/travelStyleResultStorage'
 
 const STEP_INTERVAL_MS   = 700
 const PROGRESS_INTERVAL_MS = 50
@@ -68,6 +69,7 @@ export function useTravelStyleLoading(totalSteps) {
     // 퍼널 3단계: 10문항 완료 (결과 유형 포함)
     trackEvent('travel_test_completed', { step: 'travel_test', result: `${result.theme}_${result.piece}` })
     ga4Event('travel_test_completed', { result: `${result.theme}_${result.piece}` })
+    saveTravelStyleResult(result) // 마이페이지 "내 여행 유형" 카드용
 
     const stepTimer = setInterval(() => {
       setStepIndex((i) => Math.min(i + 1, totalSteps - 1))

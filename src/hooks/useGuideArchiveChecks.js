@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { loadSavedItems } from '@/utils/savedTripItems'
 import { trackEvent } from '@/utils/analyticsTracker'
 import { getChecklistByTrip, toggleChecklistItem } from '@/api/checklists'
+import { getMe } from '@/api/auth'
 import { notifyTripChange } from '@/lib/tripSyncBus'
 import {
   loadEntryChecklistChecks,
@@ -23,6 +24,8 @@ function isNumericTripId(tripId) {
  * - 마운트: 서버 isChecked 를 가져와 로컬 캐시에 덮어씀 (다기기/공동 편집 대비)
  */
 export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
+  // 아이템별 마지막 수정자 (본인 제외 — 공동 편집 멤버의 손길만 표시)
+  const [actors, setActors] = useState({})
   const [checks, setChecks] = useState(() => {
     const fromStorage = loadEntryChecklistChecks(tripId, entry.id)
     if (Object.keys(fromStorage).length > 0) return fromStorage
@@ -60,9 +63,24 @@ export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
     let cancelled = false
     ;(async () => {
       try {
-        const data = await getChecklistByTrip(tripId)
+        const [data, me] = await Promise.all([
+          getChecklistByTrip(tripId),
+          getMe().catch(() => null),
+        ])
         if (cancelled) return
         const serverItems = data?.items ?? []
+        const myNickname = me?.profile?.nickname ?? null
+
+        // 마지막 수정자 매핑 (serverId → localId), 본인 활동은 제외
+        const nextActors = {}
+        for (const sit of serverItems) {
+          const localId = localIdByServerId.get(String(sit.id))
+          if (!localId || !sit.lastActor) continue
+          if (myNickname && sit.lastActor.nickname === myNickname) continue
+          nextActors[localId] = sit.lastActor
+        }
+        setActors(nextActors)
+
         setChecks((prev) => {
           let changed = false
           const next = { ...prev }
@@ -113,5 +131,5 @@ export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
     }
   }, [checks, tripId, entry.id, entry.items])
 
-  return { checks, setChecks, handleToggle }
+  return { checks, setChecks, handleToggle, actors }
 }

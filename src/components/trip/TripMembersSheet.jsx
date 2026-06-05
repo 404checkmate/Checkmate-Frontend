@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createTripInvite, listTripMembers, removeTripMember, addTripMember, buildTripInviteUrl } from '@/api/tripMembers'
 import { listFriends } from '@/api/friends'
 import { getMe } from '@/api/auth'
+import { trackEvent } from '@/utils/analyticsTracker'
 import defaultProfileImg from '@/assets/default-profile.png'
 
 function MemberAvatar({ src, name, size = 'h-9 w-9' }) {
@@ -56,8 +57,11 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
   }, [tripId])
 
   useEffect(() => {
-    if (open) load()
-  }, [open, load])
+    if (open) {
+      load()
+      trackEvent('collab_members_sheet_opened', { page: 'trip_members_sheet', trip_id: tripId })
+    }
+  }, [open, load, tripId])
 
   useEffect(() => {
     if (!open) return
@@ -71,6 +75,7 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
     setInviting(true)
     try {
       const { token } = await createTripInvite(tripId)
+      trackEvent('trip_invite_link_created', { button: 'trip_invite_link', trip_id: tripId })
       const url = buildTripInviteUrl(token)
       const isTouch = window.matchMedia('(pointer: coarse)').matches
       if (isTouch && navigator.share) {
@@ -98,14 +103,21 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
     if (addingId) return
     setAddingId(friend.userId)
     try {
-      await addTripMember(tripId, friend.userId)
-      showNotice(`${friend.nickname}님을 멤버로 추가했어요 🎉`)
-      // 멤버 목록 갱신
+      const result = await addTripMember(tripId, friend.userId)
+      if (result.status === 'already_member') {
+        showNotice(`${friend.nickname}님은 이미 멤버예요`)
+      } else if (result.status === 'already_invited') {
+        showNotice(`${friend.nickname}님에게 보낸 초대가 수락 대기 중이에요`)
+      } else {
+        trackEvent('trip_invite_sent', { button: 'trip_invite_direct', trip_id: tripId })
+        showNotice(`${friend.nickname}님에게 초대를 보냈어요 💌 수락하면 함께 준비할 수 있어요`)
+      }
+      // 멤버 목록 갱신 (수락 대기 중으로 표시됨)
       const rows = await listTripMembers(tripId).catch(() => null)
       if (rows) setMembers(rows)
     } catch (err) {
       const msg = err?.response?.data?.error?.message
-      showNotice(msg || '추가에 실패했어요. 잠시 후 다시 시도해 주세요.')
+      showNotice(msg || '초대에 실패했어요. 잠시 후 다시 시도해 주세요.')
     } finally {
       setAddingId(null)
     }
@@ -215,9 +227,15 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
             <ul className="flex max-h-64 flex-col gap-2 overflow-y-auto">
               {members.map((m) => {
                 const isSelf = m.userId === myUserId
+                const isPending = m.status === 'pending'
                 const canRemove = isSelf ? m.role !== 'owner' : amOwner
                 return (
-                  <li key={m.userId} className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50/60 px-3 py-2.5">
+                  <li
+                    key={m.userId}
+                    className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 ${
+                      isPending ? 'border-dashed border-amber-200 bg-amber-50/40' : 'border-gray-100 bg-gray-50/60'
+                    }`}
+                  >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <MemberAvatar src={m.profileImageUrl} name={m.nickname} />
                       <div className="min-w-0">
@@ -225,8 +243,8 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
                           {m.nickname}
                           {isSelf && <span className="ml-1 text-[10px] font-semibold text-gray-400">(나)</span>}
                         </p>
-                        <p className="text-[10px] font-semibold text-gray-400">
-                          {m.role === 'owner' ? '👑 소유자' : '편집 멤버'}
+                        <p className={`text-[10px] font-semibold ${isPending ? 'text-amber-600' : 'text-gray-400'}`}>
+                          {isPending ? '⏳ 수락 대기 중' : m.role === 'owner' ? '👑 소유자' : '편집 멤버'}
                         </p>
                       </div>
                     </div>
@@ -237,7 +255,7 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
                         disabled={removingId === m.userId}
                         className="shrink-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-400 transition hover:border-red-200 hover:text-red-500 disabled:opacity-50"
                       >
-                        {removingId === m.userId ? '처리 중…' : isSelf ? '나가기' : '내보내기'}
+                        {removingId === m.userId ? '처리 중…' : isSelf ? '나가기' : isPending ? '초대 취소' : '내보내기'}
                       </button>
                     )}
                   </li>
