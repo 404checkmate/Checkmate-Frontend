@@ -48,6 +48,9 @@ export default defineConfig(({ mode }) => {
             if (id.includes('@dnd-kit')) return 'vendor-dnd'
             if (id.includes('@supabase')) return 'vendor-supabase'
             if (id.includes('axios')) return 'vendor-axios'
+            // 특정 페이지에서만 쓰는 무거운 라이브러리는 분리 (필요할 때만 로드)
+            if (id.includes('recharts')) return 'vendor-recharts'
+            if (id.includes('html-to-image')) return 'vendor-html-to-image'
             return 'vendor'
           },
         },

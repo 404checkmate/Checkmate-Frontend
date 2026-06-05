@@ -107,13 +107,17 @@ function TripNewDestinationPageInner({ navState }) {
   }, [])
 
   // ─── 여행 스타일 테스트 결과에서 자동 입력 ──────────────────────────────────
+  // 테스트 B축 테마 → 트립 생성 여행 스타일 id (food→foodie 외 동일)
   const STYLE_TO_TRAVEL_IDS = {
-    rook:   ['photo'],
-    knight: ['activity'],
-    bishop: ['culture', 'landmark'],
-    queen:  ['foodie', 'photo', 'culture'],
-    king:   ['landmark', 'activity'],
-    pawn:   ['healing', 'foodie'],
+    activity:  ['activity'],
+    culture:   ['culture'],
+    food:      ['foodie'],
+    healing:   ['healing'],
+    landmark:  ['landmark'],
+    nature:    ['nature'],
+    nightlife: ['nightlife'],
+    photo:     ['photo'],
+    shopping:  ['shopping'],
   }
   useEffect(() => {
     const dest = navState?.prefilledDestination
