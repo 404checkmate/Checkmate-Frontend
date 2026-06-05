@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Navigate } from 'react-router-dom'
 import {
   STEP_DESTINATION_CONFIG,
   MOBILE_QUICK_DESTINATION_CHIPS,
+  COUNTRY_ARRIVAL_OPTIONS,
   filterArrivalsByQuery,
   getArrivalsForCountry,
   sanitizeCountryInput,
@@ -104,6 +105,40 @@ function TripNewDestinationPageInner({ navState }) {
   useEffect(() => {
     clearActiveTripId()
   }, [])
+
+  // ─── 여행 스타일 테스트 결과에서 자동 입력 ──────────────────────────────────
+  // 테스트 B축 테마 → 트립 생성 여행 스타일 id (food→foodie 외 동일)
+  const STYLE_TO_TRAVEL_IDS = {
+    activity:  ['activity'],
+    culture:   ['culture'],
+    food:      ['foodie'],
+    healing:   ['healing'],
+    landmark:  ['landmark'],
+    nature:    ['nature'],
+    nightlife: ['nightlife'],
+    photo:     ['photo'],
+    shopping:  ['shopping'],
+  }
+  useEffect(() => {
+    const dest = navState?.prefilledDestination
+    const styleKey = navState?.prefilledTravelStyle
+    if (!dest) return
+    const countryEntry = COUNTRY_ARRIVAL_OPTIONS.find((c) => c.countryCode === dest.countryCode)
+    if (!countryEntry) return
+    const arrivals = countryEntry.arrivals ?? [{ city: countryEntry.city, iata: countryEntry.iata }]
+    const arrival = arrivals.find((a) => a.iata === dest.iata) ?? arrivals[0]
+    setSelectedCountry({
+      iata: arrival.iata,
+      city: arrival.city,
+      country: countryEntry.country,
+      countryCode: countryEntry.countryCode,
+      name: countryEntry.name,
+    })
+    if (styleKey && STYLE_TO_TRAVEL_IDS[styleKey]) {
+      setStyleIds(STYLE_TO_TRAVEL_IDS[styleKey])
+      setSection5Visible(true)
+    }
+  }, [navState?.prefilledDestination, navState?.prefilledTravelStyle])
 
   // iOS 오버스크롤(rubber-band)로 헤더와 진행률바가 어긋나는 현상 방지
   useEffect(() => {

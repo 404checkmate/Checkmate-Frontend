@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase'
-import { signOut } from '@/api/auth'
+import { getMe, signOut } from '@/api/auth'
 import defaultProfileImg from '@/assets/default-profile.png'
 
 const PAGE_BG = {
@@ -24,6 +24,25 @@ function MyPage() {
   const [state, setState] = useState(isSupabaseConfigured() ? 'loading' : 'unconfigured')
   const [session, setSession] = useState(null)
   const [signingOut, setSigningOut] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // 관리자 여부 — 백엔드 /auth/me 의 isAdmin(ADMIN_EMAILS 허용 목록) 기준
+  useEffect(() => {
+    if (state !== 'signed_in') {
+      setIsAdmin(false)
+      return undefined
+    }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const me = await getMe()
+        if (!cancelled) setIsAdmin(Boolean(me?.isAdmin))
+      } catch {
+        if (!cancelled) setIsAdmin(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [state])
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return undefined
@@ -80,6 +99,7 @@ function MyPage() {
             state={state}
             session={session}
             signingOut={signingOut}
+            isAdmin={isAdmin}
             onSignOut={handleSignOut}
             onGoLogin={() => navigate('/login')}
           />
@@ -98,7 +118,7 @@ function MyPage() {
  *   onGoLogin: () => void,
  * }} props
  */
-function AuthStatusCard({ state, session, signingOut, onSignOut, onGoLogin }) {
+function AuthStatusCard({ state, session, signingOut, isAdmin = false, onSignOut, onGoLogin }) {
   if (state === 'loading') {
     return (
       <section
@@ -196,6 +216,19 @@ function AuthStatusCard({ state, session, signingOut, onSignOut, onGoLogin }) {
         <InfoRow label="사용자 ID" value={sub ? shortenSub(sub) : '—'} title={sub} />
         <InfoRow label="소셜 계정" value={provider ?? '—'} />
       </dl>
+
+      {isAdmin ? (
+        <Link
+          to="/admin/dashboard"
+          className="mt-5 flex w-full items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 transition hover:bg-indigo-100"
+        >
+          <span className="flex items-center gap-2">
+            <span className="rounded-md bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Admin</span>
+            <span className="text-sm font-bold text-indigo-900">스크럼 대시보드</span>
+          </span>
+          <span className="text-xs font-semibold text-indigo-500">지표 보기 →</span>
+        </Link>
+      ) : null}
 
       <div className="mt-5 flex flex-wrap gap-2">
         <button

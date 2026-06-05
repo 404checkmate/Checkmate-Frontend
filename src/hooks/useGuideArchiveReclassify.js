@@ -20,7 +20,7 @@ export function useGuideArchiveReclassify({ tripId, entry, localItems, setLocalI
   }, [localItems])
 
   useEffect(() => {
-    if (!candidatesSignature) return
+    if (!entry || !candidatesSignature) return
     const requestKey = `${String(tripId)}:${String(entry.id)}:${candidatesSignature}`
     if (attemptedRef.current.has(requestKey)) return
     attemptedRef.current.add(requestKey)
@@ -106,5 +106,5 @@ export function useGuideArchiveReclassify({ tripId, entry, localItems, setLocalI
     })()
 
     return () => { cancelled = true }
-  }, [tripId, entry.id, candidatesSignature, localItems, onArchiveMutated])
+  }, [tripId, entry?.id, candidatesSignature, localItems, onArchiveMutated])
 }

@@ -15,13 +15,19 @@ const TripNewDestinationPage = lazy(() => import('@/pages/TripNewDestinationPage
 const TripLoadingPage = lazy(() => import('@/pages/TripLoadingPage'))
 const TripSearchPage = lazy(() => import('@/pages/TripSearchPage'))
 const TripGuideArchiveDetailPage = lazy(() => import('@/pages/TripGuideArchiveDetailPage'))
+const GuestGuideArchivePreviewPage = lazy(() => import('@/pages/GuestGuideArchivePreviewPage'))
 const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const MyPage = lazy(() => import('@/pages/MyPage'))
+const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'))
 const ErrorPage = lazy(() => import('@/pages/ErrorPage'))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
 const CurationArticlePage = lazy(() => import('@/pages/CurationArticlePage'))
+const TravelStyleTestPage = lazy(() => import('@/pages/TravelStyleTestPage'))
+const TravelStyleQuestionsPage = lazy(() => import('@/pages/TravelStyleQuestionsPage'))
+const TravelStyleLoadingPage = lazy(() => import('@/pages/TravelStyleLoadingPage'))
+const TravelStyleResultPage = lazy(() => import('@/pages/TravelStyleResultPage'))
 import { FEATURE_PROFILE_ONBOARDING_ENABLED } from '@/utils/onboardingGate'
 
 function RouteFallback() {
@@ -76,6 +82,7 @@ const AppRoutes = () => {
         },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <ProtectedRoute>{withSuspense(<MyPage />)}</ProtectedRoute> },
+        { path: '/admin/dashboard',     element: <ProtectedRoute>{withSuspense(<AdminDashboardPage />)}</ProtectedRoute> },
         { path: '/trips/new',             element: <Navigate to="/trips/new/destination" replace /> },
         { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },
         { path: '/trips/new/step2',       element: <Navigate to="/" replace /> },
@@ -83,17 +90,22 @@ const AppRoutes = () => {
         { path: '/trips/new/step4',       element: <Navigate to="/" replace /> },
         { path: '/trips/new/step5',       element: <Navigate to="/" replace /> },
         { path: '/trips/guest/search',                element: withSuspense(<TripSearchPage />) },
+        { path: '/trips/guest/guide-archive/preview', element: withSuspense(<GuestGuideArchivePreviewPage />) },
         { path: '/trips/:id/search',                  element: <ProtectedRoute>{withSuspense(<TripSearchPage />)}</ProtectedRoute> },
         { path: '/guide-archives',                    element: <ProtectedRoute>{withSuspense(<MyGuideArchivesPage />)}</ProtectedRoute> },
         { path: '/trips/:id/guide-archive/:entryId',  element: <ProtectedRoute>{withSuspense(<TripGuideArchiveDetailPage />)}</ProtectedRoute> },
         { path: '/curation/:country',                 element: withSuspense(<CurationArticlePage />) },
+        { path: '/travel-style-test',                 element: withSuspense(<TravelStyleTestPage />) },
+        { path: '/travel-style-test/questions',       element: withSuspense(<TravelStyleQuestionsPage />) },
+        { path: '/travel-style-test/result',          element: withSuspense(<TravelStyleResultPage />) },
         { path: '/404',                 element: withSuspense(<NotFoundPage />) },
       ],
     },
 
     // 로딩 페이지 - Header/Footer 없는 독립 풀스크린 (RootLayout 미적용)
-    { path: '/trips/guest/loading',   element: withSuspense(<TripLoadingPage />) },
-    { path: '/trips/:id/loading', element: <ProtectedRoute>{withSuspense(<TripLoadingPage />)}</ProtectedRoute> },
+    { path: '/trips/guest/loading',              element: withSuspense(<TripLoadingPage />) },
+    { path: '/trips/:id/loading',                element: <ProtectedRoute>{withSuspense(<TripLoadingPage />)}</ProtectedRoute> },
+    { path: '/travel-style-test/loading',        element: withSuspense(<TravelStyleLoadingPage />) },
 
     // 법적 고지 - Header/Footer 없는 단독 페이지 (누구나 접근 가능)
     { path: '/privacy', element: withSuspense(<PrivacyPage />) },

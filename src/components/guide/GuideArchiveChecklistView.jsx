@@ -60,7 +60,7 @@ function calcProgress(items, checksState) {
  * **순서 변경**: 카드 오른쪽 **드래그 핸들**만 잡고 이동(@dnd-kit). 스토리지 반영은 「완료」와 동일 시점.
  * `onArchiveMutated`: 삭제·저장 후 부모가 스토리지에서 entry를 다시 읽을 때 호출합니다.
  */
-export default function GuideArchiveChecklistView({ tripId, entry, companions = [], travelStyles = [], onArchiveMutated }) {
+export default function GuideArchiveChecklistView({ tripId, entry, companions = [], travelStyles = [], onArchiveMutated, isPreview = false, onItemsChange, onSaveIntent }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
@@ -104,7 +104,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const effectiveItemCategory = viewBasis === VIEW_BASIS_SUPPLIES ? suppliesCategory : 'all'
 
   // ── 훅 ────────────────────────────────────────────────
-  useGuideArchiveReclassify({ tripId, entry, localItems, setLocalItems, onArchiveMutated })
+  useGuideArchiveReclassify({ tripId: isPreview ? null : tripId, entry: isPreview ? null : entry, localItems, setLocalItems, onArchiveMutated })
   const {
     dndSensors,
     activeDragItem,
@@ -227,15 +227,18 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     // 서버/로컬 저장 (비동기, refetch 트리거 없음 — race condition 방지)
     const nextChecks = { ...checks, [String(id)]: false }
     const progressN = calcProgress(newItems, nextChecks)
-    saveEntryChecklistChecks(tripId, entry.id, nextChecks)
-    patchGuideArchiveEntry(tripId, entry.id, {
-      items: newItems,
-      checklistProgressPercent: progressN,
-      checklistSavedAt: new Date().toISOString(),
-    })
-    saveItemForTrip(tripId, { id, category: GUIDE_USER_DIRECT_SECTION_LABEL, title, subtitle: description || title })
+    if (!isPreview) {
+      saveEntryChecklistChecks(tripId, entry.id, nextChecks)
+      patchGuideArchiveEntry(tripId, entry.id, {
+        items: newItems,
+        checklistProgressPercent: progressN,
+        checklistSavedAt: new Date().toISOString(),
+      })
+      saveItemForTrip(tripId, { id, category: GUIDE_USER_DIRECT_SECTION_LABEL, title, subtitle: description || title })
+    }
+    onItemsChange?.(newItems)
     trackEvent('edit_add', { trip_id: tripId, category: GUIDE_USER_DIRECT_CATEGORY })
-  }, [directAddDraft, items, checks, setChecks, tripId, entry.id])
+  }, [directAddDraft, items, checks, setChecks, tripId, entry.id, isPreview, onItemsChange])
 
   const openSectionEditorForSingleItem = useCallback((item) => {
     const bagKey = resolveBaggageSection(item)
@@ -250,32 +253,35 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   }, [])
 
   const persistItemsAndChecks = useCallback((newItems, nextChecks) => {
-    const nextIds = new Set(newItems.map((it) => String(it.id)))
-    for (const it of items) {
-      const id = String(it.id)
-      if (nextIds.has(id)) continue
-      removeSavedItem(tripId, id)
-      const serverId = it.serverId
-      if (serverId && String(serverId).trim()) {
-        deselectChecklistItem(serverId).catch((err) => {
-          console.warn(
-            `[GuideArchiveChecklistView] deselectChecklistItem(${serverId}) 실패:`,
-            err?.response?.data?.message || err?.message || err,
-          )
-        })
+    if (!isPreview) {
+      const nextIds = new Set(newItems.map((it) => String(it.id)))
+      for (const it of items) {
+        const id = String(it.id)
+        if (nextIds.has(id)) continue
+        removeSavedItem(tripId, id)
+        const serverId = it.serverId
+        if (serverId && String(serverId).trim()) {
+          deselectChecklistItem(serverId).catch((err) => {
+            console.warn(
+              `[GuideArchiveChecklistView] deselectChecklistItem(${serverId}) 실패:`,
+              err?.response?.data?.message || err?.message || err,
+            )
+          })
+        }
       }
+      const progressN = calcProgress(newItems, nextChecks)
+      saveEntryChecklistChecks(tripId, entry.id, nextChecks)
+      patchGuideArchiveEntry(tripId, entry.id, {
+        items: newItems,
+        checklistProgressPercent: progressN,
+        checklistSavedAt: new Date().toISOString(),
+      })
+      onArchiveMutated?.()
     }
-    const progressN = calcProgress(newItems, nextChecks)
-    saveEntryChecklistChecks(tripId, entry.id, nextChecks)
-    patchGuideArchiveEntry(tripId, entry.id, {
-      items: newItems,
-      checklistProgressPercent: progressN,
-      checklistSavedAt: new Date().toISOString(),
-    })
     setLocalItems(newItems)
     setChecks(nextChecks)
-    onArchiveMutated?.()
-  }, [tripId, entry.id, items, setChecks, onArchiveMutated])
+    onItemsChange?.(newItems)
+  }, [isPreview, tripId, entry.id, items, setChecks, onArchiveMutated, onItemsChange])
 
   const confirmDeleteSingleItem = useCallback((item) => setDeleteItemConfirm(item), [])
 
@@ -307,28 +313,36 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
         detail: (row.detail ?? '').trim(),
       }
     })
-    const progressN = calcProgress(newItems, checks)
-    saveEntryChecklistChecks(tripId, entry.id, checks)
-    patchGuideArchiveEntry(tripId, entry.id, {
-      items: newItems,
-      checklistProgressPercent: progressN,
-      checklistSavedAt: new Date().toISOString(),
-    })
-    for (const r of sectionEditDraft.rows) {
-      const id = String(r.id)
-      const sub =
-        [(r.detail ?? '').trim(), (r.description ?? '').trim()].filter(Boolean).join(' — ') ||
-        (r.title ?? '').trim()
-      patchSavedItemContent(tripId, id, { title: (r.title ?? '').trim(), subtitle: sub })
+    if (!isPreview) {
+      const progressN = calcProgress(newItems, checks)
+      saveEntryChecklistChecks(tripId, entry.id, checks)
+      patchGuideArchiveEntry(tripId, entry.id, {
+        items: newItems,
+        checklistProgressPercent: progressN,
+        checklistSavedAt: new Date().toISOString(),
+      })
+      for (const r of sectionEditDraft.rows) {
+        const id = String(r.id)
+        const sub =
+          [(r.detail ?? '').trim(), (r.description ?? '').trim()].filter(Boolean).join(' — ') ||
+          (r.title ?? '').trim()
+        patchSavedItemContent(tripId, id, { title: (r.title ?? '').trim(), subtitle: sub })
+      }
     }
     setLocalItems(newItems)
+    onItemsChange?.(newItems)
     trackEvent('edit_text', { item_id: sectionEditDraft.rows[0]?.id, trip_id: tripId })
     setSectionEditModalOpen(false)
     setEditingSection(null)
     setSectionEditDraft(null)
-  }, [editingSection, sectionEditDraft, items, tripId, entry.id, checks])
+  }, [editingSection, sectionEditDraft, items, tripId, entry.id, checks, isPreview, onItemsChange])
 
   const performSave = useCallback(async () => {
+    if (isPreview) {
+      setSaveConfirmOpen(false)
+      onSaveIntent?.()
+      return
+    }
     setIsSaving(true)
     try {
       const persisted = {}
@@ -352,9 +366,15 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     } finally {
       setIsSaving(false)
     }
-  }, [tripId, entry.id, items, checks, progress, navigate])
+  }, [tripId, entry.id, items, checks, progress, navigate, isPreview, onSaveIntent])
 
   const handleTempSave = useCallback(async () => {
+    if (isPreview) {
+      onItemsChange?.(items)
+      setTempSaved(true)
+      window.setTimeout(() => setTempSaved(false), 2000)
+      return
+    }
     setIsSaving(true)
     try {
       saveEntryChecklistChecks(tripId, entry.id, checks)
@@ -371,7 +391,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     } finally {
       setIsSaving(false)
     }
-  }, [tripId, entry.id, items, checks, progress])
+  }, [tripId, entry.id, items, checks, progress, isPreview, onItemsChange])
 
   // ── 공통 리스트 props ─────────────────────────────────
   const checklistListProps = {
@@ -452,12 +472,14 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
             <p className="w-full text-sm text-gray-500 sm:max-w-md">직접 추가 창을 닫으면 다시 이 화면을 사용할 수 있어요.</p>
           ) : (
             <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 gap-y-3">
-              <Link
-                to={`/trips/${tripId}/search?archiveEntry=${encodeURIComponent(entry.id)}`}
-                className="inline-flex shrink-0 items-center rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
-              >
-                필수품 추가
-              </Link>
+              {!isPreview && (
+                <Link
+                  to={`/trips/${tripId}/search?archiveEntry=${encodeURIComponent(entry.id)}`}
+                  className="inline-flex shrink-0 items-center rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-amber-500 hover:shadow-md active:scale-[0.98]"
+                >
+                  필수품 추가
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={openDirectAddModal}

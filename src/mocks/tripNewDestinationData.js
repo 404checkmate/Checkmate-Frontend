@@ -210,6 +210,20 @@ export const COUNTRY_ARRIVAL_OPTIONS = [
       { city: '프놈펜', iata: 'PNH', aliases: [] },
     ],
   },
+  {
+    name: '라오스',
+    aliases: [],
+    iata: 'VTE',
+    city: '비엔티안',
+    country: '라오스',
+    countryCode: 'LA',
+    arrivals: [
+      { city: '비엔티안', iata: 'VTE', aliases: [] },
+      { city: '루앙프라방', iata: 'LPQ', aliases: [] },
+      { city: '팍세', iata: 'PKZ', aliases: ['씨판돈'] },
+    ],
+  },
+  { name: '요르단', aliases: ['페트라'], iata: 'AMM', city: '암만', country: '요르단', countryCode: 'JO' },
   { name: '괌', aliases: ['Guam'], iata: 'GUM', city: '투몬', country: '괌', countryCode: 'GU' },
   { name: '사이판', aliases: ['Saipan'], iata: 'GSN', city: '사이판', country: '사이판', countryCode: 'MP' },
   {

@@ -9,6 +9,7 @@ import { buildArchiveSnapshot, buildCurationArchiveSnapshot } from '@/utils/trip
 import { loadPendingGuestSearch, clearPendingGuestSearch } from '@/utils/pendingGuestSearch'
 import { saveActiveTripId } from '@/utils/activeTripIdStorage'
 import { getSupabaseClient } from '@/lib/supabase'
+import { trackEvent } from '@/utils/analyticsTracker'
 
 /**
  * 비로그인(guest) 상태로 진입 후 로그인된 세션이 감지되면
@@ -53,6 +54,11 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
               const snapshot = buildCurationArchiveSnapshot(curationItems, dest)
               const archiveCreated = await createGuideArchive(realId, { name: snapshot.pageTitle, snapshot })
               if (cancelledRef.current) return
+              trackEvent('save_confirm_navigate_guide_archive', {
+                trip_id: realId,
+                item_count: curationItems.length,
+                mode: 'guest_curation_upgrade',
+              })
               clearPendingGuestSearch()
               sessionStorage.removeItem('curationSave')
               if (archiveCreated?.id) {
@@ -99,7 +105,7 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
         const realId = rawId != null ? String(rawId) : null
         if (!realId) return
 
-        const selectedItems = pending.selectedItems ?? []
+        const selectedItems = pending.editedItems ?? pending.selectedItems ?? []
         clearPendingGuestSearch()
         saveActiveTripId(realId)
 
@@ -123,6 +129,12 @@ export function useGuestTripUpgrade({ tripId, setLoadState }) {
           const snapshot = buildArchiveSnapshot(loadActiveTripPlan(), selectedItems)
           const archiveCreated = await createGuideArchive(realId, { name: snapshot.pageTitle, snapshot })
           if (cancelledRef.current) return
+          trackEvent('save_confirm_navigate_guide_archive', {
+            trip_id: realId,
+            item_count: selectedItems.length,
+            mode: 'guest_upgrade',
+            edited_in_preview: Boolean(pending.editedItems),
+          })
           if (archiveCreated?.id) sessionStorage.setItem('lastSavedArchiveId', String(archiveCreated.id))
           navigate('/guide-archives', { replace: true })
           return
