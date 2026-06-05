@@ -1,10 +1,80 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
+import { fetchReceivedTripInvites, respondTripInvite } from '@/api/tripMembers'
 import ArchiveCard, { SkeletonCard } from '@/components/guide/ArchiveCard'
 import ArchiveListControls from '@/components/guide/ArchiveListControls'
 import DeleteConfirmModal from '@/components/guide/DeleteConfirmModal'
 import { trackEvent } from '@/utils/analyticsTracker'
+
+/** 받은 트립 초대 배너 — 수락하면 목록을 다시 불러온다 */
+function ReceivedInvitesBanner({ invites, onResponded }) {
+  const navigate = useNavigate()
+  const [respondingKey, setRespondingKey] = useState(null)
+
+  if (!invites || invites.length === 0) return null
+
+  const respond = async (invite, action) => {
+    if (respondingKey) return
+    setRespondingKey(`${invite.tripId}-${action}`)
+    try {
+      const result = await respondTripInvite(invite.tripId, action)
+      trackEvent(action === 'accept' ? 'trip_invite_accepted' : 'trip_invite_declined', {
+        step: 'trip_join',
+        via: 'direct',
+        trip_id: invite.tripId,
+      })
+      if (action === 'accept' && result.archiveId) {
+        navigate(`/trips/${result.tripId}/guide-archive/${result.archiveId}`)
+        return
+      }
+      onResponded?.()
+    } catch {
+      onResponded?.()
+    } finally {
+      setRespondingKey(null)
+    }
+  }
+
+  return (
+    <div className="mb-4 flex flex-col gap-2">
+      {invites.map((invite) => (
+        <div
+          key={invite.tripId}
+          className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-extrabold text-amber-950">
+              💌 {invite.inviterNickname}님이 함께 준비하자고 초대했어요
+            </p>
+            <p className="mt-0.5 truncate text-xs text-amber-800/70">
+              ✈️ {invite.tripTitle}
+              {invite.tripStart ? ` · ${String(invite.tripStart).slice(0, 10)} 출발` : ''}
+            </p>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => respond(invite, 'accept')}
+              disabled={Boolean(respondingKey)}
+              className="rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-teal-700 disabled:opacity-60"
+            >
+              {respondingKey === `${invite.tripId}-accept` ? '수락 중…' : '수락'}
+            </button>
+            <button
+              type="button"
+              onClick={() => respond(invite, 'decline')}
+              disabled={Boolean(respondingKey)}
+              className="rounded-xl border border-amber-200 bg-white px-4 py-2 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60"
+            >
+              거절
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const PAGE_BG = {
   background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F1F5F9 100%)',
@@ -14,6 +84,7 @@ export default function MyGuideArchivesPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [archives, setArchives] = useState([])
+  const [invites, setInvites] = useState([])
   const [status, setStatus] = useState('loading')
   const [filterTab, setFilterTab] = useState(location.state?.activeTab ?? 'not_started')
   const [deleteMode, setDeleteMode] = useState(false)
@@ -30,6 +101,10 @@ export default function MyGuideArchivesPage() {
         setStatus('idle')
       })
       .catch(() => setStatus('error'))
+    // 받은 트립 초대 — 실패해도 목록은 정상 노출
+    fetchReceivedTripInvites()
+      .then((rows) => setInvites(Array.isArray(rows) ? rows : []))
+      .catch(() => setInvites([]))
   }
 
   useEffect(() => { load() }, [])
@@ -59,6 +134,7 @@ export default function MyGuideArchivesPage() {
         if (filterTab === 'not_started') return progress === 0
         if (filterTab === 'preparing') return progress > 0 && progress < 100
         if (filterTab === 'completed') return progress >= 100
+        if (filterTab === 'shared') return Boolean(a.shared) // 공동 편집 중
         return false
       }),
     [sortedArchives, filterTab],
@@ -110,6 +186,8 @@ export default function MyGuideArchivesPage() {
 
           <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">My Checklists</p>
           <h1 className="mb-4 text-2xl font-extrabold text-slate-900 md:text-3xl">내 체크리스트</h1>
+
+          <ReceivedInvitesBanner invites={invites} onResponded={load} />
 
           <ArchiveListControls
             filterTab={filterTab}

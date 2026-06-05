@@ -66,3 +66,9 @@ export async function fetchTravelTestTypes(range) {
   const res = await apiClient.get('/admin/metrics/travel-test-types', { params: rangeParams(range) })
   return res.data
 }
+
+/** 쿼리 13. 친구·협업 퍼널 (초대→수락 일별 이벤트 수) */
+export async function fetchCollab(range) {
+  const res = await apiClient.get('/admin/metrics/collab', { params: rangeParams(range) })
+  return res.data
+}

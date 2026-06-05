@@ -1,5 +1,33 @@
 import { Link } from 'react-router-dom'
 import GuideArchiveProgressBar from '@/components/guide/GuideArchiveProgressBar'
+import defaultProfileImg from '@/assets/default-profile.png'
+
+/** 공동 편집 표시 — 아바타 스택 + "OO님과 함께" 한 줄 */
+function SharedRow({ shared }) {
+  if (!shared) return null
+  const { isOwner, memberCount, ownerNickname, others } = shared
+  const first = others?.[0]?.nickname
+  const label = isOwner
+    ? `${first ?? '친구'}${memberCount > 2 ? ` 외 ${memberCount - 2}명` : ''}님과 함께 준비 중`
+    : `${ownerNickname}님의 여행 · 함께 준비 중`
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <div className="flex -space-x-2">
+        {(others ?? []).slice(0, 3).map((p, i) => (
+          <img
+            key={`${p.nickname}-${i}`}
+            src={p.profileImageUrl || defaultProfileImg}
+            alt={p.nickname}
+            referrerPolicy="no-referrer"
+            className="h-5 w-5 rounded-full border-2 border-white object-cover"
+            onError={(e) => { e.currentTarget.src = defaultProfileImg }}
+          />
+        ))}
+      </div>
+      <span className="truncate text-[11px] font-bold text-teal-700">👥 {label}</span>
+    </div>
+  )
+}
 
 function formatDate(isoOrDate) {
   if (!isoOrDate) return ''
@@ -50,7 +78,9 @@ export default function ArchiveCard({ archive, deleteMode, isSelected, onToggleS
           ? 'border-teal-400 ring-2 ring-teal-400 ring-offset-1'
           : deleteMode && isSelected
             ? 'border-teal-200 ring-2 ring-teal-500 ring-offset-2'
-            : 'border-slate-100'
+            : archive.shared
+              ? 'border-teal-200/80' // 공동 편집 — 옅은 틸 보더로 구분
+              : 'border-slate-100'
       } ${!deleteMode ? 'hover:shadow-md active:scale-[0.99]' : ''}`}
     >
       {isHighlighted && (
@@ -72,6 +102,8 @@ export default function ArchiveCard({ archive, deleteMode, isSelected, onToggleS
           )}
         </div>
       </div>
+
+      <SharedRow shared={archive.shared} />
 
       {dateLine && (
         <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">

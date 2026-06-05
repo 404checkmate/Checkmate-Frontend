@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '@/components/common/BrandLogo'
+import NotificationBell from '@/components/common/NotificationBell'
 import { clearClientSessionForLogout } from '@/utils/onboardingGate'
 import { useAuth } from '@/hooks/useAuth'
 import defaultProfileImg from '@/assets/default-profile.png'
@@ -161,6 +162,8 @@ function Header() {
         </nav>
 
         <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
+          {/* 알림 벨 — 모바일/데스크탑 공통, 로그인 시에만 */}
+          {isWebLoggedIn && <NotificationBell />}
           {isWebLoggedIn ? (
             <>
               <button

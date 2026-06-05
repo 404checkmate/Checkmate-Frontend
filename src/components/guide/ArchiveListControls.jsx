@@ -4,6 +4,7 @@ const STATUS_TABS = [
   { id: 'not_started', label: '시작 전' },
   { id: 'preparing',   label: '준비 중' },
   { id: 'completed',   label: '완료' },
+  { id: 'shared',      label: '👥 함께' }, // 공동 편집 중인 체크리스트만
 ]
 
 function FilterIcon({ className = 'h-4 w-4' }) {

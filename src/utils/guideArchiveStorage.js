@@ -21,6 +21,7 @@ import {
   fetchTripGuideArchives as apiFetchTripGuideArchives,
   toEntryShape,
 } from '@/api/guideArchives'
+import { notifyTripChange } from '@/lib/tripSyncBus'
 
 /**
  * @typedef {Object} GuideArchiveEntry
@@ -95,6 +96,8 @@ export async function patchGuideArchiveEntry(_tripId, entryId, partial) {
   const nextSnap = { ...baseSnap, ...partial }
   try {
     const updated = await apiUpdateGuideArchive(entryId, { snapshot: nextSnap })
+    // 공동 편집 멤버에게 "변경됨" 핑 (Phase 3 — useTripRealtimeSync가 발행)
+    notifyTripChange(_tripId, { kind: 'archive' })
     return toEntryShape(updated)
   } catch (err) {
     if (import.meta.env.DEV) {

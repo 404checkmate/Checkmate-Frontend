@@ -21,3 +21,14 @@ export async function acceptLegalConsent({ marketingOptIn = false } = {}) {
   const res = await apiClient.post('/users/me/consent', { marketingOptIn })
   return res.data
 }
+
+/**
+ * 회원탈퇴 — 개인정보 익명화 + 트립 삭제 + 친구/멤버 관계 정리.
+ * 성공 후 프론트에서 signOut() 필수.
+ *
+ *   DELETE /api/users/me
+ */
+export async function deleteMyAccount() {
+  const res = await apiClient.delete('/users/me')
+  return res.data
+}

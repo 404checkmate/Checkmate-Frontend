@@ -28,6 +28,9 @@ const TravelStyleTestPage = lazy(() => import('@/pages/TravelStyleTestPage'))
 const TravelStyleQuestionsPage = lazy(() => import('@/pages/TravelStyleQuestionsPage'))
 const TravelStyleLoadingPage = lazy(() => import('@/pages/TravelStyleLoadingPage'))
 const TravelStyleResultPage = lazy(() => import('@/pages/TravelStyleResultPage'))
+const FriendsPage = lazy(() => import('@/pages/FriendsPage'))
+const FriendInviteAcceptPage = lazy(() => import('@/pages/FriendInviteAcceptPage'))
+const TripInviteAcceptPage = lazy(() => import('@/pages/TripInviteAcceptPage'))
 import { FEATURE_PROFILE_ONBOARDING_ENABLED } from '@/utils/onboardingGate'
 
 function RouteFallback() {
@@ -82,6 +85,9 @@ const AppRoutes = () => {
         },
         { path: '/signup',              element: <Navigate to="/login" replace /> },
         { path: '/mypage',              element: <ProtectedRoute>{withSuspense(<MyPage />)}</ProtectedRoute> },
+        { path: '/mypage/friends',      element: <ProtectedRoute>{withSuspense(<FriendsPage />)}</ProtectedRoute> },
+        { path: '/friends/invite/:token', element: withSuspense(<FriendInviteAcceptPage />) },
+        { path: '/trips/invite/:token',   element: withSuspense(<TripInviteAcceptPage />) },
         { path: '/admin/dashboard',     element: <ProtectedRoute>{withSuspense(<AdminDashboardPage />)}</ProtectedRoute> },
         { path: '/trips/new',             element: <Navigate to="/trips/new/destination" replace /> },
         { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },

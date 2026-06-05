@@ -39,7 +39,16 @@ function App() {
     try {
       if (!sessionStorage.getItem(SESSION_START_KEY)) {
         const lastVisit = localStorage.getItem('checkmate:last_visit')
-        trackEvent('session_start', { is_returning: !!lastVisit })
+        // 유입 채널 — 어드민 대시보드 쿼리 4(channels)에서 사용
+        const params = new URLSearchParams(window.location.search)
+        trackEvent('session_start', {
+          is_returning: !!lastVisit,
+          utm_source: params.get('utm_source') || null,
+          utm_medium: params.get('utm_medium') || null,
+          utm_campaign: params.get('utm_campaign') || null,
+          referrer: document.referrer || null,
+          landing: window.location.pathname,
+        })
         sessionStorage.setItem(SESSION_START_KEY, '1')
         localStorage.setItem('checkmate:last_visit', String(Date.now()))
       }

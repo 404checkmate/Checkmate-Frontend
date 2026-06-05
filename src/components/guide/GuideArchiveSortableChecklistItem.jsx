@@ -161,6 +161,7 @@ export default function GuideArchiveSortableChecklistItem({
   item,
   sortableDisabled,
   checks,
+  lastActor = null,
   handleToggle,
   onEditItem,
   onDeleteItem,
@@ -373,6 +374,21 @@ export default function GuideArchiveSortableChecklistItem({
               {item.description ? (
                 <span className={`mt-1 block text-xs leading-relaxed ${showCheckedStyle ? 'text-gray-700' : 'text-gray-600'}`}>
                   {item.description}
+                </span>
+              ) : null}
+              {lastActor ? (
+                <span className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-teal-600/80">
+                  {lastActor.profileImageUrl ? (
+                    <img
+                      src={lastActor.profileImageUrl}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      className="h-3.5 w-3.5 rounded-full border border-white object-cover"
+                    />
+                  ) : (
+                    <span aria-hidden>👤</span>
+                  )}
+                  {lastActor.nickname}님이 수정
                 </span>
               ) : null}
               {item.detail ? (
