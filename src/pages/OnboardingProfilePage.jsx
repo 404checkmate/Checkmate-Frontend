@@ -12,6 +12,12 @@ import {
   markOnboardingComplete,
 } from '@/utils/onboardingGate'
 import { updateMyProfile } from '@/api/users'
+import { getMe } from '@/api/auth'
+import { loadPendingFriendInvite, clearPendingFriendInvite } from '@/utils/pendingFriendInvite'
+import { loadPendingTripInvite, clearPendingTripInvite } from '@/utils/pendingTripInvite'
+
+const NICKNAME_MIN = 2
+const NICKNAME_MAX = 12
 
 /** 온보딩 마지막「체크메이트 시작하기」 */
 const ONBOARDING_FINISH_BTN_CLASS =
@@ -51,26 +57,48 @@ function SectionInputConfirmed({ show, align = 'start' }) {
 }
 
 /**
- * 소셜 로그인 직후 1회 프로필 수집 — **성별·생년월일**.
+ * 소셜 로그인 직후 1회 프로필 수집 — **닉네임·성별·생년월일**.
  * 섹션은 순차적으로만 펼쳐지며(@formkit/auto-animate), 이전 단계는 살짝 흐리게.
  */
 export default function OnboardingProfilePage() {
   const navigate = useNavigate()
   const [listRef] = useAutoAnimate({ duration: 320, easing: 'ease-out' })
 
+  const [nickname, setNickname] = useState('')
   const [gender, setGender] = useState('')
   const [birthDate, setBirthDate] = useState('')
 
-  /** 순차 단계: 성별 1, 생년월일 2, 하단 완료 버튼 3 */
+  /** 순차 단계: 닉네임 1, 성별 2, 생년월일 3, 하단 완료 버튼 4 */
   const [revealed, setRevealed] = useState(1)
   const [finishModalOpen, setFinishModalOpen] = useState(false)
 
   const bottomAnchorRef = useRef(null)
 
+  const nicknameTrimmed = nickname.trim()
+  const nickOk = nicknameTrimmed.length >= NICKNAME_MIN && nicknameTrimmed.length <= NICKNAME_MAX
   const genderOk = gender !== ''
   const birthOk = birthDate !== ''
 
-  const canFinish = genderOk && birthOk
+  const canFinish = nickOk && genderOk && birthOk
+
+  // 소셜 로그인 시 서버가 정한 기본 닉네임(소셜 이름 등)을 초깃값으로
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const me = await getMe()
+        if (cancelled) return
+        const current = me?.profile?.nickname
+        if (current) {
+          setNickname((prev) => prev || current)
+          setRevealed((r) => Math.max(r, 2))
+        }
+      } catch {
+        /* 미로그인/실패 시 빈 입력으로 시작 */
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const scrollToBottom = useCallback(() => {
     window.setTimeout(() => {
@@ -82,10 +110,23 @@ export default function OnboardingProfilePage() {
     if (!canFinish) return
     const sub = getActiveOnboardingSubject()
     if (sub) markOnboardingComplete(sub)
-    updateMyProfile({ gender, birthDate }).catch(() => {})
+    updateMyProfile({ nickname: nicknameTrimmed, gender, birthDate }).catch(() => {})
     setFinishModalOpen(false)
+    // 친구/트립 초대 링크에서 가입한 신규 유저 — 온보딩 완료 후 수락 페이지로 복귀
+    const pendingFriendInvite = loadPendingFriendInvite()
+    if (pendingFriendInvite) {
+      clearPendingFriendInvite()
+      navigate(`/friends/invite/${pendingFriendInvite}`, { replace: true })
+      return
+    }
+    const pendingTripInvite = loadPendingTripInvite()
+    if (pendingTripInvite) {
+      clearPendingTripInvite()
+      navigate(`/trips/invite/${pendingTripInvite}`, { replace: true })
+      return
+    }
     navigate('/', { replace: true })
-  }, [birthDate, canFinish, gender, navigate])
+  }, [birthDate, canFinish, gender, navigate, nicknameTrimmed])
 
   const handleFormSubmit = (e) => {
     e.preventDefault()
@@ -172,43 +213,71 @@ export default function OnboardingProfilePage() {
           <div ref={listRef} className="flex flex-col gap-6">
             <div>
               <h2 className="mb-3 text-left text-base font-bold tracking-tight text-gray-900">기본 정보</h2>
-              <p className="text-xs text-gray-500">성별과 생년월일을 입력해 주세요.</p>
+              <p className="text-xs text-gray-500">닉네임, 성별과 생년월일을 입력해 주세요.</p>
             </div>
 
-            {/* 1 성별 */}
-            <section className={sectionShell(revealed >= 2 && genderOk)}>
+            {/* 1 닉네임 */}
+            <section className={sectionShell(revealed >= 2 && nickOk)}>
               <div className="p-5">
-                <p className="mb-3 text-sm font-semibold text-gray-800">성별 (Gender)</p>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  {[
-                    { v: 'female', label: '여성' },
-                    { v: 'male', label: '남성' },
-                  ].map(({ v, label }) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => {
-                        setGender(v)
-                        setRevealed((r) => Math.max(r, 2))
-                        scrollToBottom()
-                      }}
-                      className={`rounded-xl border-2 py-3 text-sm font-bold transition ${
-                        gender === v
-                          ? 'border-teal-500 bg-teal-50 text-teal-900 shadow-sm shadow-teal-900/10'
-                          : 'border-gray-200 bg-white/90 text-gray-700 hover:border-teal-200 hover:bg-teal-50/40'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <SectionInputConfirmed show={genderOk} />
+                <p className="mb-2 text-sm font-semibold text-gray-800">닉네임 (Nickname)</p>
+                <p className="mb-3 text-xs text-gray-500">
+                  친구에게 보여질 이름이에요. {NICKNAME_MIN}~{NICKNAME_MAX}자로 입력해 주세요.
+                </p>
+                <input
+                  type="text"
+                  value={nickname}
+                  maxLength={NICKNAME_MAX}
+                  placeholder="예) 여행하는체스말"
+                  onChange={(e) => {
+                    setNickname(e.target.value)
+                    const trimmed = e.target.value.trim()
+                    if (trimmed.length >= NICKNAME_MIN && revealed === 1) {
+                      setRevealed(2)
+                      scrollToBottom()
+                    }
+                  }}
+                  className="w-full rounded-xl border-2 border-gray-200 bg-white/90 px-4 py-3 text-sm font-semibold text-gray-900 outline-none transition placeholder:font-normal placeholder:text-gray-400 focus:border-teal-400 focus:bg-teal-50/30"
+                />
+                <SectionInputConfirmed show={nickOk} />
               </div>
             </section>
 
-            {/* 2 생년월일 */}
-            {revealed >= 2 && genderOk && (
-              <section className={sectionShell(revealed >= 3 && birthOk)}>
+            {/* 2 성별 */}
+            {revealed >= 2 && nickOk && (
+              <section className={sectionShell(revealed >= 3 && genderOk)}>
+                <div className="p-5">
+                  <p className="mb-3 text-sm font-semibold text-gray-800">성별 (Gender)</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {[
+                      { v: 'female', label: '여성' },
+                      { v: 'male', label: '남성' },
+                    ].map(({ v, label }) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => {
+                          setGender(v)
+                          setRevealed((r) => Math.max(r, 3))
+                          scrollToBottom()
+                        }}
+                        className={`rounded-xl border-2 py-3 text-sm font-bold transition ${
+                          gender === v
+                            ? 'border-teal-500 bg-teal-50 text-teal-900 shadow-sm shadow-teal-900/10'
+                            : 'border-gray-200 bg-white/90 text-gray-700 hover:border-teal-200 hover:bg-teal-50/40'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <SectionInputConfirmed show={genderOk} />
+                </div>
+              </section>
+            )}
+
+            {/* 3 생년월일 */}
+            {revealed >= 3 && genderOk && (
+              <section className={sectionShell(revealed >= 4 && birthOk)}>
                 <div className="p-5">
                   <p className="mb-2 text-sm font-semibold text-gray-800">생년월일 (Date of Birth)</p>
                   <p className="mb-3 text-xs text-gray-500">연·월을 고른 뒤 날짜를 눌러 주세요.</p>
@@ -219,7 +288,7 @@ export default function OnboardingProfilePage() {
                     onChange={(iso) => {
                       setBirthDate(iso)
                       if (iso) {
-                        setRevealed((r) => Math.max(r, 3))
+                        setRevealed((r) => Math.max(r, 4))
                         scrollToBottom()
                       }
                     }}
@@ -236,7 +305,7 @@ export default function OnboardingProfilePage() {
 
           <div ref={bottomAnchorRef} className="h-px w-full shrink-0" aria-hidden="true" />
 
-          {revealed >= 3 && birthOk && (
+          {revealed >= 4 && birthOk && (
             <button
               type="button"
               disabled={!canFinish}

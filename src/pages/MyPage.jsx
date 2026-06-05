@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase'
 import { getMe, signOut } from '@/api/auth'
+import { updateMyProfile } from '@/api/users'
 import defaultProfileImg from '@/assets/default-profile.png'
+
+const NICKNAME_MIN = 2
+const NICKNAME_MAX = 12
 
 const PAGE_BG = {
   background: 'linear-gradient(180deg, #E0F7FA 0%, #F8FAFC 55%, #F0FDFA 100%)',
@@ -25,20 +29,27 @@ function MyPage() {
   const [session, setSession] = useState(null)
   const [signingOut, setSigningOut] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [profile, setProfile] = useState(null)
 
-  // 관리자 여부 — 백엔드 /auth/me 의 isAdmin(ADMIN_EMAILS 허용 목록) 기준
+  // 관리자 여부 + 백엔드 프로필(닉네임 등) — /auth/me 기준
   useEffect(() => {
     if (state !== 'signed_in') {
       setIsAdmin(false)
+      setProfile(null)
       return undefined
     }
     let cancelled = false
     ;(async () => {
       try {
         const me = await getMe()
-        if (!cancelled) setIsAdmin(Boolean(me?.isAdmin))
+        if (cancelled) return
+        setIsAdmin(Boolean(me?.isAdmin))
+        setProfile(me?.profile ?? null)
       } catch {
-        if (!cancelled) setIsAdmin(false)
+        if (!cancelled) {
+          setIsAdmin(false)
+          setProfile(null)
+        }
       }
     })()
     return () => { cancelled = true }
@@ -100,6 +111,8 @@ function MyPage() {
             session={session}
             signingOut={signingOut}
             isAdmin={isAdmin}
+            profile={profile}
+            onProfileChange={setProfile}
             onSignOut={handleSignOut}
             onGoLogin={() => navigate('/login')}
           />
@@ -118,7 +131,7 @@ function MyPage() {
  *   onGoLogin: () => void,
  * }} props
  */
-function AuthStatusCard({ state, session, signingOut, isAdmin = false, onSignOut, onGoLogin }) {
+function AuthStatusCard({ state, session, signingOut, isAdmin = false, profile = null, onProfileChange, onSignOut, onGoLogin }) {
   if (state === 'loading') {
     return (
       <section
@@ -201,16 +214,29 @@ function AuthStatusCard({ state, session, signingOut, isAdmin = false, onSignOut
       </div>
 
       <div className="mt-5 flex items-center gap-4">
-        <Avatar src={avatarUrl} name={name || email} />
+        <Avatar src={avatarUrl} name={profile?.nickname || name || email} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-base font-extrabold text-gray-900 md:text-lg">
-            {name || email || '이름 없음'}
+            {profile?.nickname || name || email || '이름 없음'}
           </p>
           {email ? (
             <p className="mt-0.5 truncate text-xs text-gray-500 md:text-sm">{email}</p>
           ) : null}
         </div>
       </div>
+
+      <NicknameEditor profile={profile} onProfileChange={onProfileChange} />
+
+      <Link
+        to="/mypage/friends"
+        className="mt-3 flex w-full items-center justify-between rounded-xl border border-cyan-100 bg-cyan-50/60 px-4 py-3 transition hover:bg-cyan-50"
+      >
+        <span className="flex items-center gap-2">
+          <span className="text-base">🤝</span>
+          <span className="text-sm font-bold text-cyan-900">친구 관리</span>
+        </span>
+        <span className="text-xs font-semibold text-cyan-500">초대하고 함께 준비하기 →</span>
+      </Link>
 
       <dl className="mt-5 grid grid-cols-1 gap-3 rounded-xl bg-gray-50/80 p-4 text-xs md:text-sm">
         <InfoRow label="사용자 ID" value={sub ? shortenSub(sub) : '—'} title={sub} />
@@ -247,6 +273,103 @@ function AuthStatusCard({ state, session, signingOut, isAdmin = false, onSignOut
         </Link>
       </div>
     </section>
+  )
+}
+
+/** 닉네임 표시 + 인라인 수정 — 친구/공동 편집에서 보여질 이름 */
+function NicknameEditor({ profile, onProfileChange }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const nickname = profile?.nickname ?? ''
+  const draftTrimmed = draft.trim()
+  const draftOk = draftTrimmed.length >= NICKNAME_MIN && draftTrimmed.length <= NICKNAME_MAX
+
+  const startEdit = () => {
+    setDraft(nickname)
+    setError('')
+    setEditing(true)
+  }
+
+  const save = async () => {
+    if (!draftOk || saving) return
+    if (draftTrimmed === nickname) {
+      setEditing(false)
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      await updateMyProfile({ nickname: draftTrimmed })
+      onProfileChange?.({ ...(profile ?? {}), nickname: draftTrimmed })
+      setEditing(false)
+    } catch {
+      setError('닉네임 저장에 실패했어요. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!profile) return null
+
+  return (
+    <div className="mt-4 rounded-xl border border-teal-100 bg-teal-50/50 p-4">
+      {editing ? (
+        <div>
+          <p className="mb-2 text-xs font-bold text-teal-800">
+            닉네임 ({NICKNAME_MIN}~{NICKNAME_MAX}자) — 친구에게 보여질 이름이에요
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={draft}
+              maxLength={NICKNAME_MAX}
+              autoFocus
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') save()
+                if (e.key === 'Escape') setEditing(false)
+              }}
+              className="min-w-0 flex-1 rounded-lg border border-teal-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 outline-none focus:border-teal-400"
+            />
+            <button
+              type="button"
+              onClick={save}
+              disabled={!draftOk || saving}
+              className="shrink-0 rounded-lg bg-teal-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? '저장 중…' : '저장'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+            >
+              취소
+            </button>
+          </div>
+          {error ? <p className="mt-2 text-xs font-semibold text-red-500">{error}</p> : null}
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-teal-800">닉네임</p>
+            <p className="mt-0.5 truncate text-sm font-extrabold text-gray-900">
+              {nickname || '미설정'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={startEdit}
+            className="shrink-0 rounded-lg border border-teal-200 bg-white px-3 py-1.5 text-xs font-bold text-teal-700 transition hover:bg-teal-50"
+          >
+            수정
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

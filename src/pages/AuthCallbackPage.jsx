@@ -14,6 +14,8 @@ import { trackEvent } from '@/utils/analyticsTracker'
 import { ga4Event, ga4SetUserId } from '@/utils/ga4'
 import { loadPendingTripSubmit, clearPendingTripSubmit } from '@/utils/pendingTripSubmit'
 import { loadPendingGuestSearch } from '@/utils/pendingGuestSearch'
+import { loadPendingFriendInvite, clearPendingFriendInvite } from '@/utils/pendingFriendInvite'
+import { loadPendingTripInvite, clearPendingTripInvite } from '@/utils/pendingTripInvite'
 
 /**
  * /auth/callback — Google/Kakao 소셜 로그인(Supabase Auth) 콜백 처리.
@@ -106,6 +108,24 @@ export default function AuthCallbackPage() {
       }
 
       const next = resolveNext(sub)
+
+      // 친구/트립 초대 링크에서 로그인한 경우 — 게이트(동의/온보딩) 통과 후 수락 페이지로 복귀.
+      // 게이트가 남아 있으면 토큰은 sessionStorage에 유지되고 온보딩 완료 시점에 복귀한다.
+      if (next === '/') {
+        const pendingFriendInvite = loadPendingFriendInvite()
+        if (pendingFriendInvite) {
+          clearPendingFriendInvite()
+          navigate(`/friends/invite/${pendingFriendInvite}`, { replace: true })
+          return
+        }
+        const pendingTripInvite = loadPendingTripInvite()
+        if (pendingTripInvite) {
+          clearPendingTripInvite()
+          navigate(`/trips/invite/${pendingTripInvite}`, { replace: true })
+          return
+        }
+      }
+
       navigate(next, { replace: true })
     })()
 

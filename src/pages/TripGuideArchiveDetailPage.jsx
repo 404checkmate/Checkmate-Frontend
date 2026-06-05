@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { fetchGuideArchive } from '@/api/guideArchives'
 import { getTrip } from '@/api/trips'
 import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
+import TripMembersSheet from '@/components/trip/TripMembersSheet'
+import { useTripRealtimeSync } from '@/hooks/useTripRealtimeSync'
 import { TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE } from '@/utils/tripMintPageBackground'
 
 /**
@@ -22,6 +24,20 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
   const [archiveRevision, setArchiveRevision] = useState(0)
   const [tripCompanions, setTripCompanions] = useState([])
   const [tripStyles, setTripStyles] = useState([])
+  const [membersOpen, setMembersOpen] = useState(false)
+  const [remoteNotice, setRemoteNotice] = useState('')
+
+  // 공동 편집 실시간 동기화 — 다른 멤버의 변경 핑 수신 시 entry+체크 refetch + 토스트
+  useTripRealtimeSync({
+    tripId,
+    onRemoteChange: (meta) => {
+      setArchiveRevision((n) => n + 1)
+      const who = meta?.by ? `${meta.by}님이` : '함께 준비 중인 멤버가'
+      setRemoteNotice(`${who} 체크리스트를 수정했어요`)
+      window.clearTimeout(window.__cmRemoteNoticeTimer)
+      window.__cmRemoteNoticeTimer = window.setTimeout(() => setRemoteNotice(''), 3000)
+    },
+  })
 
   useEffect(() => {
     if (!tripId) return
@@ -127,7 +143,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
 
   return (
     <div className="min-h-screen" style={TRIP_GUIDE_ARCHIVE_PAGE_BACKGROUND_STYLE}>
-      <div className="mx-auto flex w-full max-w-7xl items-center px-3 pt-4 md:px-6 md:pt-8 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-3 pt-4 md:px-6 md:pt-8 lg:px-8">
         <button
           type="button"
           onClick={() => navigate('/guide-archives')}
@@ -135,10 +151,28 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
         >
           ← 나의 체크리스트로
         </button>
+        {/* 트립이 있는 엔트리에서만 공동 편집 제공 (큐레이션 저장 등 트립 미연결 제외) */}
+        {tripId && /^\d+$/.test(String(tripId)) && (
+          <button
+            type="button"
+            onClick={() => setMembersOpen(true)}
+            className="rounded-xl border border-teal-200 bg-white px-3 py-1.5 text-xs font-bold text-teal-700 shadow-sm transition hover:bg-teal-50"
+          >
+            👥 함께 준비하기
+          </button>
+        )}
       </div>
+      <TripMembersSheet tripId={tripId} open={membersOpen} onClose={() => setMembersOpen(false)} />
+      {/* 실시간 변경 토스트 */}
+      {remoteNotice && (
+        <div className="pointer-events-none fixed left-1/2 top-16 z-[90] -translate-x-1/2 rounded-full bg-teal-900/90 px-4 py-2 text-xs font-bold text-white shadow-lg">
+          🔄 {remoteNotice}
+        </div>
+      )}
       <GuideArchiveChecklistView
         tripId={tripId}
         entry={entry}
+        syncTick={archiveRevision}
         companions={entry?.via === 'curation' ? [] : tripCompanions}
         travelStyles={entry?.via === 'curation' ? [] : tripStyles}
         onArchiveMutated={() => setArchiveRevision((n) => n + 1)}

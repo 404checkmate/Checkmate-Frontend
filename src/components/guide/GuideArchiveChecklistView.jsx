@@ -60,7 +60,7 @@ function calcProgress(items, checksState) {
  * **순서 변경**: 카드 오른쪽 **드래그 핸들**만 잡고 이동(@dnd-kit). 스토리지 반영은 「완료」와 동일 시점.
  * `onArchiveMutated`: 삭제·저장 후 부모가 스토리지에서 entry를 다시 읽을 때 호출합니다.
  */
-export default function GuideArchiveChecklistView({ tripId, entry, companions = [], travelStyles = [], onArchiveMutated, isPreview = false, onItemsChange, onSaveIntent }) {
+export default function GuideArchiveChecklistView({ tripId, entry, companions = [], travelStyles = [], onArchiveMutated, isPreview = false, onItemsChange, onSaveIntent, syncTick = 0 }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const navBarVisible = useMobileScrollChromeVisibility(true, pathname)
@@ -96,7 +96,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   }, [entryOrderSignature])
 
   // ── 체크 상태 ─────────────────────────────────────────
-  const { checks, setChecks, handleToggle } = useGuideArchiveChecks({ tripId, entry })
+  const { checks, setChecks, handleToggle } = useGuideArchiveChecks({ tripId, entry, syncTick })
 
   // ── 파생 필터 ─────────────────────────────────────────
   const dndLocked = sectionEditModalOpen || directAddModalOpen
