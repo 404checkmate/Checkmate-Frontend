@@ -27,6 +27,12 @@ function describe(n) {
       return { icon: '🧳', text: `${who}님이 ${title}에 합류했어요`, to: '/guide-archives' }
     case 'friend_accepted':
       return { icon: '🤝', text: `${who}님과 친구가 됐어요`, to: '/mypage/friends' }
+    case 'item_assigned':
+      return {
+        icon: '🎒',
+        text: `${who}님이 ${title}의 '${n.payload?.itemTitle ?? '준비물'}' 담당으로 지정했어요`,
+        to: '/guide-archives',
+      }
     default:
       return { icon: '🔔', text: '새 알림', to: '/mypage' }
   }

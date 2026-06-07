@@ -19,6 +19,11 @@ export default function GuideArchiveSectionDndList({
   onMoveUp,
   onMoveDown,
   actionVariant = 'default',
+  itemMeta = {},
+  tripMembers = [],
+  myUserId = null,
+  onScopeToggle,
+  onAssign,
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: droppableId,
@@ -54,6 +59,11 @@ export default function GuideArchiveSectionDndList({
             onMoveUp={onMoveUp}
             onMoveDown={onMoveDown}
             actionVariant={actionVariant}
+            meta={itemMeta[String(it.id)] ?? null}
+            tripMembers={tripMembers}
+            myUserId={myUserId}
+            onScopeToggle={onScopeToggle}
+            onAssign={onAssign}
           />
         ))}
       </ul>

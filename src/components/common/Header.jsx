@@ -85,8 +85,11 @@ function Header() {
     setLogoutConfirmOpen(true)
   }, [closeMobileMenu])
 
-  const { isLoggedIn } = useAuth()
+  const { user, isLoggedIn } = useAuth()
   const { pathname } = location
+  /** 소셜(구글/카카오) 프로필 이미지 — 없으면 기본 이미지 유지 */
+  const socialAvatarUrl =
+    user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ''
   const isWebLoggedIn = isLoggedIn && pathname !== '/auth/consent'
   const logoutConfirmModal =
     logoutConfirmOpen && typeof document !== 'undefined'
@@ -179,7 +182,14 @@ function Header() {
                 className="hidden h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-100 transition-colors hover:bg-gray-200 lg:flex"
                 aria-label="마이페이지"
               >
-                <img src={defaultProfileImg} alt="" className="h-full w-full object-cover" aria-hidden />
+                <img
+                  src={socialAvatarUrl || defaultProfileImg}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="h-full w-full object-cover"
+                  onError={(e) => { e.currentTarget.src = defaultProfileImg }}
+                  aria-hidden
+                />
               </button>
             </>
           ) : (

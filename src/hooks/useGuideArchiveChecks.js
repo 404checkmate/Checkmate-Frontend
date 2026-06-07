@@ -9,6 +9,7 @@ import {
   saveEntryChecklistChecks,
   seedEntryChecksFromSavedIfEmpty,
 } from '@/utils/guideArchiveEntryChecklistStorage'
+import { loadEntryItemMetaCache, saveEntryItemMetaCache } from '@/utils/collabMetaStorage'
 
 // 서버 동기화는 실제 trip(숫자 id)에서만 — 게스트('guest')는 로컬 전용
 function isNumericTripId(tripId) {
@@ -26,6 +27,9 @@ function isNumericTripId(tripId) {
 export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
   // 아이템별 마지막 수정자 (본인 제외 — 공동 편집 멤버의 손길만 표시)
   const [actors, setActors] = useState({})
+  // 아이템별 협업 메타: { scope, personalSummary({checkedCount,memberCount}), assignee }
+  // 마지막으로 본 값을 캐시에서 즉시 복원 → 서버 응답 도착 시 갱신 (늦게 뜨는 문제 방지)
+  const [itemMeta, setItemMeta] = useState(() => loadEntryItemMetaCache(tripId, entry.id))
   const [checks, setChecks] = useState(() => {
     const fromStorage = loadEntryChecklistChecks(tripId, entry.id)
     if (Object.keys(fromStorage).length > 0) return fromStorage
@@ -72,14 +76,24 @@ export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
         const myNickname = me?.profile?.nickname ?? null
 
         // 마지막 수정자 매핑 (serverId → localId), 본인 활동은 제외
+        // 개인(personal) 짐은 각자 체크라 "누가 수정" 표시가 무의미 — 공동 짐만
         const nextActors = {}
+        const nextMeta = {}
         for (const sit of serverItems) {
           const localId = localIdByServerId.get(String(sit.id))
-          if (!localId || !sit.lastActor) continue
+          if (!localId) continue
+          nextMeta[localId] = {
+            scope: sit.scope ?? 'personal',
+            personalSummary: sit.personalSummary ?? null,
+            assignee: sit.assignee ?? null,
+          }
+          if (!sit.lastActor || sit.scope !== 'shared') continue
           if (myNickname && sit.lastActor.nickname === myNickname) continue
           nextActors[localId] = sit.lastActor
         }
         setActors(nextActors)
+        setItemMeta(nextMeta)
+        saveEntryItemMetaCache(tripId, entry.id, nextMeta)
 
         setChecks((prev) => {
           let changed = false
@@ -87,7 +101,8 @@ export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
           for (const sit of serverItems) {
             const localId = localIdByServerId.get(String(sit.id))
             if (!localId) continue
-            const serverChecked = Boolean(sit.isChecked)
+            // 내 기준 체크 상태 — personal 은 내 행, shared 는 공유 상태 (구버전 응답은 isChecked 폴백)
+            const serverChecked = Boolean(sit.myChecked ?? sit.isChecked)
             if (Boolean(next[localId]) !== serverChecked) {
               next[localId] = serverChecked
               changed = true
@@ -131,5 +146,5 @@ export function useGuideArchiveChecks({ tripId, entry, syncTick = 0 }) {
     }
   }, [checks, tripId, entry.id, entry.items])
 
-  return { checks, setChecks, handleToggle, actors }
+  return { checks, setChecks, handleToggle, actors, itemMeta, setItemMeta }
 }

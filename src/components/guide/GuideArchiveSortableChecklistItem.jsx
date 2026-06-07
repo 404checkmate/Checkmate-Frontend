@@ -1,9 +1,11 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GUIDE_ARCHIVE_LEGACY_AI_CATEGORY } from '@/utils/guideArchiveChecklistReorder'
 import aiSparklesImg from '@/assets/ai-sparkles.png'
 import AiSparkleMaskIcon from '@/components/search/AiSparkleMaskIcon'
+import defaultProfileImg from '@/assets/default-profile.png'
 
 const SORTABLE_TRANSITION = {
   duration: 260,
@@ -115,6 +117,155 @@ export function GuideArchiveChecklistDragPreview({ item, checks }) {
   )
 }
 
+/**
+ * 개인/공동 짐 협업 행 — scope 배지(클릭 시 전환) + 개인 짐 "n/m명" 집계 + 공동 짐 담당자 피커.
+ * 공동 작업 중인 여행(멤버 2명 이상) + 서버 영속화된 항목에서만 표시된다.
+ * label 내부에 있으므로 클릭 시 preventDefault 로 체크박스 토글을 막는다.
+ */
+function CollabRow({ item, meta, tripMembers, myUserId, onScopeToggle, onAssign }) {
+  const [assignOpen, setAssignOpen] = useState(false)
+
+  useEffect(() => {
+    if (!assignOpen) return undefined
+    const onKey = (e) => { if (e.key === 'Escape') setAssignOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [assignOpen])
+
+  const isShared = meta.scope === 'shared'
+  const summary = meta.personalSummary
+  const assignee = meta.assignee
+  const isMeAssigned = assignee && myUserId != null && String(assignee.userId) === String(myUserId)
+
+  const guard = (e, fn) => {
+    e.preventDefault()
+    e.stopPropagation()
+    fn?.()
+  }
+
+  return (
+    <span className="relative mt-1.5 flex flex-wrap items-center gap-1.5" onPointerDown={(e) => e.stopPropagation()}>
+      {/* scope 칩 — 가벼운 고스트 버튼 + ⇄ 아이콘으로 전환 가능함만 살짝 암시 */}
+      <button
+        type="button"
+        title={isShared ? '공동 짐 — 한 명만 준비하면 돼요. 클릭하면 개인 짐으로' : '개인 짐 — 각자 체크해요. 클릭하면 공동 짐으로'}
+        onClick={(e) => guard(e, () => onScopeToggle(item))}
+        className={`inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[10px] font-bold leading-none transition-colors ${
+          isShared
+            ? 'text-cyan-700 hover:bg-cyan-50'
+            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+        }`}
+      >
+        {isShared ? '👥 공동' : '🧍 개인'}
+        <svg className="h-3 w-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4 4 4m6 4v12m0 0 4-4m-4 4-4-4" />
+        </svg>
+      </button>
+
+      {/* 개인 짐: 멤버 진척 집계 */}
+      {!isShared && summary && summary.memberCount > 1 ? (
+        <span className="inline-flex items-center rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold leading-none text-teal-700">
+          {summary.checkedCount}/{summary.memberCount}명 준비 완료
+        </span>
+      ) : null}
+
+      {/* 공동 짐: 담당자 칩 + 피커 */}
+      {isShared ? (
+        <>
+          <button
+            type="button"
+            onClick={(e) => guard(e, () => setAssignOpen(true))}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold leading-none transition-colors ${
+              assignee
+                ? 'border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
+                : 'border-dashed border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            {assignee ? (
+              <>
+                <img
+                  src={assignee.profileImageUrl || defaultProfileImg}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="h-3.5 w-3.5 rounded-full object-cover"
+                  onError={(e) => { e.currentTarget.src = defaultProfileImg }}
+                />
+                {isMeAssigned ? '내가 챙겨요' : `${assignee.nickname} 담당`}
+              </>
+            ) : (
+              <>＋ 담당자 지정</>
+            )}
+          </button>
+
+          {/* 카드의 overflow-hidden(모바일 스와이프 클리핑)에 잘리지 않도록 portal 로 띄운다
+              — 모바일: 바텀시트 / 데스크톱(sm+): 중앙 카드 */}
+          {assignOpen && typeof document !== 'undefined'
+            ? createPortal(
+                <div className="fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-4">
+                  <button
+                    type="button"
+                    aria-label="담당자 지정 닫기"
+                    className="absolute inset-0 bg-black/30"
+                    onClick={(e) => guard(e, () => setAssignOpen(false))}
+                  />
+                  <div className="relative z-[1] w-full rounded-t-2xl bg-white px-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] pt-4 shadow-xl sm:w-80 sm:rounded-2xl sm:pb-4">
+                    <p className="mb-1 truncate text-sm font-extrabold text-gray-900">{item.title}</p>
+                    <p className="mb-3 text-[11px] text-gray-400">이 공동 짐을 챙길 담당자를 골라 주세요</p>
+                    <div className="flex flex-col">
+                      {!isMeAssigned && myUserId != null ? (
+                        <button
+                          type="button"
+                          onClick={(e) => guard(e, () => { onAssign(item, myUserId); setAssignOpen(false) })}
+                          className="rounded-xl px-3 py-3 text-left text-sm font-bold text-teal-700 hover:bg-teal-50"
+                        >
+                          🙋 내가 맡을게요
+                        </button>
+                      ) : null}
+                      {tripMembers
+                        .filter((m) => String(m.userId) !== String(myUserId ?? ''))
+                        .map((m) => (
+                          <button
+                            key={m.userId}
+                            type="button"
+                            onClick={(e) => guard(e, () => { onAssign(item, m.userId); setAssignOpen(false) })}
+                            className={`flex items-center gap-2.5 rounded-xl px-3 py-3 text-left text-sm font-semibold hover:bg-gray-50 ${
+                              assignee && String(assignee.userId) === String(m.userId) ? 'text-amber-700' : 'text-gray-800'
+                            }`}
+                          >
+                            <img
+                              src={m.profileImageUrl || defaultProfileImg}
+                              alt=""
+                              referrerPolicy="no-referrer"
+                              className="h-6 w-6 rounded-full object-cover"
+                              onError={(e) => { e.currentTarget.src = defaultProfileImg }}
+                            />
+                            {m.nickname}
+                            {assignee && String(assignee.userId) === String(m.userId) ? (
+                              <span className="ml-auto text-[10px] font-bold text-amber-600">현재 담당</span>
+                            ) : null}
+                          </button>
+                        ))}
+                      {assignee ? (
+                        <button
+                          type="button"
+                          onClick={(e) => guard(e, () => { onAssign(item, null); setAssignOpen(false) })}
+                          className="mt-1 rounded-xl border-t border-gray-50 px-3 py-3 text-left text-sm font-semibold text-gray-400 hover:bg-gray-50"
+                        >
+                          담당 해제
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>,
+                document.body,
+              )
+            : null}
+        </>
+      ) : null}
+    </span>
+  )
+}
+
 function RowActionIconButton({ onClick, ariaLabel, variant, tone = 'neutral', children }) {
   const isAi = variant === 'ai'
   const cls =
@@ -166,6 +317,11 @@ export default function GuideArchiveSortableChecklistItem({
   onEditItem,
   onDeleteItem,
   actionVariant = 'default',
+  meta = null,
+  tripMembers = [],
+  myUserId = null,
+  onScopeToggle,
+  onAssign,
 }) {
   const id = String(item.id)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -375,6 +531,18 @@ export default function GuideArchiveSortableChecklistItem({
                 <span className={`mt-1 block text-xs leading-relaxed ${showCheckedStyle ? 'text-gray-700' : 'text-gray-600'}`}>
                   {item.description}
                 </span>
+              ) : null}
+              {/* 개인/공동 짐 — 공동 작업 여행(멤버 2+) + 서버 영속 항목에서만.
+                  서버 메타 로딩 전에는 기본값(개인)으로 즉시 표시 후 로드되면 갱신 */}
+              {onScopeToggle && tripMembers.length > 1 && item.serverId != null && String(item.serverId).trim() ? (
+                <CollabRow
+                  item={item}
+                  meta={meta ?? { scope: 'personal', personalSummary: null, assignee: null }}
+                  tripMembers={tripMembers}
+                  myUserId={myUserId}
+                  onScopeToggle={onScopeToggle}
+                  onAssign={onAssign}
+                />
               ) : null}
               {lastActor ? (
                 <span className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-teal-600/80">
