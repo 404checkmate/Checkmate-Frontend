@@ -150,22 +150,27 @@ function CollabRow({ item, meta, tripMembers, myUserId, onScopeToggle, onAssign 
         type="button"
         title={isShared ? '공동 짐 — 한 명만 준비하면 돼요. 클릭하면 개인 짐으로' : '개인 짐 — 각자 체크해요. 클릭하면 공동 짐으로'}
         onClick={(e) => guard(e, () => onScopeToggle(item))}
-        className={`inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[10px] font-bold leading-none transition-colors ${
+        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ring-1 transition-colors ${
           isShared
-            ? 'text-cyan-700 hover:bg-cyan-50'
-            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+            ? 'bg-cyan-50 text-cyan-700 ring-cyan-200 hover:bg-cyan-100'
+            : 'bg-gray-100 text-gray-500 ring-gray-200 hover:bg-gray-200 hover:text-gray-700'
         }`}
       >
         {isShared ? '👥 공동' : '🧍 개인'}
-        <svg className="h-3 w-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4 4 4m6 4v12m0 0 4-4m-4 4-4-4" />
+        {/* ⇄ 전환 아이콘 — 위/아래 화살표는 정렬로 오해돼 좌우 교환 형태로 변경 */}
+        <svg className="h-2.5 w-2.5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 3l4 4-4 4M20 7H8m0 14-4-4 4-4M4 17h12" />
         </svg>
       </button>
 
       {/* 개인 짐: 멤버 진척 집계 */}
       {!isShared && summary && summary.memberCount > 1 ? (
-        <span className="inline-flex items-center rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold leading-none text-teal-700">
-          {summary.checkedCount}/{summary.memberCount}명 준비 완료
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold leading-none ring-1 ${
+          summary.checkedCount >= summary.memberCount
+            ? 'bg-emerald-100 text-emerald-700 ring-emerald-300'
+            : 'bg-teal-100 text-teal-800 ring-teal-300'
+        }`}>
+          {summary.checkedCount >= summary.memberCount ? '✅ ' : ''}{summary.checkedCount}/{summary.memberCount}명 준비 완료
         </span>
       ) : null}
 
@@ -544,17 +549,18 @@ export default function GuideArchiveSortableChecklistItem({
                   onAssign={onAssign}
                 />
               ) : null}
+              {/* 수정자 — 준비 상태 칩과 색이 겹쳐 가려지지 않도록 중립 gray 보조 텍스트로 약화 */}
               {lastActor ? (
-                <span className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-teal-600/80">
+                <span className="mt-1 flex items-center gap-1 text-[10px] font-medium text-gray-400">
                   {lastActor.profileImageUrl ? (
                     <img
                       src={lastActor.profileImageUrl}
                       alt=""
                       referrerPolicy="no-referrer"
-                      className="h-3.5 w-3.5 rounded-full border border-white object-cover"
+                      className="h-3 w-3 rounded-full object-cover opacity-80"
                     />
                   ) : (
-                    <span aria-hidden>👤</span>
+                    <span aria-hidden className="opacity-70">👤</span>
                   )}
                   {lastActor.nickname}님이 수정
                 </span>
