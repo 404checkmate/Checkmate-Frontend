@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation, Navigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchGuideArchive } from '@/api/guideArchives'
 import { getTrip } from '@/api/trips'
 import GuideArchiveChecklistView from '@/components/guide/GuideArchiveChecklistView'
@@ -26,18 +26,38 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
   const [tripStyles, setTripStyles] = useState([])
   const [membersOpen, setMembersOpen] = useState(false)
   const [remoteNotice, setRemoteNotice] = useState('')
+  // syncTick: 모든 원격 변경에서 증가 → 서버 체크/멤버 상태를 가볍게 다시 읽는다 (스피너 없음).
+  // archiveRevision 과 분리해, 단순 체크 핑이 무거운 아카이브 재조회를 유발하지 않게 한다.
+  const [syncTick, setSyncTick] = useState(0)
 
-  // 공동 편집 실시간 동기화 — 다른 멤버의 변경 핑 수신 시 entry+체크 refetch + 토스트
+  // 공동 편집 실시간 동기화 — 다른 멤버의 변경 핑 수신.
+  // C(디바운스): 연속 핑을 500ms 윈도우로 합쳐 한 번만 반영 (연타 시 재조회 폭주 방지).
+  // B(종류 분기): 'check' 핑은 syncTick(체크 병합)만, 'edit'/'archive' 는 아카이브 재조회까지.
+  const remoteResyncTimerRef = useRef(null)
+  const pendingRemoteRef = useRef({ needsArchive: false, by: null })
   useTripRealtimeSync({
     tripId,
     onRemoteChange: (meta) => {
-      setArchiveRevision((n) => n + 1)
-      const who = meta?.by ? `${meta.by}님이` : '함께 준비 중인 멤버가'
-      setRemoteNotice(`${who} 체크리스트를 수정했어요`)
-      window.clearTimeout(window.__cmRemoteNoticeTimer)
-      window.__cmRemoteNoticeTimer = window.setTimeout(() => setRemoteNotice(''), 3000)
+      if (meta?.kind && meta.kind !== 'check') pendingRemoteRef.current.needsArchive = true
+      if (meta?.by) pendingRemoteRef.current.by = meta.by
+      if (remoteResyncTimerRef.current) return // 이번 윈도우 이미 예약됨 — 누적만 하고 끝
+      remoteResyncTimerRef.current = window.setTimeout(() => {
+        remoteResyncTimerRef.current = null
+        const { needsArchive, by } = pendingRemoteRef.current
+        pendingRemoteRef.current = { needsArchive: false, by: null }
+        setSyncTick((n) => n + 1)
+        if (needsArchive) setArchiveRevision((n) => n + 1)
+        const who = by ? `${by}님이` : '함께 준비 중인 멤버가'
+        setRemoteNotice(`${who} 체크리스트를 수정했어요`)
+        window.clearTimeout(window.__cmRemoteNoticeTimer)
+        window.__cmRemoteNoticeTimer = window.setTimeout(() => setRemoteNotice(''), 3000)
+      }, 500)
     },
   })
+  // 언마운트 시 디바운스 타이머 정리 (setState-after-unmount 방지)
+  useEffect(() => () => {
+    if (remoteResyncTimerRef.current) window.clearTimeout(remoteResyncTimerRef.current)
+  }, [])
 
   useEffect(() => {
     if (!tripId) return
@@ -56,18 +76,29 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
     return () => { cancelled = true }
   }, [tripId])
 
+  // 이미 한 번 성공적으로 로드한 entryId 를 기억한다.
+  // 같은 entryId 에서 archiveRevision 만 바뀌어 재실행되면 = 공동 편집 핑에 의한 백그라운드 재동기화
+  // → 풀스크린 로딩 스피너로 전환하지 않고 entry 만 조용히 교체한다 (화면 깜빡임 = "새로고침" 체감 제거).
+  const loadedEntryIdRef = useRef(null)
+
   useEffect(() => {
     let cancelled = false
-    setStatus('loading')
-    setErrorMessage('')
+    const isBackgroundResync = loadedEntryIdRef.current === entryId
+    if (!isBackgroundResync) {
+      setStatus('loading')
+      setErrorMessage('')
+    }
     ;(async () => {
       try {
         const found = await fetchGuideArchive(entryId)
         if (cancelled) return
         setEntry(found)
         setStatus('ready')
+        loadedEntryIdRef.current = entryId
       } catch (err) {
         if (cancelled) return
+        // 백그라운드 재동기화 실패는 현재 화면을 유지한다 — 다음 핑/재진입 때 다시 동기화된다.
+        if (isBackgroundResync) return
         setEntry(null)
         if (err?.response?.status === 404) {
           setStatus('not_found')
@@ -172,7 +203,7 @@ function TripGuideArchiveDetailInner({ tripId, entryId }) {
       <GuideArchiveChecklistView
         tripId={tripId}
         entry={entry}
-        syncTick={archiveRevision}
+        syncTick={syncTick}
         companions={entry?.via === 'curation' ? [] : tripCompanions}
         travelStyles={entry?.via === 'curation' ? [] : tripStyles}
         onArchiveMutated={() => setArchiveRevision((n) => n + 1)}
