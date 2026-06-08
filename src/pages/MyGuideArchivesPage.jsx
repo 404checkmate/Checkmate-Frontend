@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { fetchMyGuideArchives, deleteGuideArchive } from '@/api/guideArchives'
-import { fetchReceivedTripInvites, respondTripInvite } from '@/api/tripMembers'
+import { fetchReceivedTripInvites, respondTripInvite, removeTripMember } from '@/api/tripMembers'
+import { getMe } from '@/api/auth'
 import ArchiveCard, { SkeletonCard } from '@/components/guide/ArchiveCard'
 import ArchiveListControls from '@/components/guide/ArchiveListControls'
 import DeleteConfirmModal from '@/components/guide/DeleteConfirmModal'
+import LeaveTripConfirmModal from '@/components/guide/LeaveTripConfirmModal'
 import { trackEvent } from '@/utils/analyticsTracker'
 
 /** 받은 트립 초대 배너 — 수락하면 목록을 다시 불러온다 */
@@ -90,6 +92,8 @@ export default function MyGuideArchivesPage() {
   const [deleteMode, setDeleteMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState([])
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
+  const [myUserId, setMyUserId] = useState(null)
 
   const lastSavedId = sessionStorage.getItem('lastSavedArchiveId')
 
@@ -105,6 +109,10 @@ export default function MyGuideArchivesPage() {
     fetchReceivedTripInvites()
       .then((rows) => setInvites(Array.isArray(rows) ? rows : []))
       .catch(() => setInvites([]))
+    // 내 userId — 남이 만든 여행 "나가기"(removeTripMember) 호출에 필요
+    getMe()
+      .then((me) => setMyUserId(me?.profile?.id != null ? String(me.profile.id) : null))
+      .catch(() => {})
   }
 
   useEffect(() => { load() }, [])
@@ -162,9 +170,42 @@ export default function MyGuideArchivesPage() {
     setSelectedIds([])
   }
 
+  // 선택 항목을 "내가 만든 것(삭제 가능)" vs "남이 만들어 합류한 것(삭제 불가 → 나가기)"으로 분류.
+  // shared 가 있고 isOwner === false 면 내가 멤버로 합류한 남의 여행.
+  const classifySelected = () => {
+    const picked = archives.filter((a) => selectedIds.includes(String(a.id)))
+    const joined = picked.filter((a) => a.shared && a.shared.isOwner === false)
+    const mine = picked.filter((a) => !(a.shared && a.shared.isOwner === false))
+    return { joined, mine }
+  }
+
+  // "삭제" 클릭 — 남의 여행이 섞여 있으면 삭제 대신 "나가기" 확인을 띄운다
+  const handleDeleteClick = () => {
+    if (selectedIds.length === 0) return
+    const { joined } = classifySelected()
+    if (joined.length > 0) setLeaveConfirmOpen(true)
+    else setDeleteConfirmOpen(true)
+  }
+
   const confirmDelete = async () => {
     setDeleteConfirmOpen(false)
-    await Promise.all(selectedIds.map((id) => deleteGuideArchive(id)))
+    await Promise.all(selectedIds.map((id) => deleteGuideArchive(id).catch(() => null)))
+    exitDeleteMode()
+    load()
+  }
+
+  // 남의 여행에서 나가기(+ 같이 선택된 내 여행은 삭제). 본인 나가기는 removeTripMember(tripId, 내 userId).
+  const confirmLeave = async () => {
+    setLeaveConfirmOpen(false)
+    const { joined, mine } = classifySelected()
+    await Promise.all([
+      ...joined.map((a) =>
+        a.trip?.id != null && myUserId != null
+          ? removeTripMember(a.trip.id, myUserId).catch(() => null)
+          : null,
+      ),
+      ...mine.map((a) => deleteGuideArchive(a.id).catch(() => null)),
+    ])
     exitDeleteMode()
     load()
   }
@@ -198,7 +239,7 @@ export default function MyGuideArchivesPage() {
             selectedCount={selectedIds.length}
             onEnterDeleteMode={() => { setDeleteMode(true); setSelectedIds([]) }}
             onSelectAll={handleSelectAll}
-            onDeleteSelected={() => { if (selectedIds.length > 0) setDeleteConfirmOpen(true) }}
+            onDeleteSelected={handleDeleteClick}
             onExitDeleteMode={exitDeleteMode}
           />
 
@@ -274,6 +315,20 @@ export default function MyGuideArchivesPage() {
         onConfirm={confirmDelete}
         onClose={() => setDeleteConfirmOpen(false)}
       />
+
+      {(() => {
+        const { joined, mine } = classifySelected()
+        return (
+          <LeaveTripConfirmModal
+            open={leaveConfirmOpen}
+            joinedCount={joined.length}
+            mineCount={mine.length}
+            ownerNickname={joined[0]?.shared?.ownerNickname}
+            onConfirm={confirmLeave}
+            onClose={() => setLeaveConfirmOpen(false)}
+          />
+        )
+      })()}
     </>
   )
 }
