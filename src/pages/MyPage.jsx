@@ -32,6 +32,7 @@ function MyPage() {
   const [signingOut, setSigningOut] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(true)
   const [archives, setArchives] = useState([])
   const [friends, setFriends] = useState([])
 
@@ -43,6 +44,7 @@ function MyPage() {
       return undefined
     }
     let cancelled = false
+    setProfileLoading(true)
     ;(async () => {
       const [me, archiveRows, friendRows] = await Promise.all([
         getMe().catch(() => null),
@@ -52,6 +54,7 @@ function MyPage() {
       if (cancelled) return
       setIsAdmin(Boolean(me?.isAdmin))
       setProfile(me?.profile ?? null)
+      setProfileLoading(false)
       setArchives(Array.isArray(archiveRows) ? archiveRows : [])
       setFriends(Array.isArray(friendRows) ? friendRows : [])
     })()
@@ -145,7 +148,12 @@ function MyPage() {
         <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">My page</p>
         <h1 className="text-2xl font-extrabold text-gray-900 md:text-3xl">마이페이지</h1>
 
-        <ProfileHeader session={session} profile={profile} onProfileChange={setProfile} />
+        <ProfileHeader
+          session={session}
+          profile={profile}
+          profileLoading={profileLoading}
+          onProfileChange={setProfile}
+        />
 
         <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <UpcomingTripCard archives={archives} />
@@ -181,7 +189,7 @@ function MyPage() {
 
 /* ─── 프로필 헤더 (닉네임 인라인 수정) ─────────────────────────────── */
 
-function ProfileHeader({ session, profile, onProfileChange }) {
+function ProfileHeader({ session, profile, profileLoading, onProfileChange }) {
   const user = session?.user
   const provider = pickProvider(user)
   const email = user?.email || user?.user_metadata?.email || ''
@@ -267,17 +275,24 @@ function ProfileHeader({ session, profile, onProfileChange }) {
           ) : (
             <>
               <div className="flex items-center gap-1.5">
-                <p className="truncate text-lg font-extrabold text-gray-900 md:text-xl">{displayName}</p>
-                <button
-                  type="button"
-                  onClick={startEdit}
-                  aria-label="닉네임 수정"
-                  className="shrink-0 rounded-lg p-1 text-gray-300 transition hover:bg-gray-50 hover:text-teal-600"
-                >
-                  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                  </svg>
-                </button>
+                {/* 닉네임 로드 전에 소셜 이름이 잠깐 보였다 바뀌는 깜빡임 방지 — 로딩 중엔 스켈레톤 */}
+                {profileLoading ? (
+                  <div className="h-6 w-28 animate-pulse rounded-lg bg-gray-100 md:h-7" aria-hidden />
+                ) : (
+                  <>
+                    <p className="truncate text-lg font-extrabold text-gray-900 md:text-xl">{displayName}</p>
+                    <button
+                      type="button"
+                      onClick={startEdit}
+                      aria-label="닉네임 수정"
+                      className="shrink-0 rounded-lg p-1 text-gray-300 transition hover:bg-gray-50 hover:text-teal-600"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
+                  </>
+                )}
               </div>
               <div className="mt-0.5 flex items-center gap-1.5">
                 {email ? <p className="truncate text-xs text-gray-500">{email}</p> : null}

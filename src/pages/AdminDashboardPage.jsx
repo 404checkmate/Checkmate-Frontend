@@ -213,12 +213,17 @@ export default function AdminDashboardPage() {
     const visited = sum('visited')
     const explored = sum('explored')
     const saved = sum('saved')
+    const savedIntent = sum('saved_intent')
     const loggedIn = sum('logged_in')
     return {
       visited,
       explored,
       saved,
+      savedIntent,
       loggedIn,
+      // 탐색→저장시도: 게스트 포함·대칭(이벤트 기준) — 로그인 후순위 효과가 잡히는 "진짜" 전환율
+      exploreToSaveIntent: explored > 0 ? Math.round((1000 * savedIntent) / explored) / 10 : null,
+      // 탐색→실제저장: guide_archives 기준(로그인 저장만)
       exploreToSave: explored > 0 ? Math.round((1000 * saved) / explored) / 10 : null,
     }
   }, [data.funnel])
@@ -264,7 +269,7 @@ export default function AdminDashboardPage() {
           <div>
             <h1 className="text-xl font-extrabold text-gray-900 md:text-2xl">스크럼 대시보드</h1>
             <p className="mt-0.5 text-xs text-gray-500">
-              팀원/dev 이벤트 제외 기준 · 저장 = guide_archives · 60초 캐시
+              팀원/dev 제외 · 저장시도=이벤트(게스트 포함) · 실제저장=guide_archives(로그인만) · 60초 캐시
             </p>
           </div>
           <Link to="/mypage" className="text-sm font-semibold text-teal-700 hover:text-teal-900">
@@ -288,17 +293,19 @@ export default function AdminDashboardPage() {
         ) : null}
 
         {/* KPI 카드 — 선택 기간 합계 */}
-        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="방문 세션" value={kpi.visited} />
           <KpiCard label="탐색 세션" value={kpi.explored} />
-          <KpiCard label="저장 세션" value={kpi.saved} />
+          <KpiCard label="저장 시도" value={kpi.savedIntent} sub="이벤트·게스트 포함" />
+          <KpiCard label="실제 저장" value={kpi.saved} sub="guide_archives·로그인만" />
           <KpiCard label="로그인 세션" value={kpi.loggedIn} />
-          <KpiCard label="탐색→저장" value={PCT(kpi.exploreToSave)} sub="기간 합계 기준" />
+          <KpiCard label="탐색→저장시도" value={PCT(kpi.exploreToSaveIntent)} sub="게스트 포함·대칭" />
+          <KpiCard label="탐색→실제저장" value={PCT(kpi.exploreToSave)} sub="로그인 저장만" />
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
           {/* 쿼리 1 — 일별 퍼널 추이 */}
-          <ChartCard title="일별 핵심 퍼널" note="방문 → 탐색 → 항목선택 → 저장 세션 수">
+          <ChartCard title="일별 핵심 퍼널" note="방문 → 탐색 → 항목선택 → 저장시도(게스트 포함) → 실제저장">
             <ResponsiveContainer>
               <LineChart data={funnel}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -309,7 +316,8 @@ export default function AdminDashboardPage() {
                 <Line type="monotone" dataKey="visited" name="방문" stroke="#94a3b8" dot={false} />
                 <Line type="monotone" dataKey="explored" name="탐색" stroke="#0ea5e9" dot={false} />
                 <Line type="monotone" dataKey="selected" name="항목선택" stroke="#8b5cf6" dot={false} />
-                <Line type="monotone" dataKey="saved" name="저장" stroke="#10b981" strokeWidth={2} />
+                <Line type="monotone" dataKey="saved_intent" name="저장시도" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="saved" name="실제저장" stroke="#10b981" strokeWidth={2} strokeDasharray="4 2" dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>

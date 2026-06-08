@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core'
 import {
@@ -9,7 +9,15 @@ import {
 } from '@/utils/savedTripItems'
 import { patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { trackEvent } from '@/utils/analyticsTracker'
-import { deselectChecklistItem } from '@/api/checklists'
+import { deselectChecklistItem, editChecklistItem } from '@/api/checklists'
+import { listTripMembers } from '@/api/tripMembers'
+import { getMe } from '@/api/auth'
+import { notifyTripChange } from '@/lib/tripSyncBus'
+import {
+  loadTripMembersCache,
+  saveTripMembersCache,
+  saveEntryItemMetaCache,
+} from '@/utils/collabMetaStorage'
 import { buildGuideArchiveDateLine, buildGuideArchiveListTitle } from '@/utils/guideArchivePresentation'
 import { CATEGORIES } from '@/mocks/searchData'
 import { saveEntryChecklistChecks } from '@/utils/guideArchiveEntryChecklistStorage'
@@ -48,6 +56,11 @@ function calcProgress(items, checksState) {
   if (items.length === 0) return 0
   const checked = items.filter((it) => checksState[String(it.id)]).length
   return Math.round((checked / items.length) * 100)
+}
+
+// 서버 동기화는 실제 trip(숫자 id)에서만 — 게스트('guest')는 로컬 전용
+function isNumericTripId(tripId) {
+  return /^\d+$/.test(String(tripId ?? ''))
 }
 
 /**
@@ -96,7 +109,97 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   }, [entryOrderSignature])
 
   // ── 체크 상태 ─────────────────────────────────────────
-  const { checks, setChecks, handleToggle, actors } = useGuideArchiveChecks({ tripId, entry, syncTick })
+  const { checks, setChecks, handleToggle, actors, itemMeta, setItemMeta } = useGuideArchiveChecks({ tripId, entry, syncTick })
+
+  // ── 멤버 (개인/공동 짐 — 담당자 지정·집계 표시용) ──────
+  const collabEnabled = !isPreview && isNumericTripId(tripId)
+  // 마지막으로 본 멤버 목록을 캐시에서 즉시 복원 → 협업 UI가 첫 페인트부터 보인다
+  const [tripMembers, setTripMembers] = useState(() => (collabEnabled ? loadTripMembersCache(tripId) : []))
+  const [myUserId, setMyUserId] = useState(null)
+  const [scopeNotice, setScopeNotice] = useState(null)
+  const scopeNoticeTimer = useRef(null)
+  useEffect(() => () => window.clearTimeout(scopeNoticeTimer.current), [])
+  useEffect(() => {
+    if (!collabEnabled) return undefined
+    let cancelled = false
+    listTripMembers(tripId)
+      .then((rows) => {
+        if (cancelled) return
+        const accepted = (Array.isArray(rows) ? rows : []).filter(
+          (m) => !m.status || m.status === 'accepted',
+        )
+        setTripMembers(accepted)
+        saveTripMembersCache(tripId, accepted)
+      })
+      .catch(() => {})
+    getMe()
+      .then((me) => { if (!cancelled) setMyUserId(me?.profile?.id != null ? String(me.profile.id) : null) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [tripId, collabEnabled, syncTick])
+
+  // 개인 ↔ 공동 전환 — 서버가 체크 상태를 초기화하므로 로컬도 동일하게 (낙관적 반영)
+  const handleScopeToggle = useCallback((item) => {
+    const serverId = item.serverId
+    if (!collabEnabled || serverId == null || !String(serverId).trim()) return
+    const localId = String(item.id)
+    const current = itemMeta[localId]?.scope ?? 'personal'
+    const nextScope = current === 'personal' ? 'shared' : 'personal'
+    const nextMeta = {
+      ...itemMeta,
+      [localId]: { scope: nextScope, personalSummary: null, assignee: null },
+    }
+    setItemMeta(nextMeta)
+    saveEntryItemMetaCache(tripId, entry.id, nextMeta)
+    const nextChecks = { ...checks, [localId]: false }
+    setChecks(nextChecks)
+    saveEntryChecklistChecks(tripId, entry.id, nextChecks)
+    editChecklistItem(serverId, { scope: nextScope })
+      .then(() => notifyTripChange(tripId, { kind: 'edit' }))
+      .catch((err) => {
+        console.warn(`[handleScopeToggle] editChecklistItem(${serverId}) 실패:`, err?.message)
+      })
+    // 전환 의미 + 체크 초기화 부수효과 안내 토스트
+    setScopeNotice(
+      nextScope === 'shared'
+        ? '👥 공동 짐으로 전환했어요 — 멤버 중 한 명만 준비하면 돼요 (체크 초기화)'
+        : '🧍 개인 짐으로 전환했어요 — 멤버마다 각자 체크해요 (체크 초기화)',
+    )
+    window.clearTimeout(scopeNoticeTimer.current)
+    scopeNoticeTimer.current = window.setTimeout(() => setScopeNotice(null), 3200)
+    trackEvent('item_scope_toggled', { item_id: localId, scope_after: nextScope, trip_id: tripId })
+  }, [collabEnabled, itemMeta, setItemMeta, checks, setChecks, tripId, entry.id])
+
+  // 공동 짐 담당자 지정/해제 — assigneeUserId: string(지정) | null(해제)
+  const handleAssign = useCallback((item, assigneeUserId) => {
+    const serverId = item.serverId
+    if (!collabEnabled || serverId == null || !String(serverId).trim()) return
+    const localId = String(item.id)
+    const member = assigneeUserId == null
+      ? null
+      : tripMembers.find((m) => String(m.userId) === String(assigneeUserId)) ?? null
+    const nextMeta = {
+      ...itemMeta,
+      [localId]: {
+        ...(itemMeta[localId] ?? { scope: 'shared', personalSummary: null }),
+        assignee: member
+          ? { userId: String(member.userId), nickname: member.nickname, profileImageUrl: member.profileImageUrl ?? null }
+          : null,
+      },
+    }
+    setItemMeta(nextMeta)
+    saveEntryItemMetaCache(tripId, entry.id, nextMeta)
+    editChecklistItem(serverId, { assigneeUserId: assigneeUserId == null ? null : String(assigneeUserId) })
+      .then(() => notifyTripChange(tripId, { kind: 'edit' }))
+      .catch((err) => {
+        console.warn(`[handleAssign] editChecklistItem(${serverId}) 실패:`, err?.message)
+      })
+    trackEvent('item_assignee_changed', {
+      item_id: localId,
+      assigned: assigneeUserId != null,
+      trip_id: tripId,
+    })
+  }, [collabEnabled, tripMembers, itemMeta, setItemMeta, tripId, entry.id])
 
   // ── 파생 필터 ─────────────────────────────────────────
   const dndLocked = sectionEditModalOpen || directAddModalOpen
@@ -403,6 +506,12 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     onDeleteItem: confirmDeleteSingleItem,
     onMoveUp: handleMoveUp,
     onMoveDown: handleMoveDown,
+    // 개인/공동 짐 협업 메타 — 게스트/프리뷰에서는 비활성
+    itemMeta: collabEnabled ? itemMeta : {},
+    tripMembers: collabEnabled ? tripMembers : [],
+    myUserId,
+    onScopeToggle: collabEnabled ? handleScopeToggle : undefined,
+    onAssign: collabEnabled ? handleAssign : undefined,
   }
 
   // ── 렌더 ──────────────────────────────────────────────
@@ -559,6 +668,13 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
         onTempSave={handleTempSave}
         onComplete={() => setSaveConfirmOpen(true)}
       />
+
+      {/* 개인/공동 전환 안내 토스트 — 실시간 변경 토스트(top-16)와 같은 톤, 위치만 아래로 분리 */}
+      {scopeNotice && (
+        <div className="pointer-events-none fixed bottom-28 left-1/2 z-[90] w-max max-w-[calc(100vw-2.5rem)] -translate-x-1/2 rounded-full bg-teal-900/90 px-4 py-2 text-center text-xs font-bold text-white shadow-lg">
+          {scopeNotice}
+        </div>
+      )}
 
       <GuideArchiveDeleteItemModal
         item={deleteItemConfirm}
