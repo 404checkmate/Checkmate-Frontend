@@ -38,6 +38,28 @@ function buildFlatItems(checklist) {
 /* ════════════════════════════════════════════
    Hooks
 ════════════════════════════════════════════ */
+function useCurationDwell(country) {
+  useEffect(() => {
+    const startMs = performance.now()
+    let fired = false
+    const fire = (trigger) => {
+      if (fired) return
+      fired = true
+      const seconds = Math.round((performance.now() - startMs) / 1000)
+      ga4Event('curation_dwell', { country, seconds, trigger })
+    }
+    const onVisibility = () => { if (document.visibilityState === 'hidden') fire('tab_hide') }
+    const onPageHide = () => fire('page_hide')
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('pagehide', onPageHide)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('pagehide', onPageHide)
+      fire('navigate')
+    }
+  }, [country])
+}
+
 function useReadingProgress() {
   const [p, setP] = useState(0)
   useEffect(() => {
@@ -533,7 +555,7 @@ function Article({ data, checked, toggle }) {
                             key={it.id}
                             item={{ label: it.label }}
                             checked={!!checked[it.id]}
-                            onToggle={() => toggle(it.id)}
+                            onToggle={() => toggle(it.id, it.label)}
                           />
                         ))}
                       </div>
@@ -655,7 +677,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                       <li
                         key={it.id}
                         className={'group flex items-start gap-3 border-b border-slate-100 py-3.5 cursor-pointer md:odd:border-r md:odd:pr-4 md:even:pl-4 ' + (isShaking ? 'cur-shake' : '')}
-                        onClick={() => { toggle(it.id); setShake(it.id); setTimeout(() => setShake(null), 320) }}
+                        onClick={() => { toggle(it.id, it.label); setShake(it.id); setTimeout(() => setShake(null), 320) }}
                         aria-label={it.label}
                       >
                         <span className={'relative mt-0.5 h-5 w-5 shrink-0 rounded-md border transition-all duration-200 ' + (on ? 'bg-teal-700 border-teal-700' : 'border-slate-300 group-hover:border-teal-500 bg-white')}>
@@ -861,9 +883,15 @@ function CurationArticleContent({ data }) {
     return () => document.documentElement.classList.remove('curation-page')
   }, [])
 
-  const toggle = useCallback((id) => {
-    setChecked((c) => ({ ...c, [id]: !c[id] }))
-  }, [])
+  useCurationDwell(data.code)
+
+  const toggle = useCallback((id, label) => {
+    setChecked((c) => {
+      const next = !c[id]
+      ga4Event('curation_item_check', { country: data.code, item_id: id, item_label: label, checked: next })
+      return { ...c, [id]: next }
+    })
+  }, [data.code])
 
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
 
@@ -878,7 +906,7 @@ function CurationArticleContent({ data }) {
 
   const handleCurationSave = useCallback(async () => {
     if (curationSaving) return
-    ga4Event('curation_save_click', { country: data.code })
+    ga4Event('curation_save_click', { country: data.code, checked_count: checkedItems.length, total_count: flatItems.length })
     const checkedItems = flatItems.filter((it) => checked[it.id])
     const dest = CURATION_COUNTRY_MAP[data.code]
 
