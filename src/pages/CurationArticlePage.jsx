@@ -886,11 +886,8 @@ function CurationArticleContent({ data }) {
   useCurationDwell(data.code)
 
   const toggle = useCallback((id, label) => {
-    setChecked((c) => {
-      const next = !c[id]
-      ga4Event('curation_item_check', { country: data.code, item_id: id, item_label: label, checked: next })
-      return { ...c, [id]: next }
-    })
+    setChecked((c) => ({ ...c, [id]: !c[id] }))
+    ga4Event('curation_item_check', { country: data.code, item_id: id, item_label: label })
   }, [data.code])
 
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
@@ -906,8 +903,8 @@ function CurationArticleContent({ data }) {
 
   const handleCurationSave = useCallback(async () => {
     if (curationSaving) return
-    ga4Event('curation_save_click', { country: data.code, checked_count: checkedItems.length, total_count: flatItems.length })
     const checkedItems = flatItems.filter((it) => checked[it.id])
+    ga4Event('curation_save_click', { country: data.code, checked_count: checkedItems.length, total_count: flatItems.length })
     const dest = CURATION_COUNTRY_MAP[data.code]
 
     if (!user) {
