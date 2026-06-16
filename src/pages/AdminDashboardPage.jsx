@@ -6,6 +6,7 @@ import {
   Line,
   BarChart,
   Bar,
+  Cell,
   ComposedChart,
   XAxis,
   YAxis,
@@ -25,6 +26,7 @@ import {
   fetchTravelTest,
   fetchTravelTestTypes,
   fetchCollab,
+  fetchAdTargeting,
 } from '@/api/admin'
 
 const PAGE_BG = {
@@ -179,7 +181,7 @@ export default function AdminDashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab] =
+      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab, adTargeting] =
         await Promise.all([
           fetchFunnel(range),
           fetchLogins(range),
@@ -191,8 +193,9 @@ export default function AdminDashboardPage() {
           fetchTravelTest(range),
           fetchTravelTestTypes(range),
           fetchCollab(range),
+          fetchAdTargeting(range),
         ])
-      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab })
+      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab, adTargeting })
     } catch (err) {
       setError(err?.response?.status === 403
         ? '관리자 권한이 없습니다.'
@@ -261,6 +264,7 @@ export default function AdminDashboardPage() {
   const travelTest = data.travelTest ?? []
   const travelTestTypes = data.travelTestTypes ?? []
   const collab = data.collab ?? []
+  const adTargeting = data.adTargeting ?? []
 
   return (
     <div className="min-h-screen pb-16" style={PAGE_BG}>
@@ -302,6 +306,72 @@ export default function AdminDashboardPage() {
           <KpiCard label="탐색→저장시도" value={PCT(kpi.exploreToSaveIntent)} sub="게스트 포함·대칭" />
           <KpiCard label="탐색→실제저장" value={PCT(kpi.exploreToSave)} sub="로그인 저장만" />
         </div>
+
+        {/* 쿼리 14 — 광고 타겟 항목 (수익화) */}
+        <section className="mt-6 rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-bold text-gray-900">💰 광고 타겟 항목 — 탐색 선택 점유율</h2>
+          <p className="mt-0.5 text-xs text-gray-400">
+            탐색 단계 "담기" 클릭 기준 상위 15 · <span className="font-semibold text-teal-700">색칠된 막대 = 제휴/광고 매칭 가능</span> · 저장 유저수는 구매의도 지속 확인용
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <div className="h-[420px]">
+              <ResponsiveContainer>
+                <BarChart data={adTargeting} layout="vertical" margin={{ left: 8, right: 16 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                  <XAxis type="number" fontSize={11} unit="%" />
+                  <YAxis
+                    type="category"
+                    dataKey="title"
+                    width={150}
+                    fontSize={10}
+                    interval={0}
+                    tickFormatter={(t) => (t && t.length > 14 ? `${t.slice(0, 13)}…` : t)}
+                  />
+                  <Tooltip formatter={(v) => `${v}%`} />
+                  <Bar dataKey="select_share_pct" name="선택점유율" radius={[0, 3, 3, 0]}>
+                    {adTargeting.map((d, i) => (
+                      <Cell key={i} fill={d.ad_category ? '#0d9488' : '#cbd5e1'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+                    {['항목', '선택클릭', '점유율', '저장유저', '광고 매칭'].map((c) => (
+                      <th key={c} className="py-2 pr-3 font-semibold">{c}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {adTargeting.length === 0 ? (
+                    <tr><td colSpan={5} className="py-4 text-center text-gray-400">데이터 없음</td></tr>
+                  ) : (
+                    adTargeting.map((r, i) => (
+                      <tr key={`${r.title}-${i}`} className="border-b border-gray-50 text-gray-700">
+                        <td className="py-2 pr-3">{r.title}</td>
+                        <td className="py-2 pr-3">{r.select_clicks}</td>
+                        <td className="py-2 pr-3">{PCT(r.select_share_pct)}</td>
+                        <td className="py-2 pr-3">{r.save_users}</td>
+                        <td className="py-2 pr-3">
+                          {r.ad_category ? (
+                            <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-700">
+                              {r.ad_category}
+                            </span>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
         <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
           {/* 쿼리 1 — 일별 퍼널 추이 */}
