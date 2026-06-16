@@ -652,7 +652,7 @@ export default function DesktopHomeSearchBar() {
       <div className="relative flex items-stretch rounded-full border border-gray-200 bg-white shadow-xl shadow-gray-200/50">
 
         {/* 1. 여행 국가 */}
-        <div className="relative flex-none min-w-[170px]">
+        <div className="relative shrink min-w-[140px]">
           <FieldButton
             label="여행 국가"
             value={countryValue}
@@ -681,7 +681,7 @@ export default function DesktopHomeSearchBar() {
         <PillDivider />
 
         {/* 2. 날짜 */}
-        <div className="relative flex-none min-w-[190px]">
+        <div className="relative shrink min-w-[160px]">
           <FieldButton
             label="날짜"
             value={dateValue}
@@ -703,7 +703,7 @@ export default function DesktopHomeSearchBar() {
         <PillDivider />
 
         {/* 3. 추가 여행지 */}
-        <div className="relative flex-1 min-w-[160px]">
+        <div className="relative flex-1 min-w-[120px]">
           <FieldButton
             label="추가 여행지"
             value={extraValue}
@@ -726,7 +726,7 @@ export default function DesktopHomeSearchBar() {
         <PillDivider />
 
         {/* 4. 동행인 선택 */}
-        <div className="relative w-[190px] shrink-0">
+        <div className="relative shrink min-w-[150px] w-[190px]">
           <FieldButton
             label="동행인 선택"
             value={companionValue}
@@ -747,7 +747,7 @@ export default function DesktopHomeSearchBar() {
         <PillDivider />
 
         {/* 5. 여행 스타일 */}
-        <div className="relative w-[190px] shrink-0">
+        <div className="relative shrink min-w-[150px] w-[190px]">
           <FieldButton
             label="여행 스타일"
             value={styleValue}
