@@ -189,10 +189,10 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
         </button>
         {notice && <p className="mt-2 text-center text-xs font-semibold text-teal-700">{notice}</p>}
 
-        {/* 친구 바로 추가 — 링크 없이 한 번에 */}
+        {/* 친구 초대하기 — 링크 없이 한 번에 */}
         {!loading && addableFriends.length > 0 && (
           <div className="mt-5">
-            <h3 className="mb-2 text-xs font-extrabold text-gray-500">친구 바로 추가</h3>
+            <h3 className="mb-2 text-xs font-extrabold text-gray-500">친구 초대하기</h3>
             <ul className="flex max-h-40 flex-col gap-2 overflow-y-auto">
               {addableFriends.map((f) => (
                 <li key={f.userId} className="flex items-center justify-between gap-3 rounded-xl border border-cyan-100 bg-cyan-50/40 px-3 py-2.5">
@@ -206,7 +206,7 @@ export default function TripMembersSheet({ tripId, open, onClose }) {
                     disabled={addingId === f.userId}
                     className="shrink-0 rounded-lg bg-teal-600 px-3 py-1.5 text-[11px] font-bold text-white transition hover:bg-teal-700 disabled:opacity-50"
                   >
-                    {addingId === f.userId ? '추가 중…' : '+ 추가'}
+                    {addingId === f.userId ? '초대 중…' : '초대'}
                   </button>
                 </li>
               ))}
