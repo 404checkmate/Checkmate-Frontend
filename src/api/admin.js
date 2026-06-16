@@ -72,3 +72,9 @@ export async function fetchCollab(range) {
   const res = await apiClient.get('/admin/metrics/collab', { params: rangeParams(range) })
   return res.data
 }
+
+/** 쿼리 14. 광고 타겟 항목 — 탐색 선택 점유율 + 저장 유저수 + 광고 매칭 분류 */
+export async function fetchAdTargeting(range) {
+  const res = await apiClient.get('/admin/metrics/ad-targeting', { params: rangeParams(range) })
+  return res.data
+}
