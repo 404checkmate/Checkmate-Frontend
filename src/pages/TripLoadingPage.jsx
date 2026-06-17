@@ -5,6 +5,7 @@ import { loadActiveTripPlan } from '@/utils/tripPlanContextStorage'
 import { buildContextInputFromPlan } from '@/utils/tripSearchUtils'
 import { trackEvent } from '@/utils/analyticsTracker'
 import BrandLogo from '@/components/common/BrandLogo'
+import AdBanner from '@/components/home/AdBanner'
 import StepProgressBarMascot from '@/components/common/StepProgressBarMascot'
 import {
   LOADING_VARIANTS,
@@ -297,6 +298,10 @@ function TripLoadingPage() {
             MATE TIP
           </p>
           <p className="text-xs text-gray-600 leading-relaxed">{TIPS[tipIndex]}</p>
+        </div>
+
+        <div className="mt-4 w-full">
+          <AdBanner />
         </div>
 
       </div>
