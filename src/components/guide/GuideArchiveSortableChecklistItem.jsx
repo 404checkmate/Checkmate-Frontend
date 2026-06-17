@@ -575,17 +575,20 @@ export default function GuideArchiveSortableChecklistItem({
                   {item.detail}
                 </span>
               ) : null}
-              {affiliate ? (
-                <span
-                  className="mt-2 block"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                >
-                  <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} />
-                </span>
-              ) : null}
             </div>
           </label>
+
+          {/* 제휴 버튼 — 항목명과 수정/삭제 액션 사이, 우측 정렬(수직 중앙) */}
+          {affiliate ? (
+            <div
+              className="flex shrink-0 items-center pr-1"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            >
+              <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} />
+            </div>
+          ) : null}
 
           {/* 데스크톱 전용 액션 버튼 (항상 표시) */}
           <div
