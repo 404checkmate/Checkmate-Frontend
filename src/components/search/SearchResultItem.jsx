@@ -1,4 +1,6 @@
 import AiSparkleMaskIcon from './AiSparkleMaskIcon'
+import AffiliateBuyButton from '@/components/ads/AffiliateBuyButton'
+import { resolveAffiliate } from '@/config/affiliateMap'
 
 function CheckIcon({ className }) {
   return (
@@ -79,30 +81,41 @@ export default function SearchResultItem({
     ? aiRecommended ? 'border-violet-600 bg-violet-600' : 'border-amber-600 bg-amber-600'
     : 'border-gray-300 bg-white'
 
+  // 선택된 항목이 제휴 매핑에 있으면 구매/예약 버튼 노출 (박스 button 바깥 형제로 — 중첩 금지)
+  const affiliate = resolveAffiliate(item.title)
+  const showBuy = selected && !!affiliate
+
   return (
-    <button type="button" onClick={onToggle} aria-pressed={selected} className={`${btnShell} ${className}`.trim()}>
-      <div className="flex gap-2.5 lg:gap-3">
-        <span
-          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${checkShell}`}
-          aria-hidden
-        >
-          {selected ? <CheckIcon className="h-3 w-3 text-white" /> : null}
-        </span>
-        <div className="min-w-0 flex-1">
-          {aiRecommended ? (
-            <div className="mb-0.5 lg:mb-1">
-              <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
-                <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
-                MATE 추천
-              </span>
-            </div>
-          ) : null}
-          <p className="text-sm lg:text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
-          {subtitleText ? (
-            <p className={`mt-1 lg:mt-1.5 text-xs lg:text-sm leading-relaxed text-gray-600${aiRecommended ? '' : ' hidden lg:block'}`}>{subtitleText}</p>
-          ) : null}
+    <div className={`${btnShell} ${className}`.trim()}>
+      <button type="button" onClick={onToggle} aria-pressed={selected} className="block w-full text-left">
+        <div className="flex gap-2.5 lg:gap-3">
+          <span
+            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${checkShell}`}
+            aria-hidden
+          >
+            {selected ? <CheckIcon className="h-3 w-3 text-white" /> : null}
+          </span>
+          <div className="min-w-0 flex-1">
+            {aiRecommended ? (
+              <div className="mb-0.5 lg:mb-1">
+                <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-800">
+                  <AiSparkleMaskIcon selected={false} className="h-3 w-3" />
+                  MATE 추천
+                </span>
+              </div>
+            ) : null}
+            <p className="text-sm lg:text-[15px] font-extrabold leading-snug text-gray-900">{item.title}</p>
+            {subtitleText ? (
+              <p className={`mt-1 lg:mt-1.5 text-xs lg:text-sm leading-relaxed text-gray-600${aiRecommended ? '' : ' hidden lg:block'}`}>{subtitleText}</p>
+            ) : null}
+          </div>
         </div>
-      </div>
-    </button>
+      </button>
+      {showBuy ? (
+        <div className="mt-2.5 flex justify-end pl-[30px]">
+          <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} />
+        </div>
+      ) : null}
+    </div>
   )
 }
