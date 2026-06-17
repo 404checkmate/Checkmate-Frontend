@@ -6,6 +6,8 @@ import { GUIDE_ARCHIVE_LEGACY_AI_CATEGORY } from '@/utils/guideArchiveChecklistR
 import aiSparklesImg from '@/assets/ai-sparkles.png'
 import AiSparkleMaskIcon from '@/components/search/AiSparkleMaskIcon'
 import defaultProfileImg from '@/assets/default-profile.png'
+import AffiliateBuyButton from '@/components/ads/AffiliateBuyButton'
+import useAffiliateResolver from '@/hooks/useAffiliateResolver'
 
 const SORTABLE_TRANSITION = {
   duration: 260,
@@ -329,6 +331,7 @@ export default function GuideArchiveSortableChecklistItem({
   onAssign,
 }) {
   const id = String(item.id)
+  const resolveAffiliate = useAffiliateResolver()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
     disabled: sortableDisabled,
@@ -415,6 +418,8 @@ export default function GuideArchiveSortableChecklistItem({
     (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ||
     item?.prepType === 'ai_recommend'
   const isUserAdded = item?.source === 'user_added' || String(item?.id ?? '').startsWith('ga-direct-')
+  // 제휴 구매/예약 버튼 — 템플릿(시드) 항목만. AI추천·직접추가 항목은 제외.
+  const affiliate = !isAiOrigin && !isUserAdded ? resolveAffiliate(item.title) : null
 
   const dragHandleProps = !sortableDisabled ? { ...listeners, ...attributes } : {}
   const stop = (e) => e.stopPropagation()
@@ -568,6 +573,15 @@ export default function GuideArchiveSortableChecklistItem({
               {item.detail ? (
                 <span className={`mt-2 block border-l-2 pl-2 text-xs leading-relaxed ${showCheckedStyle ? 'border-amber-300 text-gray-700' : isAiOrigin ? 'border-violet-300/90 text-gray-600' : 'border-cyan-200 text-gray-500'}`}>
                   {item.detail}
+                </span>
+              ) : null}
+              {affiliate ? (
+                <span
+                  className="mt-2 block"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                >
+                  <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} />
                 </span>
               ) : null}
             </div>

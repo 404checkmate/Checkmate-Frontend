@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const ACK_KEY = 'cm_affiliate_disclosure_ack'
 
@@ -33,7 +34,9 @@ export default function AffiliateDisclosureModal({ provider, onConfirm, onCancel
     onConfirm()
   }
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
       onClick={onCancel}
@@ -77,6 +80,7 @@ export default function AffiliateDisclosureModal({ provider, onConfirm, onCancel
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
