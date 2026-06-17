@@ -260,6 +260,10 @@ function TripSearchInner({ tripId }) {
                 </div>
               )}
 
+              <p className="mb-3 text-xs leading-relaxed text-gray-400">
+                ⓘ 일부 항목의 ‘구매·예약·신청하러 가기’는 제휴(쿠팡 파트너스·마이리얼트립) 링크예요. 구매·예약이 발생하면 체크메이트가 일정 수수료를 받습니다.
+              </p>
+
               <section ref={mobileChecklistRef} className="lg:hidden scroll-mt-28" aria-label="준비물 목록">
                 <MobileAccordionChecklist
                   loadState={loadState}

@@ -36,9 +36,8 @@ export default function AffiliateBuyButton({ itemTitle, affiliate, className = '
         target="_blank"
         rel="sponsored nofollow noopener"
         onClick={handleClick}
-        className={`inline-flex items-center gap-1.5 rounded-full bg-teal-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-teal-700 ${className}`.trim()}
+        className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-teal-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-teal-700 ${className}`.trim()}
       >
-        <span className="rounded bg-white/25 px-1 text-[9px] font-extrabold leading-4 tracking-wide">AD</span>
         {affiliate.label}
         <span aria-hidden>↗</span>
       </a>
