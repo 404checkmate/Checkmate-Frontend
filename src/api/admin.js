@@ -78,3 +78,9 @@ export async function fetchAdTargeting(range) {
   const res = await apiClient.get('/admin/metrics/ad-targeting', { params: rangeParams(range) })
   return res.data
 }
+
+/** 쿼리 15. 제휴 클릭 지표 — 일별/provider별/항목TOP + 탐색·저장 세션 중 클릭 비율 */
+export async function fetchAffiliateClicks(range) {
+  const res = await apiClient.get('/admin/metrics/affiliate-clicks', { params: rangeParams(range) })
+  return res.data
+}
