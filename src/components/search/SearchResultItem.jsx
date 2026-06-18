@@ -86,8 +86,8 @@ export default function SearchResultItem({
   const showBuy = selected && !!affiliate
 
   return (
-    <div className={`${btnShell} ${className}`.trim()}>
-      <button type="button" onClick={onToggle} aria-pressed={selected} className="block w-full text-left">
+    <div className={`flex items-center gap-2 lg:gap-3 ${btnShell} ${className}`.trim()}>
+      <button type="button" onClick={onToggle} aria-pressed={selected} className="min-w-0 flex-1 text-left">
         <div className="flex gap-2.5 lg:gap-3">
           <span
             className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${checkShell}`}
@@ -112,9 +112,7 @@ export default function SearchResultItem({
         </div>
       </button>
       {showBuy ? (
-        <div className="mt-2.5 flex justify-end pl-[30px]">
-          <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} />
-        </div>
+        <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} className="shrink-0" />
       ) : null}
     </div>
   )
