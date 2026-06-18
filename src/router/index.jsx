@@ -20,6 +20,7 @@ const MyGuideArchivesPage = lazy(() => import('@/pages/MyGuideArchivesPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const MyPage = lazy(() => import('@/pages/MyPage'))
 const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'))
+const AdminAffiliatePage = lazy(() => import('@/pages/AdminAffiliatePage'))
 const ErrorPage = lazy(() => import('@/pages/ErrorPage'))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
@@ -89,6 +90,7 @@ const AppRoutes = () => {
         { path: '/friends/invite/:token', element: withSuspense(<FriendInviteAcceptPage />) },
         { path: '/trips/invite/:token',   element: withSuspense(<TripInviteAcceptPage />) },
         { path: '/admin/dashboard',     element: <ProtectedRoute>{withSuspense(<AdminDashboardPage />)}</ProtectedRoute> },
+        { path: '/admin/affiliate-links', element: <ProtectedRoute>{withSuspense(<AdminAffiliatePage />)}</ProtectedRoute> },
         { path: '/trips/new',             element: <Navigate to="/trips/new/destination" replace /> },
         { path: '/trips/new/destination', element: withSuspense(<TripNewDestinationPage />) },
         { path: '/trips/new/step2',       element: <Navigate to="/" replace /> },

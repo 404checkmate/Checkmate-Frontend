@@ -1,6 +1,6 @@
 import AiSparkleMaskIcon from './AiSparkleMaskIcon'
 import AffiliateBuyButton from '@/components/ads/AffiliateBuyButton'
-import { resolveAffiliate } from '@/config/affiliateMap'
+import useAffiliateResolver from '@/hooks/useAffiliateResolver'
 
 function CheckIcon({ className }) {
   return (
@@ -19,6 +19,7 @@ export default function SearchResultItem({
   className = '',
 }) {
   const subtitleText = item.description || item.detail || ''
+  const resolveAffiliate = useAffiliateResolver()
 
   if (inArchiveAlready) {
     const archivedShellClass = aiRecommended
