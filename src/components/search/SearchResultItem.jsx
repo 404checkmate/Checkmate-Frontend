@@ -113,7 +113,7 @@ export default function SearchResultItem({
         </div>
       </button>
       {showBuy ? (
-        <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} className="shrink-0" />
+        <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} surface="search" className="shrink-0" />
       ) : null}
     </div>
   )

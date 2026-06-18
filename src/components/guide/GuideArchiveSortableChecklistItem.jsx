@@ -586,7 +586,7 @@ export default function GuideArchiveSortableChecklistItem({
               onClick={(e) => e.stopPropagation()}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} />
+              <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} surface="guide_archive" />
             </div>
           ) : null}
 

@@ -8,11 +8,14 @@ import AffiliateDisclosureModal, { hasAckedDisclosure } from './AffiliateDisclos
  * - 첫 클릭 시 고지 모달 → 이동. "다시 보지 않기" 이후엔 바로 이동.
  * - 외부 이동(↗) + rel="sponsored nofollow noopener". 광고 고지는 섹션 상시 문구 + 1회 모달로.
  */
-export default function AffiliateBuyButton({ itemTitle, affiliate, className = '' }) {
+export default function AffiliateBuyButton({ itemTitle, affiliate, surface = null, className = '' }) {
   const [modalOpen, setModalOpen] = useState(false)
 
+  const track = () =>
+    trackEvent('affiliate_click', { provider: affiliate.provider, item: itemTitle, surface })
+
   const go = () => {
-    trackEvent('affiliate_click', { provider: affiliate.provider, item: itemTitle })
+    track()
     window.open(affiliate.url, '_blank', 'noopener,noreferrer')
   }
 
@@ -21,7 +24,7 @@ export default function AffiliateBuyButton({ itemTitle, affiliate, className = '
     e.stopPropagation()
     if (hasAckedDisclosure()) {
       // 고지 확인 완료 → 앵커 기본동작(target=_blank)으로 이동 + 계측
-      trackEvent('affiliate_click', { provider: affiliate.provider, item: itemTitle })
+      track()
       return
     }
     // 첫 이동 → 기본동작 막고 고지 모달

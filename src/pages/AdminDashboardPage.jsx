@@ -27,6 +27,7 @@ import {
   fetchTravelTestTypes,
   fetchCollab,
   fetchAdTargeting,
+  fetchAffiliateClicks,
 } from '@/api/admin'
 
 const PAGE_BG = {
@@ -181,7 +182,7 @@ export default function AdminDashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab, adTargeting] =
+      const [funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab, adTargeting, affiliateClicks] =
         await Promise.all([
           fetchFunnel(range),
           fetchLogins(range),
@@ -194,8 +195,9 @@ export default function AdminDashboardPage() {
           fetchTravelTestTypes(range),
           fetchCollab(range),
           fetchAdTargeting(range),
+          fetchAffiliateClicks(range),
         ])
-      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab, adTargeting })
+      setData({ funnel, logins, channels, contentGap, retention, saveRetention, guestPreview, travelTest, travelTestTypes, collab, adTargeting, affiliateClicks })
     } catch (err) {
       setError(err?.response?.status === 403
         ? '관리자 권한이 없습니다.'
@@ -265,6 +267,10 @@ export default function AdminDashboardPage() {
   const travelTestTypes = data.travelTestTypes ?? []
   const collab = data.collab ?? []
   const adTargeting = data.adTargeting ?? []
+  const affiliateClicks = data.affiliateClicks ?? {}
+  const affDaily = affiliateClicks.daily ?? []
+  const affTopItems = affiliateClicks.topItems ?? []
+  const affSummary = affiliateClicks.summary ?? {}
 
   return (
     <div className="min-h-screen pb-16" style={PAGE_BG}>
@@ -364,6 +370,65 @@ export default function AdminDashboardPage() {
                             <span className="text-gray-300">—</span>
                           )}
                         </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* 쿼리 15 — 제휴 클릭 지표 */}
+        <section className="mt-6 rounded-2xl border border-teal-200 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-bold text-gray-900">🔗 제휴 클릭 지표 — 쿠팡·마이리얼트립</h2>
+          <p className="mt-0.5 text-xs text-gray-400">
+            제휴 버튼 클릭 기준 · 구매 전환·수익은 제휴사 리포트에서 확인(우리 DB 밖) · 팀원/dev 제외
+          </p>
+
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <KpiCard label="제휴 클릭" value={affSummary.total_clicks} />
+            <KpiCard label="클릭 세션" value={affSummary.click_sessions} />
+            <KpiCard label="탐색→클릭" value={PCT(affSummary.explore_to_click_pct)} sub="탐색 세션 중" />
+            <KpiCard label="저장→클릭" value={PCT(affSummary.save_to_click_pct)} sub="저장 세션 중" />
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <div className="h-64">
+              <p className="mb-2 text-xs font-semibold text-gray-500">일별 제휴 클릭</p>
+              <ResponsiveContainer>
+                <LineChart data={affDaily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="day" fontSize={11} tickFormatter={(d) => (d ? d.slice(5) : d)} />
+                  <YAxis fontSize={11} allowDecimals={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="total" name="전체" stroke="#0d9488" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="coupang" name="쿠팡" stroke="#f59e0b" dot={false} />
+                  <Line type="monotone" dataKey="mrt" name="마리트" stroke="#0ea5e9" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="overflow-x-auto">
+              <p className="mb-2 text-xs font-semibold text-gray-500">항목별 클릭 TOP 15</p>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+                    {['항목', 'provider', '클릭', '세션'].map((c) => (
+                      <th key={c} className="py-2 pr-3 font-semibold">{c}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {affTopItems.length === 0 ? (
+                    <tr><td colSpan={4} className="py-4 text-center text-gray-400">데이터 없음</td></tr>
+                  ) : (
+                    affTopItems.map((r, i) => (
+                      <tr key={`${r.item}-${i}`} className="border-b border-gray-50 text-gray-700">
+                        <td className="py-2 pr-3">{r.item}</td>
+                        <td className="py-2 pr-3">{r.provider === 'mrt' ? '마리트' : r.provider === 'coupang' ? '쿠팡' : r.provider}</td>
+                        <td className="py-2 pr-3">{r.clicks}</td>
+                        <td className="py-2 pr-3">{r.sessions}</td>
                       </tr>
                     ))
                   )}
