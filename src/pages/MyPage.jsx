@@ -510,6 +510,15 @@ function QuickLinks({ archiveCount, isAdmin }) {
             <span className="text-xs font-semibold text-indigo-400">→</span>
           </Link>
         )}
+        {isAdmin && (
+          <Link to="/admin/affiliate-links" className={`${rowClass} border-indigo-100 bg-indigo-50/60 hover:bg-indigo-50`}>
+            <span className="flex items-center gap-2.5 text-sm font-bold text-indigo-900">
+              <span className="rounded-md bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Admin</span>
+              제휴 링크 관리
+            </span>
+            <span className="text-xs font-semibold text-indigo-400">→</span>
+          </Link>
+        )}
       </div>
     </section>
   )
