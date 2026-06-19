@@ -83,7 +83,7 @@ export default function CurationSection() {
           지금 떠나기 좋은 <span className="text-[#3db4dd]">인기여행지</span>
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-gray-500">
-          체크리스트를 만들지 않아도 OK! 큐레이션에서 여행 정보를 얻으며 준비물을 미리 챙겨보세요.
+          여행 정보 탐색부터 체크리스트 저장까지, 큐레이션 하나로 시작해보세요
         </p>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
