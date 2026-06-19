@@ -14,27 +14,38 @@ export default function AdBanner() {
     }
   }, [])
 
-  // 카카오 애드핏 스크립트 로드
+  // Google AdSense 스크립트 로드
   useEffect(() => {
-    if (document.querySelector('script[data-kakao-adfit]')) return
+    if (document.querySelector('script[data-adsense]')) return
     const script = document.createElement('script')
     script.async = true
-    script.src = '//t1.kakaocdn.net/kas/static/ba.min.js'
-    script.setAttribute('data-kakao-adfit', '1')
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9327920427200310'
+    script.crossOrigin = 'anonymous'
+    script.setAttribute('data-adsense', '1')
     document.head.appendChild(script)
     return () => {
       if (document.head.contains(script)) document.head.removeChild(script)
     }
   }, [])
 
+  // AdSense 광고 초기화
+  useEffect(() => {
+    try {
+      ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+    } catch {
+      // ignore
+    }
+  }, [])
+
   return (
-    <section className="flex w-full justify-center">
+    <section className="w-full">
       <ins
-        className="kakao_ad_area"
-        style={{ display: 'none' }}
-        data-ad-unit="DAN-azP0OdSlBgJvmB5e"
-        data-ad-width="728"
-        data-ad-height="90"
+        className="adsbygoogle"
+        style={{ display: 'block' }}
+        data-ad-client="ca-pub-9327920427200310"
+        data-ad-slot="4156320707"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
       />
     </section>
   )
