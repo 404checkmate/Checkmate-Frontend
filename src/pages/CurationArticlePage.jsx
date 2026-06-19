@@ -469,7 +469,7 @@ function InlineCheckItem({ item, checked, onToggle }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className={'font-medium text-[16px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+        <span className={'font-medium text-[16px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'font-semibold text-teal-800' : 'text-slate-800')}>
           {item.label}
         </span>
       </span>
@@ -625,8 +625,8 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
               <h2 className="font-extrabold text-[1.6rem] md:text-[2rem] leading-[1.2] tracking-[-0.02em] text-slate-900 max-w-[18ch]">
                 여행 준비, 한 번에 체크하세요
               </h2>
-              <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700 whitespace-nowrap">
-                준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
+              <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700">
+                마음에 드는 항목을 체크하면, 저장 시 <span className="font-bold text-teal-700">내 체크리스트</span>에 그대로 담겨요.
               </p>
               <div className="mt-5 flex justify-end">
                 <button
@@ -688,8 +688,8 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={'font-medium text-[14px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
-                            <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
+                          <span className={'font-medium text-[14px] leading-snug transition-colors ' + (on ? 'font-semibold text-teal-800' : 'text-slate-800')}>
+                            {it.label}
                           </span>
                         </span>
                       </li>
@@ -727,10 +727,10 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
             <button
               type="button"
               onClick={onSave}
-              disabled={saving}
+              disabled={saving || done === 0}
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[13px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
-              {saving ? '저장 중...' : '저장하기'}
+              {saving ? '저장 중...' : done > 0 ? `체크한 ${done}개 내 체크리스트에 담기` : '담을 항목을 체크하세요'}
             </button>
           </div>
         </div>
