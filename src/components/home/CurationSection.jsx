@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import vietnamData from '@/data/curation/vietnam.js'
 import japanData from '@/data/curation/japan.js'
+import chinaData from '@/data/curation/china.js'
 import usaData from '@/data/curation/usa.js'
 import thailandData from '@/data/curation/thailand.js'
 
 const CURATION_COUNTRIES = [
   { id: 'vietnam',  name: '베트남',  sub: '가성비 최고의 선택',    image: vietnamData.photos.hero },
   { id: 'japan',    name: '일본',    sub: '가장 인기 있는 여행지',  image: japanData.photos.hero },
+  { id: 'china',    name: '중국',    sub: '가깝고 다채로운 대도시',  image: chinaData.photos.hero },
   { id: 'usa',      name: '미국',    sub: '자유여행의 클래식',      image: usaData.photos.hero },
   { id: 'thailand', name: '태국',    sub: '힐링이 필요할 때',       image: thailandData.photos.hero },
 ]
@@ -86,9 +88,12 @@ export default function CurationSection() {
           여행 정보 탐색부터 체크리스트 저장까지, 큐레이션 하나로
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {/* 모바일: 가로 스크롤(스와이프, 옆 카드 peek) / 데스크톱: 5개 한 줄 그리드 */}
+      <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-5 lg:overflow-visible">
         {CURATION_COUNTRIES.map((country, index) => (
-          <CurationCard key={country.id} country={country} index={index} />
+          <div key={country.id} className="snap-start shrink-0 w-[42%] sm:w-[30%] lg:w-auto">
+            <CurationCard country={country} index={index} />
+          </div>
         ))}
       </div>
     </section>
