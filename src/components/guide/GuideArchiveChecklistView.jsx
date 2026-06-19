@@ -10,7 +10,7 @@ import {
 import { patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
 import { updateGuideArchive } from '@/api/guideArchives'
 import { trackEvent } from '@/utils/analyticsTracker'
-import { deselectChecklistItem, editChecklistItem } from '@/api/checklists'
+import { deselectChecklistItem, editChecklistItem, upsertChecklistItems } from '@/api/checklists'
 import { listTripMembers } from '@/api/tripMembers'
 import { getMe } from '@/api/auth'
 import { notifyTripChange } from '@/lib/tripSyncBus'
@@ -354,6 +354,27 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
         checklistSavedAt: new Date().toISOString(),
       })
       saveItemForTrip(tripId, { id, category: GUIDE_USER_DIRECT_SECTION_LABEL, title, subtitle: description || title })
+      // 서버에 실제 ChecklistItem으로 생성 → serverId 부여(공동/개인·담당자 편집 가능)
+      if (isNumericTripId(tripId)) {
+        upsertChecklistItems(tripId, [{
+          title,
+          description: description || undefined,
+          categoryCode: resolvedCategory,
+          prepType: directAddDraft.prepType,
+          baggageType,
+          source: 'user_added',
+          orderIndex: newItems.length - 1,
+        }])
+          .then((res) => {
+            const created = (res?.items ?? []).find((it) => (it.title ?? '').trim() === title)
+            const serverId = created?.id != null ? String(created.id) : null
+            if (!serverId) return
+            const withServerId = (list) => list.map((it) => (String(it.id) === String(id) ? { ...it, serverId } : it))
+            setLocalItems(withServerId)
+            patchGuideArchiveEntry(tripId, entry.id, { items: withServerId(newItems) })
+          })
+          .catch(() => {})
+      }
     }
     onItemsChange?.(newItems)
     trackEvent('edit_add', { trip_id: tripId, category: GUIDE_USER_DIRECT_CATEGORY })
