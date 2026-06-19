@@ -6,6 +6,8 @@ import { GUIDE_ARCHIVE_LEGACY_AI_CATEGORY } from '@/utils/guideArchiveChecklistR
 import aiSparklesImg from '@/assets/ai-sparkles.png'
 import AiSparkleMaskIcon from '@/components/search/AiSparkleMaskIcon'
 import defaultProfileImg from '@/assets/default-profile.png'
+import AffiliateBuyButton from '@/components/ads/AffiliateBuyButton'
+import useAffiliateResolver from '@/hooks/useAffiliateResolver'
 
 const SORTABLE_TRANSITION = {
   duration: 260,
@@ -329,6 +331,7 @@ export default function GuideArchiveSortableChecklistItem({
   onAssign,
 }) {
   const id = String(item.id)
+  const resolveAffiliate = useAffiliateResolver()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
     disabled: sortableDisabled,
@@ -415,6 +418,8 @@ export default function GuideArchiveSortableChecklistItem({
     (item?.category ?? '_misc') === GUIDE_ARCHIVE_LEGACY_AI_CATEGORY ||
     item?.prepType === 'ai_recommend'
   const isUserAdded = item?.source === 'user_added' || String(item?.id ?? '').startsWith('ga-direct-')
+  // 제휴 구매/예약 버튼 — 템플릿(시드) 항목만. AI추천·직접추가 항목은 제외.
+  const affiliate = !isAiOrigin && !isUserAdded ? resolveAffiliate(item.title) : null
 
   const dragHandleProps = !sortableDisabled ? { ...listeners, ...attributes } : {}
   const stop = (e) => e.stopPropagation()
@@ -572,6 +577,18 @@ export default function GuideArchiveSortableChecklistItem({
               ) : null}
             </div>
           </label>
+
+          {/* 제휴 버튼 — 항목명과 수정/삭제 액션 사이, 우측 정렬(수직 중앙) */}
+          {affiliate ? (
+            <div
+              className="flex shrink-0 items-center pr-1"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            >
+              <AffiliateBuyButton itemTitle={item.title} affiliate={affiliate} surface="guide_archive" />
+            </div>
+          ) : null}
 
           {/* 데스크톱 전용 액션 버튼 (항상 표시) */}
           <div

@@ -8,8 +8,9 @@ import {
   setSavedItemChecked,
 } from '@/utils/savedTripItems'
 import { patchGuideArchiveEntry } from '@/utils/guideArchiveStorage'
+import { updateGuideArchive } from '@/api/guideArchives'
 import { trackEvent } from '@/utils/analyticsTracker'
-import { deselectChecklistItem, editChecklistItem } from '@/api/checklists'
+import { deselectChecklistItem, editChecklistItem, upsertChecklistItems } from '@/api/checklists'
 import { listTripMembers } from '@/api/tripMembers'
 import { getMe } from '@/api/auth'
 import { notifyTripChange } from '@/lib/tripSyncBus'
@@ -234,8 +235,23 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
   const checkedCount = useMemo(() => items.filter((it) => checks[String(it.id)]).length, [items, checks])
   const progress = total > 0 ? Math.round((checkedCount / total) * 100) : 0
 
-  const title = buildGuideArchiveListTitle(entry)
+  const [titleOverride, setTitleOverride] = useState(null)
+  const title = titleOverride ?? (entry?.name?.trim() || buildGuideArchiveListTitle(entry))
   const dateLine = entry?.via === 'curation' ? '' : buildGuideArchiveDateLine(entry)
+
+  // 제목 인라인 수정 — 실제 저장된 보관함(서버 id)만 가능. 낙관적 갱신 후 PATCH.
+  const titleEditable = !isPreview && /^\d+$/.test(String(entry?.id ?? ''))
+  const handleSaveTitle = useCallback(async (name) => {
+    const prev = title
+    setTitleOverride(name)
+    try {
+      await updateGuideArchive(entry.id, { name })
+      onArchiveMutated?.()
+      trackEvent('edit_text', { trip_id: tripId, field: 'archive_title' })
+    } catch {
+      setTitleOverride(prev) // 실패 롤백
+    }
+  }, [entry?.id, title, tripId, onArchiveMutated])
 
   // ── 모달/필터 효과 ─────────────────────────────────────
   const closeAllModals = useCallback(() => {
@@ -338,6 +354,27 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
         checklistSavedAt: new Date().toISOString(),
       })
       saveItemForTrip(tripId, { id, category: GUIDE_USER_DIRECT_SECTION_LABEL, title, subtitle: description || title })
+      // 서버에 실제 ChecklistItem으로 생성 → serverId 부여(공동/개인·담당자 편집 가능)
+      if (isNumericTripId(tripId)) {
+        upsertChecklistItems(tripId, [{
+          title,
+          description: description || undefined,
+          categoryCode: resolvedCategory,
+          prepType: directAddDraft.prepType,
+          baggageType,
+          source: 'user_added',
+          orderIndex: newItems.length - 1,
+        }])
+          .then((res) => {
+            const created = (res?.items ?? []).find((it) => (it.title ?? '').trim() === title)
+            const serverId = created?.id != null ? String(created.id) : null
+            if (!serverId) return
+            const withServerId = (list) => list.map((it) => (String(it.id) === String(id) ? { ...it, serverId } : it))
+            setLocalItems(withServerId)
+            patchGuideArchiveEntry(tripId, entry.id, { items: withServerId(newItems) })
+          })
+          .catch(() => {})
+      }
     }
     onItemsChange?.(newItems)
     trackEvent('edit_add', { trip_id: tripId, category: GUIDE_USER_DIRECT_CATEGORY })
@@ -540,7 +577,7 @@ export default function GuideArchiveChecklistView({ tripId, entry, companions = 
     <>
       <GuideArchiveSaveConfirmModal open={saveConfirmOpen} isSaving={isSaving} onConfirm={performSave} onClose={() => setSaveConfirmOpen(false)} />
       <div className="mx-auto max-w-3xl px-5 pb-36 pt-5 md:px-4 md:pb-28 md:pt-6">
-        <GuideArchiveChecklistHeader title={title} dateLine={dateLine} companions={companions} travelStyles={travelStyles} />
+        <GuideArchiveChecklistHeader title={title} dateLine={dateLine} companions={companions} travelStyles={travelStyles} onSaveTitle={titleEditable ? handleSaveTitle : undefined} />
 
         <GuideArchiveProgressCard checkedCount={checkedCount} total={total} progress={progress} />
 

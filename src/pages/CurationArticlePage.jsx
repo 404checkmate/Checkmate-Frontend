@@ -469,7 +469,7 @@ function InlineCheckItem({ item, checked, onToggle }) {
         )}
       </span>
       <span className="flex-1 min-w-0">
-        <span className={'font-medium text-[16px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'line-through text-slate-400' : 'text-slate-800')}>
+        <span className={'font-medium text-[16px] md:text-[15px] leading-snug transition-colors ' + (checked ? 'font-semibold text-teal-800' : 'text-slate-800')}>
           {item.label}
         </span>
       </span>
@@ -625,7 +625,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
               <h2 className="font-extrabold text-[1.6rem] md:text-[2rem] leading-[1.2] tracking-[-0.02em] text-slate-900 max-w-[18ch]">
                 여행 준비, 한 번에 체크하세요
               </h2>
-              <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700 whitespace-nowrap">
+              <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700">
                 준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
               </p>
               <div className="mt-5 flex justify-end">
@@ -688,8 +688,8 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={'font-medium text-[14px] leading-snug transition-colors ' + (on ? 'text-slate-400' : 'text-slate-800')}>
-                            <span className={'cur-strike-line ' + (on ? 'cur-strike-on' : '')}>{it.label}</span>
+                          <span className={'font-medium text-[14px] leading-snug transition-colors ' + (on ? 'font-semibold text-teal-800' : 'text-slate-800')}>
+                            {it.label}
                           </span>
                         </span>
                       </li>
@@ -727,10 +727,10 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
             <button
               type="button"
               onClick={onSave}
-              disabled={saving}
+              disabled={saving || done === 0}
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 disabled:cursor-not-allowed text-[#6a4a00] font-bold text-[13px] tracking-wide px-6 py-3.5 shadow-sm shadow-amber-900/15 active:scale-[0.98] transition w-full"
             >
-              {saving ? '저장 중...' : '저장하기'}
+              {saving ? '저장 중...' : done > 0 ? `체크한 ${done}개 내 체크리스트에 담기` : '담을 항목을 체크하세요'}
             </button>
           </div>
         </div>
@@ -891,6 +891,7 @@ function CurationArticleContent({ data }) {
   }, [data.code])
 
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
+  const selectedCount = useMemo(() => flatItems.filter((it) => checked[it.id]).length, [flatItems, checked])
 
   const onSaveAll = useCallback(() => {
     const allOn = flatItems.every((it) => checked[it.id])
@@ -997,6 +998,10 @@ function CurationArticleContent({ data }) {
         @keyframes cur-shake { 0%,100% { transform: translateX(0); } 30% { transform: translateX(-2px); } 70% { transform: translateX(2px); } }
         .cur-shake { animation: cur-shake 0.32s ease both; }
 
+        @keyframes cur-count-pop { 0% { transform: scale(1); } 30% { transform: scale(1.4); } 60% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        .cur-count-pop { display: inline-block; animation: cur-count-pop 0.36s cubic-bezier(.34,1.56,.64,1) both; }
+        @media (prefers-reduced-motion: reduce) { .cur-count-pop { animation: none; } }
+
         .cur-no-scrollbar { scrollbar-width: none; }
         .cur-no-scrollbar::-webkit-scrollbar { display: none; }
 
@@ -1034,7 +1039,7 @@ function CurationArticleContent({ data }) {
         />
       </div>
 
-      <div className="cur-page-bg [overflow-x:clip]" style={{ wordBreak: 'keep-all' }}>
+      <div className="cur-page-bg [overflow-x:clip] pb-24 md:pb-20" style={{ wordBreak: 'keep-all' }}>
         <Hero data={data} />
 
         <div className="relative mx-auto max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-[22px] md:px-3 lg:px-2 pt-16 pb-10 md:pt-20 md:pb-4">
@@ -1057,6 +1062,31 @@ function CurationArticleContent({ data }) {
 
         <CtaBanner data={data} />
         <Related currentCode={data.code} />
+      </div>
+
+      {/* 플로팅 담기 카운터 바 — 체크할 때마다 카운트가 실시간 증가하며 "선택→내 체크리스트 담김"을 직관적으로 보여줌 */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center px-4 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] md:justify-end md:px-6 md:pb-6">
+        <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-[0_8px_30px_rgba(13,58,76,0.20)] ring-1 ring-slate-200 backdrop-blur md:w-auto">
+          <span className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+            <svg className="h-5 w-5 shrink-0 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="9" />
+              <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+            </svg>
+            {selectedCount > 0 ? (
+              <span><span key={selectedCount} className="cur-count-pop text-teal-700">{selectedCount}개</span> 담는 중</span>
+            ) : (
+              <span className="text-slate-500">담을 항목을 체크하세요</span>
+            )}
+          </span>
+          <button
+            type="button"
+            onClick={handleCurationSave}
+            disabled={selectedCount === 0 || curationSaving}
+            className="ml-auto shrink-0 rounded-xl bg-amber-400 px-4 py-2 text-sm font-extrabold text-[#6a4a00] shadow-sm transition hover:bg-amber-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed md:ml-2"
+          >
+            {curationSaving ? '저장 중…' : '내 체크리스트에 저장'}
+          </button>
+        </div>
       </div>
     </>
   )

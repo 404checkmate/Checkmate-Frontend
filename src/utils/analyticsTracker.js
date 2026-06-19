@@ -34,6 +34,7 @@ const EVENT_TYPE_MAP = {
   // 신규 이벤트
   page_view: 'page_view',
   cta_click: 'cta_click',
+  affiliate_click: 'cta_click', // 제휴 구매/예약 버튼 클릭 (meta: provider, item)
   step_complete: 'step_complete',
   item_checked: 'prepare_action',
   session_start: 'session_start',

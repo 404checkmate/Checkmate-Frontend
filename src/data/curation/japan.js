@@ -382,14 +382,6 @@ const japan = {
       "prepType": "clothing",
       "section": [],
       "items": [
-        "편한 신발"
-      ]
-    },
-    {
-      "cat": "😉 기본 준비물",
-      "prepType": "clothing",
-      "section": [],
-      "items": [
         "모자"
       ]
     },

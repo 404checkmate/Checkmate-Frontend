@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 export default function AdBanner() {
-  // Drive: 백그라운드 행동 타겟팅
+  // Drive: 백그라운드 행동 타겟팅 (보이는 배너 아님 — 항상 로드)
   useEffect(() => {
     if (document.querySelector('script[data-tp-drive]')) return
     const script = document.createElement('script')
