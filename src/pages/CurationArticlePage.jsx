@@ -450,12 +450,22 @@ function AppShelf({ apps }) {
 /* ════════════════════════════════════════════
    InlineCheckItem
 ════════════════════════════════════════════ */
-/** 체크리스트 카드 상단 안내 캡션 — "체크 = 내 체크리스트에 담김" */
+/** 체크리스트 카드 상단 안내 콜아웃 — "체크 = 내 체크리스트에 담김" */
 function SaveHint({ className = '' }) {
   return (
-    <p className={'text-[11px] md:text-xs font-bold text-slate-500 ' + className}>
-      체크한 항목은 저장 시 내 체크리스트에 담겨요
-    </p>
+    <div className={'flex items-center gap-2 rounded-xl bg-teal-50 px-3.5 py-2.5 ring-1 ring-teal-100 ' + className}>
+      <svg
+        className="h-[18px] w-[18px] shrink-0 text-teal-600"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+      </svg>
+      <p className="text-[12.5px] md:text-[13px] font-bold leading-snug text-teal-800">
+        체크한 항목은 저장 시 <span className="text-teal-600">내 체크리스트</span>에 담겨요
+      </p>
+    </div>
   )
 }
 
