@@ -82,6 +82,9 @@ export default function CurationSection() {
         <h2 className="text-[1.1rem] font-extrabold leading-snug text-[#04384a] lg:text-xl">
           지금 떠나기 좋은 <span className="text-[#3db4dd]">인기여행지</span>
         </h2>
+        <p className="mt-1 text-sm leading-relaxed text-gray-500">
+          여행 정보 탐색부터 체크리스트 저장까지, 큐레이션 하나로 시작해보세요
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {CURATION_COUNTRIES.map((country, index) => (
