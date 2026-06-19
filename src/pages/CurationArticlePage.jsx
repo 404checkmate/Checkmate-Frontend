@@ -998,6 +998,10 @@ function CurationArticleContent({ data }) {
         @keyframes cur-shake { 0%,100% { transform: translateX(0); } 30% { transform: translateX(-2px); } 70% { transform: translateX(2px); } }
         .cur-shake { animation: cur-shake 0.32s ease both; }
 
+        @keyframes cur-count-pop { 0% { transform: scale(1); } 30% { transform: scale(1.4); } 60% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        .cur-count-pop { display: inline-block; animation: cur-count-pop 0.36s cubic-bezier(.34,1.56,.64,1) both; }
+        @media (prefers-reduced-motion: reduce) { .cur-count-pop { animation: none; } }
+
         .cur-no-scrollbar { scrollbar-width: none; }
         .cur-no-scrollbar::-webkit-scrollbar { display: none; }
 
@@ -1069,7 +1073,7 @@ function CurationArticleContent({ data }) {
               <path d="M8.5 12.5l2.5 2.5 4.5-5" />
             </svg>
             {selectedCount > 0 ? (
-              <span><span className="text-teal-700">{selectedCount}개</span> 담는 중</span>
+              <span><span key={selectedCount} className="cur-count-pop text-teal-700">{selectedCount}개</span> 담는 중</span>
             ) : (
               <span className="text-slate-500">담을 항목을 체크하세요</span>
             )}
