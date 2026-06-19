@@ -450,25 +450,6 @@ function AppShelf({ apps }) {
 /* ════════════════════════════════════════════
    InlineCheckItem
 ════════════════════════════════════════════ */
-/** 체크리스트 카드 상단 안내 콜아웃 — "체크 = 내 체크리스트에 담김" */
-function SaveHint({ className = '' }) {
-  return (
-    <div className={'flex items-center gap-2 rounded-xl bg-teal-50 px-3.5 py-2.5 ring-1 ring-teal-100 ' + className}>
-      <svg
-        className="h-[18px] w-[18px] shrink-0 text-teal-600"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M8.5 12.5l2.5 2.5 4.5-5" />
-      </svg>
-      <p className="text-[12.5px] md:text-[13px] font-bold leading-snug text-teal-800">
-        체크한 항목은 저장 시 <span className="text-teal-600">내 체크리스트</span>에 담겨요
-      </p>
-    </div>
-  )
-}
-
 function InlineCheckItem({ item, checked, onToggle }) {
   return (
     <div
@@ -566,7 +547,6 @@ function Article({ data, checked, toggle }) {
 
                 {relatedGroups.length > 0 && (
                   <div className="mt-3 rounded-xl bg-white border border-slate-100 p-4">
-                    <SaveHint className="mb-3" />
                     {relatedGroups.map((group) => (
                       <div key={group.cat} className="mb-3 last:mb-0">
                         <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
@@ -661,7 +641,6 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
 
           {/* Items */}
           <div className="px-5 md:px-7 mt-6 pb-7">
-            <SaveHint className="mb-4" />
             {allGroups.map((group) => {
               const isCollapsed = collapsed.has(group.cat)
               const groupDone = group.items.filter((it) => checked[it.id]).length
@@ -912,6 +891,7 @@ function CurationArticleContent({ data }) {
   }, [data.code])
 
   const flatItems = useMemo(() => buildFlatItems(data.checklist), [data])
+  const selectedCount = useMemo(() => flatItems.filter((it) => checked[it.id]).length, [flatItems, checked])
 
   const onSaveAll = useCallback(() => {
     const allOn = flatItems.every((it) => checked[it.id])
@@ -1055,7 +1035,7 @@ function CurationArticleContent({ data }) {
         />
       </div>
 
-      <div className="cur-page-bg [overflow-x:clip]" style={{ wordBreak: 'keep-all' }}>
+      <div className="cur-page-bg [overflow-x:clip] pb-24 md:pb-20" style={{ wordBreak: 'keep-all' }}>
         <Hero data={data} />
 
         <div className="relative mx-auto max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-[22px] md:px-3 lg:px-2 pt-16 pb-10 md:pt-20 md:pb-4">
@@ -1078,6 +1058,31 @@ function CurationArticleContent({ data }) {
 
         <CtaBanner data={data} />
         <Related currentCode={data.code} />
+      </div>
+
+      {/* 플로팅 담기 카운터 바 — 체크할 때마다 카운트가 실시간 증가하며 "선택→내 체크리스트 담김"을 직관적으로 보여줌 */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center px-4 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] md:justify-end md:px-6 md:pb-6">
+        <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-[0_8px_30px_rgba(13,58,76,0.20)] ring-1 ring-slate-200 backdrop-blur md:w-auto">
+          <span className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+            <svg className="h-5 w-5 shrink-0 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="9" />
+              <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+            </svg>
+            {selectedCount > 0 ? (
+              <span><span className="text-teal-700">{selectedCount}개</span> 담는 중</span>
+            ) : (
+              <span className="text-slate-500">담을 항목을 체크하세요</span>
+            )}
+          </span>
+          <button
+            type="button"
+            onClick={handleCurationSave}
+            disabled={selectedCount === 0 || curationSaving}
+            className="ml-auto shrink-0 rounded-xl bg-amber-400 px-4 py-2 text-sm font-extrabold text-[#6a4a00] shadow-sm transition hover:bg-amber-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed md:ml-2"
+          >
+            {curationSaving ? '저장 중…' : '내 체크리스트에 저장'}
+          </button>
+        </div>
       </div>
     </>
   )
