@@ -450,6 +450,15 @@ function AppShelf({ apps }) {
 /* ════════════════════════════════════════════
    InlineCheckItem
 ════════════════════════════════════════════ */
+/** 체크리스트 카드 상단 안내 캡션 — "체크 = 내 체크리스트에 담김" */
+function SaveHint({ className = '' }) {
+  return (
+    <p className={'text-[11px] md:text-xs font-bold text-slate-500 ' + className}>
+      체크한 항목은 저장 시 내 체크리스트에 담겨요
+    </p>
+  )
+}
+
 function InlineCheckItem({ item, checked, onToggle }) {
   return (
     <div
@@ -547,6 +556,7 @@ function Article({ data, checked, toggle }) {
 
                 {relatedGroups.length > 0 && (
                   <div className="mt-3 rounded-xl bg-white border border-slate-100 p-4">
+                    <SaveHint className="mb-3" />
                     {relatedGroups.map((group) => (
                       <div key={group.cat} className="mb-3 last:mb-0">
                         <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-extrabold tracking-[0.18em] uppercase text-amber-700 mb-3">{group.cat}</div>
@@ -626,7 +636,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
                 여행 준비, 한 번에 체크하세요
               </h2>
               <p className="mt-5 font-medium text-[14px] md:text-[15px] leading-relaxed text-gray-700">
-                마음에 드는 항목을 체크하면, 저장 시 <span className="font-bold text-teal-700">내 체크리스트</span>에 그대로 담겨요.
+                준비물부터 출국 전 확인사항까지, 필요한 항목을 저장하여 한 번에 관리해보세요.
               </p>
               <div className="mt-5 flex justify-end">
                 <button
@@ -641,6 +651,7 @@ function ChecklistSection({ data, checked, toggle, onSaveAll, shake, setShake, o
 
           {/* Items */}
           <div className="px-5 md:px-7 mt-6 pb-7">
+            <SaveHint className="mb-4" />
             {allGroups.map((group) => {
               const isCollapsed = collapsed.has(group.cat)
               const groupDone = group.items.filter((it) => checked[it.id]).length
