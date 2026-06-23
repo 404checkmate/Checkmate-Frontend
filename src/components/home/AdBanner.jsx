@@ -1,18 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function AdBanner() {
-  // Drive: 백그라운드 행동 타겟팅 (보이는 배너 아님 — 항상 로드)
-  useEffect(() => {
-    if (document.querySelector('script[data-tp-drive]')) return
-    const script = document.createElement('script')
-    script.async = true
-    script.src = 'https://tpembars.com/NTQwNjcx.js?t=540671'
-    script.setAttribute('data-tp-drive', '1')
-    document.head.appendChild(script)
-    return () => {
-      if (document.head.contains(script)) document.head.removeChild(script)
-    }
-  }, [])
+  const hasPushed = useRef(false)
 
   // Google AdSense 스크립트 로드
   useEffect(() => {
@@ -28,8 +17,10 @@ export default function AdBanner() {
     }
   }, [])
 
-  // AdSense 광고 초기화
+  // AdSense 광고 초기화 — ref로 인스턴스 단위 중복 push 방지
   useEffect(() => {
+    if (hasPushed.current) return
+    hasPushed.current = true
     try {
       ;(window.adsbygoogle = window.adsbygoogle || []).push({})
     } catch {
