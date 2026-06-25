@@ -14,9 +14,9 @@ const china = {
       "https://images.unsplash.com/photo-1561845376-11c89062fdff?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1743384257019-692097518687?q=80&w=932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1532300481631-0bc14f3b7699?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://plus.unsplash.com/premium_photo-1661757505824-69b1816836bd?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1579860876104-66a737d50772?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1586784444981-ac96e335555c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://plus.unsplash.com/premium_photo-1769958535347-fd7c331e62d2?q=80&w=1147&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1544449566-dee13645ade8?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2hpbmElMjBjaXR5fGVufDB8fDB8fHww"
     ]
   },
@@ -67,7 +67,7 @@ const china = {
       "icon": "",
       "title": "필수 앱",
       "body": "중국은 모바일 결제와 앱 기반 서비스가 생활 전반에 자리 잡고 있어 관련 앱을 미리 준비하면 여행이 훨씬 편리해집니다.",
-      "photo": "https://plus.unsplash.com/premium_photo-1661757505824-69b1816836bd?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "photo": "https://images.unsplash.com/photo-1579860876104-66a737d50772?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",
         "body": "중국에서는 일부 지역에서 구글 서비스 사용이 원활하지 않을 수 있어요! "
@@ -88,7 +88,7 @@ const china = {
       "icon": "",
       "title": "기타 주의사항",
       "body": "<strong>비자</strong><br/>한국인은 일반적으로 관광 목적 방문 시 무비자 입국 정책 적용 여부를 출국 전 반드시 확인해야 합니다. 정책이 수시로 변경될 수 있으므로 최신 정보를 확인하세요.<br/><strong>인터넷 검열</strong><br/>구글·인스타그램·카카오톡 등 다수 서비스가 차단되므로 VPN을 미리 준비해야 합니다.<br/><strong>생활 문화</strong><br/>가격 흥정이 가능한 시장에서는 부르는 값보다 낮춰 협상하는 것이 일반적입니다. 일부 호텔은 외국인 투숙이 제한될 수 있으니 예약 시 '외국인 투숙 가능' 여부를 확인하는 것이 좋습니다.<br/><strong>촬영주의</strong><br/>공안(경찰), 군사시설, 정부 청사 등은 촬영이 금지될 수 있으니 주의하세요.",
-      "photo": "https://plus.unsplash.com/premium_photo-1769958535347-fd7c331e62d2?q=80&w=1147&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "photo": "https://images.unsplash.com/photo-1544449566-dee13645ade8?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "tip": {
         "icon": "💡",
         "body": "최근 VPN 기능이 포함된 e-SIM, u-SIM이 많으니 미리 준비해가는 것을 추천드려요!"
@@ -98,38 +98,38 @@ const china = {
   "apps": [
     {
       "name": "Alipay (알리페이)",
-      "iconUrl": "",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=alipay.com&sz=128",
       "emoji": "💳",
       "desc": "중국에서 가장 널리 사용되는 모바일 결제 앱입니다. 해외 카드 등록이 가능하며 결제, 대중교통 이용 등에 활용할 수 있습니다.",
-      "storeUrl": ""
+      "storeUrl": "alipay.com/"
     },
     {
       "name": "고덕지도(Amap)",
-      "iconUrl": "",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=amap.com&sz=128",
       "emoji": "🚶‍♀️",
       "desc": "중국 현지에서 가장 많이 사용하는 지도 앱입니다. 중국 내 길 찾기와 대중교통 검색에 유용합니다.",
-      "storeUrl": ""
+      "storeUrl": "amap.com/"
     },
     {
       "name": "DiDi (디디)",
-      "iconUrl": "",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=didiglobal.com&sz=128",
       "emoji": "🚗",
       "desc": "중국 최대 차량 호출 앱입니다. 한국의 카카오택시와 비슷하며, 택시 호출 시 가장 많이 사용됩니다.",
-      "storeUrl": ""
+      "storeUrl": "didiglobal.com/"
     },
     {
       "name": "美团 (메이퇀)",
-      "iconUrl": "",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=meituan.com&sz=128",
       "emoji": "🛵",
       "desc": "음식 배달, 맛집 검색, 관광지 입장권 예약, 액티비티 예약까지 가능한 중국 대표 생활 플랫폼입니다.",
-      "storeUrl": ""
+      "storeUrl": "meituan.com/"
     },
     {
       "name": "大众点评 (따중뎬핑)",
-      "iconUrl": "",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dianping.com&sz=128",
       "emoji": "🍽️",
       "desc": "맛집 검색, 레스토랑 예약, 웨이팅에 가장 많이 사용됩니다.",
-      "storeUrl": ""
+      "storeUrl": "dianping.com/"
     }
   ],
   "checklist": [
